@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 자동 점검</title>
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; padding: 24px; background:#fff; color:#111; }
+  h1 { font-size: 22px; }
+  table { border-collapse: collapse; width: 100%; max-width: 900px; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #ddd; }
+  th { background: #f2f4f7; }
+  .pass { color: #0a7f3f; font-weight: 700; }
+  .fail { color: #c62828; font-weight: 700; }
+  #summary { font-size: 18px; font-weight: 700; margin: 16px 0; }
+  iframe { position: absolute; left: -9999px; width: 1100px; height: 900px; border: 0; }
+</style>
+</head>
+<body>
+<h1>툴모아 자동 점검 결과</h1>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:170px">항목</th><th style="width:70px">결과</th><th>측정값</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script>
+var results = [];
+function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+// 고정 대기 대신 조건이 만족될 때까지 폴링한다.
+// 헤드리스 가상 시간에서도 파일 읽기가 끝날 때까지 기다리게 하려는 목적.
+function waitFor(cond, maxMs) {
+  var start = Date.now(), limit = maxMs || 8000;
+  return new Promise(function (res) {
+    (function poll() {
+      var ok = false;
+      try { ok = cond(); } catch (e) { ok = false; }
+      if (ok || Date.now() - start > limit) { res(ok); return; }
+      setTimeout(poll, 100);
+    })();
+  });
+}
+
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.src = src;
+    f.onload = function () { setTimeout(function () { res(f); }, 300); };
+    f.onerror = function () { rej(new Error('iframe 로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+function txt(d, id) { return d.getElementById(id).textContent.trim(); }
+
+function run() {
+  var chain = Promise.resolve();
+
+  // 1. 글자수 세기
+  chain = chain.then(function () {
+    return loadFrame('../char-count.html').then(function (f) {
+      var d = f.contentDocument;
+      var ta = d.getElementById('ta');
+      ta.value = '안녕하세요 반갑습니다';           // 공백포함 11자 / 제외 10자 / 2단어
+      ta.dispatchEvent(new Event('input'));
+      var all = txt(d, 's-all'), nos = txt(d, 's-nospace'), w = txt(d, 's-words');
+      log('글자수 세기', all === '11' && nos === '10' && w === '2',
+          '공백포함 ' + all + '자 / 제외 ' + nos + '자 / ' + w + '단어 (기대: 11/10/2)');
+    });
+  }).catch(function (e) { log('글자수 세기', false, '오류: ' + e.message); });
+
+  // 2. QR 생성
+  chain = chain.then(function () {
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      var t = d.getElementById('text');
+      t.value = 'https://example.com';
+      t.dispatchEvent(new Event('input'));
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+        var c = d.getElementById('canvas');
+        var px = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        var dark = 0, light = 0;
+        for (var i = 0; i < px.length; i += 4) {
+          if (px[i + 3] < 128) continue;              // 투명 픽셀 제외 (미렌더 오탐 방지)
+          if (px[i] < 100) dark++; else if (px[i] > 200) light++;
+        }
+        log('QR 생성', !c.hidden && dark > 500 && light > 500,
+            '캔버스 ' + c.width + '×' + c.height + ', 검정 ' + dark.toLocaleString() +
+            ' / 흰색 ' + light.toLocaleString() + ' 픽셀');
+      });
+    });
+  }).catch(function (e) { log('QR 생성', false, '오류: ' + e.message); });
+
+  // 3. CSV 읽기 (UTF-8, BOM 없음 — 한글 깨짐 여부가 핵심)
+  chain = chain.then(function () {
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      var csv = '이름,나이,도시\n홍길동,30,서울\n김철수,25,부산\n';
+      setFiles(d.getElementById('file'), [new File([csv], 'test.csv', { type: 'text/csv' })]);
+      return waitFor(function () { return txt(d, 't-rows') !== '0'; }, 10000).then(function () {
+        var rows = txt(d, 't-rows'), cols = txt(d, 't-cols');
+        var hangul = d.getElementById('preview').textContent.indexOf('홍길동') >= 0;
+        log('CSV 읽기 (한글)', rows === '2' && cols === '3' && hangul,
+            rows + '행 ' + cols + '열, 한글 표시 ' + (hangul ? 'OK' : '깨짐') +
+            ' (기대: 2행 3열) · 메시지[' + txt(d, 'msg') + ']');
+      });
+    });
+  }).catch(function (e) { log('CSV 읽기 (한글)', false, '오류: ' + e.message); });
+
+  // 4. CSV → JSON 변환 결과 검증
+  chain = chain.then(function () {
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      var json = JSON.stringify([{ 이름: '홍길동', 점수: 90 }, { 이름: '김철수', 점수: 85 }]);
+      setFiles(d.getElementById('file'), [new File([json], 'test.json', { type: 'application/json' })]);
+      return waitFor(function () { return txt(d, 't-rows') !== '0'; }, 10000).then(function () {
+        var rows = txt(d, 't-rows'), from = txt(d, 't-from');
+        var hangul = d.getElementById('preview').textContent.indexOf('홍길동') >= 0;
+        log('JSON 읽기', rows === '2' && from === 'JSON' && hangul,
+            rows + '행, 원본형식 "' + from + '", 한글 ' + (hangul ? 'OK' : '깨짐') +
+            ' · 메시지[' + txt(d, 'msg') + ']');
+      });
+    });
+  }).catch(function (e) { log('JSON 읽기', false, '오류: ' + e.message); });
+
+  // 5. 이미지 압축
+  chain = chain.then(function () {
+    var cv = document.createElement('canvas');
+    cv.width = 2000; cv.height = 1500;
+    var cx = cv.getContext('2d');
+    var g = cx.createLinearGradient(0, 0, 2000, 1500);
+    g.addColorStop(0, '#e63946'); g.addColorStop(.5, '#f1faee'); g.addColorStop(1, '#1d3557');
+    cx.fillStyle = g; cx.fillRect(0, 0, 2000, 1500);
+    for (var i = 0; i < 400; i++) {           // 압축률을 현실적으로 만들기 위한 잡음
+      cx.fillStyle = 'rgba(' + (i * 7 % 255) + ',' + (i * 13 % 255) + ',' + (i * 29 % 255) + ',.5)';
+      cx.fillRect((i * 137) % 2000, (i * 71) % 1500, 40, 40);
+    }
+    return new Promise(function (res) { cv.toBlob(res, 'image/png'); }).then(function (blob) {
+      return loadFrame('../image-compress.html').then(function (f) {
+        var d = f.contentDocument;
+        d.getElementById('maxw').value = '1280';
+        setFiles(d.getElementById('file'), [new File([blob], 'test.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') !== '0'; }, 10000).then(function () {
+          var link = d.querySelector('#list a[download]');
+          log('이미지 압축', txt(d, 't-count') === '1' && !!link,
+              txt(d, 't-count') + '장, ' + txt(d, 't-before') + ' → ' + txt(d, 't-after') +
+              ' (' + txt(d, 't-saved') + ' 절약), 저장링크 ' + (link ? 'OK' : '없음'));
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지 압축', false, '오류: ' + e.message); });
+
+  // 6. PDF 읽기·정렬 + 실제 병합
+  chain = chain.then(function () {
+    if (typeof PDFLib === 'undefined') { log('PDF 합치기', false, 'pdf-lib 로드 실패'); return; }
+    function makePdf(n, name) {
+      return PDFLib.PDFDocument.create().then(function (doc) {
+        for (var i = 0; i < n; i++) { doc.addPage([300, 400]); }
+        return doc.save();
+      }).then(function (bytes) { return new File([bytes], name, { type: 'application/pdf' }); });
+    }
+    return Promise.all([makePdf(2, 'a.pdf'), makePdf(3, 'b.pdf')]).then(function (files) {
+      return loadFrame('../pdf-merge.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), files);
+        return waitFor(function () { return txt(d, 't-files') !== '0'; }, 12000).then(function () {
+          var n = txt(d, 't-files'), pages = txt(d, 't-pages');
+          var items = d.getElementById('list').querySelectorAll('li').length;
+          log('PDF 읽기·정렬', n === '2' && pages === '5' && items === 2,
+              n + '개 파일, 총 ' + pages + '쪽, 목록 ' + items + '행 (기대: 2개 5쪽) · 메시지[' + txt(d, 'msg') + ']');
+
+          // 순서 변경(↓ 버튼)이 실제로 동작하는지도 확인
+          var el = d.querySelector('#list li .fname');
+          if (!el) { log('PDF 순서 변경', false, '목록이 비어 있어 확인 불가'); return; }
+          var firstBefore = el.textContent;
+          var downBtn = d.querySelectorAll('#list li button')[1];
+          if (downBtn) downBtn.click();
+          var after = d.querySelector('#list li .fname');
+          var firstAfter = after ? after.textContent : '(없음)';
+          log('PDF 순서 변경', firstBefore !== firstAfter,
+              '"' + firstBefore + '" → "' + firstAfter + '"');
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 읽기·정렬', false, '오류: ' + e.message); });
+
+  // 7. 이미지 → PDF
+  chain = chain.then(function () {
+    function mkImg(w, h, color) {
+      var c = document.createElement('canvas'); c.width = w; c.height = h;
+      var x = c.getContext('2d'); x.fillStyle = color; x.fillRect(0, 0, w, h);
+      return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+    }
+    return Promise.all([mkImg(800, 600, '#e63946'), mkImg(600, 900, '#1d3557')]).then(function (bl) {
+      return loadFrame('../img-to-pdf.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [
+          new File([bl[0]], 'a.png', { type: 'image/png' }),
+          new File([bl[1]], 'b.png', { type: 'image/png' })
+        ]);
+        return waitFor(function () { return txt(d, 't-count') !== '0'; }, 10000).then(function () {
+          var items = d.getElementById('list').querySelectorAll('li').length;
+          log('이미지→PDF', txt(d, 't-count') === '2' && items === 2,
+              txt(d, 't-count') + '장, 목록 ' + items + '행 (기대: 2/2) · 메시지[' + txt(d, 'msg') + ']');
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지→PDF', false, '오류: ' + e.message); });
+
+  // 8. PDF 나누기 (5쪽 문서에서 "1-3,5" → 4쪽 선택되어야 함)
+  chain = chain.then(function () {
+    if (typeof PDFLib === 'undefined') { log('PDF 나누기', false, 'pdf-lib 로드 실패'); return; }
+    return PDFLib.PDFDocument.create().then(function (doc) {
+      for (var i = 0; i < 5; i++) { doc.addPage([300, 400]); }
+      return doc.save();
+    }).then(function (bytes) {
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([bytes], 'src.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') !== '0'; }, 12000).then(function () {
+          var pages = txt(d, 't-pages');
+          var r = d.getElementById('range');
+          r.value = '1-3,5';
+          r.dispatchEvent(new Event('input'));
+          var pick = txt(d, 't-pick');
+          log('PDF 나누기', pages === '5' && pick === '4쪽',
+              '전체 ' + pages + '쪽, 범위 "1-3,5" → ' + pick +
+              ' (기대: 5쪽 / 4쪽) · 메시지[' + txt(d, 'msg') + ']');
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 나누기', false, '오류: ' + e.message); });
+
+  // 9. 날짜 계산기
+  chain = chain.then(function () {
+    return loadFrame('../date-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      var n = new Date();
+      var t = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 10);
+      var iso = t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+      var dd = d.getElementById('dday');
+      dd.value = iso;
+      dd.dispatchEvent(new Event('input'));
+      var label = txt(d, 'd-label');
+      var days = txt(d, 'b-days');     // 초기값이 오늘 ~ 오늘+30 이므로 30일이어야 함
+      log('날짜 계산기', label === 'D-10' && days === '30일',
+          '디데이 ' + label + ' (기대 D-10), 기본 기간 ' + days + ' (기대 30일)');
+    });
+  }).catch(function (e) { log('날짜 계산기', false, '오류: ' + e.message); });
+
+  // 10. 만 나이 계산기 (정확히 30년 전 같은 날 → 만 30세)
+  chain = chain.then(function () {
+    return loadFrame('../age-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      var n = new Date();
+      var b = new Date(n.getFullYear() - 30, n.getMonth(), n.getDate());
+      var iso = b.getFullYear() + '-' + ('0' + (b.getMonth() + 1)).slice(-2) + '-' + ('0' + b.getDate()).slice(-2);
+      var el = d.getElementById('birth');
+      el.value = iso;
+      el.dispatchEvent(new Event('input'));
+      var full = txt(d, 'a-full'), kor = txt(d, 'a-korean');
+      log('만 나이 계산기', full === '30세' && kor === '31세',
+          '만 ' + full + ' / 세는 ' + kor + ' (기대: 30세 / 31세)');
+    });
+  }).catch(function (e) { log('만 나이 계산기', false, '오류: ' + e.message); });
+
+  // 11. 단위 변환기 (1평 = 3.3058㎡ 인지 확인)
+  chain = chain.then(function () {
+    return loadFrame('../unit-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      var v = d.getElementById('val');
+      v.value = '1';
+      v.dispatchEvent(new Event('input'));
+      var rows = d.getElementById('out').querySelectorAll('tr');
+      var sqm = rows.length ? rows[0].children[1].textContent.trim() : '';
+      // 온도 변환도 함께 확인: 32°F = 0°C
+      var c = d.getElementById('cat');
+      c.value = 'temp'; c.dispatchEvent(new Event('change'));
+      d.getElementById('unit').value = '1';                      // 화씨
+      d.getElementById('unit').dispatchEvent(new Event('change'));
+      v.value = '32'; v.dispatchEvent(new Event('input'));
+      var celsius = d.getElementById('out').querySelectorAll('tr')[0].children[1].textContent.trim();
+      log('단위 변환기', sqm.indexOf('3.3') === 0 && celsius === '0',
+          '1평=' + sqm + '㎡ (기대 3.3058), 32°F=' + celsius + '°C (기대 0)');
+    });
+  }).catch(function (e) { log('단위 변환기', false, '오류: ' + e.message); });
+
+  // 12. 이미지 자르기
+  chain = chain.then(function () {
+    var cv = document.createElement('canvas');
+    cv.width = 1000; cv.height = 800;
+    var cx = cv.getContext('2d');
+    cx.fillStyle = '#2f6df6'; cx.fillRect(0, 0, 1000, 800);
+    return new Promise(function (r) { cv.toBlob(r, 'image/png'); }).then(function (blob) {
+      return loadFrame('../image-crop.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([blob], 'c.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-orig') !== '-'; }, 10000).then(function () {
+          var orig = txt(d, 't-orig'), cropSize = txt(d, 't-crop');
+          // 1:1 비율 고정 시 가로세로가 같아져야 한다
+          var r = d.getElementById('ratio');
+          r.value = '1'; r.dispatchEvent(new Event('change'));
+          var sq = txt(d, 't-crop').split('×');
+          var isSquare = sq.length === 2 && Math.abs(+sq[0] - +sq[1]) <= 1;
+          log('이미지 자르기', orig === '1000×800' && cropSize.indexOf('×') > 0 && isSquare,
+              '원본 ' + orig + ' (기대 1000×800), 기본선택 ' + cropSize +
+              ', 1:1 고정 → ' + txt(d, 't-crop') + (isSquare ? ' 정사각형 OK' : ' 정사각형 실패'));
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지 자르기', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 실패 항목 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+
+  // 창 제목으로 결과를 내보낸다 (외부에서 실제 시간으로 폴링해 읽기 위함)
+  var fails = results.filter(function (r) { return !r.ok; })
+    .map(function (r) { return r.name + ' >> ' + r.detail; }).join(' ;; ');
+  document.title = 'RESULT ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + '=' + (r.ok ? 'PASS' : 'FAIL'); }).join(' | ') +
+    (fails ? ' :: FAILDETAIL :: ' + fails : '');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 200); });
+</script>
+</body>
+</html>
