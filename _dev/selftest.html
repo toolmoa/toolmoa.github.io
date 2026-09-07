@@ -317,6 +317,34 @@ function run() {
     });
   }).catch(function (e) { log('이미지 자르기', false, '오류: ' + e.message); });
 
+  // 13. 다국어 전환
+  chain = chain.then(function () {
+    return loadFrame('../index.html').then(function (f) {
+      var d = f.contentDocument;
+      var sel = d.querySelector('.lang-select');
+      if (!sel) { log('다국어 전환', false, '언어 선택기가 없음'); return; }
+      var koH1 = d.querySelector('h1').textContent.trim();
+
+      sel.value = 'en'; sel.dispatchEvent(new Event('change'));
+      var enH1 = d.querySelector('h1').textContent.trim();
+      var enNav = d.querySelector('.site-nav a').textContent.trim();
+      var enLang = d.documentElement.lang;
+
+      sel.value = 'ja'; sel.dispatchEvent(new Event('change'));
+      var jaH1 = d.querySelector('h1').textContent.trim();
+
+      sel.value = 'ko'; sel.dispatchEvent(new Event('change'));  // 한국어 복귀 확인
+      var backH1 = d.querySelector('h1').textContent.trim();
+
+      var ok = enH1 === 'Just the tool you need, free' &&
+               enNav === 'Compress image' && enLang === 'en' &&
+               jaH1 === '必要な道具だけ、無料で' &&
+               backH1 === koH1;
+      log('다국어 전환', ok,
+          'EN "' + enH1 + '" / JA "' + jaH1 + '" / 한국어 복귀 ' + (backH1 === koH1 ? 'OK' : '실패'));
+    });
+  }).catch(function (e) { log('다국어 전환', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 
