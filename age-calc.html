@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>만 나이 계산기 · 세는 나이 · 띠 계산 - 무료 | 툴모아</title>
+<meta name="description" content="생년월일을 넣으면 만 나이, 세는 나이, 연 나이를 한 번에 계산합니다. 띠와 별자리, 다음 생일까지 남은 날, 태어난 요일까지 알려줍니다. 설치·회원가입 없이 무료.">
+<link rel="canonical" href="https://toolmoa.github.io/age-calc.html">
+<meta property="og:title" content="만 나이 계산기 · 세는 나이 · 띠 계산">
+<meta property="og:description" content="생년월일 하나로 만 나이·세는 나이·연 나이·띠·별자리까지.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"만 나이 계산기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="image-crop.html">이미지 자르기</a>
+      <a href="img-to-pdf.html">이미지→PDF</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+      <a href="unit-convert.html">단위 변환</a>
+      <a href="date-calc.html">날짜 계산</a>
+      <a href="age-calc.html" aria-current="page">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>만 나이 계산기</h1>
+  <p class="lead">생년월일만 넣으면 만 나이·세는 나이·연 나이를 한 번에 계산합니다.</p>
+
+  <div class="card">
+    <div class="field" style="margin-bottom:0">
+      <label for="birth">생년월일</label>
+      <input type="date" id="birth">
+      <div class="hint">2023년 6월부터 법적·행정적으로는 <strong>만 나이</strong>가 기준입니다.</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="a-full" style="font-size:34px;color:var(--accent)">-</span><span class="lbl">만 나이 (공식)</span></div>
+    <div class="stat"><span class="num" id="a-korean">-</span><span class="lbl">세는 나이</span></div>
+    <div class="stat"><span class="num" id="a-year">-</span><span class="lbl">연 나이</span></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">자세한 정보</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      <tbody id="detail"></tbody>
+    </table>
+  </div>
+
+  <div class="ad-slot"><!-- AD:AGE --></div>
+
+  <h2>나이 세는 방법이 왜 세 가지인가요</h2>
+  <div class="card">
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">만 나이</strong>는 태어난 날을 0살로 보고 생일이 지날 때마다 한 살씩 더합니다.
+      2023년 6월 28일부터 법령·계약·공문서의 기준이 되었습니다. 그냥 "나이"라고 하면 이걸 뜻합니다.
+    </p>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">세는 나이</strong>는 태어나자마자 한 살이고 새해마다 한 살을 더하는 전통 방식입니다.
+      일상 대화에서 아직 쓰이지만 공식 문서에는 쓰지 않습니다.
+    </p>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">연 나이</strong>는 현재 연도에서 태어난 연도를 뺀 값입니다.
+      병역법, 청소년보호법처럼 생일과 무관하게 연도로 판단해야 하는 일부 법률에서 씁니다.
+    </p>
+  </div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>생일이 아직 안 지났으면 어떻게 되나요?</summary>
+      <p>만 나이는 생일 전날까지 한 살 적습니다. 이 계산기는 그 점을 반영해 오늘 기준으로 정확히 계산합니다.</p>
+    </details>
+    <details>
+      <summary>세는 나이는 왜 만 나이와 1~2살 차이가 나나요?</summary>
+      <p>생일이 지났으면 1살, 아직 안 지났으면 2살 차이가 납니다. 세는 나이는 생일이 아니라 새해를 기준으로 올라가기 때문입니다.</p>
+    </details>
+    <details>
+      <summary>음력 생일도 계산되나요?</summary>
+      <p>양력 기준으로만 계산합니다. 음력 생일을 쓰신다면 해당 연도의 양력 날짜로 변환해서 넣어주세요.</p>
+    </details>
+    <details>
+      <summary>입력한 생년월일이 저장되나요?</summary>
+      <p>저장되지 않습니다. 브라우저 안에서만 계산되며 서버로 전송되지 않습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="image-crop.html">이미지 자르기</a>
+      <a href="img-to-pdf.html">이미지 PDF 변환</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+      <a href="unit-convert.html">단위 변환기</a>
+      <a href="date-calc.html">날짜 계산기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+  var ZODIAC = ['원숭이', '닭', '개', '돼지', '쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양'];
+  var MS = 86400000;
+  var birth = document.getElementById('birth');
+
+  function parse(v) { if (!v) return null; var p = v.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function today() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+  function num(n) { return n.toLocaleString('ko-KR'); }
+
+  function starSign(m, d) {
+    var t = [[1, 20, '염소자리'], [2, 19, '물병자리'], [3, 21, '물고기자리'], [4, 20, '양자리'],
+             [5, 21, '황소자리'], [6, 22, '쌍둥이자리'], [7, 23, '게자리'], [8, 23, '사자자리'],
+             [9, 23, '처녀자리'], [10, 23, '천칭자리'], [11, 23, '전갈자리'], [12, 25, '사수자리']];
+    for (var i = 0; i < t.length; i++) {
+      if (m === t[i][0]) return d < t[i][1] ? (i === 0 ? '사수자리' : t[i - 1][2]) : t[i][2];
+    }
+    return '염소자리';
+  }
+
+  function calc() {
+    var b = parse(birth.value), t = today();
+    var full = document.getElementById('a-full');
+    if (!b || b > t) {
+      full.textContent = '-';
+      document.getElementById('a-korean').textContent = '-';
+      document.getElementById('a-year').textContent = '-';
+      document.getElementById('detail').innerHTML =
+        '<tr><td style="padding:12px 0;color:var(--muted)">' +
+        (b && b > t ? '오늘보다 뒤의 날짜입니다.' : '생년월일을 입력하면 결과가 나옵니다.') + '</td></tr>';
+      return;
+    }
+
+    // 만 나이: 생일이 지났는지에 따라 1살 차이
+    var age = t.getFullYear() - b.getFullYear();
+    var had = (t.getMonth() > b.getMonth()) ||
+              (t.getMonth() === b.getMonth() && t.getDate() >= b.getDate());
+    if (!had) age--;
+
+    var korean = t.getFullYear() - b.getFullYear() + 1;   // 세는 나이
+    var yearAge = t.getFullYear() - b.getFullYear();      // 연 나이
+
+    full.textContent = age + '세';
+    document.getElementById('a-korean').textContent = korean + '세';
+    document.getElementById('a-year').textContent = yearAge + '세';
+
+    // 다음 생일
+    var next = new Date(t.getFullYear(), b.getMonth(), b.getDate());
+    if (next < t) next = new Date(t.getFullYear() + 1, b.getMonth(), b.getDate());
+    var toNext = Math.round((next - t) / MS);
+    var lived = Math.round((t - b) / MS);
+
+    var rows = [
+      ['만 나이', age + '세 (공식 기준)'],
+      ['세는 나이', korean + '세'],
+      ['연 나이', yearAge + '세'],
+      ['태어난 요일', DOW[b.getDay()] + '요일'],
+      ['띠', ZODIAC[b.getFullYear() % 12] + '띠'],
+      ['별자리', starSign(b.getMonth() + 1, b.getDate())],
+      ['다음 생일', toNext === 0 ? '오늘입니다 🎂' : toNext + '일 뒤 (' + (next.getMonth() + 1) + '월 ' + next.getDate() + '일 ' + DOW[next.getDay()] + '요일)'],
+      ['살아온 날', num(lived) + '일'],
+      ['살아온 주', num(Math.floor(lived / 7)) + '주']
+    ];
+    document.getElementById('detail').innerHTML = rows.map(function (r) {
+      return '<tr><td style="padding:9px 0;border-bottom:1px solid var(--border);color:var(--muted)">' + r[0] +
+             '</td><td style="padding:9px 0;border-bottom:1px solid var(--border);text-align:right;font-weight:600">' + r[1] + '</td></tr>';
+    }).join('');
+  }
+
+  birth.addEventListener('input', calc);
+  birth.addEventListener('change', calc);
+  calc();
+})();
+</script>
+</body>
+</html>

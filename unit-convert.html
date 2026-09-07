@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단위 변환기 · 평수 계산 · 인치 cm 변환 - 무료 | 툴모아</title>
+<meta name="description" content="길이·무게·넓이·부피·온도·속도·데이터 단위를 한 번에 변환합니다. 평수 계산(평↔제곱미터), 인치 cm 변환, 파운드 kg 변환을 즉시 확인하세요. 설치 없이 무료.">
+<link rel="canonical" href="https://toolmoa.github.io/unit-convert.html">
+<meta property="og:title" content="단위 변환기 · 평수 계산 · 인치 cm 변환">
+<meta property="og:description" content="값 하나만 넣으면 모든 단위로 동시에 변환됩니다.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"단위 변환기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="image-crop.html">이미지 자르기</a>
+      <a href="img-to-pdf.html">이미지→PDF</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+      <a href="unit-convert.html" aria-current="page">단위 변환</a>
+      <a href="date-calc.html">날짜 계산</a>
+      <a href="age-calc.html">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>단위 변환기</h1>
+  <p class="lead">값 하나만 넣으면 같은 종류의 모든 단위로 한 번에 변환됩니다.</p>
+
+  <div class="card">
+    <div class="field">
+      <label for="cat">종류</label>
+      <select id="cat">
+        <option value="area">넓이 (평 · 제곱미터)</option>
+        <option value="length">길이 (cm · 인치 · 자)</option>
+        <option value="weight">무게 (kg · 파운드 · 근)</option>
+        <option value="volume">부피 (리터 · 되 · 갤런)</option>
+        <option value="temp">온도 (섭씨 · 화씨)</option>
+        <option value="speed">속도 (km/h · mph)</option>
+        <option value="data">데이터 (MB · GB)</option>
+      </select>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="field" style="margin-bottom:0">
+        <label for="val">값</label>
+        <input type="number" id="val" value="1" step="any">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="unit">단위</label>
+        <select id="unit"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table style="width:100%;border-collapse:collapse;font-size:15px">
+      <tbody id="out"></tbody>
+    </table>
+  </div>
+
+  <div class="ad-slot"><!-- AD:UNIT --></div>
+
+  <h2>자주 쓰는 변환</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px;line-height:2">
+      <strong style="color:var(--text)">1평 = 3.3058㎡</strong> — 아파트 면적을 볼 때 씁니다. 84㎡는 약 25.4평입니다.<br>
+      <strong style="color:var(--text)">1인치 = 2.54cm</strong> — 모니터·TV 크기는 화면 대각선 인치입니다.<br>
+      <strong style="color:var(--text)">1파운드 = 453.6g</strong> — 해외 직구 배송 무게에 자주 나옵니다.<br>
+      <strong style="color:var(--text)">1근 = 600g</strong> (고기 기준) — 정육점에서 쓰는 단위입니다.<br>
+      <strong style="color:var(--text)">화씨 → 섭씨</strong> — (화씨 − 32) ÷ 1.8 로 계산합니다.
+    </p>
+  </div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>평수 계산이 부동산 표기와 다릅니다.</summary>
+      <p>분양 광고의 "몇 평"은 공급면적(전용+공용)을 말하는 경우가 많고, 등기부의 면적은 전용면적입니다. 어떤 면적을 넣었는지에 따라 결과가 달라지니 기준을 확인하세요.</p>
+    </details>
+    <details>
+      <summary>근이 600g인가요 375g인가요?</summary>
+      <p>둘 다 쓰입니다. 고기·생선은 600g, 채소·과일은 375g을 쓰는 경우가 많습니다. 이 변환기는 고기 기준인 600g을 사용합니다.</p>
+    </details>
+    <details>
+      <summary>소수점이 너무 길게 나옵니다.</summary>
+      <p>값의 크기에 맞춰 자동으로 자릿수를 조절합니다. 표시된 숫자를 복사하면 반올림된 값이 그대로 복사됩니다.</p>
+    </details>
+    <details>
+      <summary>입력값이 저장되나요?</summary>
+      <p>저장되지 않습니다. 모든 계산은 브라우저 안에서만 이뤄집니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="image-crop.html">이미지 자르기</a>
+      <a href="img-to-pdf.html">이미지 PDF 변환</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+      <a href="date-calc.html">날짜 계산기</a>
+      <a href="age-calc.html">만 나이 계산기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // 각 단위를 기준 단위로 환산하는 배율. 온도만 별도 계산.
+  var DATA = {
+    area:   { base: '㎡', units: [['㎡', 1], ['평', 3.305785], ['㎢', 1e6], ['헥타르(ha)', 10000],
+                                 ['아르(a)', 100], ['제곱피트(ft²)', 0.09290304], ['제곱야드', 0.83612736]] },
+    length: { base: 'm',  units: [['cm', 0.01], ['m', 1], ['km', 1000], ['mm', 0.001],
+                                 ['인치(in)', 0.0254], ['피트(ft)', 0.3048], ['야드(yd)', 0.9144],
+                                 ['마일(mi)', 1609.344], ['자(척)', 0.303030]] },
+    weight: { base: 'kg', units: [['g', 0.001], ['kg', 1], ['톤(t)', 1000], ['mg', 1e-6],
+                                 ['파운드(lb)', 0.45359237], ['온스(oz)', 0.028349523],
+                                 ['근(고기 600g)', 0.6], ['관', 3.75]] },
+    volume: { base: 'L',  units: [['mL', 0.001], ['L', 1], ['㎥', 1000],
+                                 ['갤런(미국)', 3.785411784], ['쿼트', 0.946352946],
+                                 ['컵(200mL)', 0.2], ['되', 1.8039], ['말', 18.039]] },
+    speed:  { base: 'm/s',units: [['km/h', 0.2777778], ['m/s', 1], ['mph', 0.44704],
+                                 ['노트(kn)', 0.5144444]] },
+    data:   { base: 'MB', units: [['KB', 1 / 1024], ['MB', 1], ['GB', 1024], ['TB', 1048576],
+                                 ['바이트(B)', 1 / 1048576]] },
+    temp:   { base: '°C', units: [['섭씨(°C)', 1], ['화씨(°F)', 1], ['켈빈(K)', 1]] }
+  };
+
+  var catSel = document.getElementById('cat');
+  var unitSel = document.getElementById('unit');
+  var valInput = document.getElementById('val');
+
+  function fillUnits() {
+    var d = DATA[catSel.value];
+    unitSel.innerHTML = d.units.map(function (u, i) {
+      return '<option value="' + i + '">' + u[0] + '</option>';
+    }).join('');
+    // 넓이는 '평'을 기본으로 두는 편이 한국에서 쓰기 편하다
+    if (catSel.value === 'area') unitSel.value = '1';
+    calc();
+  }
+
+  // 값 크기에 따라 유효 자릿수를 조절해 읽기 좋게 만든다
+  function fmt(n) {
+    if (!isFinite(n)) return '-';
+    var a = Math.abs(n);
+    if (a === 0) return '0';
+    if (a >= 1e9 || a < 1e-6) return n.toExponential(4);
+    var digits = a >= 100 ? 2 : (a >= 1 ? 4 : 6);
+    var s = n.toFixed(digits).replace(/\.?0+$/, '');
+    return Number(s).toLocaleString('ko-KR', { maximumFractionDigits: digits });
+  }
+
+  function toC(v, idx) {
+    if (idx === 0) return v;
+    if (idx === 1) return (v - 32) / 1.8;
+    return v - 273.15;
+  }
+  function fromC(c, idx) {
+    if (idx === 0) return c;
+    if (idx === 1) return c * 1.8 + 32;
+    return c + 273.15;
+  }
+
+  function calc() {
+    var d = DATA[catSel.value];
+    var v = parseFloat(valInput.value);
+    var idx = parseInt(unitSel.value, 10);
+    var out = document.getElementById('out');
+
+    if (isNaN(v)) {
+      out.innerHTML = '<tr><td style="padding:12px 0;color:var(--muted)">숫자를 입력하세요.</td></tr>';
+      return;
+    }
+
+    var results = d.units.map(function (u, i) {
+      if (catSel.value === 'temp') return [u[0], fromC(toC(v, idx), i)];
+      return [u[0], v * d.units[idx][1] / u[1]];
+    });
+
+    out.innerHTML = results.map(function (r, i) {
+      var cur = i === idx;
+      return '<tr' + (cur ? ' style="background:var(--accent-soft)"' : '') + '>' +
+        '<td style="padding:11px 12px;border-bottom:1px solid var(--border);color:' + (cur ? 'var(--accent)' : 'var(--muted)') + ';font-weight:' + (cur ? '600' : '400') + '">' + r[0] + '</td>' +
+        '<td style="padding:11px 12px;border-bottom:1px solid var(--border);text-align:right;font-weight:600;font-variant-numeric:tabular-nums">' + fmt(r[1]) + '</td></tr>';
+    }).join('');
+  }
+
+  catSel.addEventListener('change', fillUnits);
+  unitSel.addEventListener('change', calc);
+  valInput.addEventListener('input', calc);
+  fillUnits();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 자르기 · 사진 회전 · 크롭 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="사진을 원하는 영역만 잘라내고 회전·좌우반전까지 할 수 있습니다. 1:1, 16:9 등 비율 고정도 지원합니다. 파일이 서버로 올라가지 않아 안전하며 워터마크가 없습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/image-crop.html">
+<meta property="og:title" content="이미지 자르기 · 사진 회전">
+<meta property="og:description" content="원하는 영역만 잘라내고 회전까지. 업로드 없이 브라우저에서 안전하게.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔲</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  #stage { position: relative; display: inline-block; max-width: 100%; touch-action: none; }
+  #stage canvas { display: block; max-width: 100%; height: auto; border-radius: 8px; }
+  #box {
+    position: absolute; border: 2px solid #fff; cursor: move;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,.5); box-sizing: border-box;
+  }
+  #box .h {
+    position: absolute; width: 14px; height: 14px; background: #fff;
+    border: 1px solid #666; border-radius: 3px;
+  }
+  #box .nw { left: -8px; top: -8px; cursor: nwse-resize; }
+  #box .ne { right: -8px; top: -8px; cursor: nesw-resize; }
+  #box .sw { left: -8px; bottom: -8px; cursor: nesw-resize; }
+  #box .se { right: -8px; bottom: -8px; cursor: nwse-resize; }
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"이미지 자르기","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="image-crop.html" aria-current="page">이미지 자르기</a>
+      <a href="img-to-pdf.html">이미지→PDF</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+      <a href="unit-convert.html">단위 변환</a>
+      <a href="date-calc.html">날짜 계산</a>
+      <a href="age-calc.html">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>이미지 자르기</h1>
+  <p class="lead">필요한 영역만 잘라내고 회전·좌우반전까지 한 번에 처리합니다.</p>
+  <span class="privacy-badge">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz">
+    <span class="dz-icon">🔲</span>
+    <span class="dz-main">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <div id="msg"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="ratio">비율 고정</label>
+        <select id="ratio">
+          <option value="0">자유롭게</option>
+          <option value="1">1:1 (정사각형 · 프로필)</option>
+          <option value="1.7777778">16:9 (와이드)</option>
+          <option value="1.3333333">4:3</option>
+          <option value="0.75">3:4 (세로)</option>
+          <option value="0.5625">9:16 (세로 영상)</option>
+        </select>
+      </div>
+      <div class="btn-row" style="margin-bottom:0">
+        <button class="btn secondary small" id="rot-l">↺ 왼쪽 90°</button>
+        <button class="btn secondary small" id="rot-r">↻ 오른쪽 90°</button>
+        <button class="btn secondary small" id="flip-h">좌우 반전</button>
+        <button class="btn secondary small" id="reset-box">선택 초기화</button>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin:18px 0">
+      <div id="stage">
+        <canvas id="cv"></canvas>
+        <div id="box"><i class="h nw"></i><i class="h ne"></i><i class="h sw"></i><i class="h se"></i></div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-orig" style="font-size:18px">-</span><span class="lbl">원본 크기</span></div>
+      <div class="stat"><span class="num" id="t-crop" style="font-size:18px">-</span><span class="lbl">잘라낼 크기</span></div>
+    </div>
+
+    <div class="field">
+      <label for="fmt">저장 형식</label>
+      <select id="fmt">
+        <option value="image/png">PNG (화질 손실 없음)</option>
+        <option value="image/jpeg">JPG (용량 작음)</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-save">잘라서 저장</button>
+      <button class="btn secondary" id="btn-reset">다른 사진 열기</button>
+    </div>
+  </div>
+
+  <div class="ad-slot"><!-- AD:CROP --></div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 자르기와 회전 모두 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다.</p>
+    </details>
+    <details>
+      <summary>화질이 떨어지나요?</summary>
+      <p>PNG로 저장하면 화질 손실이 전혀 없습니다. 자르기는 원본 해상도 그대로 잘라내므로 화면에 작게 보여도 결과물은 원본 화질입니다.</p>
+    </details>
+    <details>
+      <summary>프로필 사진용으로 정사각형을 만들려면?</summary>
+      <p>비율 고정에서 <strong>1:1</strong>을 선택하면 어떻게 끌어도 정사각형이 유지됩니다.</p>
+    </details>
+    <details>
+      <summary>휴대폰에서도 되나요?</summary>
+      <p>됩니다. 손가락으로 선택 영역을 끌거나 모서리를 잡아 크기를 조절하세요.</p>
+    </details>
+    <details>
+      <summary>여러 장을 한 번에 자를 수 있나요?</summary>
+      <p>이 도구는 한 번에 한 장씩 처리합니다. 여러 장의 용량을 한꺼번에 줄이시려면 <a href="image-compress.html">이미지 용량 줄이기</a>를 이용하세요.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="img-to-pdf.html">이미지 PDF 변환</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+      <a href="unit-convert.html">단위 변환기</a>
+      <a href="date-calc.html">날짜 계산기</a>
+      <a href="age-calc.html">만 나이 계산기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var cv = document.getElementById('cv');
+  var box = document.getElementById('box');
+  var stage = document.getElementById('stage');
+  var ratioSel = document.getElementById('ratio');
+
+  var img = null;                       // 현재 원본 (회전 반영본)
+  var baseName = 'image';
+  var crop = { x: 0, y: 0, w: 0, h: 0 };  // 원본 픽셀 기준
+  var drag = null;
+
+  function setMsg(t, cls) {
+    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  }
+  function scale() { return cv.clientWidth / cv.width; }   // 화면 표시 배율
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files.length) load(fileInput.files[0]);
+  });
+
+  function load(file) {
+    if (file.type.indexOf('image/') !== 0) { setMsg('이미지 파일을 선택해 주세요.', 'err'); return; }
+    baseName = file.name.replace(/\.[^.]+$/, '');
+    var url = URL.createObjectURL(file);
+    var im = new Image();
+    im.onload = function () {
+      URL.revokeObjectURL(url);
+      img = im;
+      draw();
+      resetBox();
+      area.hidden = false;
+      setMsg('');
+    };
+    im.onerror = function () { URL.revokeObjectURL(url); setMsg('이미지를 열 수 없습니다.', 'err'); };
+    im.src = url;
+  }
+
+  function draw() {
+    cv.width = img.width; cv.height = img.height;
+    cv.getContext('2d').drawImage(img, 0, 0);
+    document.getElementById('t-orig').textContent = img.width + '×' + img.height;
+  }
+
+  function resetBox() {
+    var r = parseFloat(ratioSel.value);
+    var w, h;
+    if (r) {
+      w = Math.min(img.width, img.height * r) * 0.8;
+      h = w / r;
+    } else {
+      w = img.width * 0.8; h = img.height * 0.8;
+    }
+    crop = { x: (img.width - w) / 2, y: (img.height - h) / 2, w: w, h: h };
+    clampCrop();
+    paintBox();
+  }
+
+  function clampCrop() {
+    crop.w = Math.max(10, Math.min(crop.w, img.width));
+    crop.h = Math.max(10, Math.min(crop.h, img.height));
+    crop.x = Math.max(0, Math.min(crop.x, img.width - crop.w));
+    crop.y = Math.max(0, Math.min(crop.y, img.height - crop.h));
+  }
+
+  function paintBox() {
+    var s = scale();
+    box.style.left = (crop.x * s) + 'px';
+    box.style.top = (crop.y * s) + 'px';
+    box.style.width = (crop.w * s) + 'px';
+    box.style.height = (crop.h * s) + 'px';
+    document.getElementById('t-crop').textContent =
+      Math.round(crop.w) + '×' + Math.round(crop.h);
+  }
+
+  function pos(e) {
+    var r = cv.getBoundingClientRect();
+    var t = e.touches ? e.touches[0] : e;
+    return { x: (t.clientX - r.left) / scale(), y: (t.clientY - r.top) / scale() };
+  }
+
+  function startDrag(e, mode) {
+    e.preventDefault(); e.stopPropagation();
+    drag = { mode: mode, start: pos(e), orig: { x: crop.x, y: crop.y, w: crop.w, h: crop.h } };
+  }
+
+  box.addEventListener('mousedown', function (e) { startDrag(e, 'move'); });
+  box.addEventListener('touchstart', function (e) { startDrag(e, 'move'); }, { passive: false });
+  ['nw', 'ne', 'sw', 'se'].forEach(function (c) {
+    var el = box.querySelector('.' + c);
+    el.addEventListener('mousedown', function (e) { startDrag(e, c); });
+    el.addEventListener('touchstart', function (e) { startDrag(e, c); }, { passive: false });
+  });
+
+  function onMove(e) {
+    if (!drag) return;
+    e.preventDefault();
+    var p = pos(e);
+    var dx = p.x - drag.start.x, dy = p.y - drag.start.y;
+    var o = drag.orig, r = parseFloat(ratioSel.value);
+
+    if (drag.mode === 'move') {
+      crop.x = o.x + dx; crop.y = o.y + dy;
+    } else {
+      var nx = o.x, ny = o.y, nw = o.w, nh = o.h;
+      if (drag.mode === 'se') { nw = o.w + dx; nh = o.h + dy; }
+      if (drag.mode === 'sw') { nx = o.x + dx; nw = o.w - dx; nh = o.h + dy; }
+      if (drag.mode === 'ne') { ny = o.y + dy; nw = o.w + dx; nh = o.h - dy; }
+      if (drag.mode === 'nw') { nx = o.x + dx; ny = o.y + dy; nw = o.w - dx; nh = o.h - dy; }
+      if (r) {                                  // 비율 고정이면 높이를 폭에 맞춘다
+        nh = nw / r;
+        if (drag.mode === 'ne' || drag.mode === 'nw') ny = o.y + o.h - nh;
+      }
+      if (nw > 10 && nh > 10) { crop.x = nx; crop.y = ny; crop.w = nw; crop.h = nh; }
+    }
+    clampCrop();
+    paintBox();
+  }
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', function () { drag = null; });
+  document.addEventListener('touchend', function () { drag = null; });
+
+  ratioSel.addEventListener('change', resetBox);
+  document.getElementById('reset-box').addEventListener('click', resetBox);
+  window.addEventListener('resize', function () { if (img) paintBox(); });
+
+  // 회전·반전은 원본 자체를 다시 그려서 반영한다
+  function transform(fn, newW, newH) {
+    var c = document.createElement('canvas');
+    c.width = newW; c.height = newH;
+    var x = c.getContext('2d');
+    fn(x);
+    var out = new Image();
+    out.onload = function () { img = out; draw(); resetBox(); };
+    out.src = c.toDataURL('image/png');
+  }
+  document.getElementById('rot-r').addEventListener('click', function () {
+    var w = img.width, h = img.height;
+    transform(function (x) { x.translate(h, 0); x.rotate(Math.PI / 2); x.drawImage(img, 0, 0); }, h, w);
+  });
+  document.getElementById('rot-l').addEventListener('click', function () {
+    var w = img.width, h = img.height;
+    transform(function (x) { x.translate(0, w); x.rotate(-Math.PI / 2); x.drawImage(img, 0, 0); }, h, w);
+  });
+  document.getElementById('flip-h').addEventListener('click', function () {
+    var w = img.width, h = img.height;
+    transform(function (x) { x.translate(w, 0); x.scale(-1, 1); x.drawImage(img, 0, 0); }, w, h);
+  });
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!img) return;
+    var type = document.getElementById('fmt').value;
+    var c = document.createElement('canvas');
+    c.width = Math.round(crop.w); c.height = Math.round(crop.h);
+    var x = c.getContext('2d');
+    if (type === 'image/jpeg') { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
+    x.drawImage(img, Math.round(crop.x), Math.round(crop.y), c.width, c.height, 0, 0, c.width, c.height);
+    c.toBlob(function (blob) {
+      var ext = type === 'image/jpeg' ? 'jpg' : (type === 'image/webp' ? 'webp' : 'png');
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = baseName + '_자름.' + ext;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      setMsg('저장했습니다. ' + c.width + '×' + c.height, 'ok');
+    }, type, 0.92);
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    img = null; fileInput.value = ''; area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>
