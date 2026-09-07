@@ -16,7 +16,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"PDF 합치기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
 </head>
-<body>
+<body data-i18n-title="merge.title">
 
 <header class="site-header">
   <div class="wrap">
@@ -38,53 +38,49 @@
 </header>
 
 <main class="wrap">
-  <h1>PDF 합치기</h1>
-  <p class="lead">여러 개의 PDF를 원하는 순서로 배치해 하나의 파일로 합칩니다. 용량 제한도 워터마크도 없습니다.</p>
-  <span class="privacy-badge">🔒 파일이 서버로 업로드되지 않습니다</span>
+  <h1 data-i18n="merge.h1">PDF 합치기</h1>
+  <p class="lead" data-i18n="merge.lead">여러 개의 PDF를 원하는 순서로 배치해 하나의 파일로 합칩니다. 용량 제한도 워터마크도 없습니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 파일이 서버로 업로드되지 않습니다</span>
 
   <div class="dropzone" id="dz">
     <span class="dz-icon">📄</span>
-    <span class="dz-main">PDF를 끌어다 놓거나 클릭해서 선택하세요</span>
-    <span class="dz-sub">여러 개를 한 번에 선택할 수 있습니다</span>
+    <span class="dz-main" data-i18n="merge.drop">PDF를 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="merge.drop2">여러 개를 한 번에 선택할 수 있습니다</span>
     <input type="file" id="file" accept="application/pdf,.pdf" multiple>
   </div>
 
   <div id="msg"></div>
 
   <div id="area" hidden>
-    <h2 style="margin-bottom:6px">합칠 순서</h2>
-    <p class="hint" style="margin:0 0 12px">항목을 끌어서 옮기거나 화살표 버튼으로 순서를 바꾸세요. 위에서 아래 순서로 합쳐집니다.</p>
+    <h2 style="margin-bottom:6px" data-i18n="merge.orderH">합칠 순서</h2>
+    <p class="hint" style="margin:0 0 12px" data-i18n="merge.orderHint">항목을 끌어서 옮기거나 화살표 버튼으로 순서를 바꾸세요. 위에서 아래 순서로 합쳐집니다.</p>
     <ul class="file-list" id="list"></ul>
 
     <div class="stats">
-      <div class="stat"><span class="num" id="t-files">0</span><span class="lbl">파일</span></div>
-      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl">전체 페이지</span></div>
-      <div class="stat"><span class="num" id="t-size">0</span><span class="lbl">합계 용량</span></div>
+      <div class="stat"><span class="num" id="t-files">0</span><span class="lbl" data-i18n="merge.files">파일</span></div>
+      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl" data-i18n="merge.pages">전체 페이지</span></div>
+      <div class="stat"><span class="num" id="t-size">0</span><span class="lbl" data-i18n="merge.size">합계 용량</span></div>
     </div>
 
     <div class="btn-row">
-      <button class="btn" id="btn-merge">PDF 합치기</button>
-      <button class="btn secondary" id="btn-reset">전체 삭제</button>
+      <button class="btn" id="btn-merge" data-i18n="merge.go">PDF 합치기</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="merge.clearAll">전체 삭제</button>
     </div>
   </div>
 
   <!-- 수익화 지점: Gumroad 상품 링크를 만든 뒤 href를 교체하세요 -->
-  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">
-    반대로 <strong style="color:var(--text)">PDF를 나누고 싶으시면</strong>
-    <a href="pdf-split.html">PDF 나누기</a>를, 사진을 문서로 묶으려면
-    <a href="img-to-pdf.html">이미지 PDF 변환</a>을 쓰세요. 둘 다 무료입니다.
-  </p>
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="merge.cross">반대로 <strong style="color:var(--text)">PDF를 나누고 싶으시면</strong> <a href="pdf-split.html">PDF 나누기</a>를, 사진을 문서로 묶으려면 <a href="img-to-pdf.html">이미지 PDF 변환</a>을 쓰세요. 둘 다 무료입니다.</p>
 
   <div class="upsell">
-    <h3>폴더 안의 PDF 수백 개를 규칙대로 자동 처리하려면</h3>
-    <p>데스크톱 버전은 폴더를 통째로 읽어 파일명 규칙에 따라 자동으로 묶고, 페이지 회전·용량 압축까지 한 번에 처리합니다. 브라우저를 열어둘 필요가 없습니다.</p>
-    <a class="btn" href="#" id="upsell-link">일괄 처리 버전 보기</a>
+    <h3 data-i18n="merge.upsellH">폴더 안의 PDF 수백 개를 규칙대로 자동 처리하려면</h3>
+    <p data-i18n="merge.upsellP">데스크톱 버전은 폴더를 통째로 읽어 파일명 규칙에 따라 자동으로 묶고, 페이지 회전·용량 압축까지 한 번에 처리합니다. 브라우저를 열어둘 필요가 없습니다.</p>
+    <a class="btn" href="#" id="upsell-link" data-i18n="merge.upsellB">일괄 처리 버전 보기</a>
   </div>
 
   <div class="ad-slot"><!-- AD:PDF --></div>
 
-  <h2>자주 묻는 질문</h2>
-  <div class="faq">
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
     <details>
       <summary>파일이 서버로 올라가나요?</summary>
       <p>아니요. 병합은 브라우저 안에서만 이뤄지며 파일은 외부로 전송되지 않습니다. 회사 문서를 다룰 때 특히 안전합니다.</p>

@@ -1,0 +1,215 @@
+use strict; use warnings; use utf8;
+binmode(STDOUT, ':utf8');
+
+# [파일 => [본문 title 키, [ [번역키, 요소의 정확한 내부 텍스트], ... ] ]]
+my %PAGES = (
+ 'image-crop.html' => ['crop.title', [
+   ['crop.h1','이미지 자르기'],
+   ['crop.lead','필요한 영역만 잘라내고 회전·좌우반전까지 한 번에 처리합니다.'],
+   ['badge.file','🔒 사진이 서버로 업로드되지 않습니다'],
+   ['crop.drop','사진을 끌어다 놓거나 클릭해서 선택하세요'],
+   ['crop.drop2','JPG · PNG · WebP · GIF · BMP'],
+   ['crop.ratio','비율 고정'],
+   ['crop.ratioFree','자유롭게'],
+   ['crop.ratio11','1:1 (정사각형 · 프로필)'],
+   ['crop.ratio169','16:9 (와이드)'],
+   ['crop.ratio43','4:3'],
+   ['crop.ratio34','3:4 (세로)'],
+   ['crop.ratio916','9:16 (세로 영상)'],
+   ['crop.rotL','↺ 왼쪽 90°'],
+   ['crop.rotR','↻ 오른쪽 90°'],
+   ['crop.flip','좌우 반전'],
+   ['crop.resetBox','선택 초기화'],
+   ['crop.orig','원본 크기'],
+   ['crop.crop','잘라낼 크기'],
+   ['crop.fmt','저장 형식'],
+   ['crop.fmtPng','PNG (화질 손실 없음)'],
+   ['crop.fmtJpg','JPG (용량 작음)'],
+   ['crop.fmtWebp','WebP'],
+   ['crop.save','잘라서 저장'],
+   ['crop.other','다른 사진 열기'],
+ ]],
+ 'img-to-pdf.html' => ['i2p.title', [
+   ['i2p.h1','이미지 PDF 변환'],
+   ['i2p.lead','사진 여러 장을 원하는 순서대로 하나의 PDF 문서로 만듭니다.'],
+   ['badge.file','🔒 사진이 서버로 업로드되지 않습니다'],
+   ['i2p.drop','사진을 끌어다 놓거나 클릭해서 선택하세요'],
+   ['i2p.drop2','JPG · PNG · WebP · GIF · BMP · 여러 장 동시 선택 가능'],
+   ['i2p.pagesize','페이지 크기'],
+   ['i2p.psFit','사진 크기에 맞춤 (여백 없음)'],
+   ['i2p.psA4p','A4 세로'],
+   ['i2p.psA4l','A4 가로'],
+   ['i2p.psHint','A4를 고르면 사진 비율을 유지한 채 페이지 안에 맞춰 넣습니다.'],
+   ['i2p.margin','여백'],
+   ['i2p.mNone','없음'],
+   ['i2p.mNormal','보통'],
+   ['i2p.mWide','넓게'],
+   ['i2p.orderH','순서'],
+   ['i2p.orderHint','끌어서 옮기거나 화살표로 순서를 바꾸세요. 위에서 아래 순서로 페이지가 만들어집니다.'],
+   ['i2p.count','사진'],
+   ['i2p.size','합계 용량'],
+   ['i2p.make','PDF로 만들기'],
+   ['merge.clearAll','전체 삭제'],
+ ]],
+ 'char-count.html' => ['char.title', [
+   ['char.h1','글자수 세기 · 원고지 매수 계산기'],
+   ['char.lead','글을 붙여넣으면 글자수·단어수·바이트·원고지 매수를 실시간으로 계산합니다.'],
+   ['badge.text','🔒 입력한 글은 어디로도 전송되지 않습니다'],
+   ['char.all','공백 포함'],
+   ['char.nospace','공백 제외'],
+   ['char.words','단어'],
+   ['char.para','문단'],
+   ['char.manu','원고지(200자)'],
+   ['char.label','텍스트 입력'],
+   ['char.clear','지우기'],
+   ['char.copy','복사'],
+   ['char.detail','자세한 정보'],
+ ]],
+ 'pdf-merge.html' => ['merge.title', [
+   ['merge.h1','PDF 합치기'],
+   ['merge.lead','여러 개의 PDF를 원하는 순서로 배치해 하나의 파일로 합칩니다. 용량 제한도 워터마크도 없습니다.'],
+   ['badge.file','🔒 파일이 서버로 업로드되지 않습니다'],
+   ['merge.drop','PDF를 끌어다 놓거나 클릭해서 선택하세요'],
+   ['merge.drop2','여러 개를 한 번에 선택할 수 있습니다'],
+   ['merge.orderH','합칠 순서'],
+   ['merge.orderHint','항목을 끌어서 옮기거나 화살표 버튼으로 순서를 바꾸세요. 위에서 아래 순서로 합쳐집니다.'],
+   ['merge.files','파일'],
+   ['merge.pages','전체 페이지'],
+   ['merge.size','합계 용량'],
+   ['merge.go','PDF 합치기'],
+   ['merge.clearAll','전체 삭제'],
+   ['merge.upsellH','폴더 안의 PDF 수백 개를 규칙대로 자동 처리하려면'],
+   ['merge.upsellB','일괄 처리 버전 보기'],
+ ]],
+ 'pdf-split.html' => ['split.title', [
+   ['split.h1','PDF 나누기'],
+   ['split.lead','필요한 페이지만 뽑아내거나, 모든 페이지를 낱장 파일로 나눕니다.'],
+   ['badge.file','🔒 파일이 서버로 업로드되지 않습니다'],
+   ['split.drop','PDF를 끌어다 놓거나 클릭해서 선택하세요'],
+   ['split.drop2','한 번에 한 개의 파일을 나눕니다'],
+   ['split.pages','전체 페이지'],
+   ['split.size','용량'],
+   ['split.pick','선택된 페이지'],
+   ['split.mode','방식'],
+   ['split.mRange','원하는 페이지만 뽑아서 하나의 PDF로'],
+   ['split.mEach','모든 페이지를 낱장 PDF로 나누기'],
+   ['split.range','뽑을 페이지'],
+   ['split.go','나누기'],
+   ['btn.reset','초기화'],
+ ]],
+ 'file-convert.html' => ['conv.title', [
+   ['conv.h1','CSV · JSON · 엑셀 변환'],
+   ['conv.lead','표 형식 파일을 원하는 형식으로 바꿔줍니다. 한글이 깨지지 않도록 처리합니다.'],
+   ['badge.file','🔒 파일이 서버로 업로드되지 않습니다'],
+   ['conv.drop','파일을 끌어다 놓거나 클릭해서 선택하세요'],
+   ['conv.drop2','CSV · JSON · XLSX · XLS · TSV'],
+   ['conv.rows','행'],
+   ['conv.cols','열'],
+   ['conv.from','원본 형식'],
+   ['conv.sheet','시트 선택'],
+   ['conv.target','변환할 형식'],
+   ['conv.tCsv','CSV (엑셀에서 바로 열림)'],
+   ['conv.tJson','JSON'],
+   ['conv.tXlsx','엑셀 (XLSX)'],
+   ['conv.targetHint','CSV로 저장하면 한글이 깨지지 않도록 UTF-8 BOM을 자동으로 넣습니다.'],
+   ['conv.go','변환해서 저장'],
+   ['btn.reset','초기화'],
+ ]],
+ 'qr-generate.html' => ['qr.title', [
+   ['qr.h1','QR코드 만들기'],
+   ['qr.lead','주소나 문자를 입력하면 QR코드가 바로 만들어집니다. PNG로 저장해 어디에나 쓰세요.'],
+   ['badge.text','🔒 입력한 내용이 서버로 전송되지 않습니다'],
+   ['qr.content','내용 (주소 또는 문자)'],
+   ['qr.size','크기'],
+   ['qr.sizePrint','1024px (인쇄용)'],
+   ['qr.sizeBig','2048px (대형 인쇄)'],
+   ['qr.ecl','오류 복원 수준'],
+   ['qr.eclL','L — 낮음 (가장 단순)'],
+   ['qr.eclM','M — 보통 (권장)'],
+   ['qr.eclQ','Q — 높음'],
+   ['qr.eclH','H — 최고 (로고 삽입용)'],
+   ['qr.margin','여백'],
+   ['qr.mNone','없음'],
+   ['qr.mNarrow','좁게'],
+   ['qr.mNormal','보통 (권장)'],
+   ['qr.mWide','넓게'],
+   ['qr.fg','QR 색상'],
+   ['qr.bg','배경 색상'],
+   ['qr.placeholder','내용을 입력하면 여기에 QR코드가 나타납니다'],
+   ['qr.savePng','PNG로 저장'],
+   ['qr.copyImg','이미지 복사'],
+ ]],
+ 'unit-convert.html' => ['unit.title', [
+   ['unit.h1','단위 변환기'],
+   ['unit.lead','값 하나만 넣으면 같은 종류의 모든 단위로 한 번에 변환됩니다.'],
+   ['unit.cat','종류'],
+   ['unit.cArea','넓이 (평 · 제곱미터)'],
+   ['unit.cLength','길이 (cm · 인치 · 자)'],
+   ['unit.cWeight','무게 (kg · 파운드 · 근)'],
+   ['unit.cVolume','부피 (리터 · 되 · 갤런)'],
+   ['unit.cTemp','온도 (섭씨 · 화씨)'],
+   ['unit.cSpeed','속도 (km/h · mph)'],
+   ['unit.cData','데이터 (MB · GB)'],
+   ['unit.val','값'],
+   ['unit.unit','단위'],
+ ]],
+ 'date-calc.html' => ['date.title', [
+   ['date.h1','날짜 계산기'],
+   ['date.lead','디데이, 두 날짜 사이 일수, 날짜 더하기·빼기를 한 곳에서 계산합니다.'],
+   ['date.ddayH','디데이 계산'],
+   ['date.target','목표 날짜'],
+   ['date.pickTarget','목표 날짜를 고르세요'],
+   ['date.weeks','주 단위'],
+   ['date.dow','그날의 요일'],
+   ['date.betweenH','두 날짜 사이 일수'],
+   ['date.from','시작 날짜'],
+   ['date.to','끝 날짜'],
+   ['date.days','일수'],
+   ['date.weeksLbl','주'],
+   ['date.ym','년/개월'],
+   ['date.addH','날짜 더하기 · 빼기'],
+   ['date.base','기준 날짜'],
+   ['date.delta','일수'],
+   ['date.op','연산'],
+   ['date.opAdd','더하기 (이후)'],
+   ['date.opSub','빼기 (이전)'],
+   ['date.result','결과 날짜'],
+   ['date.dow','요일'],
+ ]],
+ 'age-calc.html' => ['age.title', [
+   ['age.h1','만 나이 계산기'],
+   ['age.lead','생년월일만 넣으면 만 나이·세는 나이·연 나이를 한 번에 계산합니다.'],
+   ['age.birth','생년월일'],
+   ['age.full','만 나이 (공식)'],
+   ['age.korean','세는 나이'],
+   ['age.year','연 나이'],
+   ['age.detail','자세한 정보'],
+ ]],
+);
+
+for my $f (sort keys %PAGES) {
+  open(my $in, '<:raw', $f) or die "$f: $!";
+  local $/; my $c = <$in>; close $in;
+  utf8::decode($c); $c =~ s/\r\n/\n/g;
+
+  my ($titleKey, $items) = @{$PAGES{$f}};
+  $c =~ s{<body>}{<body data-i18n-title="$titleKey">};
+
+  my $hit = 0; my @miss;
+  for my $it (@$items) {
+    my ($key, $txt) = @$it;
+    # 여는 태그와 닫는 태그 사이의 내부 텍스트가 정확히 일치하는 요소를 찾아 속성을 붙인다
+    if ($c =~ s{<(\w+)((?:[^<>"]|"[^"]*")*?)>\Q$txt\E</\1>}
+               {<$1$2 data-i18n="$key">$txt</$1>}) { $hit++; }
+    else { push @miss, $key; }
+  }
+
+  # FAQ는 아직 번역 전이므로 한국어일 때만 표시한다
+  $c =~ s{<h2>자주 묻는 질문</h2>\n  <div class="faq">}
+         {<h2 data-ko-only>자주 묻는 질문</h2>\n  <div class="faq" data-ko-only>};
+
+  utf8::encode($c);
+  open(my $o, '>:raw', $f) or die; print $o $c; close $o;
+  printf("%-22s 적용 %2d/%2d%s\n", $f, $hit, scalar(@$items),
+         @miss ? '   누락: ' . join(', ', @miss) : '');
+}

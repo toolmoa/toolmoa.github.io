@@ -16,7 +16,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"QR코드 만들기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
 </head>
-<body>
+<body data-i18n-title="qr.title">
 
 <header class="site-header">
   <div class="wrap">
@@ -38,51 +38,51 @@
 </header>
 
 <main class="wrap">
-  <h1>QR코드 만들기</h1>
-  <p class="lead">주소나 문자를 입력하면 QR코드가 바로 만들어집니다. PNG로 저장해 어디에나 쓰세요.</p>
-  <span class="privacy-badge">🔒 입력한 내용이 서버로 전송되지 않습니다</span>
+  <h1 data-i18n="qr.h1">QR코드 만들기</h1>
+  <p class="lead" data-i18n="qr.lead">주소나 문자를 입력하면 QR코드가 바로 만들어집니다. PNG로 저장해 어디에나 쓰세요.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 내용이 서버로 전송되지 않습니다</span>
 
   <div class="card">
     <div class="field">
-      <label for="text">내용 (주소 또는 문자)</label>
-      <textarea id="text" style="min-height:90px" placeholder="https://example.com 또는 원하는 문구를 입력하세요">https://</textarea>
+      <label for="text" data-i18n="qr.content">내용 (주소 또는 문자)</label>
+      <textarea id="text" style="min-height:90px" placeholder="https://example.com 또는 원하는 문구를 입력하세요" data-i18n-ph="qr.ph">https://</textarea>
       <div class="hint">웹 주소는 <code>https://</code>로 시작해야 스캔 시 바로 열립니다.</div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
       <div class="field">
-        <label for="size">크기</label>
+        <label for="size" data-i18n="qr.size">크기</label>
         <select id="size">
           <option value="256">256px</option>
           <option value="512" selected>512px</option>
-          <option value="1024">1024px (인쇄용)</option>
-          <option value="2048">2048px (대형 인쇄)</option>
+          <option value="1024" data-i18n="qr.sizePrint">1024px (인쇄용)</option>
+          <option value="2048" data-i18n="qr.sizeBig">2048px (대형 인쇄)</option>
         </select>
       </div>
       <div class="field">
-        <label for="ecl">오류 복원 수준</label>
+        <label for="ecl" data-i18n="qr.ecl">오류 복원 수준</label>
         <select id="ecl">
-          <option value="L">L — 낮음 (가장 단순)</option>
-          <option value="M" selected>M — 보통 (권장)</option>
-          <option value="Q">Q — 높음</option>
-          <option value="H">H — 최고 (로고 삽입용)</option>
+          <option value="L" data-i18n="qr.eclL">L — 낮음 (가장 단순)</option>
+          <option value="M" selected data-i18n="qr.eclM">M — 보통 (권장)</option>
+          <option value="Q" data-i18n="qr.eclQ">Q — 높음</option>
+          <option value="H" data-i18n="qr.eclH">H — 최고 (로고 삽입용)</option>
         </select>
       </div>
       <div class="field">
-        <label for="margin">여백</label>
+        <label for="margin" data-i18n="qr.margin">여백</label>
         <select id="margin">
-          <option value="0">없음</option>
-          <option value="2">좁게</option>
-          <option value="4" selected>보통 (권장)</option>
-          <option value="8">넓게</option>
+          <option value="0" data-i18n="qr.mNone">없음</option>
+          <option value="2" data-i18n="qr.mNarrow">좁게</option>
+          <option value="4" selected data-i18n="qr.mNormal">보통 (권장)</option>
+          <option value="8" data-i18n="qr.mWide">넓게</option>
         </select>
       </div>
       <div class="field">
-        <label for="fg">QR 색상</label>
+        <label for="fg" data-i18n="qr.fg">QR 색상</label>
         <input type="color" id="fg" value="#000000" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
       </div>
       <div class="field">
-        <label for="bg">배경 색상</label>
+        <label for="bg" data-i18n="qr.bg">배경 색상</label>
         <input type="color" id="bg" value="#ffffff" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
       </div>
     </div>
@@ -92,13 +92,13 @@
   <div id="msg"></div>
 
   <div class="card" style="text-align:center">
-    <div id="placeholder" style="padding:56px 20px;border:2px dashed var(--border);border-radius:8px;color:var(--muted);font-size:14px">
+    <div id="placeholder" style="padding:56px 20px;border:2px dashed var(--border);border-radius:8px;color:var(--muted);font-size:14px" data-i18n="qr.placeholder">
       내용을 입력하면 여기에 QR코드가 나타납니다
     </div>
     <canvas id="canvas" style="max-width:300px;width:100%;height:auto;border-radius:8px" hidden></canvas>
     <div class="btn-row" style="justify-content:center;margin-top:16px">
-      <button class="btn" id="btn-png" disabled>PNG로 저장</button>
-      <button class="btn secondary" id="btn-copy" disabled>이미지 복사</button>
+      <button class="btn" id="btn-png" disabled data-i18n="qr.savePng">PNG로 저장</button>
+      <button class="btn secondary" id="btn-copy" disabled data-i18n="qr.copyImg">이미지 복사</button>
     </div>
     <div class="hint" id="copy-msg"></div>
     <div class="hint" id="size-note"></div>
@@ -106,8 +106,8 @@
 
   <div class="ad-slot"><!-- AD:QR --></div>
 
-  <h2>어디에 쓰나요</h2>
-  <div class="card">
+  <h2 data-ko-only>어디에 쓰나요</h2>
+  <div class="card" data-ko-only>
     <p style="margin:0;color:var(--muted);font-size:14px">
       명함이나 전단지에 웹사이트 주소를 넣을 때, 매장에 메뉴판·설문 링크를 붙일 때,
       와이파이 정보나 연락처를 빠르게 전달할 때 씁니다.
@@ -116,8 +116,8 @@
     </p>
   </div>
 
-  <h2>자주 묻는 질문</h2>
-  <div class="faq">
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
     <details>
       <summary>만든 QR코드가 나중에 만료되나요?</summary>
       <p>아니요. 여기서 만드는 QR은 내용을 그림 안에 직접 담는 정적 QR이라 영구히 작동합니다. 중간에 거치는 서버가 없어서 서비스가 닫혀도 영향이 없습니다.</p>

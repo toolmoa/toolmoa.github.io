@@ -16,7 +16,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"CSV JSON 엑셀 변환기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
 </head>
-<body>
+<body data-i18n-title="conv.title">
 
 <header class="site-header">
   <div class="wrap">
@@ -38,14 +38,14 @@
 </header>
 
 <main class="wrap">
-  <h1>CSV · JSON · 엑셀 변환</h1>
-  <p class="lead">표 형식 파일을 원하는 형식으로 바꿔줍니다. 한글이 깨지지 않도록 처리합니다.</p>
-  <span class="privacy-badge">🔒 파일이 서버로 업로드되지 않습니다</span>
+  <h1 data-i18n="conv.h1">CSV · JSON · 엑셀 변환</h1>
+  <p class="lead" data-i18n="conv.lead">표 형식 파일을 원하는 형식으로 바꿔줍니다. 한글이 깨지지 않도록 처리합니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 파일이 서버로 업로드되지 않습니다</span>
 
   <div class="dropzone" id="dz">
     <span class="dz-icon">🔄</span>
-    <span class="dz-main">파일을 끌어다 놓거나 클릭해서 선택하세요</span>
-    <span class="dz-sub">CSV · JSON · XLSX · XLS · TSV</span>
+    <span class="dz-main" data-i18n="conv.drop">파일을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="conv.drop2">CSV · JSON · XLSX · XLS · TSV</span>
     <input type="file" id="file" accept=".csv,.json,.xlsx,.xls,.tsv,.txt">
   </div>
 
@@ -53,30 +53,30 @@
 
   <div id="area" hidden>
     <div class="stats">
-      <div class="stat"><span class="num" id="t-rows">0</span><span class="lbl">행</span></div>
-      <div class="stat"><span class="num" id="t-cols">0</span><span class="lbl">열</span></div>
-      <div class="stat"><span class="num" id="t-from" style="font-size:18px">-</span><span class="lbl">원본 형식</span></div>
+      <div class="stat"><span class="num" id="t-rows">0</span><span class="lbl" data-i18n="conv.rows">행</span></div>
+      <div class="stat"><span class="num" id="t-cols">0</span><span class="lbl" data-i18n="conv.cols">열</span></div>
+      <div class="stat"><span class="num" id="t-from" style="font-size:18px">-</span><span class="lbl" data-i18n="conv.from">원본 형식</span></div>
     </div>
 
     <div class="card">
       <div class="field" id="sheet-field" hidden>
-        <label for="sheet">시트 선택</label>
+        <label for="sheet" data-i18n="conv.sheet">시트 선택</label>
         <select id="sheet"></select>
       </div>
       <div class="field" style="margin-bottom:0">
-        <label for="target">변환할 형식</label>
+        <label for="target" data-i18n="conv.target">변환할 형식</label>
         <select id="target">
-          <option value="csv">CSV (엑셀에서 바로 열림)</option>
-          <option value="json">JSON</option>
-          <option value="xlsx">엑셀 (XLSX)</option>
+          <option value="csv" data-i18n="conv.tCsv">CSV (엑셀에서 바로 열림)</option>
+          <option value="json" data-i18n="conv.tJson">JSON</option>
+          <option value="xlsx" data-i18n="conv.tXlsx">엑셀 (XLSX)</option>
         </select>
-        <div class="hint">CSV로 저장하면 한글이 깨지지 않도록 UTF-8 BOM을 자동으로 넣습니다.</div>
+        <div class="hint" data-i18n="conv.targetHint">CSV로 저장하면 한글이 깨지지 않도록 UTF-8 BOM을 자동으로 넣습니다.</div>
       </div>
     </div>
 
     <div class="btn-row">
-      <button class="btn" id="btn-convert">변환해서 저장</button>
-      <button class="btn secondary" id="btn-reset">초기화</button>
+      <button class="btn" id="btn-convert" data-i18n="conv.go">변환해서 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
     </div>
 
     <h2>미리보기 <span class="hint" style="font-weight:400">(앞 20행)</span></h2>
@@ -87,8 +87,8 @@
 
   <div class="ad-slot"><!-- AD:CONVERT --></div>
 
-  <h2>한글이 깨지는 이유</h2>
-  <div class="card">
+  <h2 data-ko-only>한글이 깨지는 이유</h2>
+  <div class="card" data-ko-only>
     <p style="margin:0;color:var(--muted);font-size:14px">
       엑셀은 CSV를 열 때 파일 앞부분에 <strong style="color:var(--text)">BOM</strong>이라는 표시가 없으면
       한글을 UTF-8이 아닌 다른 방식으로 해석해 <code>ìƒ˜í"Œ</code> 같은 글자로 보여줍니다.
@@ -96,8 +96,8 @@
     </p>
   </div>
 
-  <h2>자주 묻는 질문</h2>
-  <div class="faq">
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
     <details>
       <summary>파일이 서버로 올라가나요?</summary>
       <p>아니요. 변환은 브라우저 안에서만 이뤄지며 파일은 외부로 전송되지 않습니다.</p>

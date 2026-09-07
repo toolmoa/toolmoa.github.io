@@ -16,7 +16,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"이미지 PDF 변환","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
 </head>
-<body>
+<body data-i18n-title="i2p.title">
 
 <header class="site-header">
   <div class="wrap">
@@ -38,14 +38,14 @@
 </header>
 
 <main class="wrap">
-  <h1>이미지 PDF 변환</h1>
-  <p class="lead">사진 여러 장을 원하는 순서대로 하나의 PDF 문서로 만듭니다.</p>
-  <span class="privacy-badge">🔒 사진이 서버로 업로드되지 않습니다</span>
+  <h1 data-i18n="i2p.h1">이미지 PDF 변환</h1>
+  <p class="lead" data-i18n="i2p.lead">사진 여러 장을 원하는 순서대로 하나의 PDF 문서로 만듭니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
 
   <div class="dropzone" id="dz">
     <span class="dz-icon">🖨️</span>
-    <span class="dz-main">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
-    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · 여러 장 동시 선택 가능</span>
+    <span class="dz-main" data-i18n="i2p.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="i2p.drop2">JPG · PNG · WebP · GIF · BMP · 여러 장 동시 선택 가능</span>
     <input type="file" id="file" accept="image/*" multiple>
   </div>
 
@@ -54,43 +54,43 @@
   <div id="area" hidden>
     <div class="card">
       <div class="field">
-        <label for="pagesize">페이지 크기</label>
+        <label for="pagesize" data-i18n="i2p.pagesize">페이지 크기</label>
         <select id="pagesize">
-          <option value="fit">사진 크기에 맞춤 (여백 없음)</option>
-          <option value="a4p" selected>A4 세로</option>
-          <option value="a4l">A4 가로</option>
+          <option value="fit" data-i18n="i2p.psFit">사진 크기에 맞춤 (여백 없음)</option>
+          <option value="a4p" selected data-i18n="i2p.psA4p">A4 세로</option>
+          <option value="a4l" data-i18n="i2p.psA4l">A4 가로</option>
         </select>
-        <div class="hint">A4를 고르면 사진 비율을 유지한 채 페이지 안에 맞춰 넣습니다.</div>
+        <div class="hint" data-i18n="i2p.psHint">A4를 고르면 사진 비율을 유지한 채 페이지 안에 맞춰 넣습니다.</div>
       </div>
       <div class="field" style="margin-bottom:0">
-        <label for="margin">여백</label>
+        <label for="margin" data-i18n="i2p.margin">여백</label>
         <select id="margin">
-          <option value="0">없음</option>
-          <option value="20" selected>보통</option>
-          <option value="45">넓게</option>
+          <option value="0" data-i18n="i2p.mNone">없음</option>
+          <option value="20" selected data-i18n="i2p.mNormal">보통</option>
+          <option value="45" data-i18n="i2p.mWide">넓게</option>
         </select>
       </div>
     </div>
 
-    <h2 style="margin-bottom:6px">순서</h2>
-    <p class="hint" style="margin:0 0 12px">끌어서 옮기거나 화살표로 순서를 바꾸세요. 위에서 아래 순서로 페이지가 만들어집니다.</p>
+    <h2 style="margin-bottom:6px" data-i18n="i2p.orderH">순서</h2>
+    <p class="hint" style="margin:0 0 12px" data-i18n="i2p.orderHint">끌어서 옮기거나 화살표로 순서를 바꾸세요. 위에서 아래 순서로 페이지가 만들어집니다.</p>
     <ul class="file-list" id="list"></ul>
 
     <div class="stats">
-      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">사진</span></div>
-      <div class="stat"><span class="num" id="t-size">0</span><span class="lbl">합계 용량</span></div>
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl" data-i18n="i2p.count">사진</span></div>
+      <div class="stat"><span class="num" id="t-size">0</span><span class="lbl" data-i18n="i2p.size">합계 용량</span></div>
     </div>
 
     <div class="btn-row">
-      <button class="btn" id="btn-make">PDF로 만들기</button>
-      <button class="btn secondary" id="btn-reset">전체 삭제</button>
+      <button class="btn" id="btn-make" data-i18n="i2p.make">PDF로 만들기</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="merge.clearAll">전체 삭제</button>
     </div>
   </div>
 
   <div class="ad-slot"><!-- AD:IMGPDF --></div>
 
-  <h2>자주 묻는 질문</h2>
-  <div class="faq">
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
     <details>
       <summary>사진이 서버로 올라가나요?</summary>
       <p>아니요. 변환은 브라우저 안에서만 이뤄지며 파일은 외부로 전송되지 않습니다.</p>

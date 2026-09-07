@@ -16,7 +16,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"만 나이 계산기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
 </head>
-<body>
+<body data-i18n-title="age.title">
 
 <header class="site-header">
   <div class="wrap">
@@ -38,25 +38,25 @@
 </header>
 
 <main class="wrap">
-  <h1>만 나이 계산기</h1>
-  <p class="lead">생년월일만 넣으면 만 나이·세는 나이·연 나이를 한 번에 계산합니다.</p>
+  <h1 data-i18n="age.h1">만 나이 계산기</h1>
+  <p class="lead" data-i18n="age.lead">생년월일만 넣으면 만 나이·세는 나이·연 나이를 한 번에 계산합니다.</p>
 
   <div class="card">
     <div class="field" style="margin-bottom:0">
-      <label for="birth">생년월일</label>
+      <label for="birth" data-i18n="age.birth">생년월일</label>
       <input type="date" id="birth">
       <div class="hint">2023년 6월부터 법적·행정적으로는 <strong>만 나이</strong>가 기준입니다.</div>
     </div>
   </div>
 
   <div class="stats">
-    <div class="stat"><span class="num" id="a-full" style="font-size:34px;color:var(--accent)">-</span><span class="lbl">만 나이 (공식)</span></div>
-    <div class="stat"><span class="num" id="a-korean">-</span><span class="lbl">세는 나이</span></div>
-    <div class="stat"><span class="num" id="a-year">-</span><span class="lbl">연 나이</span></div>
+    <div class="stat"><span class="num" id="a-full" style="font-size:34px;color:var(--accent)">-</span><span class="lbl" data-i18n="age.full">만 나이 (공식)</span></div>
+    <div class="stat"><span class="num" id="a-korean">-</span><span class="lbl" data-i18n="age.korean">세는 나이</span></div>
+    <div class="stat"><span class="num" id="a-year">-</span><span class="lbl" data-i18n="age.year">연 나이</span></div>
   </div>
 
   <div class="card">
-    <h3 style="margin-top:0">자세한 정보</h3>
+    <h3 style="margin-top:0" data-i18n="age.detail">자세한 정보</h3>
     <table style="width:100%;border-collapse:collapse;font-size:14px">
       <tbody id="detail"></tbody>
     </table>
@@ -64,8 +64,8 @@
 
   <div class="ad-slot"><!-- AD:AGE --></div>
 
-  <h2>나이 세는 방법이 왜 세 가지인가요</h2>
-  <div class="card">
+  <h2 data-ko-only>나이 세는 방법이 왜 세 가지인가요</h2>
+  <div class="card" data-ko-only>
     <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
       <strong style="color:var(--text)">만 나이</strong>는 태어난 날을 0살로 보고 생일이 지날 때마다 한 살씩 더합니다.
       2023년 6월 28일부터 법령·계약·공문서의 기준이 되었습니다. 그냥 "나이"라고 하면 이걸 뜻합니다.
@@ -80,8 +80,8 @@
     </p>
   </div>
 
-  <h2>자주 묻는 질문</h2>
-  <div class="faq">
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
     <details>
       <summary>생일이 아직 안 지났으면 어떻게 되나요?</summary>
       <p>만 나이는 생일 전날까지 한 살 적습니다. 이 계산기는 그 점을 반영해 오늘 기준으로 정확히 계산합니다.</p>

@@ -32,7 +32,7 @@
 {"@context":"https://schema.org","@type":"WebApplication","name":"이미지 자르기","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
 </head>
-<body>
+<body data-i18n-title="crop.title">
 
 <header class="site-header">
   <div class="wrap">
@@ -54,14 +54,14 @@
 </header>
 
 <main class="wrap">
-  <h1>이미지 자르기</h1>
-  <p class="lead">필요한 영역만 잘라내고 회전·좌우반전까지 한 번에 처리합니다.</p>
-  <span class="privacy-badge">🔒 사진이 서버로 업로드되지 않습니다</span>
+  <h1 data-i18n="crop.h1">이미지 자르기</h1>
+  <p class="lead" data-i18n="crop.lead">필요한 영역만 잘라내고 회전·좌우반전까지 한 번에 처리합니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
 
   <div class="dropzone" id="dz">
     <span class="dz-icon">🔲</span>
-    <span class="dz-main">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
-    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP</span>
+    <span class="dz-main" data-i18n="crop.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="crop.drop2">JPG · PNG · WebP · GIF · BMP</span>
     <input type="file" id="file" accept="image/*">
   </div>
 
@@ -70,21 +70,21 @@
   <div id="area" hidden>
     <div class="card">
       <div class="field">
-        <label for="ratio">비율 고정</label>
+        <label for="ratio" data-i18n="crop.ratio">비율 고정</label>
         <select id="ratio">
-          <option value="0">자유롭게</option>
-          <option value="1">1:1 (정사각형 · 프로필)</option>
-          <option value="1.7777778">16:9 (와이드)</option>
-          <option value="1.3333333">4:3</option>
-          <option value="0.75">3:4 (세로)</option>
-          <option value="0.5625">9:16 (세로 영상)</option>
+          <option value="0" data-i18n="crop.ratioFree">자유롭게</option>
+          <option value="1" data-i18n="crop.ratio11">1:1 (정사각형 · 프로필)</option>
+          <option value="1.7777778" data-i18n="crop.ratio169">16:9 (와이드)</option>
+          <option value="1.3333333" data-i18n="crop.ratio43">4:3</option>
+          <option value="0.75" data-i18n="crop.ratio34">3:4 (세로)</option>
+          <option value="0.5625" data-i18n="crop.ratio916">9:16 (세로 영상)</option>
         </select>
       </div>
       <div class="btn-row" style="margin-bottom:0">
-        <button class="btn secondary small" id="rot-l">↺ 왼쪽 90°</button>
-        <button class="btn secondary small" id="rot-r">↻ 오른쪽 90°</button>
-        <button class="btn secondary small" id="flip-h">좌우 반전</button>
-        <button class="btn secondary small" id="reset-box">선택 초기화</button>
+        <button class="btn secondary small" id="rot-l" data-i18n="crop.rotL">↺ 왼쪽 90°</button>
+        <button class="btn secondary small" id="rot-r" data-i18n="crop.rotR">↻ 오른쪽 90°</button>
+        <button class="btn secondary small" id="flip-h" data-i18n="crop.flip">좌우 반전</button>
+        <button class="btn secondary small" id="reset-box" data-i18n="crop.resetBox">선택 초기화</button>
       </div>
     </div>
 
@@ -96,29 +96,29 @@
     </div>
 
     <div class="stats">
-      <div class="stat"><span class="num" id="t-orig" style="font-size:18px">-</span><span class="lbl">원본 크기</span></div>
-      <div class="stat"><span class="num" id="t-crop" style="font-size:18px">-</span><span class="lbl">잘라낼 크기</span></div>
+      <div class="stat"><span class="num" id="t-orig" style="font-size:18px">-</span><span class="lbl" data-i18n="crop.orig">원본 크기</span></div>
+      <div class="stat"><span class="num" id="t-crop" style="font-size:18px">-</span><span class="lbl" data-i18n="crop.crop">잘라낼 크기</span></div>
     </div>
 
     <div class="field">
-      <label for="fmt">저장 형식</label>
+      <label for="fmt" data-i18n="crop.fmt">저장 형식</label>
       <select id="fmt">
-        <option value="image/png">PNG (화질 손실 없음)</option>
-        <option value="image/jpeg">JPG (용량 작음)</option>
-        <option value="image/webp">WebP</option>
+        <option value="image/png" data-i18n="crop.fmtPng">PNG (화질 손실 없음)</option>
+        <option value="image/jpeg" data-i18n="crop.fmtJpg">JPG (용량 작음)</option>
+        <option value="image/webp" data-i18n="crop.fmtWebp">WebP</option>
       </select>
     </div>
 
     <div class="btn-row">
-      <button class="btn" id="btn-save">잘라서 저장</button>
-      <button class="btn secondary" id="btn-reset">다른 사진 열기</button>
+      <button class="btn" id="btn-save" data-i18n="crop.save">잘라서 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="crop.other">다른 사진 열기</button>
     </div>
   </div>
 
   <div class="ad-slot"><!-- AD:CROP --></div>
 
-  <h2>자주 묻는 질문</h2>
-  <div class="faq">
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
     <details>
       <summary>사진이 서버로 올라가나요?</summary>
       <p>아니요. 자르기와 회전 모두 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다.</p>
