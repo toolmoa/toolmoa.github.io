@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글자수 세기 · 원고지 매수 계산기 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="공백 포함/제외 글자수, 단어수, 바이트, 원고지 매수를 실시간으로 계산합니다. 자기소개서·과제·리포트 분량 확인에. 설치 없이 무료로 사용하세요.">
+<link rel="canonical" href="https://toolmoa.github.io/char-count.html">
+<meta property="og:title" content="글자수 세기 · 원고지 매수 계산기">
+<meta property="og:description" content="공백 포함/제외 글자수, 바이트, 원고지 매수를 실시간 계산">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"글자수 세기 · 원고지 매수 계산기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="char-count.html" aria-current="page">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>글자수 세기 · 원고지 매수 계산기</h1>
+  <p class="lead">글을 붙여넣으면 글자수·단어수·바이트·원고지 매수를 실시간으로 계산합니다.</p>
+  <span class="privacy-badge">🔒 입력한 글은 어디로도 전송되지 않습니다</span>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="s-all">0</span><span class="lbl">공백 포함</span></div>
+    <div class="stat"><span class="num" id="s-nospace">0</span><span class="lbl">공백 제외</span></div>
+    <div class="stat"><span class="num" id="s-words">0</span><span class="lbl">단어</span></div>
+    <div class="stat"><span class="num" id="s-para">0</span><span class="lbl">문단</span></div>
+    <div class="stat"><span class="num" id="s-manu">0</span><span class="lbl">원고지(200자)</span></div>
+  </div>
+
+  <div class="field">
+    <label for="ta">텍스트 입력</label>
+    <textarea id="ta" placeholder="여기에 글을 붙여넣으세요." spellcheck="false"></textarea>
+    <div class="btn-row">
+      <button class="btn secondary small" id="btn-clear">지우기</button>
+      <button class="btn secondary small" id="btn-copy">복사</button>
+      <span class="hint" id="copy-msg" style="align-self:center;margin:0"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">자세한 정보</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+      <tbody id="detail-table"></tbody>
+    </table>
+  </div>
+
+  <div class="ad-slot"><!-- AD:CHARCOUNT --></div>
+
+  <h2>이렇게 쓰면 좋습니다</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">자기소개서</strong>는 보통 공백 포함 글자수를 기준으로 제한합니다.
+      <strong style="color:var(--text)">과제·리포트</strong>는 원고지 매수(200자 기준)를 요구하는 경우가 많습니다.
+      <strong style="color:var(--text)">게시판·문자</strong>는 바이트 제한이 걸리는 경우가 있어 EUC-KR 바이트를 확인하세요.
+      한글 한 글자는 EUC-KR에서 2바이트, UTF-8에서 3바이트를 차지합니다.
+    </p>
+  </div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>공백 제외 글자수는 어떻게 계산하나요?</summary>
+      <p>띄어쓰기, 줄바꿈, 탭 등 모든 공백 문자를 뺀 글자수입니다. 자기소개서에서 "공백 제외"로 요구할 때 이 값을 보세요.</p>
+    </details>
+    <details>
+      <summary>원고지 매수는 어떤 기준인가요?</summary>
+      <p>일반적인 200자 원고지 기준입니다. 공백 포함 글자수를 200으로 나눈 값이며, 소수점 아래는 올림 처리합니다.</p>
+    </details>
+    <details>
+      <summary>왜 바이트가 두 가지로 나오나요?</summary>
+      <p>인코딩 방식이 다르기 때문입니다. 오래된 게시판이나 문자 메시지는 EUC-KR을, 최신 웹 서비스는 UTF-8을 씁니다.</p>
+    </details>
+    <details>
+      <summary>입력한 내용이 저장되나요?</summary>
+      <p>아니요. 브라우저 안에서만 계산되며 서버로 전송되지 않습니다. 탭을 닫으면 내용은 사라집니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var ta = document.getElementById('ta');
+  var fmt = function (n) { return n.toLocaleString('ko-KR'); };
+
+  // EUC-KR 바이트 추정: ASCII 1바이트, 그 외(한글/한자/전각) 2바이트
+  function eucKrBytes(s) {
+    var b = 0;
+    for (var i = 0; i < s.length; i++) {
+      b += s.charCodeAt(i) > 127 ? 2 : 1;
+    }
+    return b;
+  }
+
+  function update() {
+    var t = ta.value;
+    var all = Array.from(t).length;                       // 이모지 등 서로게이트쌍 안전 처리
+    var noSpace = Array.from(t.replace(/\s/g, '')).length;
+    var words = t.trim() ? t.trim().split(/\s+/).length : 0;
+    var lines = t === '' ? 0 : t.split(/\n/).length;
+    var paras = t.trim() ? t.trim().split(/\n\s*\n/).length : 0;
+    var manuscript = Math.ceil(all / 200);
+    var utf8 = new TextEncoder().encode(t).length;
+    var euckr = eucKrBytes(t);
+    var readMin = Math.max(t.trim() ? 1 : 0, Math.round(all / 500)); // 분당 약 500자
+
+    document.getElementById('s-all').textContent = fmt(all);
+    document.getElementById('s-nospace').textContent = fmt(noSpace);
+    document.getElementById('s-words').textContent = fmt(words);
+    document.getElementById('s-para').textContent = fmt(paras);
+    document.getElementById('s-manu').textContent = fmt(manuscript);
+
+    var rows = [
+      ['공백 포함 글자수', fmt(all) + '자'],
+      ['공백 제외 글자수', fmt(noSpace) + '자'],
+      ['공백 개수', fmt(all - noSpace) + '개'],
+      ['단어 수', fmt(words) + '개'],
+      ['줄 수', fmt(lines) + '줄'],
+      ['문단 수', fmt(paras) + '개'],
+      ['원고지 매수 (200자)', fmt(manuscript) + '매'],
+      ['UTF-8 바이트', fmt(utf8) + ' bytes'],
+      ['EUC-KR 바이트 (추정)', fmt(euckr) + ' bytes'],
+      ['예상 읽기 시간', readMin + '분']
+    ];
+    document.getElementById('detail-table').innerHTML = rows.map(function (r) {
+      return '<tr><td style="padding:9px 0;border-bottom:1px solid var(--border);color:var(--muted)">' + r[0] +
+             '</td><td style="padding:9px 0;border-bottom:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;font-weight:600">' + r[1] + '</td></tr>';
+    }).join('');
+  }
+
+  ta.addEventListener('input', update);
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    ta.value = ''; update(); ta.focus();
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var msg = document.getElementById('copy-msg');
+    if (!ta.value) { msg.textContent = '복사할 내용이 없습니다'; return; }
+    navigator.clipboard.writeText(ta.value).then(function () {
+      msg.textContent = '복사했습니다';
+      setTimeout(function () { msg.textContent = ''; }, 2000);
+    }).catch(function () {
+      msg.textContent = '복사에 실패했습니다';
+    });
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>

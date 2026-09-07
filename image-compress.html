@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 용량 줄이기 · 사진 크기 조절 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="사진 용량을 줄이고 크기를 조절하세요. JPG, PNG, WebP 지원. 여러 장 한 번에 처리하며 파일이 서버로 업로드되지 않습니다. 설치·회원가입 없이 무료.">
+<link rel="canonical" href="https://toolmoa.github.io/image-compress.html">
+<meta property="og:title" content="이미지 용량 줄이기 · 사진 크기 조절">
+<meta property="og:description" content="브라우저에서 바로 사진 용량을 줄이세요. 업로드 없이 안전하게.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"이미지 용량 줄이기","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" aria-current="page">이미지 압축</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>이미지 용량 줄이기</h1>
+  <p class="lead">사진의 화질과 크기를 조절해 용량을 줄입니다. 여러 장을 한 번에 처리할 수 있습니다.</p>
+  <span class="privacy-badge">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz">
+    <span class="dz-icon">🖼️</span>
+    <span class="dz-main">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · 여러 장 동시 선택 가능</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <div class="field">
+      <label for="quality">화질 <span id="q-val" style="color:var(--accent)">75%</span></label>
+      <input type="range" id="quality" min="10" max="100" value="75" step="5">
+      <div class="hint">낮출수록 용량이 줄지만 화질이 떨어집니다. 보통 70~80%가 적당합니다.</div>
+    </div>
+    <div class="field">
+      <label for="maxw">최대 가로 크기 (px)</label>
+      <select id="maxw">
+        <option value="0">원본 크기 유지</option>
+        <option value="1920">1920px (풀HD)</option>
+        <option value="1280">1280px (웹 게시용)</option>
+        <option value="1024">1024px</option>
+        <option value="800">800px (블로그용)</option>
+        <option value="640">640px</option>
+      </select>
+      <div class="hint">가로 기준으로 줄이며 세로는 비율에 맞춰 자동 조절됩니다. 원본보다 커지지는 않습니다.</div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label for="format">저장 형식</label>
+      <select id="format">
+        <option value="image/jpeg">JPG (사진에 적합, 용량 작음)</option>
+        <option value="image/webp">WebP (가장 용량이 작음)</option>
+        <option value="image/png">PNG (투명 배경 유지, 용량 큼)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="msg"></div>
+
+  <div id="result" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">처리한 장수</span></div>
+      <div class="stat"><span class="num" id="t-before">0</span><span class="lbl">원본 합계</span></div>
+      <div class="stat"><span class="num" id="t-after">0</span><span class="lbl">변환 후 합계</span></div>
+      <div class="stat"><span class="num" id="t-saved" style="color:var(--ok)">0%</span><span class="lbl">절약</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-all">모두 저장</button>
+      <button class="btn secondary" id="btn-reset">초기화</button>
+    </div>
+    <ul class="file-list" id="list"></ul>
+  </div>
+
+  <!-- 수익화 지점: Gumroad 상품 링크를 만든 뒤 href를 교체하세요 -->
+  <div class="upsell">
+    <h3>수백 장을 폴더째 한 번에 처리하려면</h3>
+    <p>데스크톱 일괄 처리 버전은 폴더를 통째로 넣으면 하위 폴더 구조를 유지한 채 전부 변환하고, 결과를 ZIP으로 묶어줍니다. 브라우저를 켜 둘 필요도 없습니다.</p>
+    <a class="btn" href="#" id="upsell-link">일괄 처리 버전 보기</a>
+  </div>
+
+  <div class="ad-slot"><!-- AD:IMAGE --></div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 브라우저 안에서만 변환되며 파일은 외부로 전송되지 않습니다. 인터넷을 끊어도 동작합니다.</p>
+    </details>
+    <details>
+      <summary>화질은 몇 %가 적당한가요?</summary>
+      <p>보통 70~80%면 눈으로 차이를 느끼기 어려우면서 용량은 절반 이하로 줄어듭니다. 인쇄용이라면 90% 이상을 권합니다.</p>
+    </details>
+    <details>
+      <summary>PNG를 골랐는데 용량이 더 커졌어요.</summary>
+      <p>PNG는 화질 손실이 없는 대신 사진에는 비효율적입니다. 사진이라면 JPG나 WebP를 선택하세요.</p>
+    </details>
+    <details>
+      <summary>투명 배경이 검게 변했어요.</summary>
+      <p>JPG는 투명도를 지원하지 않아 흰색으로 채워집니다. 투명 배경을 유지하려면 PNG 또는 WebP를 선택하세요.</p>
+    </details>
+    <details>
+      <summary>몇 장까지 한 번에 되나요?</summary>
+      <p>제한은 없지만 기기 메모리를 사용하므로 수십 장 이상은 나눠서 처리하시는 편이 안정적입니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">홈</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var quality = document.getElementById('quality');
+  var qVal = document.getElementById('q-val');
+  var maxwSel = document.getElementById('maxw');
+  var formatSel = document.getElementById('format');
+  var msg = document.getElementById('msg');
+  var resultBox = document.getElementById('result');
+  var list = document.getElementById('list');
+
+  var lastFiles = [];   // 설정 변경 시 재변환용
+  var results = [];     // {name, blob, url, before, after}
+
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+
+  quality.addEventListener('input', function () {
+    qVal.textContent = quality.value + '%';
+  });
+
+  // 설정을 바꾸면 이미 넣은 사진을 자동으로 다시 변환
+  [quality, maxwSel, formatSel].forEach(function (el) {
+    el.addEventListener('change', function () {
+      if (lastFiles.length) process(lastFiles);
+    });
+  });
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault();
+    dz.classList.remove('over');
+    handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type.indexOf('image/') === 0;
+    });
+    if (!files.length) { setMsg('이미지 파일을 선택해 주세요.', 'err'); return; }
+    lastFiles = files;
+    process(files);
+  }
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('열 수 없는 이미지')); };
+      img.src = url;
+    });
+  }
+
+  function convert(file) {
+    return loadImage(file).then(function (img) {
+      var maxw = parseInt(maxwSel.value, 10);
+      var w = img.naturalWidth, h = img.naturalHeight;
+      if (maxw && w > maxw) {           // 원본보다 키우지 않음
+        h = Math.round(h * (maxw / w));
+        w = maxw;
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      var type = formatSel.value;
+      if (type === 'image/jpeg') {      // JPG는 투명도가 없으므로 흰 배경을 깔아줌
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+
+      return new Promise(function (resolve) {
+        canvas.toBlob(function (blob) {
+          resolve({ blob: blob, w: w, h: h, type: type });
+        }, type, parseInt(quality.value, 10) / 100);
+      });
+    });
+  }
+
+  function newName(orig, type) {
+    var base = orig.replace(/\.[^.]+$/, '');
+    var ext = type === 'image/jpeg' ? 'jpg' : (type === 'image/webp' ? 'webp' : 'png');
+    return base + '_압축.' + ext;
+  }
+
+  function process(files) {
+    setMsg('변환 중입니다… (' + files.length + '장)');
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = [];
+
+    var jobs = files.map(function (f) {
+      return convert(f).then(function (out) {
+        return {
+          name: newName(f.name, out.type),
+          blob: out.blob,
+          url: URL.createObjectURL(out.blob),
+          before: f.size,
+          after: out.blob.size,
+          dim: out.w + '×' + out.h
+        };
+      }).catch(function () { return null; });
+    });
+
+    Promise.all(jobs).then(function (out) {
+      results = out.filter(Boolean);
+      if (!results.length) { setMsg('변환할 수 있는 이미지가 없습니다.', 'err'); return; }
+      setMsg('');
+      render();
+    });
+  }
+
+  function render() {
+    var before = results.reduce(function (s, r) { return s + r.before; }, 0);
+    var after = results.reduce(function (s, r) { return s + r.after; }, 0);
+    var savedPct = before ? Math.round((1 - after / before) * 100) : 0;
+
+    document.getElementById('t-count').textContent = results.length;
+    document.getElementById('t-before').textContent = humanSize(before);
+    document.getElementById('t-after').textContent = humanSize(after);
+    var savedEl = document.getElementById('t-saved');
+    savedEl.textContent = (savedPct >= 0 ? savedPct : 0) + '%';
+    savedEl.style.color = savedPct > 0 ? 'var(--ok)' : 'var(--warn)';
+
+    list.innerHTML = '';
+    results.forEach(function (r) {
+      var pct = r.before ? Math.round((1 - r.after / r.before) * 100) : 0;
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="fname" title="' + r.name + '">' + r.name + '</span>' +
+        '<span class="fmeta">' + r.dim + ' · ' + humanSize(r.before) + ' → ' + humanSize(r.after) + '</span>' +
+        '<span class="' + (pct > 0 ? 'saved' : 'fmeta') + '">' + (pct > 0 ? '−' + pct + '%' : '+' + Math.abs(pct) + '%') + '</span>';
+      var a = document.createElement('a');
+      a.className = 'btn small';
+      a.textContent = '저장';
+      a.href = r.url;
+      a.download = r.name;
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+
+    if (after > before) {
+      setMsg('변환 후 용량이 더 커졌습니다. 화질을 낮추거나 JPG·WebP 형식을 선택해 보세요.', 'err');
+    }
+    resultBox.hidden = false;
+  }
+
+  // 브라우저가 연속 다운로드를 막지 않도록 간격을 둠
+  document.getElementById('btn-all').addEventListener('click', function () {
+    results.forEach(function (r, i) {
+      setTimeout(function () {
+        var a = document.createElement('a');
+        a.href = r.url; a.download = r.name;
+        document.body.appendChild(a); a.click(); a.remove();
+      }, i * 350);
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = []; lastFiles = [];
+    fileInput.value = '';
+    list.innerHTML = '';
+    resultBox.hidden = true;
+    setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

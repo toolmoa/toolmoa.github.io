@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSV JSON 엑셀 변환기 - 무료 온라인 파일 변환 | 툴모아</title>
+<meta name="description" content="CSV, JSON, 엑셀(XLSX) 파일을 서로 변환합니다. 한글이 깨지지 않도록 UTF-8 BOM을 자동으로 넣어줍니다. 업로드 없이 브라우저에서 무료로 변환하세요.">
+<link rel="canonical" href="https://toolmoa.github.io/file-convert.html">
+<meta property="og:title" content="CSV · JSON · 엑셀 변환기">
+<meta property="og:description" content="표 형식 파일을 서로 변환. 한글 깨짐 없이, 업로드 없이.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔄</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"CSV JSON 엑셀 변환기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html" aria-current="page">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>CSV · JSON · 엑셀 변환</h1>
+  <p class="lead">표 형식 파일을 원하는 형식으로 바꿔줍니다. 한글이 깨지지 않도록 처리합니다.</p>
+  <span class="privacy-badge">🔒 파일이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz">
+    <span class="dz-icon">🔄</span>
+    <span class="dz-main">파일을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub">CSV · JSON · XLSX · XLS · TSV</span>
+    <input type="file" id="file" accept=".csv,.json,.xlsx,.xls,.tsv,.txt">
+  </div>
+
+  <div id="msg"></div>
+
+  <div id="area" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-rows">0</span><span class="lbl">행</span></div>
+      <div class="stat"><span class="num" id="t-cols">0</span><span class="lbl">열</span></div>
+      <div class="stat"><span class="num" id="t-from" style="font-size:18px">-</span><span class="lbl">원본 형식</span></div>
+    </div>
+
+    <div class="card">
+      <div class="field" id="sheet-field" hidden>
+        <label for="sheet">시트 선택</label>
+        <select id="sheet"></select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="target">변환할 형식</label>
+        <select id="target">
+          <option value="csv">CSV (엑셀에서 바로 열림)</option>
+          <option value="json">JSON</option>
+          <option value="xlsx">엑셀 (XLSX)</option>
+        </select>
+        <div class="hint">CSV로 저장하면 한글이 깨지지 않도록 UTF-8 BOM을 자동으로 넣습니다.</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-convert">변환해서 저장</button>
+      <button class="btn secondary" id="btn-reset">초기화</button>
+    </div>
+
+    <h2>미리보기 <span class="hint" style="font-weight:400">(앞 20행)</span></h2>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
+      <table id="preview" style="width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap"></table>
+    </div>
+  </div>
+
+  <div class="ad-slot"><!-- AD:CONVERT --></div>
+
+  <h2>한글이 깨지는 이유</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      엑셀은 CSV를 열 때 파일 앞부분에 <strong style="color:var(--text)">BOM</strong>이라는 표시가 없으면
+      한글을 UTF-8이 아닌 다른 방식으로 해석해 <code>ìƒ˜í"Œ</code> 같은 글자로 보여줍니다.
+      이 도구는 CSV를 저장할 때 BOM을 자동으로 넣기 때문에 엑셀에서 바로 열어도 한글이 정상적으로 나옵니다.
+    </p>
+  </div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>파일이 서버로 올라가나요?</summary>
+      <p>아니요. 변환은 브라우저 안에서만 이뤄지며 파일은 외부로 전송되지 않습니다.</p>
+    </details>
+    <details>
+      <summary>JSON은 어떤 형태여야 하나요?</summary>
+      <p>객체가 들어 있는 배열이어야 합니다. 예: <code>[{"이름":"홍길동","나이":30}]</code>. 깊게 중첩된 구조는 표로 바꿀 수 없어 문자열로 처리됩니다.</p>
+    </details>
+    <details>
+      <summary>엑셀 파일에 시트가 여러 개인데요?</summary>
+      <p>시트 선택 메뉴가 나타납니다. 원하는 시트를 고른 뒤 변환하세요. 한 번에 하나씩 변환됩니다.</p>
+    </details>
+    <details>
+      <summary>수식이나 서식도 유지되나요?</summary>
+      <p>값만 변환됩니다. 수식은 계산된 결과값으로, 셀 색상·글꼴 같은 서식은 유지되지 않습니다.</p>
+    </details>
+    <details>
+      <summary>파일 크기 제한이 있나요?</summary>
+      <p>서비스 제한은 없습니다. 다만 수십만 행 규모는 브라우저가 느려질 수 있습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script src="assets/vendor/xlsx.full.min.js"></script>
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var msg = document.getElementById('msg');
+  var area = document.getElementById('area');
+  var sheetField = document.getElementById('sheet-field');
+  var sheetSel = document.getElementById('sheet');
+
+  var workbook = null;   // 엑셀/CSV 경로
+  var rows = [];         // 현재 표 데이터 (객체 배열)
+  var baseName = 'converted';
+
+  function setMsg(t, cls) {
+    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files.length) load(fileInput.files[0]);
+  });
+
+  // 라이브러리가 아직 로드되지 않았으면 최대 8초까지 기다렸다가 실행한다
+  function whenReady(fn, tries) {
+    tries = (tries === undefined) ? 80 : tries;
+    if (typeof XLSX !== 'undefined') { fn(); return; }
+    if (tries <= 0) {
+      setMsg('변환 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.', 'err');
+      return;
+    }
+    setMsg('변환 기능을 준비하는 중입니다…');
+    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+  }
+
+  // CSV는 인코딩 정보가 파일에 없어서 직접 판별해야 한다.
+  // UTF-8 BOM → UTF-8 → (실패 시) EUC-KR 순으로 시도한다.
+  var detectedEnc = '';
+  function decodeText(u8) {
+    if (u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF) {
+      detectedEnc = 'UTF-8 (BOM)';
+      return new TextDecoder('utf-8').decode(u8.subarray(3));
+    }
+    try {
+      var s = new TextDecoder('utf-8', { fatal: true }).decode(u8);
+      detectedEnc = 'UTF-8';
+      return s;
+    } catch (e) {
+      detectedEnc = 'EUC-KR';
+      return new TextDecoder('euc-kr').decode(u8);
+    }
+  }
+
+  function load(file) { whenReady(function () { doLoad(file); }); }
+
+  function doLoad(file) {
+    baseName = file.name.replace(/\.[^.]+$/, '');
+    var ext = (file.name.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase();
+    setMsg('파일을 읽는 중입니다…');
+
+    if (ext === 'json') {
+      file.text().then(function (txt) {
+        var data;
+        try { data = JSON.parse(txt); }
+        catch (e) { setMsg('JSON 형식이 올바르지 않습니다. 파일 내용을 확인해 주세요.', 'err'); return; }
+
+        if (!Array.isArray(data)) {
+          // 최상위가 객체면 내부의 첫 배열을 찾아본다
+          var found = Object.keys(data).map(function (k) { return data[k]; })
+                            .filter(function (v) { return Array.isArray(v); })[0];
+          if (!found) { setMsg('객체가 들어 있는 배열 형태여야 표로 변환할 수 있습니다.', 'err'); return; }
+          data = found;
+        }
+        rows = data.map(function (r) {
+          if (r && typeof r === 'object' && !Array.isArray(r)) {
+            var flat = {};
+            Object.keys(r).forEach(function (k) {
+              var v = r[k];
+              flat[k] = (v !== null && typeof v === 'object') ? JSON.stringify(v) : v;
+            });
+            return flat;
+          }
+          return { 값: r };
+        });
+        workbook = null;
+        sheetField.hidden = true;
+        show('JSON');
+      });
+      return;
+    }
+
+    file.arrayBuffer().then(function (buf) {
+      var u8 = new Uint8Array(buf);
+      detectedEnc = '';
+      try {
+        if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
+          // 텍스트 계열은 인코딩을 판별해 문자열로 넘긴다 (한글 깨짐 방지)
+          workbook = XLSX.read(decodeText(u8), { type: 'string', cellDates: true, raw: false });
+        } else {
+          workbook = XLSX.read(u8, { type: 'array', cellDates: true, raw: false });
+        }
+      } catch (e) {
+        setMsg('파일을 열 수 없습니다. 손상되었거나 지원하지 않는 형식일 수 있습니다.', 'err');
+        return;
+      }
+      var names = workbook.SheetNames;
+      if (names.length > 1) {
+        sheetSel.innerHTML = names.map(function (n) {
+          return '<option value="' + n + '">' + n + '</option>';
+        }).join('');
+        sheetField.hidden = false;
+      } else {
+        sheetField.hidden = true;
+      }
+      readSheet(names[0]);
+      show(ext === 'csv' ? 'CSV' : (ext === 'tsv' ? 'TSV' : '엑셀'));
+    });
+  }
+
+  function readSheet(name) {
+    var ws = workbook.Sheets[name];
+    rows = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
+  }
+
+  sheetSel.addEventListener('change', function () {
+    readSheet(sheetSel.value);
+    show(document.getElementById('t-from').textContent);
+  });
+
+  function show(fromLabel) {
+    if (!rows.length) { setMsg('데이터가 비어 있습니다.', 'err'); return; }
+    if (detectedEnc === 'EUC-KR') {
+      setMsg('한글이 EUC-KR로 저장된 파일이라 자동으로 변환했습니다. CSV로 내보내면 UTF-8로 저장되어 더 이상 깨지지 않습니다.', 'ok');
+    } else {
+      setMsg('');
+    }
+    var cols = Object.keys(rows[0]);
+    document.getElementById('t-rows').textContent = rows.length.toLocaleString('ko-KR');
+    document.getElementById('t-cols').textContent = cols.length;
+    document.getElementById('t-from').textContent = fromLabel;
+
+    var head = '<thead><tr>' + cols.map(function (c) {
+      return '<th style="padding:9px 12px;border-bottom:2px solid var(--border);background:var(--surface-2);text-align:left;position:sticky;top:0">' + esc(c) + '</th>';
+    }).join('') + '</tr></thead>';
+    var body = '<tbody>' + rows.slice(0, 20).map(function (r) {
+      return '<tr>' + cols.map(function (c) {
+        return '<td style="padding:8px 12px;border-bottom:1px solid var(--border);max-width:260px;overflow:hidden;text-overflow:ellipsis">' + esc(r[c]) + '</td>';
+      }).join('') + '</tr>';
+    }).join('') + '</tbody>';
+    document.getElementById('preview').innerHTML = head + body;
+    area.hidden = false;
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+
+  document.getElementById('btn-convert').addEventListener('click', function () {
+    if (!rows.length) return;
+    var target = document.getElementById('target').value;
+
+    if (target === 'json') {
+      download(new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' }),
+               baseName + '.json');
+
+    } else if (target === 'csv') {
+      var ws = XLSX.utils.json_to_sheet(rows);
+      var csv = XLSX.utils.sheet_to_csv(ws);
+      // 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM을 붙인다
+      download(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }),
+               baseName + '.csv');
+
+    } else {
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'Sheet1');
+      var out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      download(new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+               baseName + '.xlsx');
+    }
+    setMsg('저장했습니다. (' + rows.length.toLocaleString('ko-KR') + '행)', 'ok');
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    rows = []; workbook = null; fileInput.value = '';
+    area.hidden = true; sheetField.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR코드 만들기 - 무료 QR 생성기 | 툴모아</title>
+<meta name="description" content="주소나 문자를 QR코드로 만들어 PNG로 저장하세요. 크기·색상·여백을 조절할 수 있고 워터마크가 없습니다. 설치·회원가입 없이 무료.">
+<link rel="canonical" href="https://toolmoa.github.io/qr-generate.html">
+<meta property="og:title" content="QR코드 만들기 - 무료 QR 생성기">
+<meta property="og:description" content="주소·문자를 QR코드로. 크기와 색상을 골라 PNG로 저장하세요.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔳</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"QR코드 만들기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html" aria-current="page">QR 만들기</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>QR코드 만들기</h1>
+  <p class="lead">주소나 문자를 입력하면 QR코드가 바로 만들어집니다. PNG로 저장해 어디에나 쓰세요.</p>
+  <span class="privacy-badge">🔒 입력한 내용이 서버로 전송되지 않습니다</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="text">내용 (주소 또는 문자)</label>
+      <textarea id="text" style="min-height:90px" placeholder="https://example.com 또는 원하는 문구를 입력하세요">https://</textarea>
+      <div class="hint">웹 주소는 <code>https://</code>로 시작해야 스캔 시 바로 열립니다.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+      <div class="field">
+        <label for="size">크기</label>
+        <select id="size">
+          <option value="256">256px</option>
+          <option value="512" selected>512px</option>
+          <option value="1024">1024px (인쇄용)</option>
+          <option value="2048">2048px (대형 인쇄)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ecl">오류 복원 수준</label>
+        <select id="ecl">
+          <option value="L">L — 낮음 (가장 단순)</option>
+          <option value="M" selected>M — 보통 (권장)</option>
+          <option value="Q">Q — 높음</option>
+          <option value="H">H — 최고 (로고 삽입용)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="margin">여백</label>
+        <select id="margin">
+          <option value="0">없음</option>
+          <option value="2">좁게</option>
+          <option value="4" selected>보통 (권장)</option>
+          <option value="8">넓게</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fg">QR 색상</label>
+        <input type="color" id="fg" value="#000000" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+      </div>
+      <div class="field">
+        <label for="bg">배경 색상</label>
+        <input type="color" id="bg" value="#ffffff" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+      </div>
+    </div>
+    <div class="hint" style="margin-top:-4px">QR 색상과 배경의 명암 차이가 작으면 스캔이 되지 않습니다. 어두운 QR + 밝은 배경 조합을 권합니다.</div>
+  </div>
+
+  <div id="msg"></div>
+
+  <div class="card" style="text-align:center">
+    <div id="placeholder" style="padding:56px 20px;border:2px dashed var(--border);border-radius:8px;color:var(--muted);font-size:14px">
+      내용을 입력하면 여기에 QR코드가 나타납니다
+    </div>
+    <canvas id="canvas" style="max-width:300px;width:100%;height:auto;border-radius:8px" hidden></canvas>
+    <div class="btn-row" style="justify-content:center;margin-top:16px">
+      <button class="btn" id="btn-png" disabled>PNG로 저장</button>
+      <button class="btn secondary" id="btn-copy" disabled>이미지 복사</button>
+    </div>
+    <div class="hint" id="copy-msg"></div>
+    <div class="hint" id="size-note"></div>
+  </div>
+
+  <div class="ad-slot"><!-- AD:QR --></div>
+
+  <h2>어디에 쓰나요</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      명함이나 전단지에 웹사이트 주소를 넣을 때, 매장에 메뉴판·설문 링크를 붙일 때,
+      와이파이 정보나 연락처를 빠르게 전달할 때 씁니다.
+      인쇄물에 쓸 거라면 <strong style="color:var(--text)">1024px 이상</strong>으로 저장하고,
+      실제 인쇄 크기는 최소 2cm 이상을 권합니다.
+    </p>
+  </div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>만든 QR코드가 나중에 만료되나요?</summary>
+      <p>아니요. 여기서 만드는 QR은 내용을 그림 안에 직접 담는 정적 QR이라 영구히 작동합니다. 중간에 거치는 서버가 없어서 서비스가 닫혀도 영향이 없습니다.</p>
+    </details>
+    <details>
+      <summary>오류 복원 수준은 뭘 고르나요?</summary>
+      <p>보통은 M이면 충분합니다. QR 가운데에 로고를 얹을 계획이라면 H를 선택해야 일부가 가려져도 인식됩니다.</p>
+    </details>
+    <details>
+      <summary>QR이 스캔되지 않아요.</summary>
+      <p>색상 대비가 부족하거나 여백이 없는 경우가 대부분입니다. 여백을 '보통'으로 두고, QR은 어둡게 배경은 밝게 설정해 보세요. 색을 반대로 넣으면(밝은 QR + 어두운 배경) 인식하지 못하는 기기가 많습니다.</p>
+    </details>
+    <details>
+      <summary>워터마크나 사용 제한이 있나요?</summary>
+      <p>없습니다. 상업적 용도로도 자유롭게 사용하세요.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="file-convert.html">파일 변환</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script src="assets/vendor/qrious.min.js"></script>
+<script>
+(function () {
+  var canvas = document.getElementById('canvas');
+  var msg = document.getElementById('msg');
+  var inputs = ['text', 'size', 'ecl', 'margin', 'fg', 'bg'].map(function (id) {
+    return document.getElementById(id);
+  });
+
+  function setMsg(t, cls) {
+    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  }
+
+  var placeholder = document.getElementById('placeholder');
+  var btnPng = document.getElementById('btn-png');
+  var btnCopy = document.getElementById('btn-copy');
+
+  function showQr(on) {
+    canvas.hidden = !on;
+    placeholder.hidden = on;
+    btnPng.disabled = !on;
+    btnCopy.disabled = !on;
+    document.getElementById('size-note').textContent =
+      on ? '실제 저장 크기: ' + canvas.width + '×' + canvas.height + 'px (화면에는 축소해 보여줍니다)' : '';
+  }
+
+  // 라이브러리가 늦게 도착할 수 있으므로 최대 8초까지 기다린다
+  function whenReady(fn, tries) {
+    tries = (tries === undefined) ? 80 : tries;
+    if (typeof QRious !== 'undefined') { fn(); return; }
+    if (tries <= 0) {
+      setMsg('QR 생성 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.', 'err');
+      return;
+    }
+    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+  }
+
+  function render() {
+    var text = document.getElementById('text').value.trim();
+    if (!text || text === 'https://') {
+      showQr(false);
+      setMsg('');
+      return;
+    }
+    whenReady(function () { draw(text); });
+  }
+
+  function draw(text) {
+    var size = parseInt(document.getElementById('size').value, 10);
+    // 선택한 여백 단계를 이미지 크기에 비례한 픽셀값으로 환산한다
+    var ratio = { 0: 0, 2: 0.04, 4: 0.08, 8: 0.14 }[document.getElementById('margin').value] || 0.08;
+    try {
+      new QRious({
+        element: canvas,
+        value: text,
+        size: size,
+        padding: Math.round(size * ratio),
+        level: document.getElementById('ecl').value,
+        foreground: document.getElementById('fg').value,
+        background: document.getElementById('bg').value
+      });
+      showQr(true);
+      setMsg('');
+    } catch (e) {
+      showQr(false);
+      setMsg('내용이 너무 길어 QR코드로 만들 수 없습니다. 글자 수를 줄이거나 오류 복원 수준을 L로 낮춰 보세요.', 'err');
+    }
+  }
+
+  inputs.forEach(function (el) {
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+
+  document.getElementById('btn-png').addEventListener('click', function () {
+    if (!canvas.width) return;
+    var a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'qrcode.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var out = document.getElementById('copy-msg');
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      out.textContent = '이 브라우저는 이미지 복사를 지원하지 않습니다. PNG로 저장해 주세요.';
+      return;
+    }
+    canvas.toBlob(function (blob) {
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function () {
+        out.textContent = '클립보드에 복사했습니다';
+        setTimeout(function () { out.textContent = ''; }, 2000);
+      }).catch(function () {
+        out.textContent = '복사에 실패했습니다. PNG로 저장해 주세요.';
+      });
+    });
+  });
+
+  // 라이브러리 로드 이후 최초 렌더
+  window.addEventListener('load', render);
+  render();
+})();
+</script>
+</body>
+</html>
