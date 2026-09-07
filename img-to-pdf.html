@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 PDF 변환 · 사진 PDF로 만들기 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="여러 장의 사진을 원하는 순서로 하나의 PDF로 만듭니다. JPG, PNG, HEIC 외 모든 이미지 지원. 파일이 서버로 올라가지 않아 안전하며 워터마크가 없습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/img-to-pdf.html">
+<meta property="og:title" content="이미지 PDF 변환 · 사진 PDF로 만들기">
+<meta property="og:description" content="사진 여러 장을 하나의 PDF로. 업로드 없이 브라우저에서 안전하게.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖨️</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"이미지 PDF 변환","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">이미지 압축</a>
+      <a href="img-to-pdf.html" aria-current="page">이미지→PDF</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR 만들기</a>
+      <a href="date-calc.html">날짜 계산</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>이미지 PDF 변환</h1>
+  <p class="lead">사진 여러 장을 원하는 순서대로 하나의 PDF 문서로 만듭니다.</p>
+  <span class="privacy-badge">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz">
+    <span class="dz-icon">🖨️</span>
+    <span class="dz-main">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · 여러 장 동시 선택 가능</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div id="msg"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="pagesize">페이지 크기</label>
+        <select id="pagesize">
+          <option value="fit">사진 크기에 맞춤 (여백 없음)</option>
+          <option value="a4p" selected>A4 세로</option>
+          <option value="a4l">A4 가로</option>
+        </select>
+        <div class="hint">A4를 고르면 사진 비율을 유지한 채 페이지 안에 맞춰 넣습니다.</div>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="margin">여백</label>
+        <select id="margin">
+          <option value="0">없음</option>
+          <option value="20" selected>보통</option>
+          <option value="45">넓게</option>
+        </select>
+      </div>
+    </div>
+
+    <h2 style="margin-bottom:6px">순서</h2>
+    <p class="hint" style="margin:0 0 12px">끌어서 옮기거나 화살표로 순서를 바꾸세요. 위에서 아래 순서로 페이지가 만들어집니다.</p>
+    <ul class="file-list" id="list"></ul>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">사진</span></div>
+      <div class="stat"><span class="num" id="t-size">0</span><span class="lbl">합계 용량</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-make">PDF로 만들기</button>
+      <button class="btn secondary" id="btn-reset">전체 삭제</button>
+    </div>
+  </div>
+
+  <div class="ad-slot"><!-- AD:IMGPDF --></div>
+
+  <h2>자주 묻는 질문</h2>
+  <div class="faq">
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 변환은 브라우저 안에서만 이뤄지며 파일은 외부로 전송되지 않습니다.</p>
+    </details>
+    <details>
+      <summary>몇 장까지 되나요?</summary>
+      <p>개수 제한은 없습니다. 다만 기기 메모리를 쓰기 때문에 수십 장 이상은 나눠서 만드시는 편이 안정적입니다.</p>
+    </details>
+    <details>
+      <summary>사진이 잘리지 않나요?</summary>
+      <p>잘리지 않습니다. 비율을 유지한 채 페이지 안에 들어가도록 축소해서 넣습니다.</p>
+    </details>
+    <details>
+      <summary>스캔한 문서를 PDF로 묶어도 되나요?</summary>
+      <p>네. 휴대폰으로 찍은 서류 사진을 순서대로 넣으면 한 개의 PDF 문서가 됩니다. 파일이 외부로 나가지 않아 민감한 서류에도 안전합니다.</p>
+    </details>
+    <details>
+      <summary>워터마크가 붙나요?</summary>
+      <p>붙지 않습니다. 사용 횟수 제한도 없습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">홈</a>
+      <a href="image-compress.html">이미지 용량 줄이기</a>
+      <a href="char-count.html">글자수 세기</a>
+      <a href="pdf-merge.html">PDF 합치기</a>
+      <a href="pdf-split.html">PDF 나누기</a>
+      <a href="file-convert.html">파일 변환</a>
+      <a href="qr-generate.html">QR코드 만들기</a>
+      <a href="date-calc.html">날짜 계산기</a>
+    </nav>
+    <div>© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script src="assets/vendor/pdf-lib.min.js"></script>
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var list = document.getElementById('list');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+
+  var items = [];        // {file, w, h}
+  var dragIdx = null;
+  var A4 = { w: 595.28, h: 841.89 };   // 포인트 단위
+
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function setMsg(t, cls) {
+    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  }
+
+  function whenReady(fn, tries) {
+    tries = (tries === undefined) ? 100 : tries;
+    if (typeof PDFLib !== 'undefined') { fn(); return; }
+    if (tries <= 0) { setMsg('PDF 기능을 불러오지 못했습니다. 새로고침해 주세요.', 'err'); return; }
+    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over'); add(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { add(fileInput.files); });
+
+  function loadImage(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); res(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('열 수 없음')); };
+      img.src = url;
+    });
+  }
+
+  function add(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type.indexOf('image/') === 0;
+    });
+    if (!files.length) { setMsg('이미지 파일을 선택해 주세요.', 'err'); return; }
+    setMsg('사진을 읽는 중입니다…');
+
+    Promise.all(files.map(function (f) {
+      return loadImage(f).then(function (img) {
+        return { file: f, w: img.naturalWidth, h: img.naturalHeight };
+      }).catch(function () { return null; });
+    })).then(function (loaded) {
+      items = items.concat(loaded.filter(Boolean));
+      fileInput.value = '';
+      setMsg('');
+      render();
+    });
+  }
+
+  function move(from, to) {
+    if (to < 0 || to >= items.length) return;
+    var it = items.splice(from, 1)[0];
+    items.splice(to, 0, it);
+    render();
+  }
+
+  function render() {
+    area.hidden = items.length === 0;
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var li = document.createElement('li');
+      li.draggable = true;
+      li.innerHTML =
+        '<span class="handle" title="끌어서 순서 변경">⠿</span>' +
+        '<span class="fname" title="' + it.file.name + '">' + (i + 1) + '. ' + it.file.name + '</span>' +
+        '<span class="fmeta">' + it.w + '×' + it.h + ' · ' + humanSize(it.file.size) + '</span>';
+
+      var up = document.createElement('button');
+      up.className = 'btn secondary small'; up.textContent = '↑'; up.disabled = i === 0;
+      up.onclick = function () { move(i, i - 1); };
+      var down = document.createElement('button');
+      down.className = 'btn secondary small'; down.textContent = '↓'; down.disabled = i === items.length - 1;
+      down.onclick = function () { move(i, i + 1); };
+      var del = document.createElement('button');
+      del.className = 'btn secondary small'; del.textContent = '✕';
+      del.onclick = function () { items.splice(i, 1); render(); };
+      li.appendChild(up); li.appendChild(down); li.appendChild(del);
+
+      li.addEventListener('dragstart', function () { dragIdx = i; li.classList.add('dragging'); });
+      li.addEventListener('dragend', function () { li.classList.remove('dragging'); });
+      li.addEventListener('dragover', function (e) { e.preventDefault(); });
+      li.addEventListener('drop', function (e) {
+        e.preventDefault();
+        if (dragIdx !== null && dragIdx !== i) move(dragIdx, i);
+        dragIdx = null;
+      });
+      list.appendChild(li);
+    });
+    document.getElementById('t-count').textContent = items.length;
+    document.getElementById('t-size').textContent =
+      humanSize(items.reduce(function (s, x) { return s + x.file.size; }, 0));
+  }
+
+  // 어떤 형식이든 캔버스를 거쳐 JPEG으로 바꾼다.
+  // pdf-lib이 직접 받는 형식은 JPG/PNG뿐이라 WebP·GIF 등을 지원하려면 이 변환이 필요하다.
+  function toJpegBytes(file) {
+    return loadImage(file).then(function (img) {
+      var c = document.createElement('canvas');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      var ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff';                 // 투명 배경은 흰색으로
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0);
+      return new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.92); });
+    }).then(function (blob) { return blob.arrayBuffer(); })
+      .then(function (buf) { return new Uint8Array(buf); });
+  }
+
+  document.getElementById('btn-make').addEventListener('click', function () {
+    if (!items.length) return;
+    var btn = this;
+    whenReady(function () {
+      btn.disabled = true;
+      setMsg('PDF를 만드는 중입니다…');
+      var mode = document.getElementById('pagesize').value;
+      var pad = parseInt(document.getElementById('margin').value, 10);
+
+      PDFLib.PDFDocument.create().then(function (pdf) {
+        var chain = Promise.resolve();
+        items.forEach(function (it) {
+          chain = chain.then(function () {
+            return toJpegBytes(it.file).then(function (bytes) {
+              return pdf.embedJpg(bytes).then(function (img) {
+                var pw, ph;
+                if (mode === 'fit') { pw = it.w + pad * 2; ph = it.h + pad * 2; }
+                else if (mode === 'a4l') { pw = A4.h; ph = A4.w; }
+                else { pw = A4.w; ph = A4.h; }
+
+                var page = pdf.addPage([pw, ph]);
+                var availW = pw - pad * 2, availH = ph - pad * 2;
+                var scale = Math.min(availW / it.w, availH / it.h);
+                var dw = it.w * scale, dh = it.h * scale;
+                page.drawImage(img, {
+                  x: (pw - dw) / 2, y: (ph - dh) / 2, width: dw, height: dh
+                });
+              });
+            });
+          });
+        });
+        return chain.then(function () { return pdf.save(); });
+      }).then(function (bytes) {
+        var blob = new Blob([bytes], { type: 'application/pdf' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = '사진모음.pdf';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+        setMsg('완료했습니다. ' + items.length + '쪽 · ' + humanSize(blob.size), 'ok');
+        btn.disabled = false;
+      }).catch(function (e) {
+        setMsg('PDF를 만드는 중 오류가 발생했습니다: ' + ((e && e.message) || e), 'err');
+        btn.disabled = false;
+      });
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    items = []; fileInput.value = ''; setMsg(''); render();
+  });
+})();
+</script>
+</body>
+</html>
