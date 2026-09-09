@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 계산 정확도 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1050px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">계산 정확도 점검</h1>
+<p style="color:#555;font-size:14px;max-width:950px">
+  툴이 <strong>죽지 않고 틀린 답을 내는</strong> 경우를 잡는다. 알려진 정답과 하나씩 대조한다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:150px">툴</th><th style="width:60px">결과</th><th>검증</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+var results = [];
+function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
+function waitFor(cond, ms) {
+  var s = Date.now(), lim = ms || 8000;
+  return new Promise(function (res) {
+    (function p() {
+      var ok = false; try { ok = cond(); } catch (e) {}
+      if (ok || Date.now() - s > lim) { res(ok); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try {
+        f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; });
+      } catch (e) {}
+      setTimeout(function () { res(f); }, 250);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function set(d, id, v, ev) {
+  var el = d.getElementById(id);
+  el.value = v;
+  el.dispatchEvent(new Event(ev || 'input', { bubbles: true }));
+  return el;
+}
+function txt(d, id) { return d.getElementById(id).textContent.trim(); }
+// 숫자 문자열에서 콤마를 떼고 값으로 비교한다
+function num(s) { return parseFloat(String(s).replace(/,/g, '')); }
+function near(a, b, tol) { return Math.abs(num(a) - b) <= (tol === undefined ? 0.01 : tol); }
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 단위 변환: 알려진 환산값과 대조 =====
+  chain = chain.then(function () {
+    return loadFrame('../unit-convert.html').then(function (f) {
+      var d = f.contentDocument;
+
+      // 결과 표를 라벨→값 지도로 읽는다 (행 순서에 의존하지 않도록)
+      function table() {
+        var m = {};
+        Array.prototype.forEach.call(d.querySelectorAll('#out tr'), function (tr) {
+          if (tr.children.length >= 2) {
+            m[tr.children[0].textContent.trim()] = tr.children[1].textContent.trim();
+          }
+        });
+        return m;
+      }
+      function conv(cat, unitLabel, value) {
+        var c = d.getElementById('cat');
+        c.value = cat; c.dispatchEvent(new Event('change'));
+        var u = d.getElementById('unit');
+        // 라벨로 단위를 고른다
+        for (var i = 0; i < u.options.length; i++) {
+          if (u.options[i].textContent.trim() === unitLabel) { u.value = u.options[i].value; break; }
+        }
+        u.dispatchEvent(new Event('change'));
+        set(d, 'val', String(value));
+        return table();
+      }
+
+      var bad = [];
+      function expect(label, got, want, tol) {
+        if (!near(got, want, tol)) bad.push(label + ' = ' + got + ' (기대 ' + want + ')');
+      }
+
+      var t1 = conv('area', '평', 1);
+      expect('1평→㎡', t1['㎡'], 3.3058, 0.001);
+      var t2 = conv('area', '㎡', 84);
+      expect('84㎡→평', t2['평'], 25.4, 0.05);
+      var t3 = conv('length', '인치(in)', 1);
+      expect('1인치→cm', t3['cm'], 2.54, 0.001);
+      var t4 = conv('length', '마일(mi)', 1);
+      expect('1마일→km', t4['km'], 1.609344, 0.0001);
+      var t5 = conv('length', '자(척)', 1);
+      expect('1자→cm', t5['cm'], 30.303, 0.01);
+      var t6 = conv('weight', '파운드(lb)', 1);
+      expect('1파운드→g', t6['g'], 453.59, 0.5);
+      var t7 = conv('weight', '근(고기 600g)', 1);
+      expect('1근→g', t7['g'], 600, 0.5);
+      var t8 = conv('weight', '관', 1);
+      expect('1관→kg', t8['kg'], 3.75, 0.001);
+      var t9 = conv('volume', '되', 1);
+      expect('1되→L', t9['L'], 1.8039, 0.001);
+      var t10 = conv('volume', '갤런(미국)', 1);
+      expect('1갤런→L', t10['L'], 3.7854, 0.001);
+      var t11 = conv('speed', 'km/h', 100);
+      expect('100km/h→m/s', t11['m/s'], 27.778, 0.01);
+      var t12 = conv('data', 'GB', 1);
+      expect('1GB→MB', t12['MB'], 1024, 0.5);
+      var t13 = conv('temp', '섭씨(°C)', 100);
+      expect('100°C→°F', t13['화씨(°F)'], 212, 0.01);
+      var t14 = conv('temp', '화씨(°F)', 32);
+      expect('32°F→°C', t14['섭씨(°C)'], 0, 0.01);
+      var t15 = conv('temp', '켈빈(K)', 0);
+      expect('0K→°C', t15['섭씨(°C)'], -273.15, 0.01);
+
+      log('단위 변환 정확도', bad.length === 0,
+          bad.length ? '틀림: ' + bad.join(' / ') : '15개 환산값 전부 일치 (평·인치·마일·자·파운드·근·관·되·갤런·속도·데이터·온도)');
+    });
+  }).catch(function (e) { log('단위 변환 정확도', false, '오류: ' + e.message); });
+
+  // ===== 날짜 계산: 윤년·경계 =====
+  chain = chain.then(function () {
+    return loadFrame('../date-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      var bad = [];
+      function between(from, to, inclusive) {
+        d.getElementById('inclusive').checked = !!inclusive;
+        set(d, 'from', from);
+        set(d, 'to', to);
+        d.getElementById('inclusive').dispatchEvent(new Event('change', { bubbles: true }));
+        return txt(d, 'b-days');
+      }
+      function chk(label, got, want) { if (got !== want) bad.push(label + ' = ' + got + ' (기대 ' + want + ')'); }
+
+      chk('윤년 2024-02-28→03-01', between('2024-02-28', '2024-03-01'), '2일');
+      chk('평년 2023-02-28→03-01', between('2023-02-28', '2023-03-01'), '1일');
+      chk('연말연시 2025-12-31→2026-01-01', between('2025-12-31', '2026-01-01'), '1일');
+      chk('같은 날', between('2026-05-05', '2026-05-05'), '0일');
+      chk('시작일 포함', between('2026-05-01', '2026-05-03', true), '3일');
+      chk('1년 2026-01-01→2027-01-01', between('2026-01-01', '2027-01-01'), '365일');
+      chk('윤년 포함 1년 2024-01-01→2025-01-01', between('2024-01-01', '2025-01-01'), '366일');
+
+      // 날짜 더하기
+      set(d, 'base', '2026-01-01');
+      set(d, 'delta', '100');
+      d.getElementById('op').value = '1';
+      d.getElementById('op').dispatchEvent(new Event('change', { bubbles: true }));
+      var added = txt(d, 'a-date');
+      if (added !== '2026년 4월 11일') bad.push('2026-01-01 +100일 = ' + added + ' (기대 2026년 4월 11일)');
+
+      // 빼기 (월 경계를 거꾸로 넘는지)
+      set(d, 'base', '2026-03-01');
+      set(d, 'delta', '1');
+      d.getElementById('op').value = '-1';
+      d.getElementById('op').dispatchEvent(new Event('change', { bubbles: true }));
+      var sub = txt(d, 'a-date');
+      if (sub !== '2026년 2월 28일') bad.push('2026-03-01 -1일 = ' + sub + ' (기대 2026년 2월 28일)');
+
+      log('날짜 계산 정확도', bad.length === 0 && !f.dataset.errs,
+          bad.length ? '틀림: ' + bad.join(' / ') : '윤년·평년·연말·같은날·포함옵션·1년·366일·가감산 9건 전부 일치');
+    });
+  }).catch(function (e) { log('날짜 계산 정확도', false, '오류: ' + e.message); });
+
+  // ===== 만 나이: 생일 경계 =====
+  chain = chain.then(function () {
+    return loadFrame('../age-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      var bad = [];
+      var n = new Date(), today = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      function iso(dt) {
+        return dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2);
+      }
+      function ageOf(dt) { set(d, 'birth', iso(dt)); return txt(d, 'a-full'); }
+
+      // 오늘이 생일 → 만 30세
+      var b1 = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate());
+      if (ageOf(b1) !== '30세') bad.push('생일 당일 = ' + ageOf(b1) + ' (기대 30세)');
+
+      // 생일이 하루 안 지남 → 만 29세
+      var b2 = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate() + 1);
+      if (ageOf(b2) !== '29세') bad.push('생일 하루 전 = ' + ageOf(b2) + ' (기대 29세)');
+
+      // 생일이 하루 지남 → 만 30세
+      var b3 = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate() - 1);
+      if (ageOf(b3) !== '30세') bad.push('생일 하루 후 = ' + ageOf(b3) + ' (기대 30세)');
+
+      // 세는 나이는 생일과 무관하게 (올해 - 태어난 해 + 1)
+      set(d, 'birth', iso(b2));
+      var kor = txt(d, 'a-korean');
+      if (kor !== '31세') bad.push('세는 나이 = ' + kor + ' (기대 31세)');
+
+      // 윤일 생일도 죽지 않고 계산되는지
+      set(d, 'birth', '2004-02-29');
+      var leap = txt(d, 'a-full');
+      if (!/^\d+세$/.test(leap)) bad.push('윤일 생일 2004-02-29 → ' + leap);
+
+      log('만 나이 정확도', bad.length === 0 && !f.dataset.errs,
+          bad.length ? '틀림: ' + bad.join(' / ') : '생일 당일·전날·다음날·세는나이·윤일생일 5건 전부 일치');
+    });
+  }).catch(function (e) { log('만 나이 정확도', false, '오류: ' + e.message); });
+
+  // ===== 글자수: 바이트·원고지 =====
+  chain = chain.then(function () {
+    return loadFrame('../char-count.html').then(function (f) {
+      var d = f.contentDocument;
+      var bad = [];
+      function put(s) { set(d, 'ta', s); }
+      function detail() { return d.getElementById('detail-table').textContent; }
+      function has(s) { return detail().indexOf(s) >= 0; }
+
+      put('한글');
+      if (txt(d, 's-all') !== '2') bad.push('"한글" 글자수 = ' + txt(d, 's-all'));
+      if (!has('6 bytes')) bad.push('"한글" UTF-8 = 6바이트가 아님');
+      if (!has('4 bytes')) bad.push('"한글" EUC-KR = 4바이트가 아님');
+
+      put('abc');
+      if (!has('3 bytes')) bad.push('"abc" UTF-8 = 3바이트가 아님');
+
+      // 원고지: 200자 = 1매, 201자 = 2매
+      put(new Array(201).join('가'));                 // 200자
+      if (txt(d, 's-manu') !== '1') bad.push('200자 원고지 = ' + txt(d, 's-manu') + '매 (기대 1)');
+      put(new Array(202).join('가'));                 // 201자
+      if (txt(d, 's-manu') !== '2') bad.push('201자 원고지 = ' + txt(d, 's-manu') + '매 (기대 2)');
+
+      // 공백 처리
+      put('가 나  다\n라');
+      if (txt(d, 's-all') !== '8') bad.push('공백포함 = ' + txt(d, 's-all') + ' (기대 8)');
+      if (txt(d, 's-nospace') !== '4') bad.push('공백제외 = ' + txt(d, 's-nospace') + ' (기대 4)');
+      if (txt(d, 's-words') !== '4') bad.push('단어수 = ' + txt(d, 's-words') + ' (기대 4)');
+
+      log('글자수 정확도', bad.length === 0 && !f.dataset.errs,
+          bad.length ? '틀림: ' + bad.join(' / ') : '한글/영문 바이트, EUC-KR 추정, 원고지 200·201자 경계, 공백·단어 8건 일치');
+    });
+  }).catch(function (e) { log('글자수 정확도', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 계산 정확</span>' : ' <span class="fail">— 틀린 계산 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'DEEP ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

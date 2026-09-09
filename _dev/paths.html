@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 미검증 경로 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1050px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">미검증 경로 점검</h1>
+<p style="color:#555;font-size:14px;max-width:950px">
+  지금까지 한 번도 눌러보지 않은 선택지와 버튼을 전부 밟아본다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:170px">경로</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="jsQR.js"></script>
+<script>
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 12000;
+  return new Promise(function (r) {
+    (function p() { var o = false; try { o = c(); } catch (e) {} if (o || Date.now() - s > lim) { r(o); return; } setTimeout(p, 80); })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 250);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function capture(f) {
+  var w = f.contentWindow, out = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () {};
+  return out;
+}
+function pickAll(got, mark, re) {
+  return got.slice(mark).filter(function (b) {
+    if (b && typeof b.name === 'string') return false;
+    return re.test(b.type || '');
+  });
+}
+function set(d, id, v, ev) {
+  var el = d.getElementById(id);
+  el.value = v; el.dispatchEvent(new Event(ev || 'input', { bubbles: true }));
+  return el;
+}
+function txt(d, id) { return d.getElementById(id).textContent.trim(); }
+function msgOf(d) { var m = d.getElementById('msg'); return m ? m.textContent.trim().slice(0, 120) : ''; }
+function grab(p) { return fetch(p).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; }); }
+function makePdf(n) {
+  return PDFLib.PDFDocument.create().then(function (doc) {
+    for (var i = 0; i < n; i++) doc.addPage([300, 400]);
+    return doc.save();
+  });
+}
+function makeImg(w, h) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  x.fillStyle = '#2f6df6'; x.fillRect(0, 0, w, h);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, Math.round(w / 3), Math.round(h / 3));
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // 1. PDF 나누기 — "모든 페이지를 낱장으로" (한 번도 안 눌러본 경로)
+  chain = chain.then(function () {
+    return makePdf(4).then(function (bytes) {
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 's.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') !== '0'; }).then(function () {
+          var mode = d.getElementById('mode');
+          mode.value = 'each'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+          var rangeHidden = d.getElementById('range-field').hidden;
+          var pick = txt(d, 't-pick');
+          var mark = got.length;
+          d.getElementById('btn-go').click();
+          return waitFor(function () { return pickAll(got, mark, /pdf/).length >= 4; }, 25000).then(function () {
+            var outs = pickAll(got, mark, /pdf/);
+            return Promise.all(outs.map(function (b) {
+              return b.arrayBuffer().then(function (ab) {
+                return PDFLib.PDFDocument.load(new Uint8Array(ab), { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest });
+              }).then(function (doc) { return doc.getPageCount(); });
+            })).then(function (counts) {
+              var allOne = counts.length === 4 && counts.every(function (c) { return c === 1; });
+              log('PDF 낱장 분할', allOne && rangeHidden && pick === '전체 4쪽',
+                  '4쪽 → 파일 ' + counts.length + '개, 각 ' + counts.join('/') + '쪽 (기대 4개·각 1쪽), ' +
+                  '범위 입력 숨김 ' + (rangeHidden ? 'OK' : '실패') + ', 표시 "' + pick + '"');
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 낱장 분할', false, '오류: ' + e.message); });
+
+  // 2. 이미지→PDF — 페이지 크기 3종이 실제 PDF 규격으로 나오는지
+  chain = chain.then(function () {
+    return makeImg(800, 600).then(function (blob) {
+      var modes = [['fit', '사진 맞춤'], ['a4p', 'A4 세로'], ['a4l', 'A4 가로']];
+      var out = {};
+      var seq = Promise.resolve();
+      modes.forEach(function (m) {
+        seq = seq.then(function () {
+          return loadFrame('../img-to-pdf.html').then(function (f) {
+            var d = f.contentDocument, got = capture(f);
+            d.getElementById('pagesize').value = m[0];
+            d.getElementById('margin').value = '0';
+            setFiles(d.getElementById('file'), [new File([blob], 'a.png', { type: 'image/png' })]);
+            return waitFor(function () { return txt(d, 't-count') === '1'; }, 15000).then(function () {
+              var mark = got.length;
+              d.getElementById('btn-make').click();
+              return waitFor(function () { return pickAll(got, mark, /pdf/).length > 0; }, 25000).then(function () {
+                var b = pickAll(got, mark, /pdf/)[0];
+                if (!b) { out[m[0]] = 'none'; return; }
+                return b.arrayBuffer().then(function (ab) {
+                  return PDFLib.PDFDocument.load(new Uint8Array(ab), { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest });
+                }).then(function (doc) {
+                  var s = doc.getPage(0).getSize();
+                  out[m[0]] = Math.round(s.width) + 'x' + Math.round(s.height);
+                });
+              });
+            });
+          });
+        });
+      });
+      return seq.then(function () {
+        // 여백 0이므로 fit=사진크기, A4는 595x842 / 842x595
+        var ok = out.fit === '800x600' && out.a4p === '595x842' && out.a4l === '842x595';
+        log('이미지→PDF 페이지 크기', ok,
+            '사진맞춤 ' + out.fit + ' (기대 800x600), A4세로 ' + out.a4p + ' (기대 595x842), A4가로 ' + out.a4l + ' (기대 842x595)');
+      });
+    });
+  }).catch(function (e) { log('이미지→PDF 페이지 크기', false, '오류: ' + e.message); });
+
+  // 3. 이미지 자르기 — 회전·좌우반전 (한 번도 안 눌러본 버튼)
+  chain = chain.then(function () {
+    return makeImg(800, 400).then(function (blob) {
+      return loadFrame('../image-crop.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([blob], 'r.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-orig') !== '-'; }, 15000).then(function () {
+          var o0 = txt(d, 't-orig');
+          d.getElementById('rot-r').click();
+          return waitFor(function () { return txt(d, 't-orig') !== o0; }, 8000).then(function () {
+            var o1 = txt(d, 't-orig');
+            d.getElementById('rot-l').click();
+            return waitFor(function () { return txt(d, 't-orig') === o0; }, 8000).then(function () {
+              var o2 = txt(d, 't-orig');
+              d.getElementById('flip-h').click();
+              return waitFor(function () { return true; }, 1200).then(function () {
+                var o3 = txt(d, 't-orig');
+                log('이미지 자르기 회전·반전',
+                    o0 === '800×400' && o1 === '400×800' && o2 === '800×400' && o3 === '800×400' && !f.dataset.errs,
+                    '원본 ' + o0 + ' → 우회전 ' + o1 + ' (가로세로 바뀜) → 좌회전 ' + o2 + ' (원복) → 좌우반전 ' + o3 +
+                    (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지 자르기 회전·반전', false, '오류: ' + e.message); });
+
+  // 4. PDF 편집 — 새로 넣은 ← → 순서 버튼과 전체 회전
+  chain = chain.then(function () {
+    return grab('fixtures/real-b.pdf').then(function (blob) {
+      if (!blob) { log('PDF 편집 순서·전체회전', false, '고정자료 없음'); return; }
+      return loadFrame('../pdf-edit.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([blob], 'e.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-total') !== '0'; }, 30000).then(function () {
+          var first = d.querySelector('.pcard .pno').textContent.trim();
+          // 인덱스로 잡으면 버튼 순서가 바뀔 때 엉뚱한 걸 누른다. 표시 문자로 찾는다.
+          var ops = Array.prototype.slice.call(
+            d.querySelectorAll('.pcard')[0].querySelectorAll('.ops button'));
+          var moveRight = ops.filter(function (b) { return b.textContent.trim() === '→'; })[0];
+          if (!moveRight) { log('PDF 편집 순서·전체회전', false, '→ 버튼을 찾지 못함'); return; }
+          moveRight.click();
+          var afterFirst = d.querySelector('.pcard .pno').textContent.trim();
+          var keptAll = txt(d, 't-keep') === txt(d, 't-total');   // 삭제가 눌리지 않았는지
+
+          d.getElementById('all-r').click();
+          var rotCount = txt(d, 't-rot');
+          var total = txt(d, 't-total');
+
+          log('PDF 편집 순서·전체회전',
+              afterFirst !== first && rotCount === total && keptAll && !f.dataset.errs,
+              '→ 버튼으로 첫 카드 "' + first + '" → "' + afterFirst + '" (순서 바뀜), ' +
+              '전체 오른쪽 회전 후 회전 페이지 ' + rotCount + '/' + total + ', 삭제 안 눌림 ' + (keptAll ? 'OK' : '실패') +
+              (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 편집 순서·전체회전', false, '오류: ' + e.message); });
+
+  // 5. QR — 문자·이메일 프리셋 (한 번도 판독해보지 않음)
+  chain = chain.then(function () {
+    if (typeof jsQR === 'undefined') { log('QR 문자·이메일', false, 'jsQR 없음'); return; }
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      function decode() {
+        var c = d.getElementById('canvas');
+        if (c.hidden) return null;
+        var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+        var r = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+        return r ? r.data : null;
+      }
+      var ty = d.getElementById('qtype');
+      ty.value = 'sms'; ty.dispatchEvent(new Event('change', { bubbles: true }));
+      set(d, 's-num', '01012345678');
+      set(d, 's-msg', '예약 문의합니다');
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+        var sms = decode();
+        ty.value = 'mail'; ty.dispatchEvent(new Event('change', { bubbles: true }));
+        set(d, 'm-to', 'hi@example.com');
+        set(d, 'm-sub', '문의');
+        return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+          var mail = decode() || '';
+          log('QR 문자·이메일',
+              sms === 'SMSTO:01012345678:예약 문의합니다' && mail.indexOf('MAILTO:hi@example.com?subject=') === 0,
+              '문자 → "' + sms + '" · 이메일 → "' + mail + '"');
+        });
+      });
+    });
+  }).catch(function (e) { log('QR 문자·이메일', false, '오류: ' + e.message); });
+
+  // 6. 텍스트 정리 — 구분자·번호매기기·한줄합치기
+  chain = chain.then(function () {
+    return loadFrame('../text-clean.html').then(function (f) {
+      var d = f.contentDocument;
+      var bad = [];
+      function out() { return d.getElementById('out').value; }
+
+      // 쉼표로 나누기
+      set(d, 'src', 'a, b , a ,c');
+      var sep = d.getElementById('sep');
+      sep.value = 'comma'; sep.dispatchEvent(new Event('change', { bubbles: true }));
+      if (out() !== 'a\nb\nc') bad.push('쉼표 분리 = "' + out().replace(/\n/g, '|') + '" (기대 a|b|c)');
+
+      // 번호 매기기
+      d.getElementById('number').checked = true;
+      d.getElementById('number').dispatchEvent(new Event('change', { bubbles: true }));
+      if (out() !== '1. a\n2. b\n3. c') bad.push('번호매기기 = "' + out().replace(/\n/g, '|') + '"');
+      d.getElementById('number').checked = false;
+      d.getElementById('number').dispatchEvent(new Event('change', { bubbles: true }));
+
+      // 한 줄로 합치기
+      d.getElementById('joinone').checked = true;
+      d.getElementById('joinone').dispatchEvent(new Event('change', { bubbles: true }));
+      if (out() !== 'a b c') bad.push('한줄합치기 = "' + out() + '" (기대 "a b c")');
+      d.getElementById('joinone').checked = false;
+      d.getElementById('joinone').dispatchEvent(new Event('change', { bubbles: true }));
+
+      // 공백으로 나누기 + 대문자
+      sep.value = 'space'; sep.dispatchEvent(new Event('change', { bubbles: true }));
+      set(d, 'src', 'apple banana apple');
+      var cs = d.getElementById('case');
+      cs.value = 'upper'; cs.dispatchEvent(new Event('change', { bubbles: true }));
+      if (out() !== 'APPLE\nBANANA') bad.push('공백분리+대문자 = "' + out().replace(/\n/g, '|') + '"');
+
+      log('텍스트 정리 옵션', bad.length === 0 && !f.dataset.errs,
+          bad.length ? bad.join(' / ') : '쉼표분리·번호매기기·한줄합치기·공백분리+대문자 4건 일치');
+    });
+  }).catch(function (e) { log('텍스트 정리 옵션', false, '오류: ' + e.message); });
+
+  // 7. 비밀번호 — 극단 설정
+  chain = chain.then(function () {
+    return loadFrame('../password-gen.html').then(function (f) {
+      var d = f.contentDocument;
+      var bad = [];
+      function pws() {
+        return Array.prototype.map.call(d.querySelectorAll('#list code'), function (c) { return c.textContent; });
+      }
+      // 최소 길이
+      set(d, 'len', '6');
+      if (pws()[0].length !== 6) bad.push('최소 6자 = ' + pws()[0].length + '자');
+      // 최대 길이
+      set(d, 'len', '64');
+      if (pws()[0].length !== 64) bad.push('최대 64자 = ' + pws()[0].length + '자');
+      // 숫자만
+      ['lower', 'upper', 'symbol'].forEach(function (id) {
+        d.getElementById(id).checked = false;
+        d.getElementById(id).dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      var digitsOnly = pws()[0];
+      if (!/^[0-9]+$/.test(digitsOnly)) bad.push('숫자만 설정인데 "' + digitsOnly + '"');
+      // 전부 끄면 안내가 떠야 한다
+      d.getElementById('digit').checked = false;
+      d.getElementById('digit').dispatchEvent(new Event('change', { bubbles: true }));
+      var warned = msgOf(d).indexOf('하나 이상') >= 0;
+      if (!warned) bad.push('종류를 전부 껐는데 안내 없음: "' + msgOf(d) + '"');
+
+      log('비밀번호 극단 설정', bad.length === 0 && !f.dataset.errs,
+          bad.length ? bad.join(' / ') : '6자·64자·숫자만·전부해제 안내 4건 정상');
+    });
+  }).catch(function (e) { log('비밀번호 극단 설정', false, '오류: ' + e.message); });
+
+  // 8. 파일 변환 — TSV
+  chain = chain.then(function () {
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      var tsv = '이름\t부서\n홍길동\t영업팀\n김철수\t개발팀\n';
+      setFiles(d.getElementById('file'), [new File([tsv], 't.tsv', { type: 'text/tab-separated-values' })]);
+      return waitFor(function () { return txt(d, 't-rows') !== '0'; }, 12000).then(function () {
+        var rows = txt(d, 't-rows'), cols = txt(d, 't-cols'), from = txt(d, 't-from');
+        var ko = d.getElementById('preview').textContent.indexOf('홍길동') >= 0;
+        log('TSV 읽기', rows === '2' && cols === '2' && ko && from === 'TSV',
+            rows + '행 ' + cols + '열, 형식 "' + from + '", 한글 ' + (ko ? 'OK' : '깨짐'));
+      });
+    });
+  }).catch(function (e) { log('TSV 읽기', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'PATHS ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

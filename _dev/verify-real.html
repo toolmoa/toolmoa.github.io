@@ -323,10 +323,15 @@ function run() {
       return waitFor(function () { return d.getElementById('t-total').textContent !== '0'; }, 30000)
         .then(function () {
           var total = parseInt(d.getElementById('t-total').textContent, 10);
-          // 첫 페이지를 오른쪽으로 90도 돌리고, 마지막 페이지에 삭제 표시
+          // 첫 페이지를 오른쪽으로 90도 돌리고, 마지막 페이지에 삭제 표시.
+          // 버튼은 인덱스가 아니라 표시 문자로 찾는다 — 순서가 바뀌면 엉뚱한 걸 누르게 된다.
+          function btn(card, label) {
+            return Array.prototype.slice.call(card.querySelectorAll('.ops button'))
+              .filter(function (b) { return b.textContent.trim() === label; })[0];
+          }
           var cards = d.querySelectorAll('.pcard');
-          cards[0].querySelectorAll('.ops button')[1].click();          // ↻
-          d.querySelectorAll('.pcard')[total - 1].querySelectorAll('.ops button')[2].click();  // ✕
+          btn(cards[0], '↻').click();
+          btn(d.querySelectorAll('.pcard')[total - 1], '✕').click();
           var keep = d.getElementById('t-keep').textContent;
           var rot = d.getElementById('t-rot').textContent;
 
