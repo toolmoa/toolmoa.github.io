@@ -419,6 +419,56 @@ function run() {
     });
   }).catch(function (e) { log('EN 이동 연결', false, '오류: ' + e.message); });
 
+  // 18. 텍스트 정리
+  chain = chain.then(function () {
+    return loadFrame('../text-clean.html').then(function (f) {
+      var d = f.contentDocument;
+      var src = d.getElementById('src');
+      // 중복 2개, 빈 줄 1개, 앞뒤 공백 포함 → 정리하면 3줄이어야 한다
+      src.value = '사과\n  바나나  \n사과\n\n체리\n';
+      src.dispatchEvent(new Event('input'));
+      var out = d.getElementById('out').value.split('\n');
+      var outCount = txt(d, 't-out');
+
+      // 정렬도 확인
+      var sort = d.getElementById('sort');
+      sort.value = 'asc'; sort.dispatchEvent(new Event('change'));
+      var sorted = d.getElementById('out').value.split('\n');
+
+      log('텍스트 정리', out.length === 3 && out.indexOf('바나나') >= 0 &&
+          outCount === '3' && sorted[0] === '바나나',
+          '중복·빈줄·공백 포함 5줄 → ' + out.length + '줄 [' + out.join(', ') + '], ' +
+          '가나다 정렬 첫 줄 "' + sorted[0] + '" (기대: 바나나)');
+    });
+  }).catch(function (e) { log('텍스트 정리', false, '오류: ' + e.message); });
+
+  // 19. 비밀번호 생성기
+  chain = chain.then(function () {
+    return loadFrame('../password-gen.html').then(function (f) {
+      var d = f.contentDocument;
+      d.getElementById('len').value = '24';
+      d.getElementById('len').dispatchEvent(new Event('input'));
+      d.getElementById('count').value = '10';
+      d.getElementById('count').dispatchEvent(new Event('change'));
+      var codes = Array.prototype.map.call(d.querySelectorAll('#list code'),
+        function (c) { return c.textContent; });
+
+      var allLen = codes.every(function (p) { return p.length === 24; });
+      var uniq = codes.filter(function (v, i, a) { return a.indexOf(v) === i; }).length;
+      // '헷갈리는 글자 빼기'가 켜져 있으므로 l 1 I O 0 이 없어야 한다
+      var noAmb = codes.every(function (p) { return !/[l1IO0]/.test(p); });
+      // 종류를 최소 1개씩 포함하는지
+      var hasAll = codes.every(function (p) {
+        return /[a-z]/.test(p) && /[A-Z]/.test(p) && /[0-9]/.test(p) && /[^a-zA-Z0-9]/.test(p);
+      });
+
+      log('비밀번호 생성기', codes.length === 10 && allLen && uniq === 10 && noAmb && hasAll,
+          codes.length + '개 생성, 길이 24 ' + (allLen ? 'OK' : '실패') +
+          ', 서로 다름 ' + uniq + '/10, 헷갈리는 글자 제외 ' + (noAmb ? 'OK' : '실패') +
+          ', 4종류 모두 포함 ' + (hasAll ? 'OK' : '실패'));
+    });
+  }).catch(function (e) { log('비밀번호 생성기', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 

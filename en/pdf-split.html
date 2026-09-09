@@ -191,7 +191,7 @@
       setMsg('Reading the file…');
       file.arrayBuffer().then(function (buf) {
         bytes = new Uint8Array(buf);
-        return PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+        return PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest });
       }).then(function (doc) {
         pageCount = doc.getPageCount();
         document.getElementById('t-pages').textContent = pageCount;
@@ -243,7 +243,7 @@
     setMsg('Working…');
     var mode = modeSel.value;
 
-    PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true }).then(function (src) {
+    PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (src) {
       if (mode === 'each') {
         var chain = Promise.resolve();
         for (var i = 0; i < pageCount; i++) {

@@ -45,8 +45,20 @@ function waitFor(cond, maxMs) {
 function loadFrame(src) {
   return new Promise(function (res, rej) {
     var f = document.createElement('iframe');
+    f.dataset.errs = '';
     f.src = src;
-    f.onload = function () { setTimeout(function () { res(f); }, 300); };
+    f.onload = function () {
+      // 페이지 안에서 터진 오류를 잡아두면 "왜 멈췄는지"를 알 수 있다
+      try {
+        f.contentWindow.addEventListener('error', function (e) {
+          f.dataset.errs += (e.message || 'error') + ' | ';
+        });
+        f.contentWindow.addEventListener('unhandledrejection', function (e) {
+          f.dataset.errs += 'unhandled: ' + ((e.reason && e.reason.message) || e.reason) + ' | ';
+        });
+      } catch (e) { /* 무시 */ }
+      setTimeout(function () { res(f); }, 300);
+    };
     f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
     document.body.appendChild(f);
   });
@@ -301,6 +313,42 @@ function run() {
       });
     });
   }).catch(function (e) { log('목표 용량 지정 압축', false, '오류: ' + e.message); });
+
+  // 8. PDF 페이지 회전·삭제 — 실제 PDF로, 저장된 결과를 다시 열어 확인
+  chain = chain.then(function () {
+    if (!FX.pdfA) return;
+    return loadFrame('../pdf-edit.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([FX.pdfA], 'a.pdf', { type: 'application/pdf' })]);
+      return waitFor(function () { return d.getElementById('t-total').textContent !== '0'; }, 30000)
+        .then(function () {
+          var total = parseInt(d.getElementById('t-total').textContent, 10);
+          // 첫 페이지를 오른쪽으로 90도 돌리고, 마지막 페이지에 삭제 표시
+          var cards = d.querySelectorAll('.pcard');
+          cards[0].querySelectorAll('.ops button')[1].click();          // ↻
+          d.querySelectorAll('.pcard')[total - 1].querySelectorAll('.ops button')[2].click();  // ✕
+          var keep = d.getElementById('t-keep').textContent;
+          var rot = d.getElementById('t-rot').textContent;
+
+          var mark = got.length;
+          d.getElementById('btn-save').click();
+          return waitNew(got, mark, /pdf/, 120000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /pdf/, f.contentWindow);
+            if (!out) { log('PDF 회전·삭제', false, '결과 없음 · 화면: ' + msgOf(d) + ' · JS오류: ' + (f.dataset.errs || '없음')); return; }
+            return out.arrayBuffer().then(function (buf) {
+              return PDFLib.PDFDocument.load(new Uint8Array(buf), { ignoreEncryption: true });
+            }).then(function (doc) {
+              var n = doc.getPageCount();
+              var deg = doc.getPage(0).getRotation().angle;
+              log('PDF 회전·삭제', n === total - 1 && keep === String(total - 1) &&
+                  rot === '1' && deg % 360 === 90,
+                  '원본 ' + total + '쪽 → 1쪽 삭제 후 ' + n + '쪽 (기대 ' + (total - 1) + '), ' +
+                  '첫 페이지 회전값 ' + deg + '° (기대 90), 화면 표시 남길 ' + keep + '쪽 / 회전 ' + rot + '쪽');
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('PDF 회전·삭제', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

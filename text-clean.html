@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>텍스트 정리 · 중복 줄 제거 · 줄 정렬 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="중복된 줄을 지우고, 정렬하고, 빈 줄과 불필요한 공백을 없앱니다. 명단 정리나 목록 다듬기에 유용합니다. 입력한 내용이 서버로 전송되지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/text-clean.html">
+<meta property="og:title" content="텍스트 정리 · 중복 줄 제거 · 줄 정렬">
+<meta property="og:description" content="중복 제거·정렬·공백 정리를 한 번에. 브라우저 안에서만 처리됩니다.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"텍스트 정리","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+</head>
+<body data-i18n-title="txt.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" aria-current="page" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="txt.h1">텍스트 정리</h1>
+  <p class="lead" data-i18n="txt.lead">중복된 줄을 지우고, 정렬하고, 지저분한 공백을 없앱니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 글은 어디로도 전송되지 않습니다</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="src" data-i18n="txt.input">원본</label>
+      <textarea id="src" style="min-height:170px" data-i18n-ph="txt.ph"
+        placeholder="여기에 붙여넣으세요. 한 줄에 하나씩 있는 목록이면 가장 잘 동작합니다." spellcheck="false"></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="dedup" style="width:auto;margin:0" checked>
+        <span data-i18n="txt.dedup">중복된 줄 제거</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="noblank" style="width:auto;margin:0" checked>
+        <span data-i18n="txt.noblank">빈 줄 제거</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="trim" style="width:auto;margin:0" checked>
+        <span data-i18n="txt.trim">줄 앞뒤 공백 제거</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="squeeze" style="width:auto;margin:0">
+        <span data-i18n="txt.squeeze">연속 공백을 하나로</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="number" style="width:auto;margin:0">
+        <span data-i18n="txt.number">앞에 번호 매기기</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="joinone" style="width:auto;margin:0">
+        <span data-i18n="txt.joinone">한 줄로 합치기</span>
+      </label>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:16px">
+      <div class="field" style="margin-bottom:0">
+        <label for="sort" data-i18n="txt.sort">정렬</label>
+        <select id="sort">
+          <option value="none" data-i18n="txt.sNone">그대로 두기</option>
+          <option value="asc" data-i18n="txt.sAsc">가나다 · ABC 순</option>
+          <option value="desc" data-i18n="txt.sDesc">역순</option>
+          <option value="len" data-i18n="txt.sLen">짧은 줄부터</option>
+          <option value="shuffle" data-i18n="txt.sShuffle">무작위 섞기</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="case" data-i18n="txt.case">영문 대소문자</label>
+        <select id="case">
+          <option value="none" data-i18n="txt.cNone">그대로 두기</option>
+          <option value="upper" data-i18n="txt.cUpper">전부 대문자</option>
+          <option value="lower" data-i18n="txt.cLower">전부 소문자</option>
+          <option value="title" data-i18n="txt.cTitle">단어 첫 글자만 대문자</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="sep" data-i18n="txt.sep">구분 기준</label>
+        <select id="sep">
+          <option value="line" data-i18n="txt.sepLine">줄 단위</option>
+          <option value="comma" data-i18n="txt.sepComma">쉼표로 나누기</option>
+          <option value="space" data-i18n="txt.sepSpace">공백으로 나누기</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="t-in">0</span><span class="lbl" data-i18n="txt.inLines">원본 줄</span></div>
+    <div class="stat"><span class="num" id="t-out">0</span><span class="lbl" data-i18n="txt.outLines">결과 줄</span></div>
+    <div class="stat"><span class="num" id="t-cut" style="color:var(--ok)">0</span><span class="lbl" data-i18n="txt.removed">줄어든 줄</span></div>
+  </div>
+
+  <div class="field">
+    <label for="out" data-i18n="txt.result">결과</label>
+    <textarea id="out" style="min-height:170px" readonly spellcheck="false"></textarea>
+    <div class="btn-row">
+      <button class="btn" id="btn-copy" data-i18n="txt.copy">결과 복사</button>
+      <button class="btn secondary" id="btn-down" data-i18n="txt.down">txt로 저장</button>
+      <button class="btn secondary" id="btn-clear" data-i18n="txt.clear">지우기</button>
+      <span class="hint" id="copy-msg" style="align-self:center;margin:0"></span>
+    </div>
+  </div>
+
+  <div class="ad-slot"><!-- AD:TEXT --></div>
+
+  <h2 data-ko-only>이럴 때 씁니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      여기저기서 모은 명단에서 <strong style="color:var(--text)">같은 이름이 여러 번</strong> 들어간 것을 정리할 때,
+      메일 주소 목록을 <strong style="color:var(--text)">쉼표로 나눠 한 줄씩</strong> 만들 때,
+      엑셀에서 복사해 온 값의 <strong style="color:var(--text)">앞뒤 공백</strong>을 털어낼 때 씁니다.
+      모든 처리가 브라우저 안에서 일어나므로 고객 명단처럼 민감한 목록도 안전합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>중복 제거는 대소문자를 구분하나요?</summary>
+      <p>구분합니다. <code>Apple</code>과 <code>apple</code>은 다른 줄로 봅니다. 같게 처리하려면 먼저 "전부 소문자"를 적용한 뒤 중복 제거를 쓰세요.</p>
+    </details>
+    <details>
+      <summary>순서가 유지되나요?</summary>
+      <p>정렬을 "그대로 두기"로 두면 처음 나온 순서를 유지한 채 뒤쪽 중복만 지웁니다.</p>
+    </details>
+    <details>
+      <summary>입력한 내용이 저장되나요?</summary>
+      <p>저장되지 않습니다. 브라우저 안에서만 처리되고 탭을 닫으면 사라집니다.</p>
+    </details>
+    <details>
+      <summary>아주 긴 목록도 되나요?</summary>
+      <p>수만 줄까지는 무리 없습니다. 그보다 크면 브라우저가 잠시 멈출 수 있습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var src = document.getElementById('src');
+  var out = document.getElementById('out');
+  var ids = ['dedup', 'noblank', 'trim', 'squeeze', 'number', 'joinone', 'sort', 'case', 'sep'];
+
+  function on(id) { return document.getElementById(id).checked; }
+  function val(id) { return document.getElementById(id).value; }
+
+  function titleCase(s) {
+    return s.replace(/\b[a-z]/g, function (m) { return m.toUpperCase(); });
+  }
+
+  function process() {
+    var text = src.value;
+
+    // 어떤 기준으로 나눌지 먼저 정한다
+    var parts;
+    if (val('sep') === 'comma') parts = text.split(',');
+    else if (val('sep') === 'space') parts = text.split(/\s+/);
+    else parts = text.split(/\r?\n/);
+
+    var inCount = text ? parts.length : 0;
+
+    if (on('trim')) parts = parts.map(function (s) { return s.trim(); });
+    if (on('squeeze')) parts = parts.map(function (s) { return s.replace(/[ \t]+/g, ' '); });
+    if (on('noblank')) parts = parts.filter(function (s) { return s.trim() !== ''; });
+
+    var c = val('case');
+    if (c === 'upper') parts = parts.map(function (s) { return s.toUpperCase(); });
+    else if (c === 'lower') parts = parts.map(function (s) { return s.toLowerCase(); });
+    else if (c === 'title') parts = parts.map(function (s) { return titleCase(s.toLowerCase()); });
+
+    if (on('dedup')) {
+      var seen = Object.create(null), uniq = [];
+      parts.forEach(function (s) { if (!seen[s]) { seen[s] = 1; uniq.push(s); } });
+      parts = uniq;
+    }
+
+    var s = val('sort');
+    if (s === 'asc') parts = parts.slice().sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+    else if (s === 'desc') parts = parts.slice().sort(function (a, b) { return b.localeCompare(a, 'ko'); });
+    else if (s === 'len') parts = parts.slice().sort(function (a, b) { return a.length - b.length; });
+    else if (s === 'shuffle') {
+      parts = parts.slice();
+      for (var i = parts.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = parts[i]; parts[i] = parts[j]; parts[j] = tmp;
+      }
+    }
+
+    if (on('number')) parts = parts.map(function (x, i) { return (i + 1) + '. ' + x; });
+
+    var result = on('joinone') ? parts.join(' ') : parts.join('\n');
+    out.value = result;
+
+    var outCount = on('joinone') ? (result ? 1 : 0) : (result ? parts.length : 0);
+    document.getElementById('t-in').textContent = inCount.toLocaleString('ko-KR');
+    document.getElementById('t-out').textContent = outCount.toLocaleString('ko-KR');
+    var cut = Math.max(0, inCount - (on('joinone') ? inCount : outCount));
+    document.getElementById('t-cut').textContent = cut.toLocaleString('ko-KR');
+  }
+
+  src.addEventListener('input', process);
+  ids.forEach(function (id) { document.getElementById(id).addEventListener('change', process); });
+  document.addEventListener('langchange', process);
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var m = document.getElementById('copy-msg');
+    if (!out.value) { m.textContent = t('txt.nothing', '복사할 내용이 없습니다'); return; }
+    navigator.clipboard.writeText(out.value).then(function () {
+      m.textContent = t('txt.copied', '복사했습니다');
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = t('txt.copyFail', '복사에 실패했습니다'); });
+  });
+
+  document.getElementById('btn-down').addEventListener('click', function () {
+    if (!out.value) return;
+    // 메모장에서 한글이 깨지지 않도록 BOM을 붙인다
+    var blob = new Blob(['﻿' + out.value], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = t('txt.filename', '정리결과') + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    src.value = ''; process(); src.focus();
+  });
+
+  process();
+})();
+</script>
+</body>
+</html>

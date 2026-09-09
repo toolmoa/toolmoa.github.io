@@ -175,7 +175,7 @@
     var jobs = files.map(function (f) {
       return f.arrayBuffer().then(function (buf) {
         var u8 = new Uint8Array(buf);
-        return PDFLib.PDFDocument.load(u8, { ignoreEncryption: true }).then(function (doc) {
+        return PDFLib.PDFDocument.load(u8, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (doc) {
           return { file: f, pages: doc.getPageCount(), bytes: u8, error: null };
         });
       }).catch(function (e) {
@@ -255,7 +255,7 @@
       var chain = Promise.resolve();
       items.forEach(function (it) {
         chain = chain.then(function () {
-          return PDFLib.PDFDocument.load(it.bytes, { ignoreEncryption: true })
+          return PDFLib.PDFDocument.load(it.bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest })
             .then(function (doc) { return out.copyPages(doc, doc.getPageIndices()); })
             .then(function (pages) { pages.forEach(function (p) { out.addPage(p); }); });
         });

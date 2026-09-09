@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>PDF 처리 속도 측정</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; }
+  table { border-collapse:collapse; font-size:15px; }
+  td,th { padding:8px 14px; border-bottom:1px solid #ddd; text-align:left; }
+</style>
+</head>
+<body>
+<h1 style="font-size:20px">PDF 처리 속도 측정</h1>
+<div id="out">측정 중…</div>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/pdf.min.js"></script>
+<script>
+var rows = [];
+function mark(name, ms, extra) {
+  rows.push(name + ': ' + Math.round(ms) + 'ms' + (extra ? ' (' + extra + ')' : ''));
+  document.getElementById('out').innerHTML = rows.join('<br>');
+  document.title = 'PERF :: ' + rows.join(' ;; ');
+}
+
+function timed(label, fn, extra) {
+  var t0 = performance.now();
+  return Promise.resolve().then(fn).then(function (v) {
+    mark(label, performance.now() - t0, typeof extra === 'function' ? extra(v) : extra);
+    return v;
+  });
+}
+
+fetch('fixtures/real-a.pdf').then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
+  var bytes = new Uint8Array(buf);
+  mark('파일 읽기', 0, Math.round(bytes.length / 1024) + 'KB');
+
+  var src, out, copied;
+
+  return timed('pdf-lib 열기', function () {
+    return PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest });
+  }).then(function (s) { src = s; })
+
+  .then(function () {
+    return timed('새 문서 만들기 + 페이지 복사', function () {
+      return PDFLib.PDFDocument.create().then(function (o) {
+        out = o;
+        return o.copyPages(src, [0, 1]);
+      });
+    });
+  }).then(function (c) { copied = c; })
+
+  .then(function () {
+    return timed('회전 적용 + 페이지 추가', function () {
+      copied.forEach(function (pg) {
+        pg.setRotation(PDFLib.degrees(90));
+        out.addPage(pg);
+      });
+    });
+  })
+
+  .then(function () {
+    return timed('save() 기본값', function () { return out.save(); },
+      function (b) { return Math.round(b.length / 1024) + 'KB'; });
+  })
+
+  .then(function () {
+    // 같은 문서를 다시 저장하면 캐시 영향이 있으므로 새로 구성해서 잰다
+    return PDFLib.PDFDocument.create().then(function (o2) {
+      return o2.copyPages(src, [0, 1]).then(function (c2) {
+        c2.forEach(function (pg) { pg.setRotation(PDFLib.degrees(90)); o2.addPage(pg); });
+        return timed('save() useObjectStreams:false', function () {
+          return o2.save({ useObjectStreams: false });
+        }, function (b) { return Math.round(b.length / 1024) + 'KB'; });
+      });
+    });
+  })
+
+  .then(function () {
+    // 새 문서로 복사하지 않고 원본을 직접 고치면 얼마나 빠른지
+    return timed('원본 직접 수정 후 save()', function () {
+      return PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest })
+        .then(function (doc) {
+          doc.getPage(0).setRotation(PDFLib.degrees(90));
+          doc.removePage(2);
+          return doc.save();
+        });
+    }, function (b) { return Math.round(b.length / 1024) + 'KB'; });
+  })
+
+  .then(function () {
+    // 더 작은 PDF도 같은 비용이 드는지 — 문제 범위를 가늠한다
+    return fetch('fixtures/real-b.pdf').then(function (r) { return r.arrayBuffer(); })
+      .then(function (b2) {
+        var by2 = new Uint8Array(b2);
+        return timed('작은 PDF(245KB) 열기+저장', function () {
+          return PDFLib.PDFDocument.load(by2, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest })
+            .then(function (doc) {
+              doc.getPage(0).setRotation(PDFLib.degrees(90));
+              return doc.save();
+            });
+        }, function (b) { return Math.round(b.length / 1024) + 'KB'; });
+      });
+  })
+
+  .then(function () {
+    // pdf.js로 썸네일을 그리는 비용도 따로 잰다
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
+    return timed('pdf.js 문서 열기', function () {
+      return pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+    }).then(function (doc) {
+      return timed('pdf.js 썸네일 ' + doc.numPages + '장 렌더', function () {
+        var n = 1;
+        function next() {
+          if (n > doc.numPages) return Promise.resolve();
+          return doc.getPage(n).then(function (page) {
+            var v = page.getViewport({ scale: 150 / page.getViewport({ scale: 1 }).width });
+            var c = document.createElement('canvas');
+            c.width = Math.ceil(v.width); c.height = Math.ceil(v.height);
+            return page.render({ canvasContext: c.getContext('2d'), viewport: v }).promise
+              .then(function () { n++; return next(); });
+          });
+        }
+        return next();
+      });
+    });
+  })
+
+  .then(function () { document.title = 'PERFDONE :: ' + rows.join(' ;; '); });
+}).catch(function (e) {
+  document.title = 'PERFDONE :: 오류 ' + ((e && e.message) || e);
+});
+</script>
+</body>
+</html>

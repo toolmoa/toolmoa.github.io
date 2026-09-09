@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>툴모아 - 무료 온라인 도구 모음 | 설치 없이 브라우저에서 바로</title>
-<meta name="description" content="이미지 용량 줄이기·자르기, 글자수 세기, PDF 합치기·나누기, 단위 변환(평수 계산), 만 나이 계산기, QR코드까지 11가지 무료 도구. 설치도 회원가입도 필요 없고 파일이 서버로 올라가지 않습니다.">
+<meta name="description" content="이미지 압축·자르기, PDF 합치기·나누기·회전, 글자수 세기, 텍스트 정리, 단위 변환(평수), 만 나이, QR코드, 비밀번호 생성까지 14가지 무료 도구. 설치도 회원가입도 필요 없고 파일이 서버로 올라가지 않습니다.">
 <link rel="canonical" href="https://toolmoa.github.io/">
 <link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/">
 <link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/">
@@ -36,10 +36,13 @@
       <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
       <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
       <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
       <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
       <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
       <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
       <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
       <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
       <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
       <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
@@ -108,6 +111,21 @@
       <strong data-i18n="card.age.t">만 나이 계산기</strong>
       <small data-i18n="card.age.d">만 나이·세는 나이·연 나이와 띠, 다음 생일까지 한 번에.</small>
     </a>
+    <a class="tool-card" href="pdf-edit.html">
+      <span class="icon">🔃</span>
+      <strong data-i18n="card.edit.t">PDF 페이지 회전·삭제</strong>
+      <small data-i18n="card.edit.d">페이지를 보면서 돌리고, 지우고, 순서를 바꿉니다.</small>
+    </a>
+    <a class="tool-card" href="text-clean.html">
+      <span class="icon">🧹</span>
+      <strong data-i18n="card.txt.t">텍스트 정리</strong>
+      <small data-i18n="card.txt.d">중복된 줄 제거, 정렬, 공백 정리를 한 번에.</small>
+    </a>
+    <a class="tool-card" href="password-gen.html">
+      <span class="icon">🔑</span>
+      <strong data-i18n="card.pw.t">비밀번호 생성기</strong>
+      <small data-i18n="card.pw.d">추측하기 어려운 비밀번호를 만듭니다. 강도도 함께 보여줍니다.</small>
+    </a>
   </div>
 
   <!-- 광고 슬롯: 도메인 구입 + 애드센스 승인 후 아래 주석을 해제하세요 -->
@@ -146,16 +164,19 @@
 
 <footer class="site-footer">
   <div class="wrap">
-                <nav>
+                    <nav>
       <a href="index.html" data-i18n="nav.home">홈</a>
       <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
       <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
       <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
       <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
       <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
       <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
       <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
       <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
       <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
       <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
       <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
