@@ -62,6 +62,20 @@
         <label for="sheet">Sheet</label>
         <select id="sheet"></select>
       </div>
+      <div class="field" id="fs-field" hidden>
+        <label for="fs">Delimiter</label>
+        <select id="fs">
+          <option value="" selected>Detect automatically</option>
+          <option value=",">Comma ,</option>
+          <option value=";">Semicolon ;</option>
+          <option value="\t">Tab</option>
+          <option value="|">Pipe |</option>
+        </select>
+        <div class="hint">
+          CSV files exported in Europe and Latin America are usually separated by semicolons, which can make every row land in a single column. Change this if the preview looks wrong.
+          The same delimiter is used when saving as CSV.
+        </div>
+      </div>
       <div class="field" style="margin-bottom:0">
         <label for="target">Convert to</label>
         <select id="target">
@@ -106,6 +120,14 @@
     <details>
       <summary>What shape does the JSON need to be?</summary>
       <p>An array of objects, for example <code>[{"name":"Ada","age":36}]</code>. Deeply nested values cannot become table cells and are stored as text.</p>
+    </details>
+    <details>
+      <summary>My CSV opens with every row squeezed into one column.</summary>
+      <p>The file is not comma-separated. CSV files exported in Europe and Latin America are usually separated by semicolons (<code>;</code>). Pick semicolon or tab under "Delimiter" and the preview is rebuilt straight away.</p>
+    </details>
+    <details>
+      <summary>Can I save a semicolon-separated CSV?</summary>
+      <p>Yes. Whatever you pick under "Delimiter" is also used when saving. Choose semicolon if the file is going to be opened in Excel with a European locale.</p>
     </details>
     <details>
       <summary>My Excel file has several sheets.</summary>
@@ -189,11 +211,15 @@
     if (fileInput.files.length) load(fileInput.files[0]);
   });
 
+  var lastFile = null;
   function load(file) { whenReady(function () { doLoad(file); }); }
 
   function doLoad(file) {
     baseName = file.name.replace(/\.[^.]+$/, '');
     var ext = (file.name.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase();
+    lastFile = file;
+    // A delimiter only means something for text formats; Excel and JSON have none.
+    document.getElementById('fs-field').hidden = !(ext === 'csv' || ext === 'tsv' || ext === 'txt');
     setMsg('Reading the file…');
 
     if (ext === 'json') {
@@ -228,7 +254,10 @@
       detectedEnc = '';
       try {
         if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
-          workbook = XLSX.read(decodeText(u8), { type: 'string', cellDates: true, raw: false });
+          var opt = { type: 'string', cellDates: true, raw: false };
+          var fs = document.getElementById('fs').value;
+          if (fs) opt.FS = fs === '\t' ? '\t' : fs;
+          workbook = XLSX.read(decodeText(u8), opt);
         } else {
           workbook = XLSX.read(u8, { type: 'array', cellDates: true, raw: false });
         }
@@ -254,6 +283,11 @@
   sheetSel.addEventListener('change', function () {
     readSheet(sheetSel.value);
     show(document.getElementById('t-from').textContent);
+  });
+
+  // Changing the delimiter changes how the file parses, so read it again from scratch.
+  document.getElementById('fs').addEventListener('change', function () {
+    if (lastFile) doLoad(lastFile);
   });
 
   function show(fromLabel) {
@@ -295,7 +329,9 @@
     if (target === 'json') {
       download(new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' }), baseName + '.json');
     } else if (target === 'csv') {
-      var csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(rows));
+      var fsOut = document.getElementById('fs').value;
+      var csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(rows),
+                                        fsOut ? { FS: (fsOut === '\t' ? '\t' : fsOut) } : undefined);
       // UTF-8 BOM so Excel does not mangle non-ASCII characters
       download(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }), baseName + '.csv');
     } else {
@@ -308,8 +344,10 @@
   });
 
   document.getElementById('btn-reset').addEventListener('click', function () {
-    rows = []; workbook = null; fileInput.value = '';
-    area.hidden = true; sheetField.hidden = true; setMsg('');
+    rows = []; workbook = null; fileInput.value = ''; lastFile = null;
+    area.hidden = true; sheetField.hidden = true;
+    document.getElementById('fs-field').hidden = true;
+    setMsg('');
   });
 })();
 </script>

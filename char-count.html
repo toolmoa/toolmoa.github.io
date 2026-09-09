@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>글자수 세기 · 원고지 매수 계산기 - 무료 온라인 | 툴모아</title>
-<meta name="description" content="공백 포함/제외 글자수, 단어수, 바이트, 원고지 매수를 실시간으로 계산합니다. 자기소개서·과제·리포트 분량 확인에. 설치 없이 무료로 사용하세요.">
+<meta name="description" content="공백 포함/제외 글자수, 단어수, 바이트, 원고지 매수를 실시간으로 계산합니다. 자기소개서 500·1000·1500자 제한에 몇 자 남았는지 바로 보여줍니다.">
 <link rel="canonical" href="https://toolmoa.github.io/char-count.html">
 <meta property="og:title" content="글자수 세기 · 원고지 매수 계산기">
 <meta property="og:description" content="공백 포함/제외 글자수, 바이트, 원고지 매수를 실시간 계산">
@@ -64,7 +64,41 @@
   </div>
 
   <div class="card">
+    <h3 style="margin-top:0" data-i18n="char.goalH">글자수 제한 맞추기</h3>
+    <p class="hint" style="margin-top:0" data-i18n="char.goalLead">
+      자기소개서·지원서처럼 글자수 제한이 있는 글을 쓸 때, 남은 글자수를 바로 보여줍니다.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+      <div class="field" style="margin-bottom:0">
+        <label for="goal-preset" data-i18n="char.goalPreset">제한</label>
+        <select id="goal-preset">
+          <option value="500">500자</option>
+          <option value="700">700자</option>
+          <option value="1000" selected>1000자</option>
+          <option value="1500">1500자</option>
+          <option value="2000">2000자</option>
+          <option value="custom" data-i18n="char.goalCustom">직접 입력</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0" id="goal-custom-field" hidden>
+        <label for="goal-custom" data-i18n="char.goalCustomLbl">제한 글자수</label>
+        <input type="number" id="goal-custom" value="1000" min="1" max="100000">
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="goal-basis" data-i18n="char.goalBasis">세는 기준</label>
+        <select id="goal-basis">
+          <option value="all" selected data-i18n="char.goalAll">공백 포함</option>
+          <option value="nospace" data-i18n="char.goalNospace">공백 제외</option>
+        </select>
+      </div>
+    </div>
+    <div class="goal-bar"><span id="goal-fill"></span></div>
+    <div id="goal-msg" class="goal-msg">-</div>
+  </div>
+
+  <div class="card">
     <h3 style="margin-top:0" data-i18n="char.detail">자세한 정보</h3>
+
     <table style="width:100%;border-collapse:collapse;font-size:14px">
       <tbody id="detail-table"></tbody>
     </table>
@@ -87,6 +121,14 @@
     <details>
       <summary>공백 제외 글자수는 어떻게 계산하나요?</summary>
       <p>띄어쓰기, 줄바꿈, 탭 등 모든 공백 문자를 뺀 글자수입니다. 자기소개서에서 "공백 제외"로 요구할 때 이 값을 보세요.</p>
+    </details>
+    <details>
+      <summary>자기소개서 글자수 제한은 어떻게 맞추나요?</summary>
+      <p>"글자수 제한 맞추기"에서 제한을 고르면 남은 글자수가 실시간으로 나옵니다. 제한을 넘으면 막대와 숫자가 빨간색으로 바뀝니다. 500·700·1000·1500·2000자 외의 제한은 "직접 입력"으로 넣으세요.</p>
+    </details>
+    <details>
+      <summary>기업마다 공백을 세는 기준이 다른데요?</summary>
+      <p>"세는 기준"을 공백 포함/제외로 바꿔 가며 확인하세요. 공고에 명시가 없으면 보통 공백 포함으로 셉니다. 두 기준 모두 위쪽 숫자에 함께 표시되니 비교해 보시면 됩니다.</p>
     </details>
     <details>
       <summary>원고지 매수는 어떤 기준인가요?</summary>
@@ -156,6 +198,7 @@
     document.getElementById('s-words').textContent = fmt(words);
     document.getElementById('s-para').textContent = fmt(paras);
     document.getElementById('s-manu').textContent = fmt(manuscript);
+    updateGoal(all, noSpace);
 
     var rows = [
       ['공백 포함 글자수', fmt(all) + '자'],
@@ -192,8 +235,53 @@
     });
   });
 
+  // --- 글자수 제한 맞추기 ---
+  // 자소서는 "1000자 이내"처럼 상한이 정해져 있다. 넘었는지 몇 자 남았는지가 핵심이다.
+  function tt(k, ko) { return (typeof t === 'function') ? t(k, ko) : ko; }
+  var goalPreset = document.getElementById('goal-preset');
+  var goalCustom = document.getElementById('goal-custom');
+  var goalCustomField = document.getElementById('goal-custom-field');
+  var goalBasis = document.getElementById('goal-basis');
+
+  function goalLimit() {
+    if (goalPreset.value === 'custom') {
+      var n = parseInt(goalCustom.value, 10);
+      return (isNaN(n) || n < 1) ? 0 : n;
+    }
+    return parseInt(goalPreset.value, 10);
+  }
+  function updateGoal(all, noSpace) {
+    var lim = goalLimit();
+    var used = goalBasis.value === 'nospace' ? noSpace : all;
+    var fill = document.getElementById('goal-fill');
+    var msg = document.getElementById('goal-msg');
+    if (!lim) { fill.style.width = '0%'; msg.textContent = tt('char.goalNeed', '제한 글자수를 입력하세요'); msg.className = 'goal-msg'; return; }
+    var ratio = Math.min(used / lim, 1);
+    fill.style.width = (ratio * 100).toFixed(1) + '%';
+    if (used > lim) {
+      fill.className = 'over';
+      msg.className = 'goal-msg over';
+      msg.textContent = fmt(used) + ' / ' + fmt(lim) + tt('char.goalUnit', '자') + ' — ' +
+                        fmt(used - lim) + tt('char.goalOver', '자 초과');
+    } else {
+      fill.className = (ratio >= 0.9 ? 'near' : '');
+      msg.className = 'goal-msg' + (ratio >= 0.9 ? ' near' : '');
+      msg.textContent = fmt(used) + ' / ' + fmt(lim) + tt('char.goalUnit', '자') + ' — ' +
+                        fmt(lim - used) + tt('char.goalLeft', '자 남음');
+    }
+  }
+  goalPreset.addEventListener('change', function () {
+    goalCustomField.hidden = goalPreset.value !== 'custom';
+    update();
+  });
+  [goalCustom, goalBasis].forEach(function (el) {
+    el.addEventListener('input', update);
+    el.addEventListener('change', update);
+  });
+
   update();
 })();
+
 </script>
 </body>
 </html>

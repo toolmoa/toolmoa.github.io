@@ -324,7 +324,9 @@
     results.forEach(function (r) {
       var pct = r.before ? Math.round((1 - r.after / r.before) * 100) : 0;
       var li = document.createElement('li');
+      // 결과를 눈으로 보지 못한 채 저장하는 것이 이 툴의 가장 큰 약점이었다
       li.innerHTML =
+        '<a href="' + r.url + '" target="_blank" rel="noopener" title="' + r.name + '"><img src="' + r.url + '" alt="" class="thumb"></a>' +
         '<span class="fname" title="' + r.name + '">' + r.name + '</span>' +
         '<span class="fmeta">' + r.dim + ' · ' + humanSize(r.before) + ' → ' + humanSize(r.after) + '</span>' +
         '<span class="' + (pct > 0 ? 'saved' : 'fmeta') + '">' + (pct > 0 ? '−' + pct + '%' : '+' + Math.abs(pct) + '%') + '</span>';

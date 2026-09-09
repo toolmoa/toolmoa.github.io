@@ -189,7 +189,8 @@
     setMsg('Reading photos…');
     Promise.all(files.map(function (f) {
       return loadImage(f).then(function (img) {
-        return { file: f, w: img.naturalWidth, h: img.naturalHeight };
+        return { file: f, w: img.naturalWidth, h: img.naturalHeight,
+                 url: URL.createObjectURL(f) };   // thumbnail in the list
       }).catch(function () { return null; });
     })).then(function (loaded) {
       items = items.concat(loaded.filter(Boolean));
@@ -212,6 +213,7 @@
       li.draggable = true;
       li.innerHTML =
         '<span class="handle" title="Drag to reorder">⠿</span>' +
+        '<img src="' + it.url + '" alt="" class="thumb">' +
         '<span class="fname" title="' + it.file.name + '">' + (i + 1) + '. ' + it.file.name + '</span>' +
         '<span class="fmeta">' + it.w + '×' + it.h + ' · ' + humanSize(it.file.size) + '</span>';
       var up = document.createElement('button');
@@ -222,7 +224,10 @@
       down.onclick = function () { move(i, i + 1); };
       var del = document.createElement('button');
       del.className = 'btn secondary small'; del.textContent = '✕';
-      del.onclick = function () { items.splice(i, 1); render(); };
+      del.onclick = function () {
+        URL.revokeObjectURL(items[i].url);
+        items.splice(i, 1); render();
+      };
       li.appendChild(up); li.appendChild(down); li.appendChild(del);
 
       li.addEventListener('dragstart', function () { dragIdx = i; li.classList.add('dragging'); });
@@ -299,6 +304,7 @@
   });
 
   document.getElementById('btn-reset').addEventListener('click', function () {
+    items.forEach(function (x) { URL.revokeObjectURL(x.url); });
     items = []; fileInput.value = ''; setMsg(''); render();
   });
 })();

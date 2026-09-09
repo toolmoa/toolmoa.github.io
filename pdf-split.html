@@ -82,6 +82,11 @@
       </div>
     </div>
 
+    <p class="hint" id="grid-hint" style="margin:0 0 6px" data-i18n="split.gridHint">
+      아래 페이지를 눌러서 고를 수도 있습니다. 위의 칸에 직접 입력해도 됩니다.
+    </p>
+    <div class="pgrid" id="grid"></div>
+
     <div class="btn-row">
       <button class="btn" id="btn-go" data-i18n="split.go">나누기</button>
       <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
@@ -138,6 +143,7 @@
 </footer>
 
 <script src="assets/vendor/pdf-lib.min.js"></script>
+<script src="assets/vendor/pdf.min.js"></script>
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -146,6 +152,7 @@
   var msg = document.getElementById('msg');
   var rangeInput = document.getElementById('range');
   var modeSel = document.getElementById('mode');
+  var grid = document.getElementById('grid');
 
   var bytes = null, pageCount = 0, baseName = 'document';
 
@@ -159,7 +166,7 @@
   }
   function whenReady(fn, tries) {
     tries = (tries === undefined) ? 100 : tries;
-    if (typeof PDFLib !== 'undefined') { fn(); return; }
+    if (typeof PDFLib !== 'undefined' && typeof pdfjsLib !== 'undefined') { fn(); return; }
     if (tries <= 0) { setMsg('PDF 기능을 불러오지 못했습니다. 새로고침해 주세요.', 'err'); return; }
     setTimeout(function () { whenReady(fn, tries - 1); }, 100);
   }
@@ -176,7 +183,10 @@
   });
 
   modeSel.addEventListener('change', function () {
-    document.getElementById('range-field').hidden = modeSel.value !== 'range';
+    var isRange = modeSel.value === 'range';
+    document.getElementById('range-field').hidden = !isRange;
+    document.getElementById('grid-hint').hidden = !isRange;
+    grid.hidden = !isRange;
     updatePick();
   });
   rangeInput.addEventListener('input', updatePick);
@@ -200,6 +210,19 @@
         area.hidden = false;
         setMsg('');
         updatePick();
+
+        // 페이지 미리보기를 그린다. pdf.js가 넘긴 버퍼를 가져가므로 복사본을 준다.
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/vendor/pdf.worker.min.js';
+        pdfjsLib.getDocument({ data: bytes.slice() }).promise
+          .then(renderThumbs)
+          .catch(function (err) {
+            // 미리보기가 실패해도 본 기능은 쓸 수 있어야 한다.
+            // 다만 조용히 삼키면 원인을 알 수 없으므로 화면에 남긴다.
+            grid.innerHTML = '';
+            document.getElementById('grid-hint').textContent =
+              t('split.noThumb', '페이지 미리보기를 만들지 못했습니다. 위 칸에 직접 입력해 주세요.') +
+              ' (' + ((err && err.message) || err) + ')';
+          });
       }).catch(function (e) {
         setMsg('파일을 열 수 없습니다. 비밀번호가 걸려 있거나 손상된 PDF일 수 있습니다. — ' +
                ((e && e.message) || e), 'err');
@@ -231,9 +254,82 @@
 
   function updatePick() {
     var el = document.getElementById('t-pick');
-    if (modeSel.value === 'each') { el.textContent = '전체 ' + pageCount + '쪽'; return; }
+    if (modeSel.value === 'each') {
+      el.textContent = t('split.all', '전체 ') + pageCount + t('split.pageUnit', '쪽');
+      highlight([]);
+      return;
+    }
     var picked = parseRange(rangeInput.value);
-    el.textContent = picked.length ? picked.length + '쪽' : '없음';
+    el.textContent = picked.length ? picked.length + t('split.pageUnit', '쪽') : t('split.none', '없음');
+    highlight(picked);
+  }
+
+  // 고른 페이지 번호를 "1-3,7" 같은 짧은 표기로 되돌린다
+  function toRangeText(idxs) {
+    if (!idxs.length) return '';
+    var s = idxs.map(function (i) { return i + 1; }).sort(function (a, b) { return a - b; });
+    var out = [], start = s[0], prev = s[0];
+    for (var i = 1; i <= s.length; i++) {
+      if (i < s.length && s[i] === prev + 1) { prev = s[i]; continue; }
+      out.push(start === prev ? String(start) : start + '-' + prev);
+      start = prev = s[i];
+    }
+    return out.join(',');
+  }
+
+  function highlight(picked) {
+    var on = {};
+    picked.forEach(function (i) { on[i] = 1; });
+    Array.prototype.forEach.call(grid.children, function (card) {
+      card.classList.toggle('on', !!on[parseInt(card.dataset.page, 10)]);
+    });
+  }
+
+  function toggle(idx) {
+    if (modeSel.value !== 'range') return;
+    var picked = parseRange(rangeInput.value);
+    var at = picked.indexOf(idx);
+    if (at >= 0) picked.splice(at, 1); else picked.push(idx);
+    rangeInput.value = toRangeText(picked);
+    updatePick();
+  }
+
+  // 페이지를 눈으로 보고 고를 수 있게 미리보기를 그린다.
+  // 숫자로만 범위를 입력하는 것보다 훨씬 덜 헷갈린다.
+  function renderThumbs(doc) {
+    grid.innerHTML = '';
+    for (var i = 0; i < doc.numPages; i++) {
+      var card = document.createElement('div');
+      card.className = 'pcard pick';
+      card.dataset.page = i;
+      card.innerHTML = '<div class="thumb" style="min-height:80px"></div>' +
+                       '<span class="pno">' + (i + 1) + '</span>';
+      (function (idx) { card.onclick = function () { toggle(idx); }; })(i);
+      grid.appendChild(card);
+    }
+    updatePick();
+
+    var n = 1;
+    function next() {
+      if (n > doc.numPages) return Promise.resolve();
+      return doc.getPage(n).then(function (page) {
+        var v0 = page.getViewport({ scale: 1 });
+        var v = page.getViewport({ scale: 140 / v0.width });
+        var c = document.createElement('canvas');
+        c.width = Math.ceil(v.width); c.height = Math.ceil(v.height);
+        return page.render({ canvasContext: c.getContext('2d'), viewport: v }).promise
+          .then(function () {
+            var holder = grid.children[n - 1] && grid.children[n - 1].querySelector('.thumb');
+            if (holder) { holder.innerHTML = ''; holder.appendChild(c); }
+            n++;
+            return next();
+          }).catch(function (e) {
+            document.getElementById('grid-hint').textContent =
+              '미리보기 렌더 실패: ' + ((e && e.message) || e);
+          });
+      });
+    }
+    return next();
   }
 
   document.getElementById('btn-go').addEventListener('click', function () {
@@ -299,6 +395,7 @@
 
   document.getElementById('btn-reset').addEventListener('click', function () {
     bytes = null; pageCount = 0; fileInput.value = '';
+    grid.innerHTML = '';
     area.hidden = true; setMsg('');
   });
 })();

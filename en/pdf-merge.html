@@ -100,6 +100,10 @@
       <p>No. Encrypted PDFs cannot be opened. Remove the password first, then merge.</p>
     </details>
     <details>
+      <summary>Can I tell the files apart in the list?</summary>
+      <p>Once a file is added, a preview of its first page appears next to the name. That helps when the file names all look alike, such as <code>scan_001.pdf</code>. The preview engine is only downloaded after you add a file, so the page itself still opens instantly.</p>
+    </details>
+    <details>
       <summary>How do I change the order?</summary>
       <p>Drag an item in the list, or use the ↑ and ↓ buttons on each row. Files are joined from top to bottom.</p>
     </details>
@@ -192,6 +196,59 @@
       } else { setMsg(''); }
       fileInput.value = '';
       render();
+      makeThumbs();
+    });
+  }
+
+  // Previews need pdf.js. Pulling 1.3MB up front just for a first-page image would slow
+  // the initial load, so fetch it only once a file is actually added.
+  var pdfjsPromise = null;
+  function loadPdfJs() {
+    if (pdfjsPromise) return pdfjsPromise;
+    pdfjsPromise = new Promise(function (res, rej) {
+      if (typeof pdfjsLib !== 'undefined') { res(pdfjsLib); return; }
+      var sc = document.createElement('script');
+      sc.src = '../assets/vendor/pdf.min.js';
+      sc.onload = function () {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
+        res(pdfjsLib);
+      };
+      sc.onerror = function () { rej(new Error('pdf.js')); };
+      document.head.appendChild(sc);
+    });
+    return pdfjsPromise;
+  }
+
+  // 목록에 있는 파일들의 첫 페이지를 작은 그림으로 그려 둔다.
+  function makeThumbs() {
+    var todo = items.filter(function (it) { return !it.thumbTried && it.bytes; });
+    if (!todo.length) return;
+    loadPdfJs().then(function (lib) {
+      var seq = Promise.resolve();
+      todo.forEach(function (it) {
+        seq = seq.then(function () {
+
+          it.thumbTried = true;   // do not retry a page that already failed
+  // pdf.js hands the buffer to its worker and empties it. That buffer is the source for the
+  // merge, so pass a copy.
+          return lib.getDocument({ data: it.bytes.slice() }).promise
+            .then(function (doc) { return doc.getPage(1); })
+            .then(function (pg) {
+              var vp = pg.getViewport({ scale: 1 });
+              var scale = 88 / Math.max(vp.width, vp.height);
+              var v = pg.getViewport({ scale: scale });
+              var c = document.createElement('canvas');
+              c.width = Math.max(1, Math.round(v.width));
+              c.height = Math.max(1, Math.round(v.height));
+              return pg.render({ canvasContext: c.getContext('2d'), viewport: v }).promise
+                .then(function () { it.thumb = c.toDataURL('image/png'); });
+            })
+            .catch(function () { it.thumb = null; });
+        });
+      });
+      return seq;
+    }).then(function () { render(); }).catch(function () {
+  // Thumbnails are a nicety; if they fail, merging must still work.
     });
   }
 
@@ -210,6 +267,7 @@
       li.draggable = true;
       li.innerHTML =
         '<span class="handle" title="Drag to reorder">⠿</span>' +
+        (it.thumb ? '<img src="' + it.thumb + '" alt="" class="thumb" title="First page">' : '') +
         '<span class="fname" title="' + it.file.name + '">' + (i + 1) + '. ' + it.file.name + '</span>' +
         '<span class="fmeta">' + it.pages + ' pages · ' + humanSize(it.file.size) + '</span>';
 

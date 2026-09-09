@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CSV JSON 엑셀 변환기 - 무료 온라인 파일 변환 | 툴모아</title>
-<meta name="description" content="CSV, JSON, 엑셀(XLSX) 파일을 서로 변환합니다. 한글이 깨지지 않도록 UTF-8 BOM을 자동으로 넣어줍니다. 업로드 없이 브라우저에서 무료로 변환하세요.">
+<meta name="description" content="CSV, JSON, 엑셀(XLSX) 파일을 서로 변환합니다. 한글 깨짐을 자동으로 잡아주고, 세미콜론·탭으로 나뉜 CSV도 구분자를 골라 제대로 읽습니다.">
 <link rel="canonical" href="https://toolmoa.github.io/file-convert.html">
 <link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/file-convert.html">
 <link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/file-convert.html">
@@ -69,6 +69,20 @@
         <label for="sheet" data-i18n="conv.sheet">시트 선택</label>
         <select id="sheet"></select>
       </div>
+      <div class="field" id="fs-field" hidden>
+        <label for="fs" data-i18n="conv.fs">구분자</label>
+        <select id="fs">
+          <option value="" selected data-i18n="conv.fsAuto">자동 판별</option>
+          <option value="," data-i18n="conv.fsComma">쉼표 ,</option>
+          <option value=";" data-i18n="conv.fsSemi">세미콜론 ;</option>
+          <option value="\t" data-i18n="conv.fsTab">탭</option>
+          <option value="|" data-i18n="conv.fsPipe">파이프 |</option>
+        </select>
+        <div class="hint" data-i18n="conv.fsHint">
+          유럽·남미에서 만든 CSV는 세미콜론으로 나뉘어 있어 한 칸에 다 들어가 보일 수 있습니다. 표가 이상하면 바꿔 보세요.
+          여기서 고른 구분자는 CSV로 저장할 때도 그대로 쓰입니다.
+        </div>
+      </div>
       <div class="field" style="margin-bottom:0">
         <label for="target" data-i18n="conv.target">변환할 형식</label>
         <select id="target">
@@ -111,6 +125,14 @@
     <details>
       <summary>JSON은 어떤 형태여야 하나요?</summary>
       <p>객체가 들어 있는 배열이어야 합니다. 예: <code>[{"이름":"홍길동","나이":30}]</code>. 깊게 중첩된 구조는 표로 바꿀 수 없어 문자열로 처리됩니다.</p>
+    </details>
+    <details>
+      <summary>CSV를 열었는데 모든 내용이 한 칸에 들어가요</summary>
+      <p>구분자가 쉼표가 아닌 파일입니다. 유럽·남미에서 만든 CSV는 세미콜론(<code>;</code>)으로 나뉘어 있는 경우가 많습니다. "구분자"에서 세미콜론이나 탭을 골라 보세요. 미리보기 표가 바로 다시 그려집니다.</p>
+    </details>
+    <details>
+      <summary>세미콜론으로 구분된 CSV로 저장할 수도 있나요?</summary>
+      <p>됩니다. "구분자"에서 고른 값이 저장할 때도 그대로 쓰입니다. 유럽 지역 설정의 엑셀에서 열 파일이라면 세미콜론을 고르세요.</p>
     </details>
     <details>
       <summary>엑셀 파일에 시트가 여러 개인데요?</summary>
@@ -208,11 +230,15 @@
     }
   }
 
+  var lastFile = null;
   function load(file) { whenReady(function () { doLoad(file); }); }
 
   function doLoad(file) {
     baseName = file.name.replace(/\.[^.]+$/, '');
     var ext = (file.name.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase();
+    lastFile = file;
+    // 구분자는 텍스트 계열에서만 의미가 있다. 엑셀·JSON에는 구분자가 없다.
+    document.getElementById('fs-field').hidden = !(ext === 'csv' || ext === 'tsv' || ext === 'txt');
     setMsg('파일을 읽는 중입니다…');
 
     if (ext === 'json') {
@@ -252,7 +278,10 @@
       try {
         if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
           // 텍스트 계열은 인코딩을 판별해 문자열로 넘긴다 (한글 깨짐 방지)
-          workbook = XLSX.read(decodeText(u8), { type: 'string', cellDates: true, raw: false });
+          var opt = { type: 'string', cellDates: true, raw: false };
+          var fs = document.getElementById('fs').value;
+          if (fs) opt.FS = fs === '\t' ? '\t' : fs;
+          workbook = XLSX.read(decodeText(u8), opt);
         } else {
           workbook = XLSX.read(u8, { type: 'array', cellDates: true, raw: false });
         }
@@ -282,6 +311,11 @@
   sheetSel.addEventListener('change', function () {
     readSheet(sheetSel.value);
     show(document.getElementById('t-from').textContent);
+  });
+
+  // 구분자를 바꾸면 해석 자체가 달라지므로 같은 파일을 처음부터 다시 읽는다
+  document.getElementById('fs').addEventListener('change', function () {
+    if (lastFile) doLoad(lastFile);
   });
 
   function show(fromLabel) {
@@ -331,7 +365,8 @@
 
     } else if (target === 'csv') {
       var ws = XLSX.utils.json_to_sheet(rows);
-      var csv = XLSX.utils.sheet_to_csv(ws);
+      var fsOut = document.getElementById('fs').value;
+      var csv = XLSX.utils.sheet_to_csv(ws, fsOut ? { FS: (fsOut === '\t' ? '\t' : fsOut) } : undefined);
       // 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM을 붙인다
       download(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }),
                baseName + '.csv');
@@ -347,8 +382,10 @@
   });
 
   document.getElementById('btn-reset').addEventListener('click', function () {
-    rows = []; workbook = null; fileInput.value = '';
-    area.hidden = true; sheetField.hidden = true; setMsg('');
+    rows = []; workbook = null; fileInput.value = ''; lastFile = null;
+    area.hidden = true; sheetField.hidden = true;
+    document.getElementById('fs-field').hidden = true;
+    setMsg('');
   });
 })();
 </script>

@@ -34,6 +34,8 @@ for my $f (@files) {
   while ($c =~ /(?:href|src)="([^"#?:]+)"/g) {
     my $t = $1;
     next if $t =~ m{^(https?:|data:|mailto:|//)};
+    # 스크립트가 실행 중에 만들어내는 주소(문자열 조합)는 파일로 존재하지 않는다
+    next if $t =~ /['"+]/ || $t =~ /^\s/;
     next if $seen{$t}++;
     my $p = $t;
     $p =~ s{^\./}{};
@@ -89,10 +91,10 @@ my @PAIRS = (
   ['image-crop.html',     ['id="preset"', 'id="custom-field"', 'function presetSize',
                            'function activeRatio', 'jpe?g/i.test']],
   ['image-compress.html', ['id="target-size"', 'function encodeToTarget', 'function toBlob']],
-  ['pdf-merge.html',      ['ParseSpeeds.Fastest', 'new Uint8Array(buf)']],
+  ['pdf-merge.html',      ['ParseSpeeds.Fastest', 'new Uint8Array(buf)', 'function makeThumbs', 'function loadPdfJs', 'it.thumbTried']],
   ['pdf-split.html',      ['ParseSpeeds.Fastest']],
   ['img-to-pdf.html',     ['toJpegBytes']],
-  ['file-convert.html',   ['function decodeText', 'type: \'string\'']],
+  ['file-convert.html',   ['function decodeText', q{type: 'string'}, 'id="fs"', 'opt.FS', 'lastFile']],
 );
 
 my $gap = 0;

@@ -212,11 +212,20 @@ function run() {
           var rotCount = txt(d, 't-rot');
           var total = txt(d, 't-total');
 
-          log('PDF 편집 순서·전체회전',
-              afterFirst !== first && rotCount === total && keptAll && !f.dataset.errs,
-              '→ 버튼으로 첫 카드 "' + first + '" → "' + afterFirst + '" (순서 바뀜), ' +
-              '전체 오른쪽 회전 후 회전 페이지 ' + rotCount + '/' + total + ', 삭제 안 눌림 ' + (keptAll ? 'OK' : '실패') +
-              (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          // 썸네일이 실제로 그려지는지. 카드만 있고 그림이 비어도 화면상으로는 티가 안 난다.
+          return waitFor(function () {
+            return d.querySelectorAll('.pcard canvas').length === parseInt(total, 10);
+          }, 30000).then(function () {
+            var cv = d.querySelectorAll('.pcard canvas');
+            var drawn = Array.prototype.filter.call(cv, function (c) { return c.width > 0 && c.height > 0; }).length;
+            log('PDF 편집 순서·전체회전',
+                afterFirst !== first && rotCount === total && keptAll &&
+                cv.length === parseInt(total, 10) && drawn === cv.length && !f.dataset.errs,
+                '→ 버튼으로 첫 카드 "' + first + '" → "' + afterFirst + '" (순서 바뀜), ' +
+                '전체 오른쪽 회전 후 회전 페이지 ' + rotCount + '/' + total + ', 삭제 안 눌림 ' + (keptAll ? 'OK' : '실패') +
+                ', 썸네일 ' + drawn + '/' + total + '장' +
+                (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          });
         });
       });
     });
@@ -338,6 +347,210 @@ function run() {
       });
     });
   }).catch(function (e) { log('TSV 읽기', false, '오류: ' + e.message); });
+
+  // 9. 미리보기가 실제로 그려지는지 (이번에 넣은 개선)
+  chain = chain.then(function () {
+    return Promise.all([makeImg(600, 400), makeImg(400, 600)]).then(function (bl) {
+      return loadFrame('../img-to-pdf.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [
+          new File([bl[0]], 'a.png', { type: 'image/png' }),
+          new File([bl[1]], 'b.png', { type: 'image/png' })
+        ]);
+        return waitFor(function () { return txt(d, 't-count') === '2'; }, 15000).then(function () {
+          var thumbs = d.querySelectorAll('#list img.thumb');
+          var loaded = Array.prototype.filter.call(thumbs, function (im) {
+            return im.getAttribute('src') && im.getAttribute('src').indexOf('blob:') === 0;
+          }).length;
+          log('이미지→PDF 미리보기', thumbs.length === 2 && loaded === 2 && !f.dataset.errs,
+              '사진 2장 → 목록 썸네일 ' + thumbs.length + '개, 주소 정상 ' + loaded + '개');
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지→PDF 미리보기', false, '오류: ' + e.message); });
+
+  // 10. 이미지 압축 결과 썸네일
+  chain = chain.then(function () {
+    return makeImg(1200, 800).then(function (blob) {
+      return loadFrame('../image-compress.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([blob], 'c.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') === '1'; }, 15000).then(function () {
+          var im = d.querySelector('#list img.thumb');
+          var link = d.querySelector('#list a[target="_blank"]');
+          log('이미지 압축 결과 미리보기', !!im && !!link && !f.dataset.errs,
+              '결과 썸네일 ' + (im ? '있음' : '없음') + ', 원본 크기로 여는 링크 ' + (link ? '있음' : '없음'));
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지 압축 결과 미리보기', false, '오류: ' + e.message); });
+
+  // 11. PDF 나누기 — 페이지를 눌러서 고르기
+  chain = chain.then(function () {
+    return grab('fixtures/real-a.pdf').then(function (blob) {
+      if (!blob) { log('PDF 나누기 클릭 선택', false, '고정자료 없음'); return; }
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([blob], 'g.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return d.querySelectorAll('#grid .pcard').length > 0; }, 30000)
+          .then(function () {
+            var cards = d.querySelectorAll('#grid .pcard');
+            var total = parseInt(txt(d, 't-pages'), 10);
+            // 미리보기 캔버스가 실제로 그려졌는지
+            return waitFor(function () { return d.querySelectorAll('#grid canvas').length === total; }, 25000)
+              .then(function () {
+                var canvases = d.querySelectorAll('#grid canvas').length;
+                // 범위를 비우고 2쪽만 눌러본다
+                set(d, 'range', '');
+                cards[1].click();
+                var afterClick = d.getElementById('range').value;
+                var picked = txt(d, 't-pick');
+                var lit = d.querySelectorAll('#grid .pcard.on').length;
+                // 한 번 더 누르면 해제되어야 한다
+                cards[1].click();
+                var afterUnclick = d.getElementById('range').value;
+
+                log('PDF 나누기 클릭 선택',
+                    cards.length === total && canvases === total &&
+                    afterClick === '2' && lit === 1 && afterUnclick === '' && !f.dataset.errs,
+                    total + '쪽 → 카드 ' + cards.length + '개·미리보기 ' + canvases + '개, ' +
+                    '안내: "' + d.getElementById('grid-hint').textContent.trim().slice(0, 90) + '", ' +
+                    '2번째 클릭 → 범위 "' + afterClick + '" 강조 ' + lit + '개, ' +
+                    '다시 클릭 → "' + afterUnclick + '" (해제)');
+              });
+          });
+      });
+    });
+  }).catch(function (e) { log('PDF 나누기 클릭 선택', false, '오류: ' + e.message); });
+
+  // 12. 글자수 세기 — 제한 게이지
+  chain = chain.then(function () {
+    return loadFrame('../char-count.html').then(function (f) {
+      var d = f.contentDocument;
+      var ta = d.getElementById('ta');
+      // 공백 포함 11자, 공백 제외 10자
+      ta.value = '가나다라마 바사아자차';
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      var preset = d.getElementById('goal-preset');
+      preset.value = 'custom'; preset.dispatchEvent(new Event('change', { bubbles: true }));
+      var cf = d.getElementById('goal-custom');
+      cf.value = '11'; cf.dispatchEvent(new Event('input', { bubbles: true }));
+      var m1 = txt(d, 'goal-msg');                       // 11자 제한, 11자 입력 → 0자 남음
+      cf.value = '5'; cf.dispatchEvent(new Event('input', { bubbles: true }));
+      var m2 = txt(d, 'goal-msg');                       // 5자 제한 → 6자 초과
+      var over = d.getElementById('goal-msg').className.indexOf('over') >= 0;
+      var basis = d.getElementById('goal-basis');
+      basis.value = 'nospace'; basis.dispatchEvent(new Event('change', { bubbles: true }));
+      var m3 = txt(d, 'goal-msg');                       // 공백 제외 10자 / 5자 → 5자 초과
+      log('글자수 제한 게이지',
+          m1.indexOf('11 / 11') === 0 && m1.indexOf('0자 남음') > 0 &&
+          m2.indexOf('11 / 5') === 0 && m2.indexOf('6자 초과') > 0 && over &&
+          m3.indexOf('10 / 5') === 0 && m3.indexOf('5자 초과') > 0 && !f.dataset.errs,
+          '11자 제한 → "' + m1 + '", 5자 제한 → "' + m2 + '" (빨강 ' + (over ? 'O' : 'X') + '), ' +
+          '공백 제외 → "' + m3 + '"' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('글자수 제한 게이지', false, '오류: ' + e.message); });
+
+  // 13. 날짜 계산기 — 근무일
+  chain = chain.then(function () {
+    return loadFrame('../date-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      // 2026-01-01(목) ~ 2026-01-31(토). 평일은 22일이다.
+      set(d, 'from', '2026-01-01', 'change');
+      set(d, 'to', '2026-01-31', 'change');
+      d.getElementById('inclusive').checked = true;
+      d.getElementById('inclusive').dispatchEvent(new Event('change', { bubbles: true }));
+      var w1 = txt(d, 'b-work');
+      // 신정(1/1)을 쉬는 날로 넣으면 21일
+      set(d, 'holidays', '2026-01-01', 'input');
+      var w2 = txt(d, 'b-work');
+      // 자동 입력: 2026년 양력 공휴일이 들어가야 한다
+      d.getElementById('btn-holi').click();
+      var filled = d.getElementById('holidays').value;
+      var autoOk = filled.indexOf('2026-01-01') >= 0 && filled.indexOf('2026-12-25') >= 0;
+      // 근무일 더하기: 2026-01-01(목)에서 근무일 3일 뒤 = 1/6(화)
+      //   1/2(금) 1, 1/5(월) 2, 1/6(화) 3
+      set(d, 'base', '2026-01-01', 'change');
+      set(d, 'delta', '3', 'input');
+      var unit = d.getElementById('unit');
+      unit.value = 'biz'; unit.dispatchEvent(new Event('change', { bubbles: true }));
+      var res = txt(d, 'a-date'), dow = txt(d, 'a-dow');
+      log('날짜 계산기 근무일',
+          w1 === '22일' && w2 === '21일' && autoOk &&
+          res === '2026년 1월 6일' && dow === '화요일' && !f.dataset.errs,
+          '1/1~1/31 근무일 ' + w1 + ' (기대 22일), 신정 제외 ' + w2 + ' (기대 21일), ' +
+          '공휴일 자동입력 ' + (autoOk ? 'OK' : '실패') + ', 근무일 +3 → ' + res + ' ' + dow +
+          ' (기대 2026년 1월 6일 화요일)' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('날짜 계산기 근무일', false, '오류: ' + e.message); });
+
+  // 14. 파일 변환 — 세미콜론 CSV
+  chain = chain.then(function () {
+    return grab('fixtures/semicolon.csv').then(function (blob) {
+      if (!blob) { log('세미콜론 CSV', false, '고정자료 없음'); return; }
+      return loadFrame('../file-convert.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [new File([blob], 'semi.csv', { type: 'text/csv' })]);
+        return waitFor(function () { return txt(d, 't-cols') !== '0'; }, 15000).then(function () {
+          var autoCols = txt(d, 't-cols');            // 자동 판별로는 1열로 뭉칠 수 있다
+          var fsShown = !d.getElementById('fs-field').hidden;
+          var fs = d.getElementById('fs');
+          fs.value = ';'; fs.dispatchEvent(new Event('change', { bubbles: true }));
+          return waitFor(function () { return txt(d, 't-cols') === '3'; }, 15000).then(function () {
+            var cols = txt(d, 't-cols'), rows = txt(d, 't-rows');
+            var head = d.querySelector('#preview').textContent;
+            log('세미콜론 CSV',
+                fsShown && cols === '3' && rows === '2' && head.indexOf('부서') >= 0 && !f.dataset.errs,
+                '구분자 칸 ' + (fsShown ? '보임' : '숨음') + ', 자동 판별 ' + autoCols + '열 → ' +
+                '세미콜론 지정 ' + cols + '열 ' + rows + '행 (기대 3열 2행), 머리글에 "부서" ' +
+                (head.indexOf('부서') >= 0 ? 'O' : 'X') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('세미콜론 CSV', false, '오류: ' + e.message); });
+
+  // 15. PDF 합치기 — 첫 페이지 썸네일이 뜨고, 그 뒤에도 합치기가 되는지
+  //     pdf.js는 넘긴 버퍼를 워커로 가져가며 비운다. 복사본을 안 주면 합치기가 깨진다.
+  chain = chain.then(function () {
+    return Promise.all([grab('fixtures/real-a.pdf'), grab('fixtures/real-b.pdf')]).then(function (bl) {
+      if (!bl[0] || !bl[1]) { log('PDF 합치기 썸네일', false, '고정자료 없음'); return; }
+      return loadFrame('../pdf-merge.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([bl[0]], 'a.pdf', { type: 'application/pdf' }),
+          new File([bl[1]], 'b.pdf', { type: 'application/pdf' })
+        ]);
+        return waitFor(function () { return txt(d, 't-files') === '2'; }, 30000).then(function () {
+          var wantPages = parseInt(txt(d, 't-pages'), 10);
+          return waitFor(function () {
+            return d.querySelectorAll('#list img.thumb').length === 2;
+          }, 40000).then(function () {
+            var thumbs = d.querySelectorAll('#list img.thumb');
+            var real = Array.prototype.filter.call(thumbs, function (im) {
+              return (im.getAttribute('src') || '').indexOf('data:image/png') === 0;
+            }).length;
+            // 썸네일을 만든 뒤에도 원본이 살아 있어야 한다
+            var mark = got.length;
+            d.getElementById('btn-merge').click();
+            return waitFor(function () { return pickAll(got, mark, /pdf/).length > 0; }, 40000).then(function () {
+              var b = pickAll(got, mark, /pdf/)[0];
+              if (!b) { log('PDF 합치기 썸네일', false, '썸네일 ' + real + '장이지만 합치기 결과가 나오지 않음'); return; }
+              return b.arrayBuffer().then(function (ab) {
+                return PDFLib.PDFDocument.load(new Uint8Array(ab), { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest });
+              }).then(function (doc) {
+                var merged = doc.getPageCount();
+                log('PDF 합치기 썸네일',
+                    thumbs.length === 2 && real === 2 && merged === wantPages && !f.dataset.errs,
+                    '파일 2개 → 썸네일 ' + real + '/2장, 썸네일 만든 뒤 합치기 ' + merged + '쪽 (기대 ' + wantPages + '쪽)' +
+                    (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 합치기 썸네일', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

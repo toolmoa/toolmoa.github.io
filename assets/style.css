@@ -373,3 +373,66 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 }
 .lang-link:hover { color: var(--text); border-color: var(--muted); }
 
+
+/* 목록 안의 작은 미리보기 — 파일명만으로는 무엇인지 알 수 없다 */
+.file-list .thumb {
+  width: 44px; height: 44px; object-fit: cover;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface-2); flex: 0 0 auto;
+}
+
+/* ===== PDF 페이지 카드 (편집·나누기 공용) ===== */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 18px 0; }
+.pcard {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg); padding: 8px; text-align: center; position: relative;
+}
+.pcard.del { opacity: .35; }
+.pcard canvas {
+  width: 100%; height: auto; display: block; border-radius: 4px;
+  background: #fff; transition: transform .15s;
+}
+.pcard .pno { font-size: 12px; color: var(--muted); margin-top: 6px; display: block; }
+.pcard .ops { display: flex; gap: 4px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+.pcard .ops button {
+  border: 1px solid var(--border); background: transparent; color: var(--text);
+  border-radius: 6px; font-size: 12px; padding: 3px 7px; cursor: pointer; font-family: inherit;
+}
+.pcard .ops button:hover:not(:disabled) { background: var(--surface-2); }
+.pcard .ops button:disabled { opacity: .35; cursor: default; }
+.pcard .ops button.on { border-color: #e5484d; color: #e5484d; }
+.pcard.dragging { opacity: .4; }
+.pcard .grab { position: absolute; top: 6px; left: 8px; color: var(--muted); cursor: grab; font-size: 13px; }
+
+/* 나누기에서 클릭으로 고르는 상태 */
+.pcard.pick { cursor: pointer; }
+.pcard.pick:hover { border-color: var(--muted); }
+.pcard.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.pcard.on .pno { color: var(--accent); font-weight: 600; }
+
+/* 글자수 제한 게이지 (글자수 세기) */
+.goal-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+  margin: 16px 0 8px;
+}
+.goal-bar span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width .12s linear;
+}
+.goal-bar span.near { background: #e0a800; }
+.goal-bar span.over { background: #d93025; }
+.goal-msg {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.goal-msg.near { color: #b98700; }
+.goal-msg.over { color: #d93025; }

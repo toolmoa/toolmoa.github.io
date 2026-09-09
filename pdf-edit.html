@@ -12,28 +12,6 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔃</text></svg>">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/i18n.js" defer></script>
-<style>
-  .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; margin: 18px 0; }
-  .pcard {
-    border: 1px solid var(--border); border-radius: var(--radius-sm);
-    background: var(--bg); padding: 8px; text-align: center; position: relative;
-  }
-  .pcard.del { opacity: .35; }
-  .pcard canvas {
-    width: 100%; height: auto; display: block; border-radius: 4px;
-    background: #fff; transition: transform .15s;
-  }
-  .pcard .pno { font-size: 12px; color: var(--muted); margin-top: 6px; display: block; }
-  .pcard .ops { display: flex; gap: 4px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
-  .pcard .ops button {
-    border: 1px solid var(--border); background: transparent; color: var(--text);
-    border-radius: 6px; font-size: 12px; padding: 3px 7px; cursor: pointer; font-family: inherit;
-  }
-  .pcard .ops button:hover { background: var(--surface-2); }
-  .pcard .ops button.on { border-color: #e5484d; color: #e5484d; }
-  .pcard.dragging { opacity: .4; }
-  .pcard .grab { position: absolute; top: 6px; left: 8px; color: var(--muted); cursor: grab; font-size: 13px; }
-</style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"PDF 페이지 편집","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
