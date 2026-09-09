@@ -206,6 +206,9 @@
       img = im;
       draw();
       resetBox();
+      // 원본이 JPG면 저장 형식도 JPG를 기본으로 둔다.
+      // PNG는 무손실이라 사진을 자르면 원본보다 몇 배 커지는 일이 흔하다.
+      if (/jpe?g/i.test(file.type)) document.getElementById('fmt').value = 'image/jpeg';
       area.hidden = false;
       setMsg('');
     };

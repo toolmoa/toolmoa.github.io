@@ -201,6 +201,9 @@
     im.onload = function () {
       URL.revokeObjectURL(url);
       img = im; draw(); resetBox();
+      if (/jpe?g/i.test(file.type)) document.getElementById('fmt').value = 'image/jpeg';
+      // 원본이 JPG면 저장도 JPG를 기본으로 둔다.
+      // PNG는 무손실이라 사진을 자르면 원본보다 몇 배 커지는 일이 흔하다.
       area.hidden = false; setMsg('');
     };
     im.onerror = function () { URL.revokeObjectURL(url); setMsg('This image could not be opened.', 'err'); };

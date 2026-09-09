@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 실제 파일 검증</title>
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; padding: 24px; background:#fff; color:#111; }
+  h1 { font-size: 22px; }
+  table { border-collapse: collapse; width: 100%; max-width: 1050px; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  th { background: #f2f4f7; }
+  .pass { color: #0a7f3f; font-weight: 700; }
+  .fail { color: #c62828; font-weight: 700; }
+  #summary { font-size: 18px; font-weight: 700; margin: 16px 0; }
+  iframe { position: absolute; left: -9999px; width: 1100px; height: 900px; border: 0; }
+</style>
+</head>
+<body>
+<h1>실제 파일 검증</h1>
+<p style="color:#555;font-size:14px;max-width:950px">
+  합성 파일이 아니라 <strong>브라우저가 실제로 인쇄한 PDF</strong>(폰트 임베딩·압축 스트림 포함),
+  <strong>카메라로 찍은 실제 사진</strong>(EXIF 포함), <strong>실제 엑셀 파일</strong>로 검증한다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:210px">항목</th><th style="width:70px">결과</th><th>검증 내용</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/xlsx.full.min.js"></script>
+<script>
+var results = [];
+function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
+
+function waitFor(cond, maxMs) {
+  var start = Date.now(), limit = maxMs || 20000;
+  return new Promise(function (res) {
+    (function poll() {
+      var ok = false;
+      try { ok = cond(); } catch (e) { ok = false; }
+      if (ok || Date.now() - start > limit) { res(ok); return; }
+      setTimeout(poll, 100);
+    })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.src = src;
+    f.onload = function () { setTimeout(function () { res(f); }, 300); };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function capture(f) {
+  var w = f.contentWindow, out = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () {};
+  return out;
+}
+// 입력 파일도 미리보기용으로 createObjectURL을 거치므로, MIME만으로는 구분이 안 된다.
+// 툴이 새로 만든 것은 순수 Blob이고 입력은 File이라는 점을 이용해 걸러낸다.
+function pickNew(got, mark, typeRe, win) {
+  var l = got.slice(mark).filter(function (b) {
+    if (b && typeof b.name === 'string') return false;   // 입력 File 제외 (Blob에는 name이 없다)
+    return typeRe.test(b.type || '');
+  });
+  return l.length ? l[l.length - 1] : null;
+}
+function waitNew(got, mark, typeRe, ms, win) {
+  return waitFor(function () { return !!pickNew(got, mark, typeRe, win); }, ms || 60000);
+}
+function msgOf(d) {
+  var m = d.getElementById('msg');
+  return m ? m.textContent.trim().slice(0, 160) : '(메시지 없음)';
+}
+function pdfPages(blob) {
+  return blob.arrayBuffer()
+    .then(function (b) { return PDFLib.PDFDocument.load(new Uint8Array(b), { ignoreEncryption: true }); })
+    .then(function (d) { return d.getPageCount(); });
+}
+function imgSize(blob) {
+  return createImageBitmap(blob).then(function (b) { return { w: b.width, h: b.height }; });
+}
+function grab(path) {
+  return fetch(path).then(function (r) {
+    if (!r.ok) throw new Error(path + ' 없음');
+    return r.blob();
+  });
+}
+// JPEG 안에 EXIF(APP1 세그먼트)가 들어있는지 확인한다
+function hasExif(buf) {
+  var u8 = new Uint8Array(buf), lim = Math.min(u8.length - 10, 300000);
+  for (var i = 2; i < lim; i++) {
+    if (u8[i] === 0xFF && u8[i + 1] === 0xE1 &&
+        u8[i + 4] === 0x45 && u8[i + 5] === 0x78 && u8[i + 6] === 0x69 && u8[i + 7] === 0x66) return true;
+  }
+  return false;
+}
+function kb(n) { return Math.round(n / 1024) + 'KB'; }
+
+var FX = {};
+
+function run() {
+  var chain = Promise.all([
+    grab('fixtures/real-a.pdf'), grab('fixtures/real-b.pdf'),
+    grab('fixtures/photo.jpg'), grab('fixtures/book.xlsx')
+  ]).then(function (b) {
+    FX.pdfA = b[0]; FX.pdfB = b[1]; FX.photo = b[2]; FX.xlsx = b[3];
+    return Promise.all([pdfPages(FX.pdfA), pdfPages(FX.pdfB)]);
+  }).then(function (n) {
+    FX.pagesA = n[0]; FX.pagesB = n[1];
+    log('실제 PDF 읽기', FX.pagesA > 0 && FX.pagesB > 0,
+        '브라우저가 인쇄한 PDF: A=' + FX.pagesA + '쪽 (' + kb(FX.pdfA.size) + '), B=' + FX.pagesB + '쪽 (' + kb(FX.pdfB.size) + ')');
+  }).catch(function (e) { log('실제 PDF 읽기', false, '오류: ' + e.message); });
+
+  // 1. 실제 PDF 합치기
+  chain = chain.then(function () {
+    if (!FX.pdfA) return;
+    return loadFrame('../pdf-merge.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [
+        new File([FX.pdfA], 'real-a.pdf', { type: 'application/pdf' }),
+        new File([FX.pdfB], 'real-b.pdf', { type: 'application/pdf' })
+      ]);
+      return waitFor(function () { return d.getElementById('t-files').textContent === '2'; })
+        .then(function () {
+          var shown = d.getElementById('t-pages').textContent;
+          var mark = got.length;
+          d.getElementById('btn-merge').click();
+          return waitNew(got, mark, /pdf/, 60000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /pdf/, f.contentWindow);
+            if (!out) { log('실제 PDF 합치기', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+            return pdfPages(out).then(function (n) {
+              var want = FX.pagesA + FX.pagesB;
+              log('실제 PDF 합치기', n === want && String(want) === shown,
+                  FX.pagesA + '쪽 + ' + FX.pagesB + '쪽 → 결과 ' + n + '쪽 (기대 ' + want +
+                  '), 화면표시 ' + shown + '쪽, ' + kb(out.size));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('실제 PDF 합치기', false, '오류: ' + e.message); });
+
+  // 2. 실제 PDF 나누기
+  chain = chain.then(function () {
+    if (!FX.pdfA) return;
+    return loadFrame('../pdf-split.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([FX.pdfA], 'real-a.pdf', { type: 'application/pdf' })]);
+      return waitFor(function () { return d.getElementById('t-pages').textContent !== '0'; })
+        .then(function () {
+          var shown = d.getElementById('t-pages').textContent;
+          var r = d.getElementById('range');
+          r.value = '1'; r.dispatchEvent(new Event('input'));
+          var mark = got.length;
+          d.getElementById('btn-go').click();
+          return waitNew(got, mark, /pdf/, 60000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /pdf/, f.contentWindow);
+            if (!out) { log('실제 PDF 나누기', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+            return pdfPages(out).then(function (n) {
+              log('실제 PDF 나누기', n === 1 && shown === String(FX.pagesA),
+                  '원본 ' + shown + '쪽 인식 (실제 ' + FX.pagesA + '쪽), 1쪽만 추출 → 결과 ' + n + '쪽, ' + kb(out.size));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('실제 PDF 나누기', false, '오류: ' + e.message); });
+
+  // 3. 실제 사진 압축 + EXIF 제거 확인
+  chain = chain.then(function () {
+    if (!FX.photo) return;
+    return FX.photo.arrayBuffer().then(function (origBuf) {
+      var origExif = hasExif(origBuf);
+      return loadFrame('../image-compress.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        d.getElementById('maxw').value = '1920';
+        d.getElementById('format').value = 'image/jpeg';
+        var mark = got.length;
+        setFiles(d.getElementById('file'), [new File([FX.photo], 'photo.jpg', { type: 'image/jpeg' })]);
+        return waitNew(got, mark, /jpeg/, 30000, f.contentWindow).then(function () {
+          var out = pickNew(got, mark, /jpeg/, f.contentWindow);
+          if (!out) { log('실제 사진 압축', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+          return Promise.all([imgSize(out), out.arrayBuffer(), createImageBitmap(FX.photo)])
+            .then(function (r) {
+              var s = r[0], outExif = hasExif(r[1]), src = r[2];
+              var okDim = s.w === 1920 || (src.width <= 1920 && s.w === src.width);
+              var okSize = out.size < FX.photo.size;
+              log('실제 사진 압축', okDim && okSize && !outExif,
+                  '원본 ' + src.width + '×' + src.height + ' ' + kb(FX.photo.size) +
+                  ' → ' + s.w + '×' + s.h + ' ' + kb(out.size) +
+                  ' (' + Math.round((1 - out.size / FX.photo.size) * 100) + '% 절감), ' +
+                  'EXIF 원본 ' + (origExif ? '있음' : '없음') + ' → 결과 ' + (outExif ? '남아있음 ⚠' : '제거됨'));
+            });
+        });
+      });
+    });
+  }).catch(function (e) { log('실제 사진 압축', false, '오류: ' + e.message); });
+
+  // 4. 실제 사진 자르기
+  chain = chain.then(function () {
+    if (!FX.photo) return;
+    return loadFrame('../image-crop.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([FX.photo], 'photo.jpg', { type: 'image/jpeg' })]);
+      return waitFor(function () { return d.getElementById('t-orig').textContent !== '-'; }, 30000)
+        .then(function () {
+          var orig = d.getElementById('t-orig').textContent;
+          var r = d.getElementById('ratio');
+          r.value = '1'; r.dispatchEvent(new Event('change'));
+          var expect = d.getElementById('t-crop').textContent;
+          var mark = got.length;
+          d.getElementById('btn-save').click();
+          return waitNew(got, mark, /jpeg|png|webp/, 30000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /jpeg|png|webp/, f.contentWindow);
+            if (!out) { log('실제 사진 자르기', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+            return imgSize(out).then(function (s) {
+              log('실제 사진 자르기', (s.w + '×' + s.h) === expect && Math.abs(s.w - s.h) <= 1,
+                  '원본 ' + orig + ' ' + kb(FX.photo.size) + ' → 1:1 선택 ' + expect + ' → 저장 ' + s.w + '×' + s.h + ' ' + out.type + ' ' + kb(out.size));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('실제 사진 자르기', false, '오류: ' + e.message); });
+
+  // 5. 실제 사진 → PDF
+  chain = chain.then(function () {
+    if (!FX.photo) return;
+    return loadFrame('../img-to-pdf.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([FX.photo], 'photo.jpg', { type: 'image/jpeg' })]);
+      return waitFor(function () { return d.getElementById('t-count').textContent === '1'; }, 30000)
+        .then(function () {
+          var mark = got.length;
+          d.getElementById('btn-make').click();
+          return waitNew(got, mark, /pdf/, 40000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /pdf/, f.contentWindow);
+            if (!out) { log('실제 사진 → PDF', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+            return pdfPages(out).then(function (n) {
+              log('실제 사진 → PDF', n === 1, '사진 1장 → PDF ' + n + '쪽, ' + kb(out.size));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('실제 사진 → PDF', false, '오류: ' + e.message); });
+
+  // 6. 실제 엑셀 파일 읽기 + CSV 왕복
+  //    파일에 데이터가 없을 수도 있으므로, 먼저 원본을 직접 파싱해 기대값을 정한다.
+  chain = chain.then(function () {
+    if (!FX.xlsx) return;
+    return FX.xlsx.arrayBuffer().then(function (buf) {
+      var wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+      var sheet = wb.Sheets[wb.SheetNames[0]];
+      var trueRows = XLSX.utils.sheet_to_json(sheet, { defval: '' }).length;
+
+      return loadFrame('../file-convert.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([FX.xlsx], 'book.xlsx',
+          { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })]);
+
+        // 데이터가 없는 파일이면 "비어 있음"을 알려주는 것이 올바른 동작이다
+        if (trueRows === 0) {
+          // "파일을 읽는 중…" 같은 중간 메시지를 잡지 않도록 최종 문구를 기다린다
+          return waitFor(function () { return msgOf(d).indexOf('비어') >= 0; }, 15000).then(function () {
+            var m = msgOf(d);
+            log('실제 엑셀 파일 (빈 파일)', m.indexOf('비어') >= 0 && d.getElementById('t-rows').textContent === '0',
+                '실제 Excel이 만든 빈 워크북(시트 "' + wb.SheetNames[0] + '", 데이터 0행)을 열어 ' +
+                '"' + m + '" 안내. 파일 구조 파싱 자체는 성공.');
+          });
+        }
+        return realXlsxWithData(f, d, got, trueRows);
+      });
+    });
+  }).catch(function (e) { log('실제 엑셀 파일', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+// 데이터가 있는 실제 엑셀 파일일 때의 검증 경로
+function realXlsxWithData(f, d, got, trueRows) {
+  return waitFor(function () { return d.getElementById('t-rows').textContent !== '0'; }, 20000)
+        .then(function () {
+          var rows = d.getElementById('t-rows').textContent;
+          var cols = d.getElementById('t-cols').textContent;
+          var from = d.getElementById('t-from').textContent;
+          d.getElementById('target').value = 'csv';
+          var mark = got.length;
+          d.getElementById('btn-convert').click();
+          return waitNew(got, mark, /csv|text/, 20000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /csv|text/, f.contentWindow);
+            if (!out) { log('실제 엑셀 파일', false, 'CSV 결과 없음 · 행수 ' + d.getElementById('t-rows').textContent + ' · 화면: ' + msgOf(d)); return; }
+            return out.arrayBuffer().then(function (buf) {
+              var u8 = new Uint8Array(buf, 0, 3);
+              var bom = u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF;
+              return out.text().then(function (txt) {
+                var lines = txt.replace(/^﻿/, '').trim().split(/\r?\n/);
+                log('실제 엑셀 파일', String(trueRows) === rows && bom && lines.length >= 1,
+                    '실제 xlsx를 열어 ' + rows + '행 ' + cols + '열 인식 (원본 실제 ' + trueRows + '행, 형식 ' + from + '), ' +
+                    'CSV 변환 결과 ' + lines.length + '줄, BOM ' + (bom ? '있음' : '없음 ⚠'));
+              });
+            });
+          });
+        });
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 실제 파일도 정상</span>' : ' <span class="fail">— 실패 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'REAL ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>
