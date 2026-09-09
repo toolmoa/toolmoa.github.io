@@ -45,6 +45,7 @@
     <span class="dz-icon">🖨️</span>
     <span class="dz-main">Drop photos here, or click to choose</span>
     <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · multiple files supported</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
     <input type="file" id="file" accept="image/*" multiple>
   </div>
 
@@ -100,6 +101,10 @@
 
   <h2>Frequently asked questions</h2>
   <div class="faq">
+    <details>
+      <summary>Can I paste a screenshot instead of saving it first?</summary>
+      <p>Yes. Copy or capture the image, then press <kbd>Ctrl</kbd>+<kbd>V</kbd> (<kbd>⌘</kbd>+<kbd>V</kbd> on a Mac) anywhere on this page and it goes straight in.</p>
+    </details>
     <details>
       <summary>Are my photos uploaded?</summary>
       <p>No. The PDF is built inside your browser and nothing is sent anywhere.</p>
@@ -170,6 +175,24 @@
     e.preventDefault(); dz.classList.remove('over'); add(e.dataTransfer.files);
   });
   fileInput.addEventListener('change', function () { add(fileInput.files); });
+  // Saving a screenshot to a file just to pick it again is tedious. Accept Ctrl+V directly.
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile();
+      if (!f) continue;
+      // Clipboard images arrive unnamed or all called image.png, so they collide. Stamp the time.
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], 'pasted-image-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    add(picked);
+  });
+
 
   function loadImage(file) {
     return new Promise(function (res, rej) {

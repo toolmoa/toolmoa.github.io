@@ -102,6 +102,9 @@ function run() {
           mode.value = 'each'; mode.dispatchEvent(new Event('change', { bubbles: true }));
           var rangeHidden = d.getElementById('range-field').hidden;
           var pick = txt(d, 't-pick');
+          // 기본값은 ZIP 한 개다(그쪽은 verify.html에서 확인한다).
+          // 여기서는 체크를 푼 개별 저장 경로를 계속 지킨다.
+          d.getElementById('as-zip').checked = false;
           var mark = got.length;
           d.getElementById('btn-go').click();
           return waitFor(function () { return pickAll(got, mark, /pdf/).length >= 4; }, 25000).then(function () {

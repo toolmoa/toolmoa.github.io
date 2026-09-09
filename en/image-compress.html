@@ -45,6 +45,7 @@
     <span class="dz-icon">🖼️</span>
     <span class="dz-main">Drop photos here, or click to choose</span>
     <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · multiple files supported</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
     <input type="file" id="file" accept="image/*" multiple>
   </div>
 
@@ -104,12 +105,16 @@
       <button class="btn" id="btn-all">Save all</button>
       <button class="btn secondary" id="btn-reset">Reset</button>
     </div>
+    <label class="inline-check">
+      <input type="checkbox" id="as-zip" checked>
+      <span>Save as a single ZIP file</span>
+    </label>
     <ul class="file-list" id="list"></ul>
   </div>
 
   <div class="upsell">
     <h3>Need to process hundreds of photos in one go?</h3>
-    <p>The desktop version takes a whole folder, keeps your subfolder structure, converts everything and hands you a ZIP. You do not even need a browser open.</p>
+    <p>The desktop version takes a whole folder, keeps your subfolder structure, converts everything, and watches for new files to process them automatically. No dragging hundreds of images into a browser, and no browser to keep open.</p>
     <a class="btn" href="#" id="upsell-link">See the batch version</a>
   </div>
 
@@ -128,6 +133,14 @@
 
   <h2>Frequently asked questions</h2>
   <div class="faq">
+    <details>
+      <summary>Does saving several images download them one at a time?</summary>
+      <p>No. They are bundled into a <strong>single ZIP file</strong> by default. Untick the box under "Save all" if you would rather have separate files — but then the browser asks for confirmation each time, and phones often keep only the first image.</p>
+    </details>
+    <details>
+      <summary>Can I paste a screenshot instead of saving it first?</summary>
+      <p>Yes. Copy or capture the image, then press <kbd>Ctrl</kbd>+<kbd>V</kbd> (<kbd>⌘</kbd>+<kbd>V</kbd> on a Mac) anywhere on this page and it goes straight in.</p>
+    </details>
     <details>
       <summary>Are my photos uploaded anywhere?</summary>
       <p>No. The conversion runs in your browser. Load the page, go offline, and it still works.</p>
@@ -167,6 +180,7 @@
   </div>
 </footer>
 
+<script src="../assets/zip.js"></script>
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -217,6 +231,24 @@
     e.preventDefault(); dz.classList.remove('over'); handle(e.dataTransfer.files);
   });
   fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  // Saving a screenshot to a file just to pick it again is tedious. Accept Ctrl+V directly.
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile();
+      if (!f) continue;
+      // Clipboard images arrive unnamed or all called image.png, so they collide. Stamp the time.
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], 'pasted-image-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    handle(picked);
+  });
+
 
   function handle(fileList) {
     var files = Array.prototype.slice.call(fileList).filter(function (f) {
@@ -347,14 +379,41 @@
     resultBox.hidden = false;
   }
 
+  // Downloading one file at a time makes the browser ask about multiple downloads, and on
+  // phones only the first image tends to survive. Bundle everything into one ZIP by default.
   document.getElementById('btn-all').addEventListener('click', function () {
-    results.forEach(function (r, i) {
-      setTimeout(function () {
-        var a = document.createElement('a');
-        a.href = r.url; a.download = r.name;
-        document.body.appendChild(a); a.click(); a.remove();
-      }, i * 350);
-    });
+    if (!results.length) return;
+    var wantZip = document.getElementById('as-zip').checked && typeof makeZip === 'function';
+
+    if (!wantZip || results.length === 1) {
+      results.forEach(function (r, i) {
+        setTimeout(function () {
+          var a = document.createElement('a');
+          a.href = r.url; a.download = r.name;
+          document.body.appendChild(a); a.click(); a.remove();
+        }, i * 350);   // avoid the multi-download block
+      });
+      return;
+    }
+
+    var btn = this;
+    btn.disabled = true;
+    setMsg('Bundling…');
+    Promise.all(results.map(function (r) {
+      return r.blob.arrayBuffer().then(function (ab) {
+        return { name: r.name, bytes: new Uint8Array(ab) };
+      });
+    })).then(function (entries) {
+      var url = URL.createObjectURL(makeZip(entries));
+      var a = document.createElement('a');
+      a.href = url; a.download = 'compressed-images.zip';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(entries.length + ' images bundled into one ZIP.', 'ok');
+    }).catch(function (e) {
+      setMsg('Could not build the ZIP. Untick the box and save the images one by one. (' +
+             ((e && e.message) || e) + ')', 'err');
+    }).then(function () { btn.disabled = false; });
   });
 
   document.getElementById('btn-reset').addEventListener('click', function () {

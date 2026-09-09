@@ -88,12 +88,13 @@ print "\n=== 한국어 / 영어 기능 대조 ===\n";
 my @PAIRS = (
   ['qr-generate.html',    ['id="qtype"', 'id="g-wifi"', 'id="g-vcard"', 'id="logo"',
                            'toUtf8Chars', 'buildPayload', 'drawLogo', 'CAP = {']],
-  ['image-crop.html',     ['id="preset"', 'id="custom-field"', 'function presetSize',
+  ['image-crop.html',     ['id="preset"', 'id="custom-field"', 'function presetSize', "addEventListener('paste'",
                            'function activeRatio', 'jpe?g/i.test']],
-  ['image-compress.html', ['id="target-size"', 'function encodeToTarget', 'function toBlob']],
+  ['image-compress.html', ['id="target-size"', 'function encodeToTarget', 'function toBlob',
+                           'id="as-zip"', 'makeZip(entries)', "addEventListener('paste'"]],
   ['pdf-merge.html',      ['ParseSpeeds.Fastest', 'new Uint8Array(buf)', 'function makeThumbs', 'function loadPdfJs', 'it.thumbTried']],
   ['pdf-split.html',      ['ParseSpeeds.Fastest']],
-  ['img-to-pdf.html',     ['toJpegBytes']],
+  ['img-to-pdf.html',     ['toJpegBytes', "addEventListener('paste'"]],
   ['file-convert.html',   ['function decodeText', q{type: 'string'}, 'id="fs"', 'opt.FS', 'lastFile']],
 );
 

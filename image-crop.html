@@ -68,6 +68,7 @@
     <span class="dz-icon">🔲</span>
     <span class="dz-main" data-i18n="crop.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
     <span class="dz-sub" data-i18n="crop.drop2">JPG · PNG · WebP · GIF · BMP</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
     <input type="file" id="file" accept="image/*">
   </div>
 
@@ -154,6 +155,10 @@
       <p>아니요. 자르기와 회전 모두 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다.</p>
     </details>
     <details>
+      <summary>캡처한 화면을 바로 넣을 수 있나요?</summary>
+      <p>됩니다. 화면을 캡처한 뒤 <kbd>Ctrl</kbd>+<kbd>V</kbd>(맥은 <kbd>⌘</kbd>+<kbd>V</kbd>)를 누르면 바로 들어갑니다.</p>
+    </details>
+    <details>
       <summary>화질이 떨어지나요?</summary>
       <p>PNG로 저장하면 화질 손실이 전혀 없습니다. 자르기는 원본 해상도 그대로 잘라내므로 화면에 작게 보여도 결과물은 원본 화질입니다.</p>
     </details>
@@ -225,6 +230,24 @@
   fileInput.addEventListener('change', function () {
     if (fileInput.files.length) load(fileInput.files[0]);
   });
+  // 캡처한 화면을 파일로 저장한 뒤 다시 고르는 과정이 번거롭다. Ctrl+V로 바로 받는다.
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile();
+      if (!f) continue;
+      // 클립보드 이미지는 이름이 없거나 전부 image.png라 겹친다. 시각을 붙여 구분한다.
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], '붙여넣은-사진-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    load(picked[0]);
+  });
+
 
   var presetSel = document.getElementById('preset');
   var customField = document.getElementById('custom-field');

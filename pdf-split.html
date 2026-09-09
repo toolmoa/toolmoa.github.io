@@ -72,6 +72,16 @@
           <option value="each" data-i18n="split.mEach">모든 페이지를 낱장 PDF로 나누기</option>
         </select>
       </div>
+      <div class="field" id="zip-field" hidden style="margin-bottom:0">
+        <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="as-zip" checked style="width:auto;margin:0">
+          <span data-i18n="split.zip">ZIP 파일 한 개로 받기</span>
+        </label>
+        <div class="hint" data-i18n="split.zipHint">
+          체크를 풀면 페이지 수만큼 파일이 따로 내려받아집니다. 브라우저가 여러 번 물어보거나
+          휴대전화에서는 첫 파일만 저장될 수 있어, ZIP으로 받는 편을 권합니다.
+        </div>
+      </div>
       <div class="field" id="range-field" style="margin-bottom:0">
         <label for="range" data-i18n="split.range">뽑을 페이지</label>
         <input type="text" id="range" placeholder="예: 1-3,7,10-12" data-i18n-ph="split.rangePh">
@@ -107,7 +117,7 @@
     </details>
     <details>
       <summary>낱장으로 나누면 파일이 몇 개 받아지나요?</summary>
-      <p>페이지 수만큼 받아집니다. 브라우저가 여러 개의 다운로드를 물어볼 수 있는데 '허용'을 선택하세요. 페이지가 아주 많으면 범위 추출을 나눠서 쓰시는 편이 편합니다.</p>
+      <p>기본적으로 <strong>ZIP 파일 한 개</strong>로 묶어서 드립니다. 압축을 풀면 페이지 수만큼 PDF가 들어 있습니다. 파일을 하나씩 받고 싶으면 "ZIP 파일 한 개로 받기" 체크를 푸세요. 다만 그 경우 브라우저가 여러 번 확인을 묻고, 휴대전화에서는 첫 파일만 저장되는 일이 있습니다.</p>
     </details>
     <details>
       <summary>비밀번호가 걸린 PDF도 되나요?</summary>
@@ -144,6 +154,7 @@
 
 <script src="assets/vendor/pdf-lib.min.js"></script>
 <script src="assets/vendor/pdf.min.js"></script>
+<script src="assets/zip.js"></script>
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -182,13 +193,17 @@
     if (fileInput.files.length) load(fileInput.files[0]);
   });
 
-  modeSel.addEventListener('change', function () {
+  // 방식에 따라 보여줄 칸이 달라진다. 파일을 새로 열 때도 같은 규칙을 다시 적용해야
+  // 초기화 뒤에 방식이 '낱장'으로 남아 있는 경우와 어긋나지 않는다.
+  function syncMode() {
     var isRange = modeSel.value === 'range';
     document.getElementById('range-field').hidden = !isRange;
+    document.getElementById('zip-field').hidden = isRange;
     document.getElementById('grid-hint').hidden = !isRange;
     grid.hidden = !isRange;
     updatePick();
-  });
+  }
+  modeSel.addEventListener('change', syncMode);
   rangeInput.addEventListener('input', updatePick);
 
   function load(file) {
@@ -209,7 +224,7 @@
         if (!rangeInput.value) rangeInput.value = '1-' + Math.min(pageCount, 3);
         area.hidden = false;
         setMsg('');
-        updatePick();
+        syncMode();
 
         // 페이지 미리보기를 그린다. pdf.js가 넘긴 버퍼를 가져가므로 복사본을 준다.
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/vendor/pdf.worker.min.js';
@@ -341,24 +356,36 @@
     var mode = modeSel.value;
     PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (src) {
       if (mode === 'each') {
+        var wantZip = document.getElementById('as-zip').checked && typeof makeZip === 'function';
+        var made = [];
         var chain = Promise.resolve();
         for (var i = 0; i < pageCount; i++) {
           (function (idx) {
             chain = chain.then(function () {
+              setMsg(t('split.working', '나누는 중입니다… ') + (idx + 1) + ' / ' + pageCount);
               return PDFLib.PDFDocument.create().then(function (out) {
                 return out.copyPages(src, [idx]).then(function (p) {
                   out.addPage(p[0]);
                   return out.save();
                 });
               }).then(function (b) {
-                save(b, baseName + '_' + (idx + 1) + '쪽.pdf');
+                var name = baseName + '_' + (idx + 1) + t('split.pageSuffix', '쪽') + '.pdf';
+                if (wantZip) { made.push({ name: name, bytes: b }); return; }
+                save(b, name);
                 return new Promise(function (r) { setTimeout(r, 300); });  // 연속 다운로드 차단 회피
               });
             });
           })(i);
         }
         return chain.then(function () {
-          setMsg(pageCount + '개 파일로 나눴습니다.', 'ok');
+          if (!wantZip) {
+            setMsg(pageCount + t('split.doneEach', '개 파일로 나눴습니다.'), 'ok');
+            return;
+          }
+          // 파일을 하나씩 내려받게 하면 브라우저가 막거나 휴대전화에서 첫 장만 남는다
+          var zip = makeZip(made);
+          saveBlob(zip, baseName + '_' + t('split.zipName', '낱장') + '.zip');
+          setMsg(pageCount + t('split.doneZip', '쪽을 ZIP 한 개로 묶었습니다.'), 'ok');
         });
       }
 
@@ -384,8 +411,9 @@
     });
   });
 
-  function save(b, name) {
-    var blob = new Blob([b], { type: 'application/pdf' });
+  function save(b, name) { saveBlob(new Blob([b], { type: 'application/pdf' }), name); }
+
+  function saveBlob(blob, name) {
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url; a.download = name;
@@ -396,6 +424,7 @@
   document.getElementById('btn-reset').addEventListener('click', function () {
     bytes = null; pageCount = 0; fileInput.value = '';
     grid.innerHTML = '';
+    document.getElementById('zip-field').hidden = true;
     area.hidden = true; setMsg('');
   });
 })();

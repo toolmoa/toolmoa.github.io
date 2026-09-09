@@ -436,3 +436,23 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 }
 .goal-msg.near { color: #b98700; }
 .goal-msg.over { color: #d93025; }
+
+/* 버튼 줄 아래에 붙는 체크박스 한 줄 */
+.inline-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 14px;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.inline-check input { width: auto; margin: 0; }
+
+/* 붙여넣기 안내 (드롭존 안) */
+.dz-paste {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}

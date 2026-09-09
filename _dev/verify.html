@@ -28,6 +28,7 @@
 <script src="../assets/vendor/pdf-lib.min.js"></script>
 <script src="../assets/vendor/xlsx.full.min.js"></script>
 <script src="jsQR.js"></script>
+<script src="../assets/zip.js"></script>
 <script>
 var results = [];
 function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
@@ -88,6 +89,39 @@ function firstBytes(blob, n) {
   return blob.arrayBuffer().then(function (buf) {
     return Array.prototype.slice.call(new Uint8Array(buf, 0, n));
   });
+}
+
+// 압축 없이 담은(store) ZIP만 읽는 최소 해석기.
+// zip.js의 코드를 재사용하지 않는다 — 쓰는 쪽과 읽는 쪽이 같은 실수를 공유하면 검증이 성립하지 않는다.
+function readZipEntries(u8) {
+  var dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  var eocd = -1;
+  for (var i = u8.length - 22; i >= 0; i--) {
+    if (dv.getUint32(i, true) === 0x06054B50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('끝 기록(EOCD)을 찾지 못함');
+  var count = dv.getUint16(eocd + 10, true);
+  var cdOff = dv.getUint32(eocd + 16, true);
+  var dec = new TextDecoder('utf-8');
+  var out = [], p = cdOff;
+  for (var n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014B50) throw new Error('중앙 디렉터리 서명 불일치');
+    var flags = dv.getUint16(p + 8, true);
+    var method = dv.getUint16(p + 10, true);
+    var crc = dv.getUint32(p + 16, true);
+    var size = dv.getUint32(p + 24, true);
+    var nameLen = dv.getUint16(p + 28, true);
+    var extraLen = dv.getUint16(p + 30, true);
+    var cmtLen = dv.getUint16(p + 32, true);
+    var lhOff = dv.getUint32(p + 42, true);
+    var name = dec.decode(u8.subarray(p + 46, p + 46 + nameLen));
+    if (dv.getUint32(lhOff, true) !== 0x04034B50) throw new Error('로컬 헤더 서명 불일치');
+    var start = lhOff + 30 + dv.getUint16(lhOff + 26, true) + dv.getUint16(lhOff + 28, true);
+    out.push({ name: name, method: method, utf8: !!(flags & 0x0800), crc: crc,
+               bytes: u8.subarray(start, start + size) });
+    p += 46 + nameLen + extraLen + cmtLen;
+  }
+  return out;
 }
 
 function pdfPages(blob) {
@@ -458,6 +492,176 @@ function run() {
       });
     });
   }).catch(function (e) { log('EN: QR 프리셋·비ASCII', false, '오류: ' + e.message); });
+
+  // 13. ZIP 쓰기 자체를 검증한다.
+  //     내가 직접 만든 형식이므로, zip.js의 함수를 재사용해 확인하면 순환 논증이 된다.
+  //     여기서는 CRC도 ZIP 해석도 zip.js와 무관하게 따로 구현해 대조한다.
+  chain = chain.then(function () {
+    // 테이블 없이 비트 단위로 도는 CRC-32. zip.js의 테이블 방식과 구현이 다르다.
+    function crcSlow(u8) {
+      var c = 0xFFFFFFFF;
+      for (var i = 0; i < u8.length; i++) {
+        c ^= u8[i];
+        for (var k = 0; k < 8; k++) c = (c & 1) ? ((c >>> 1) ^ 0xEDB88320) : (c >>> 1);
+      }
+      return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+
+    var a = new Uint8Array([0, 1, 2, 250, 251, 255, 65, 66]);
+    var b = new Uint8Array(5000);
+    for (var i = 0; i < b.length; i++) b[i] = (i * 31 + 7) & 0xFF;
+    var entries = [
+      { name: '한글 이름 1쪽.pdf', bytes: a },
+      { name: 'plain.bin', bytes: b },
+      { name: '한글 이름 1쪽.pdf', bytes: a }   // 이름이 겹치면 뒤에 번호가 붙어야 한다
+    ];
+    var blob = makeZip(entries);
+    return blob.arrayBuffer().then(function (ab) {
+      var got = readZipEntries(new Uint8Array(ab));
+      var names = got.map(function (g) { return g.name; });
+      var sameA = got[0].bytes.length === a.length &&
+                  Array.prototype.every.call(a, function (v, k) { return got[0].bytes[k] === v; });
+      var sameB = got[1].bytes.length === b.length &&
+                  Array.prototype.every.call(b, function (v, k) { return got[1].bytes[k] === v; });
+      var crcOk = got[0].crc === crcSlow(a) && got[1].crc === crcSlow(b);
+      var stored = got.every(function (g) { return g.method === 0; });
+      var utf8 = got.every(function (g) { return g.utf8; });
+      var dedup = names[0] === '한글 이름 1쪽.pdf' && names[2] === '한글 이름 1쪽 (2).pdf';
+      log('ZIP 형식 (직접 해석)',
+          got.length === 3 && sameA && sameB && crcOk && stored && utf8 && dedup,
+          '항목 ' + got.length + '개, 내용 일치 ' + (sameA && sameB ? 'OK' : '불일치') +
+          ', CRC 별도 계산 일치 ' + (crcOk ? 'OK' : '불일치') +
+          ', 무압축 ' + (stored ? 'OK' : '아님') + ', UTF-8 이름 표시 ' + (utf8 ? 'OK' : '없음') +
+          ', 이름 중복 처리 "' + names[2] + '" (기대 "한글 이름 1쪽 (2).pdf"), ' + blob.size + 'B');
+    });
+  }).catch(function (e) { log('ZIP 형식 (직접 해석)', false, '오류: ' + e.message); });
+
+  // 14. PDF 낱장 나누기를 ZIP으로 받았을 때, 안에 든 것이 진짜 낱장 PDF인지
+  chain = chain.then(function () {
+    return makePdf(4).then(function (bytes) {
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], '문서.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return d.getElementById('t-pages').textContent === '4'; }, 15000)
+          .then(function () {
+            var mode = d.getElementById('mode');
+            mode.value = 'each'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+            var zipShown = !d.getElementById('zip-field').hidden;
+            var checked = d.getElementById('as-zip').checked;
+            var mark = got.length;
+            d.getElementById('btn-go').click();
+            return waitNew(got, mark, /zip/, 30000).then(function () {
+              var z = pickNew(got, mark, /zip/);
+              var pdfs = got.slice(mark).filter(function (x) { return /pdf/.test(x.type || ''); });
+              if (!z) { log('PDF 낱장 ZIP', false, 'ZIP이 만들어지지 않음'); return; }
+              return z.arrayBuffer().then(function (ab) {
+                var items = readZipEntries(new Uint8Array(ab));
+                return Promise.all(items.map(function (it) {
+                  return PDFLib.PDFDocument.load(it.bytes.slice(), { ignoreEncryption: true })
+                    .then(function (doc) { return doc.getPageCount(); });
+                })).then(function (counts) {
+                  var allOne = counts.length === 4 && counts.every(function (c) { return c === 1; });
+                  log('PDF 낱장 ZIP',
+                      zipShown && checked && allOne && pdfs.length === 0 && !f.dataset.errs,
+                      '4쪽 → ZIP 1개 (' + Math.round(z.size / 1024) + 'KB) 안에 ' + counts.length +
+                      '개, 각 ' + counts.join('/') + '쪽, 첫 이름 "' + items[0].name + '", ' +
+                      '개별 다운로드 ' + pdfs.length + '건 (기대 0), 체크박스 표시 ' +
+                      (zipShown ? 'OK' : '숨음') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+                });
+              });
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('PDF 낱장 ZIP', false, '오류: ' + e.message); });
+
+  // 15. 체크를 풀면 예전처럼 낱장으로 따로 받아져야 한다 (선택권이 실제로 동작하는지)
+  chain = chain.then(function () {
+    return makePdf(3).then(function (bytes) {
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 'x.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return d.getElementById('t-pages').textContent === '3'; }, 15000)
+          .then(function () {
+            var mode = d.getElementById('mode');
+            mode.value = 'each'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+            d.getElementById('as-zip').checked = false;
+            var mark = got.length;
+            d.getElementById('btn-go').click();
+            return waitFor(function () {
+              return got.slice(mark).filter(function (x) { return /pdf/.test(x.type || ''); }).length >= 3;
+            }, 30000).then(function () {
+              var pdfs = got.slice(mark).filter(function (x) { return /pdf/.test(x.type || ''); });
+              var zips = got.slice(mark).filter(function (x) { return /zip/.test(x.type || ''); });
+              log('낱장 ZIP 해제',
+                  pdfs.length === 3 && zips.length === 0 && !f.dataset.errs,
+                  '체크 해제 → 개별 PDF ' + pdfs.length + '개 (기대 3), ZIP ' + zips.length + '개 (기대 0)' +
+                  (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('낱장 ZIP 해제', false, '오류: ' + e.message); });
+
+  // 16. 이미지 압축 여러 장 → ZIP
+  chain = chain.then(function () {
+    return Promise.all([makeImg(900, 700, '#2f6df6'), makeImg(700, 900, '#e04b2f')]).then(function (bl) {
+      return loadFrame('../image-compress.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([bl[0]], '사진 하나.png', { type: 'image/png' }),
+          new File([bl[1]], '사진 둘.png', { type: 'image/png' })
+        ]);
+        return waitFor(function () { return d.getElementById('t-count').textContent === '2'; }, 20000)
+          .then(function () {
+            var mark = got.length;
+            d.getElementById('btn-all').click();
+            return waitNew(got, mark, /zip/, 25000).then(function () {
+              var z = pickNew(got, mark, /zip/);
+              if (!z) { log('이미지 압축 ZIP', false, 'ZIP이 만들어지지 않음'); return; }
+              return z.arrayBuffer().then(function (ab) {
+                var items = readZipEntries(new Uint8Array(ab));
+                // 안에 든 것이 진짜 이미지인지 확인한다 (이름만 맞고 내용이 빈 경우를 걸러낸다)
+                return Promise.all(items.map(function (it) {
+                  return createImageBitmap(new Blob([it.bytes.slice()]))
+                    .then(function (b) { return b.width + '×' + b.height; })
+                    .catch(function () { return '못 읽음'; });
+                })).then(function (sizes) {
+                  var ok = items.length === 2 && sizes.every(function (s) { return s !== '못 읽음'; });
+                  log('이미지 압축 ZIP', ok && !f.dataset.errs,
+                      '2장 → ZIP 1개 (' + Math.round(z.size / 1024) + 'KB) 안에 ' + items.length +
+                      '개: ' + items.map(function (it, i) { return '"' + it.name + '" ' + sizes[i]; }).join(', ') +
+                      (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+                });
+              });
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('이미지 압축 ZIP', false, '오류: ' + e.message); });
+
+  // 17. 붙여넣기(Ctrl+V)로 들어온 이미지가 실제로 처리되는지
+  chain = chain.then(function () {
+    return makeImg(640, 480, '#1f9d55').then(function (blob) {
+      return loadFrame('../image-compress.html').then(function (f) {
+        var d = f.contentDocument;
+        // 클립보드 이벤트를 흉내 낸다. DataTransfer에 파일을 담으면 items[].kind가 'file'이 된다.
+        var dt = new DataTransfer();
+        dt.items.add(new File([blob], 'image.png', { type: 'image/png' }));
+        var ev = new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true });
+        d.dispatchEvent(ev);
+        return waitFor(function () { return d.getElementById('t-count').textContent === '1'; }, 20000)
+          .then(function (ok) {
+            var name = (d.querySelector('#list .fname') || {}).textContent || '';
+            log('붙여넣기로 이미지 넣기',
+                ok && name.indexOf('붙여넣은-사진') >= 0 && !f.dataset.errs,
+                'Ctrl+V 흉내 → 처리한 장수 "' + d.getElementById('t-count').textContent +
+                '", 이름 "' + name.trim() + '" (기대: 붙여넣은-사진…)' +
+                (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          });
+      });
+    });
+  }).catch(function (e) { log('붙여넣기로 이미지 넣기', false, '오류: ' + e.message); });
 
   chain.then(render);
 }
