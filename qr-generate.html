@@ -206,10 +206,24 @@
     whenReady(function () { draw(text); });
   }
 
+  // QR 한 장에 담을 수 있는 최대 바이트 수 (바이트 모드, 버전 40 기준).
+  // 라이브러리가 한계를 넘어도 예외를 던지지 않고 조용히 깨진 코드를 만들기 때문에
+  // 여기서 직접 막지 않으면 스캔되지 않는 QR을 정상인 줄 알고 쓰게 된다.
+  var CAP = { L: 2953, M: 2331, Q: 1663, H: 1273 };
+
   function draw(text) {
     var size = parseInt(document.getElementById('size').value, 10);
     // 선택한 여백 단계를 이미지 크기에 비례한 픽셀값으로 환산한다
     var ratio = { 0: 0, 2: 0.04, 4: 0.08, 8: 0.14 }[document.getElementById('margin').value] || 0.08;
+    var level = document.getElementById('ecl').value;
+    var bytes = new TextEncoder().encode(text).length;
+    if (bytes > (CAP[level] || 2331)) {
+      showQr(false);
+      setMsg('내용이 너무 깁니다. 현재 오류 복원 수준(' + level + ')에서는 최대 ' +
+             CAP[level].toLocaleString('ko-KR') + '바이트까지 담을 수 있는데 지금은 ' +
+             bytes.toLocaleString('ko-KR') + '바이트입니다. 글자를 줄이거나 복원 수준을 L로 낮춰 보세요.', 'err');
+      return;
+    }
     try {
       new QRious({
         element: canvas,

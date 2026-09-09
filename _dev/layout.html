@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 레이아웃 점검</title>
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; padding: 24px; background:#fff; color:#111; }
+  table { border-collapse: collapse; width: 100%; max-width: 1050px; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  th { background: #f2f4f7; }
+  .pass { color: #0a7f3f; font-weight: 700; }
+  .fail { color: #c62828; font-weight: 700; }
+  #summary { font-size: 18px; font-weight: 700; margin: 16px 0; }
+  /* 실제 휴대폰 폭으로 페이지를 띄워 가로 넘침을 측정한다 */
+  iframe { position: absolute; left: -9999px; width: 390px; height: 800px; border: 0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">레이아웃 점검 — 휴대폰 폭 390px에서 가로로 넘치는 요소 찾기</h1>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:210px">페이지</th><th style="width:70px">결과</th><th>측정</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+var results = [];
+function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
+
+function loadFrame(src) {
+  return new Promise(function (res) {
+    var f = document.createElement('iframe');
+    f.src = src;
+    f.onload = function () { setTimeout(function () { res(f); }, 400); };
+    document.body.appendChild(f);
+  });
+}
+
+function describe(el) {
+  var s = el.tagName.toLowerCase();
+  if (el.id) s += '#' + el.id;
+  if (el.className && typeof el.className === 'string') {
+    s += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+  }
+  return s;
+}
+
+function run() {
+  var pages = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html',
+               'char-count.html', 'pdf-merge.html', 'pdf-split.html', 'file-convert.html',
+               'qr-generate.html', 'unit-convert.html', 'date-calc.html', 'age-calc.html',
+               'en/index.html', 'en/pdf-merge.html', 'en/qr-generate.html'];
+  var seq = Promise.resolve();
+  pages.forEach(function (p) {
+    seq = seq.then(function () {
+      return loadFrame('../' + p).then(function (f) {
+        var w = f.contentWindow, d = f.contentDocument;
+        var vw = w.innerWidth;
+        var scrollW = d.documentElement.scrollWidth;
+
+        // 뷰포트 밖으로 튀어나온 요소를 찾는다 (넘침의 실제 원인)
+        var over = [];
+        var all = d.body.getElementsByTagName('*');
+        for (var i = 0; i < all.length; i++) {
+          var r = all[i].getBoundingClientRect();
+          if (r.width > 0 && (r.right > vw + 1 || r.left < -1)) {
+            // 가로 스크롤 컨테이너(메뉴 등) 안의 요소는 넘쳐도 정상이다
+            var sc = all[i].parentElement, inScroller = false;
+            while (sc && sc !== d.body) {
+              var ov = w.getComputedStyle(sc).overflowX;
+              if (ov === 'auto' || ov === 'scroll') { inScroller = true; break; }
+              sc = sc.parentElement;
+            }
+            if (inScroller) continue;
+            // 부모가 이미 넘치는 경우 자식은 생략해 핵심만 남긴다
+            var pr = all[i].parentElement ? all[i].parentElement.getBoundingClientRect() : null;
+            if (pr && pr.right > vw + 1) continue;
+            over.push(describe(all[i]) + ' (' + Math.round(r.left) + '~' + Math.round(r.right) + 'px)');
+          }
+        }
+        var ok = scrollW <= vw + 1 && over.length === 0;
+        log(p, ok, '뷰포트 ' + vw + 'px / 문서폭 ' + scrollW + 'px' +
+            (over.length ? ' · 넘치는 요소: ' + over.slice(0, 4).join(', ') : ' · 넘침 없음'));
+      });
+    });
+  });
+  seq.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 정상' +
+    (pass === results.length ? ' <span class="pass">— 가로 넘침 없음</span>' : ' <span class="fail">— 넘침 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">OK' : 'fail">넘침') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'LAYOUT ' + pass + '/' + results.length + ' :: ' +
+    results.filter(function (r) { return !r.ok; })
+           .map(function (r) { return r.name + ' → ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

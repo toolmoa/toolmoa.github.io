@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QR code generator — free, no tracking, never expires</title>
-<meta name="description" content="Create a QR code from a link or text and save it as PNG. The code is generated in your browser, contains your link directly, and never expires or routes through a tracking redirect. No watermark, no sign-up.">
+<meta name="description" content="Make a QR code from a link or text and save it as PNG. Static codes with no tracking redirect and no expiry date. Free, no watermark, no sign-up.">
 <link rel="canonical" href="https://toolmoa.github.io/en/qr-generate.html">
 <link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/qr-generate.html">
 <link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/qr-generate.html">
@@ -192,9 +192,23 @@
     whenReady(function () { draw(text); });
   }
 
+  // Maximum bytes a single QR can hold (byte mode, version 40).
+  // The library does not throw when you exceed this — it silently produces a broken
+  // code — so we have to reject it here, or people print codes that never scan.
+  var CAP = { L: 2953, M: 2331, Q: 1663, H: 1273 };
+
   function draw(text) {
     var size = parseInt(document.getElementById('size').value, 10);
     var ratio = { 0: 0, 2: 0.04, 4: 0.08, 8: 0.14 }[document.getElementById('margin').value] || 0.08;
+    var level = document.getElementById('ecl').value;
+    var bytes = new TextEncoder().encode(text).length;
+    if (bytes > (CAP[level] || 2331)) {
+      showQr(false);
+      setMsg('That is too long for one QR code. At error correction ' + level +
+             ' the limit is ' + CAP[level].toLocaleString('en-US') + ' bytes and this is ' +
+             bytes.toLocaleString('en-US') + '. Shorten the text, or lower the level to L.', 'err');
+      return;
+    }
     try {
       new QRious({
         element: canvas, value: text, size: size,

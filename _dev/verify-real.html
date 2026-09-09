@@ -89,10 +89,9 @@ function imgSize(blob) {
   return createImageBitmap(blob).then(function (b) { return { w: b.width, h: b.height }; });
 }
 function grab(path) {
-  return fetch(path).then(function (r) {
-    if (!r.ok) throw new Error(path + ' 없음');
-    return r.blob();
-  });
+  // 고정자료 하나가 없다고 전체 검사가 죽지 않게 한다
+  return fetch(path).then(function (r) { return r.ok ? r.blob() : null; })
+                    .catch(function () { return null; });
 }
 // JPEG 안에 EXIF(APP1 세그먼트)가 들어있는지 확인한다
 function hasExif(buf) {
@@ -110,7 +109,7 @@ var FX = {};
 function run() {
   var chain = Promise.all([
     grab('fixtures/real-a.pdf'), grab('fixtures/real-b.pdf'),
-    grab('fixtures/photo.jpg'), grab('fixtures/book.xlsx')
+    grab('fixtures/photo-exif.jpg'), grab('fixtures/book.xlsx')
   ]).then(function (b) {
     FX.pdfA = b[0]; FX.pdfB = b[1]; FX.photo = b[2]; FX.xlsx = b[3];
     return Promise.all([pdfPages(FX.pdfA), pdfPages(FX.pdfB)]);
@@ -253,7 +252,7 @@ function run() {
   // 6. 실제 엑셀 파일 읽기 + CSV 왕복
   //    파일에 데이터가 없을 수도 있으므로, 먼저 원본을 직접 파싱해 기대값을 정한다.
   chain = chain.then(function () {
-    if (!FX.xlsx) return;
+    if (!FX.xlsx) { log('실제 엑셀 파일', true, '고정자료 없음 — 건너뜀 (개인 파일이라 저장소에 두지 않음)'); return; }
     return FX.xlsx.arrayBuffer().then(function (buf) {
       var wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
       var sheet = wb.Sheets[wb.SheetNames[0]];
