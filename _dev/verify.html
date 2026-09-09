@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 결과물 검증</title>
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; padding: 24px; background:#fff; color:#111; }
+  h1 { font-size: 22px; }
+  table { border-collapse: collapse; width: 100%; max-width: 1000px; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  th { background: #f2f4f7; }
+  .pass { color: #0a7f3f; font-weight: 700; }
+  .fail { color: #c62828; font-weight: 700; }
+  #summary { font-size: 18px; font-weight: 700; margin: 16px 0; }
+  iframe { position: absolute; left: -9999px; width: 1100px; height: 900px; border: 0; }
+</style>
+</head>
+<body>
+<h1>결과물 검증 — 저장된 파일을 실제로 열어서 확인</h1>
+<p style="color:#555;font-size:14px;max-width:900px">
+  화면 상태만 보는 것이 아니라, 각 툴이 <strong>실제로 만들어낸 파일을 가로채서 다시 열어</strong>
+  페이지 수·해상도·인코딩·QR 내용이 맞는지 확인한다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:190px">항목</th><th style="width:70px">결과</th><th>검증 내용</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/xlsx.full.min.js"></script>
+<script src="jsQR.js"></script>
+<script>
+var results = [];
+function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
+
+function waitFor(cond, maxMs) {
+  var start = Date.now(), limit = maxMs || 10000;
+  return new Promise(function (res) {
+    (function poll() {
+      var ok = false;
+      try { ok = cond(); } catch (e) { ok = false; }
+      if (ok || Date.now() - start > limit) { res(ok); return; }
+      setTimeout(poll, 100);
+    })();
+  });
+}
+
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.src = src;
+    f.onload = function () { setTimeout(function () { res(f); }, 300); };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+// 툴이 만든 Blob을 가로챈다. 실제 다운로드 창은 뜨지 않게 막는다.
+//
+// 주의: 툴은 입력 파일을 미리보기용으로 열 때도 createObjectURL을 쓴다.
+// 그래서 "마지막 Blob"을 결과물로 보면 원본을 집게 된다.
+// 반드시 기준 시점(mark) 이후에 생긴 것 중에서, 기대하는 MIME 타입으로 골라야 한다.
+function capture(f) {
+  var w = f.contentWindow, out = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () {};
+  return out;
+}
+
+function pickNew(got, mark, typeRe) {
+  var list = got.slice(mark).filter(function (b) { return typeRe.test(b.type || ''); });
+  return list.length ? list[list.length - 1] : null;
+}
+
+function waitNew(got, mark, typeRe, ms) {
+  return waitFor(function () { return !!pickNew(got, mark, typeRe); }, ms || 15000);
+}
+
+// Blob.text()는 선행 BOM을 제거해버리므로, BOM 확인은 원시 바이트로 해야 한다
+function firstBytes(blob, n) {
+  return blob.arrayBuffer().then(function (buf) {
+    return Array.prototype.slice.call(new Uint8Array(buf, 0, n));
+  });
+}
+
+function pdfPages(blob) {
+  return blob.arrayBuffer()
+    .then(function (buf) { return PDFLib.PDFDocument.load(new Uint8Array(buf), { ignoreEncryption: true }); })
+    .then(function (d) { return d.getPageCount(); });
+}
+function imgSize(blob) {
+  return createImageBitmap(blob).then(function (b) { return { w: b.width, h: b.height }; });
+}
+function makePdf(n) {
+  return PDFLib.PDFDocument.create().then(function (doc) {
+    for (var i = 0; i < n; i++) { doc.addPage([300, 400]); }
+    return doc.save();
+  });
+}
+function makeImg(w, h, color) {
+  var c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  var g = x.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, color); g.addColorStop(1, '#ffffff');
+  x.fillStyle = g; x.fillRect(0, 0, w, h);
+  for (var i = 0; i < 200; i++) {                       // 압축이 실제로 줄어들도록 잡음을 넣는다
+    x.fillStyle = 'rgba(' + (i * 11 % 255) + ',' + (i * 23 % 255) + ',' + (i * 37 % 255) + ',.6)';
+    x.fillRect((i * 97) % w, (i * 61) % h, 30, 30);
+  }
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // 1. PDF 합치기 — 저장된 PDF를 다시 열어 페이지 수 확인
+  chain = chain.then(function () {
+    return Promise.all([makePdf(2), makePdf(4)]).then(function (b) {
+      return loadFrame('../pdf-merge.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([b[0]], 'a.pdf', { type: 'application/pdf' }),
+          new File([b[1]], 'b.pdf', { type: 'application/pdf' })
+        ]);
+        return waitFor(function () { return d.getElementById('t-files').textContent !== '0'; })
+          .then(function () {
+            d.getElementById('btn-merge').click();
+            return waitFor(function () { return got.length > 0; }, 12000);
+          }).then(function () {
+            if (!got.length) { log('PDF 합치기 결과', false, '저장된 파일이 없음'); return; }
+            return pdfPages(got[got.length - 1]).then(function (n) {
+              log('PDF 합치기 결과', n === 6,
+                  '2쪽 + 4쪽을 합친 파일을 다시 열어보니 ' + n + '쪽 (기대: 6쪽), ' +
+                  Math.round(got[got.length - 1].size / 1024) + 'KB');
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('PDF 합치기 결과', false, '오류: ' + e.message); });
+
+  // 2. PDF 나누기 — 추출된 PDF의 페이지 수 확인
+  chain = chain.then(function () {
+    return makePdf(5).then(function (bytes) {
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 's.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return d.getElementById('t-pages').textContent !== '0'; })
+          .then(function () {
+            var r = d.getElementById('range');
+            r.value = '1-3,5'; r.dispatchEvent(new Event('input'));
+            d.getElementById('btn-go').click();
+            return waitFor(function () { return got.length > 0; }, 12000);
+          }).then(function () {
+            if (!got.length) { log('PDF 나누기 결과', false, '저장된 파일이 없음'); return; }
+            return pdfPages(got[got.length - 1]).then(function (n) {
+              log('PDF 나누기 결과', n === 4,
+                  '5쪽 문서에서 "1-3,5"를 뽑은 파일이 ' + n + '쪽 (기대: 4쪽)');
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('PDF 나누기 결과', false, '오류: ' + e.message); });
+
+  // 3. 이미지 → PDF — 만들어진 PDF의 페이지 수 확인
+  chain = chain.then(function () {
+    return Promise.all([makeImg(800, 600, '#e63946'), makeImg(600, 900, '#1d3557')]).then(function (bl) {
+      return loadFrame('../img-to-pdf.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([bl[0]], 'a.png', { type: 'image/png' }),
+          new File([bl[1]], 'b.png', { type: 'image/png' })
+        ]);
+        return waitFor(function () { return d.getElementById('t-count').textContent !== '0'; })
+          .then(function () {
+            var mark = got.length;
+            d.getElementById('btn-make').click();
+            return waitNew(got, mark, /pdf/, 20000).then(function () {
+              var out = pickNew(got, mark, /pdf/);
+              if (!out) { log('이미지→PDF 결과', false, 'PDF가 만들어지지 않음'); return; }
+              return pdfPages(out).then(function (n) {
+                log('이미지→PDF 결과', n === 2,
+                    '사진 2장으로 만든 PDF가 ' + n + '쪽 (기대: 2쪽), ' +
+                    Math.round(out.size / 1024) + 'KB');
+              });
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('이미지→PDF 결과', false, '오류: ' + e.message); });
+
+  // 4. 이미지 압축 — 저장된 이미지를 디코딩해 해상도·용량 확인
+  chain = chain.then(function () {
+    return makeImg(2000, 1500, '#2f6df6').then(function (blob) {
+      var originalSize = blob.size;
+      return loadFrame('../image-compress.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        d.getElementById('maxw').value = '1280';
+        d.getElementById('format').value = 'image/jpeg';
+        var mark = got.length;
+        setFiles(d.getElementById('file'), [new File([blob], 'p.png', { type: 'image/png' })]);
+        // 원본 미리보기 Blob(png)과 구분하기 위해 jpeg만 고른다
+        return waitNew(got, mark, /jpeg/, 20000).then(function () {
+          var out = pickNew(got, mark, /jpeg/);
+          if (!out) { log('이미지 압축 결과', false, '압축 결과가 만들어지지 않음'); return; }
+          return imgSize(out).then(function (s) {
+            var ok = s.w === 1280 && s.h === 960 && out.size < originalSize;
+            log('이미지 압축 결과', ok,
+                '저장된 파일을 열어보니 ' + s.w + '×' + s.h + ' (기대 1280×960), ' +
+                'MIME ' + out.type + ', 용량 ' + Math.round(originalSize / 1024) + 'KB → ' +
+                Math.round(out.size / 1024) + 'KB');
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('이미지 압축 결과', false, '오류: ' + e.message); });
+
+  // 5. 이미지 자르기 — 저장된 이미지가 실제로 잘린 크기인지 확인
+  chain = chain.then(function () {
+    return makeImg(1000, 800, '#17864a').then(function (blob) {
+      return loadFrame('../image-crop.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([blob], 'c.png', { type: 'image/png' })]);
+        return waitFor(function () { return d.getElementById('t-orig').textContent !== '-'; })
+          .then(function () {
+            var r = d.getElementById('ratio');
+            r.value = '1'; r.dispatchEvent(new Event('change'));   // 정사각형 고정
+            var expect = d.getElementById('t-crop').textContent;
+            var mark = got.length;
+            d.getElementById('btn-save').click();
+            return waitNew(got, mark, /png/, 15000).then(function () {
+              return { expect: expect, mark: mark };
+            });
+          }).then(function (ctx) {
+            var out = pickNew(got, ctx.mark, /png/);
+            if (!out) { log('이미지 자르기 결과', false, '자른 결과가 만들어지지 않음'); return; }
+            return imgSize(out).then(function (s) {
+              var square = Math.abs(s.w - s.h) <= 1;
+              var matches = (s.w + '×' + s.h) === ctx.expect;
+              log('이미지 자르기 결과', square && matches && s.w < 1000,
+                  '화면 표시 ' + ctx.expect + ' → 저장된 파일 ' + s.w + '×' + s.h +
+                  ' (일치 ' + (matches ? 'OK' : '불일치') + ', 정사각형 ' + (square ? 'OK' : '실패') + ')');
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('이미지 자르기 결과', false, '오류: ' + e.message); });
+
+  // 6. CSV 저장 — BOM이 실제로 붙었는지 + 한글이 살아있는지
+  chain = chain.then(function () {
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      var json = JSON.stringify([{ 이름: '홍길동', 부서: '영업팀' }, { 이름: '김철수', 부서: '개발팀' }]);
+      setFiles(d.getElementById('file'), [new File([json], 'x.json', { type: 'application/json' })]);
+      return waitFor(function () { return d.getElementById('t-rows').textContent !== '0'; })
+        .then(function () {
+          d.getElementById('target').value = 'csv';
+          var mark = got.length;
+          d.getElementById('btn-convert').click();
+          return waitNew(got, mark, /csv|text/, 12000).then(function () { return mark; });
+        }).then(function (mark) {
+          var out = pickNew(got, mark, /csv|text/);
+          if (!out) { log('CSV 저장 결과 (BOM)', false, 'CSV가 만들어지지 않음'); return; }
+          // BOM은 Blob.text()가 삼켜버리므로 원시 바이트로 확인한다 (EF BB BF)
+          return firstBytes(out, 3).then(function (b) {
+            var hasBom = b[0] === 0xEF && b[1] === 0xBB && b[2] === 0xBF;
+            return out.text().then(function (txt) {
+              var hasKo = txt.indexOf('홍길동') >= 0 && txt.indexOf('영업팀') >= 0;
+              var lines = txt.replace(/^﻿/, '').trim().split(/\r?\n/);
+              log('CSV 저장 결과 (BOM)', hasBom && hasKo && lines.length === 3,
+                  '선두 바이트 ' + b.map(function (x) { return x.toString(16).toUpperCase(); }).join(' ') +
+                  ' → BOM ' + (hasBom ? '있음 (엑셀에서 한글 정상)' : '없음 ⚠') +
+                  ', 한글 ' + (hasKo ? 'OK' : '깨짐') + ', ' + lines.length + '줄 · 첫 줄 "' + lines[0] + '"');
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('CSV 저장 결과 (BOM)', false, '오류: ' + e.message); });
+
+  // 7. 엑셀 저장 — 만들어진 xlsx를 다시 파싱
+  chain = chain.then(function () {
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      var csv = '이름,점수\n홍길동,90\n김철수,85\n';
+      setFiles(d.getElementById('file'), [new File([csv], 'x.csv', { type: 'text/csv' })]);
+      return waitFor(function () { return d.getElementById('t-rows').textContent !== '0'; })
+        .then(function () {
+          d.getElementById('target').value = 'xlsx';
+          d.getElementById('btn-convert').click();
+          return waitFor(function () { return got.length > 0; }, 12000);
+        }).then(function () {
+          if (!got.length) { log('엑셀 저장 결과', false, '저장된 파일이 없음'); return; }
+          return got[got.length - 1].arrayBuffer().then(function (buf) {
+            var wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+            var rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+            var ok = rows.length === 2 && rows[0]['이름'] === '홍길동' && String(rows[0]['점수']) === '90';
+            log('엑셀 저장 결과', ok,
+                '저장된 xlsx를 다시 열어보니 ' + rows.length + '행, 첫 행 = ' +
+                JSON.stringify(rows[0]) + ' (기대: 2행 / 홍길동 90)');
+          });
+        });
+    });
+  }).catch(function (e) { log('엑셀 저장 결과', false, '오류: ' + e.message); });
+
+  // 8. QR — 만들어진 QR을 실제로 판독해서 내용이 같은지 확인
+  chain = chain.then(function () {
+    if (typeof jsQR === 'undefined') { log('QR 판독', false, 'jsQR 로드 실패'); return; }
+    var target = 'https://toolmoa.github.io/pdf-merge.html?x=1';
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      var t = d.getElementById('text');
+      t.value = target; t.dispatchEvent(new Event('input'));
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 10000).then(function () {
+        var c = d.getElementById('canvas');
+        var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+        var decoded = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+        var text = decoded ? decoded.data : '(판독 실패)';
+        log('QR 판독', !!decoded && text === target,
+            '만든 QR을 다시 스캔한 결과 "' + text + '" (원본과 ' + (text === target ? '일치' : '불일치') + ')');
+      });
+    });
+  }).catch(function (e) { log('QR 판독', false, '오류: ' + e.message); });
+
+  // 9. 영어판 PDF 합치기도 동일하게 결과물 확인
+  chain = chain.then(function () {
+    return Promise.all([makePdf(3), makePdf(3)]).then(function (b) {
+      return loadFrame('../en/pdf-merge.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([b[0]], 'a.pdf', { type: 'application/pdf' }),
+          new File([b[1]], 'b.pdf', { type: 'application/pdf' })
+        ]);
+        return waitFor(function () { return d.getElementById('t-files').textContent !== '0'; })
+          .then(function () {
+            d.getElementById('btn-merge').click();
+            return waitFor(function () { return got.length > 0; }, 12000);
+          }).then(function () {
+            if (!got.length) { log('EN: PDF 합치기 결과', false, '저장된 파일이 없음'); return; }
+            return pdfPages(got[got.length - 1]).then(function (n) {
+              log('EN: PDF 합치기 결과', n === 6, '3쪽 + 3쪽 → ' + n + '쪽 (기대: 6쪽)');
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('EN: PDF 합치기 결과', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 결과물 전부 정상</span>' : ' <span class="fail">— 실패 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'VERIFY ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) {
+      return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail;
+    }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>
