@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge PDF without uploading — free, offline in your browser</title>
+<meta name="description" content="Combine several PDFs into one file without uploading anything. The merge happens inside your browser, so contracts and internal documents never reach a server. No size limit, no watermark, no sign-up.">
+<link rel="canonical" href="https://toolmoa.github.io/en/pdf-merge.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-merge.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-merge.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-merge.html">
+<meta property="og:title" content="Merge PDF without uploading">
+<meta property="og:description" content="Join PDFs into one file entirely inside your browser. Nothing is uploaded.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Merge PDF","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html" aria-current="page">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+    </nav>
+    <a class="lang-link" href="../pdf-merge.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Merge PDF without uploading</h1>
+  <p class="lead">Put several PDFs in the order you want and join them into a single file. Nothing is sent to a server.</p>
+  <span class="privacy-badge">🔒 Your files never leave your device</span>
+
+  <div class="dropzone" id="dz">
+    <span class="dz-icon">📄</span>
+    <span class="dz-main">Drop PDFs here, or click to choose</span>
+    <span class="dz-sub">You can select several at once</span>
+    <input type="file" id="file" accept="application/pdf,.pdf" multiple>
+  </div>
+
+  <div id="msg"></div>
+
+  <div id="area" hidden>
+    <h2 style="margin-bottom:6px">Merge order</h2>
+    <p class="hint" style="margin:0 0 12px">Drag an item, or use the arrows. Files are joined from top to bottom.</p>
+    <ul class="file-list" id="list"></ul>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-files">0</span><span class="lbl">Files</span></div>
+      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl">Total pages</span></div>
+      <div class="stat"><span class="num" id="t-size">0</span><span class="lbl">Total size</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-merge">Merge PDFs</button>
+      <button class="btn secondary" id="btn-reset">Remove all</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">
+    Going the other way? Use <a href="pdf-split.html">Split PDF</a>. Turning photos into a document?
+    Use <a href="img-to-pdf.html">Image to PDF</a>. Both are free and work the same way.
+  </p>
+
+  <div class="ad-slot"><!-- AD:EN_MERGE --></div>
+
+  <h2>Why merge PDFs offline</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      The documents people most often need to merge — signed contracts, scanned invoices, expense receipts,
+      medical paperwork — are exactly the documents that should not be uploaded to a service you have never
+      heard of. Most free PDF sites process your file on their servers and keep it there for some period of
+      time. This page loads a PDF library into your browser and does the whole job locally, so there is no
+      upload, no queue and no retention policy to read.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my PDFs really not uploaded?</summary>
+      <p>Correct. You can verify it: load this page, turn off your internet connection, and the merge still works. Nothing is transmitted at any point.</p>
+    </details>
+    <details>
+      <summary>How many files can I merge, and how large?</summary>
+      <p>There is no imposed limit. The practical ceiling is your device's memory, so several hundred megabytes may become slow on an older machine.</p>
+    </details>
+    <details>
+      <summary>Can it open password-protected PDFs?</summary>
+      <p>No. Encrypted PDFs cannot be opened. Remove the password first, then merge.</p>
+    </details>
+    <details>
+      <summary>How do I change the order?</summary>
+      <p>Drag an item in the list, or use the ↑ and ↓ buttons on each row. Files are joined from top to bottom.</p>
+    </details>
+    <details>
+      <summary>Are bookmarks and links preserved?</summary>
+      <p>Page content and links inside pages are preserved. The document-level outline (bookmarks) may be dropped during the merge.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="../pdf-merge.html" hreflang="ko">한국어</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var list = document.getElementById('list');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+
+  var items = [];
+  var dragIdx = null;
+
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function setMsg(t, cls) {
+    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over'); add(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { add(fileInput.files); });
+
+  function whenReady(fn, tries) {
+    tries = (tries === undefined) ? 100 : tries;
+    if (typeof PDFLib !== 'undefined') { fn(); return; }
+    if (tries <= 0) { setMsg('The PDF engine could not be loaded. Check your connection and refresh.', 'err'); return; }
+    setMsg('Preparing the PDF engine…');
+    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+  }
+
+  function add(fileList) { whenReady(function () { doAdd(fileList); }); }
+
+  function doAdd(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type === 'application/pdf' || /\.pdf$/i.test(f.name);
+    });
+    if (!files.length) { setMsg('Please choose a PDF file.', 'err'); return; }
+
+    setMsg('Reading the files…');
+    var jobs = files.map(function (f) {
+      return f.arrayBuffer().then(function (buf) {
+        var u8 = new Uint8Array(buf);
+        return PDFLib.PDFDocument.load(u8, { ignoreEncryption: true }).then(function (doc) {
+          return { file: f, pages: doc.getPageCount(), bytes: u8, error: null };
+        });
+      }).catch(function (e) {
+        return { file: f, pages: 0, bytes: null, error: true, why: (e && e.message) || String(e) };
+      });
+    });
+
+    Promise.all(jobs).then(function (loaded) {
+      var failed = loaded.filter(function (x) { return x.error; });
+      items = items.concat(loaded.filter(function (x) { return !x.error; }));
+      if (failed.length) {
+        setMsg(failed.length + ' file(s) could not be opened. They may be password protected or damaged: ' +
+               failed.map(function (x) { return x.file.name; }).join(', ') + ' — ' + failed[0].why, 'err');
+      } else { setMsg(''); }
+      fileInput.value = '';
+      render();
+    });
+  }
+
+  function move(from, to) {
+    if (to < 0 || to >= items.length) return;
+    var it = items.splice(from, 1)[0];
+    items.splice(to, 0, it);
+    render();
+  }
+
+  function render() {
+    area.hidden = items.length === 0;
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var li = document.createElement('li');
+      li.draggable = true;
+      li.innerHTML =
+        '<span class="handle" title="Drag to reorder">⠿</span>' +
+        '<span class="fname" title="' + it.file.name + '">' + (i + 1) + '. ' + it.file.name + '</span>' +
+        '<span class="fmeta">' + it.pages + ' pages · ' + humanSize(it.file.size) + '</span>';
+
+      var up = document.createElement('button');
+      up.className = 'btn secondary small'; up.textContent = '↑';
+      up.title = 'Move up'; up.disabled = i === 0;
+      up.onclick = function () { move(i, i - 1); };
+      var down = document.createElement('button');
+      down.className = 'btn secondary small'; down.textContent = '↓';
+      down.title = 'Move down'; down.disabled = i === items.length - 1;
+      down.onclick = function () { move(i, i + 1); };
+      var del = document.createElement('button');
+      del.className = 'btn secondary small'; del.textContent = '✕';
+      del.title = 'Remove';
+      del.onclick = function () { items.splice(i, 1); render(); };
+      li.appendChild(up); li.appendChild(down); li.appendChild(del);
+
+      li.addEventListener('dragstart', function () { dragIdx = i; li.classList.add('dragging'); });
+      li.addEventListener('dragend', function () { li.classList.remove('dragging'); });
+      li.addEventListener('dragover', function (e) { e.preventDefault(); });
+      li.addEventListener('drop', function (e) {
+        e.preventDefault();
+        if (dragIdx !== null && dragIdx !== i) move(dragIdx, i);
+        dragIdx = null;
+      });
+      list.appendChild(li);
+    });
+
+    document.getElementById('t-files').textContent = items.length;
+    document.getElementById('t-pages').textContent =
+      items.reduce(function (s, x) { return s + x.pages; }, 0);
+    document.getElementById('t-size').textContent =
+      humanSize(items.reduce(function (s, x) { return s + x.file.size; }, 0));
+  }
+
+  document.getElementById('btn-merge').addEventListener('click', function () {
+    if (items.length < 2) { setMsg('You need at least two PDFs to merge.', 'err'); return; }
+    var btn = this;
+    btn.disabled = true;
+    setMsg('Merging…');
+
+    PDFLib.PDFDocument.create().then(function (out) {
+      var chain = Promise.resolve();
+      items.forEach(function (it) {
+        chain = chain.then(function () {
+          return PDFLib.PDFDocument.load(it.bytes, { ignoreEncryption: true })
+            .then(function (doc) { return out.copyPages(doc, doc.getPageIndices()); })
+            .then(function (pages) { pages.forEach(function (p) { out.addPage(p); }); });
+        });
+      });
+      return chain.then(function () { return out.save(); });
+    }).then(function (bytes) {
+      var blob = new Blob([bytes], { type: 'application/pdf' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'merged.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      setMsg('Done. ' + items.reduce(function (s, x) { return s + x.pages; }, 0) +
+             ' pages · ' + humanSize(blob.size), 'ok');
+      btn.disabled = false;
+    }).catch(function () {
+      setMsg('Something went wrong while merging. Please check the files.', 'err');
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    items = []; fileInput.value = ''; setMsg(''); render();
+  });
+})();
+</script>
+</body>
+</html>

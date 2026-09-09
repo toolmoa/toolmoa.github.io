@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compress images without uploading — free, in your browser</title>
+<meta name="description" content="Reduce photo file size without uploading anything. Quality and dimensions are adjusted inside your browser, so your images never reach a server. JPG, PNG and WebP, several files at once, no watermark.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-compress.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-compress.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-compress.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-compress.html">
+<meta property="og:title" content="Compress images without uploading">
+<meta property="og:description" content="Shrink photo file size entirely inside your browser. Nothing is uploaded.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Compress image","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" aria-current="page">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+    </nav>
+    <a class="lang-link" href="../image-compress.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Compress images without uploading</h1>
+  <p class="lead">Adjust quality and dimensions to shrink file size. Several photos at once, nothing sent to a server.</p>
+  <span class="privacy-badge">🔒 Your photos never leave your device</span>
+
+  <div class="dropzone" id="dz">
+    <span class="dz-icon">🖼️</span>
+    <span class="dz-main">Drop photos here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · multiple files supported</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <div class="field">
+      <label for="quality">Quality <span id="q-val" style="color:var(--accent)">75%</span></label>
+      <input type="range" id="quality" min="10" max="100" value="75" step="5">
+      <div class="hint">Lower means smaller files but softer detail. 70–80% is usually the sweet spot.</div>
+    </div>
+    <div class="field">
+      <label for="maxw">Maximum width (px)</label>
+      <select id="maxw">
+        <option value="0">Keep original size</option>
+        <option value="1920">1920px (Full HD)</option>
+        <option value="1280">1280px (for the web)</option>
+        <option value="1024">1024px</option>
+        <option value="800">800px (for blog posts)</option>
+        <option value="640">640px</option>
+      </select>
+      <div class="hint">Height follows automatically to keep the aspect ratio. Images are never enlarged.</div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label for="format">Save as</label>
+      <select id="format">
+        <option value="image/jpeg">JPG (best for photos, small files)</option>
+        <option value="image/webp">WebP (smallest files)</option>
+        <option value="image/png">PNG (keeps transparency, larger files)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="msg"></div>
+
+  <div id="result" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Images</span></div>
+      <div class="stat"><span class="num" id="t-before">0</span><span class="lbl">Original total</span></div>
+      <div class="stat"><span class="num" id="t-after">0</span><span class="lbl">New total</span></div>
+      <div class="stat"><span class="num" id="t-saved" style="color:var(--ok)">0%</span><span class="lbl">Saved</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-all">Save all</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+    <ul class="file-list" id="list"></ul>
+  </div>
+
+  <div class="upsell">
+    <h3>Need to process hundreds of photos in one go?</h3>
+    <p>The desktop version takes a whole folder, keeps your subfolder structure, converts everything and hands you a ZIP. You do not even need a browser open.</p>
+    <a class="btn" href="#" id="upsell-link">See the batch version</a>
+  </div>
+
+  <div class="ad-slot"><!-- AD:EN_IMGC --></div>
+
+  <h2>Why compress locally</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Photos carry more than pixels. A picture straight off a phone usually contains EXIF metadata —
+      the exact GPS coordinates where it was taken, the device, the timestamp. Uploading a batch of holiday
+      or property photos to a compression site hands all of that to a third party. Compressing in the browser
+      keeps the file on your machine, and because the image is redrawn onto a canvas the location metadata
+      is dropped from the output as a side effect.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my photos uploaded anywhere?</summary>
+      <p>No. The conversion runs in your browser. Load the page, go offline, and it still works.</p>
+    </details>
+    <details>
+      <summary>What quality setting should I use?</summary>
+      <p>70–80% is usually indistinguishable from the original while roughly halving the file size. For print, stay above 90%.</p>
+    </details>
+    <details>
+      <summary>I chose PNG and the file got bigger.</summary>
+      <p>PNG is lossless, which is inefficient for photographs. For photos, choose JPG or WebP instead.</p>
+    </details>
+    <details>
+      <summary>My transparent background turned white.</summary>
+      <p>JPG does not support transparency, so it is filled with white. Choose PNG or WebP to keep it.</p>
+    </details>
+    <details>
+      <summary>How many images can I do at once?</summary>
+      <p>There is no fixed limit, but since this uses your device's memory, batches of a few dozen at a time are more comfortable.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="../image-compress.html" hreflang="ko">한국어</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var quality = document.getElementById('quality');
+  var qVal = document.getElementById('q-val');
+  var maxwSel = document.getElementById('maxw');
+  var formatSel = document.getElementById('format');
+  var msg = document.getElementById('msg');
+  var resultBox = document.getElementById('result');
+  var list = document.getElementById('list');
+
+  var lastFiles = [];
+  var results = [];
+
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+
+  quality.addEventListener('input', function () { qVal.textContent = quality.value + '%'; });
+  [quality, maxwSel, formatSel].forEach(function (el) {
+    el.addEventListener('change', function () { if (lastFiles.length) process(lastFiles); });
+  });
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over'); handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type.indexOf('image/') === 0;
+    });
+    if (!files.length) { setMsg('Please choose an image file.', 'err'); return; }
+    lastFiles = files;
+    process(files);
+  }
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+      img.src = url;
+    });
+  }
+
+  function convert(file) {
+    return loadImage(file).then(function (img) {
+      var maxw = parseInt(maxwSel.value, 10);
+      var w = img.naturalWidth, h = img.naturalHeight;
+      if (maxw && w > maxw) { h = Math.round(h * (maxw / w)); w = maxw; }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      var type = formatSel.value;
+      if (type === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h); }
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, w, h);
+      return new Promise(function (resolve) {
+        canvas.toBlob(function (blob) { resolve({ blob: blob, w: w, h: h, type: type }); },
+                      type, parseInt(quality.value, 10) / 100);
+      });
+    });
+  }
+
+  function newName(orig, type) {
+    var base = orig.replace(/\.[^.]+$/, '');
+    var ext = type === 'image/jpeg' ? 'jpg' : (type === 'image/webp' ? 'webp' : 'png');
+    return base + '_compressed.' + ext;
+  }
+
+  function process(files) {
+    setMsg('Converting… (' + files.length + ')');
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = [];
+
+    Promise.all(files.map(function (f) {
+      return convert(f).then(function (out) {
+        return {
+          name: newName(f.name, out.type), blob: out.blob,
+          url: URL.createObjectURL(out.blob),
+          before: f.size, after: out.blob.size,
+          dim: out.w + '×' + out.h
+        };
+      }).catch(function () { return null; });
+    })).then(function (out) {
+      results = out.filter(Boolean);
+      if (!results.length) { setMsg('No image could be converted.', 'err'); return; }
+      setMsg('');
+      render();
+    });
+  }
+
+  function render() {
+    var before = results.reduce(function (s, r) { return s + r.before; }, 0);
+    var after = results.reduce(function (s, r) { return s + r.after; }, 0);
+    var savedPct = before ? Math.round((1 - after / before) * 100) : 0;
+
+    document.getElementById('t-count').textContent = results.length;
+    document.getElementById('t-before').textContent = humanSize(before);
+    document.getElementById('t-after').textContent = humanSize(after);
+    var savedEl = document.getElementById('t-saved');
+    savedEl.textContent = (savedPct >= 0 ? savedPct : 0) + '%';
+    savedEl.style.color = savedPct > 0 ? 'var(--ok)' : 'var(--warn)';
+
+    list.innerHTML = '';
+    results.forEach(function (r) {
+      var pct = r.before ? Math.round((1 - r.after / r.before) * 100) : 0;
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<span class="fname" title="' + r.name + '">' + r.name + '</span>' +
+        '<span class="fmeta">' + r.dim + ' · ' + humanSize(r.before) + ' → ' + humanSize(r.after) + '</span>' +
+        '<span class="' + (pct > 0 ? 'saved' : 'fmeta') + '">' + (pct > 0 ? '−' + pct + '%' : '+' + Math.abs(pct) + '%') + '</span>';
+      var a = document.createElement('a');
+      a.className = 'btn small'; a.textContent = 'Save';
+      a.href = r.url; a.download = r.name;
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+
+    if (after > before) {
+      setMsg('The result came out larger. Try lowering the quality or choosing JPG or WebP.', 'err');
+    }
+    resultBox.hidden = false;
+  }
+
+  document.getElementById('btn-all').addEventListener('click', function () {
+    results.forEach(function (r, i) {
+      setTimeout(function () {
+        var a = document.createElement('a');
+        a.href = r.url; a.download = r.name;
+        document.body.appendChild(a); a.click(); a.remove();
+      }, i * 350);
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = []; lastFiles = [];
+    fileInput.value = ''; list.innerHTML = '';
+    resultBox.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

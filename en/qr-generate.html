@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR code generator — free, no tracking, never expires</title>
+<meta name="description" content="Create a QR code from a link or text and save it as PNG. The code is generated in your browser, contains your link directly, and never expires or routes through a tracking redirect. No watermark, no sign-up.">
+<link rel="canonical" href="https://toolmoa.github.io/en/qr-generate.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/qr-generate.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/qr-generate.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/qr-generate.html">
+<meta property="og:title" content="QR code generator — no tracking, never expires">
+<meta property="og:description" content="Static QR codes generated in your browser. No redirect, no expiry.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔳</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"QR code generator","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html" aria-current="page">QR code</a>
+    </nav>
+    <a class="lang-link" href="../qr-generate.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>QR code generator</h1>
+  <p class="lead">Type a link or some text and save the result as PNG. No tracking redirect, no expiry date.</p>
+  <span class="privacy-badge">🔒 What you type is never sent anywhere</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="text">Content (link or text)</label>
+      <textarea id="text" style="min-height:90px" placeholder="https://example.com or any text">https://</textarea>
+      <div class="hint">A web address should start with <code>https://</code> so it opens straight away when scanned.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+      <div class="field">
+        <label for="size">Size</label>
+        <select id="size">
+          <option value="256">256px</option>
+          <option value="512" selected>512px</option>
+          <option value="1024">1024px (for print)</option>
+          <option value="2048">2048px (large print)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="ecl">Error correction</label>
+        <select id="ecl">
+          <option value="L">L — Low (simplest pattern)</option>
+          <option value="M" selected>M — Medium (recommended)</option>
+          <option value="Q">Q — High</option>
+          <option value="H">H — Highest (for a logo overlay)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="margin">Quiet zone</label>
+        <select id="margin">
+          <option value="0">None</option>
+          <option value="2">Narrow</option>
+          <option value="4" selected>Normal (recommended)</option>
+          <option value="8">Wide</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="fg">QR colour</label>
+        <input type="color" id="fg" value="#000000" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+      </div>
+      <div class="field">
+        <label for="bg">Background colour</label>
+        <input type="color" id="bg" value="#ffffff" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+      </div>
+    </div>
+    <div class="hint" style="margin-top:-4px">A QR code will not scan if the two colours are too close in brightness. Keep the code dark and the background light.</div>
+  </div>
+
+  <div id="msg"></div>
+
+  <div class="card" style="text-align:center">
+    <div id="placeholder" style="padding:56px 20px;border:2px dashed var(--border);border-radius:8px;color:var(--muted);font-size:14px">
+      Your QR code will appear here
+    </div>
+    <canvas id="canvas" style="max-width:300px;width:100%;height:auto;border-radius:8px" hidden></canvas>
+    <div class="btn-row" style="justify-content:center;margin-top:16px">
+      <button class="btn" id="btn-png" disabled>Save as PNG</button>
+      <button class="btn secondary" id="btn-copy" disabled>Copy image</button>
+    </div>
+    <div class="hint" id="copy-msg"></div>
+    <div class="hint" id="size-note"></div>
+  </div>
+
+  <div class="ad-slot"><!-- AD:EN_QR --></div>
+
+  <h2>Static codes, not tracked links</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Many QR generators quietly produce a <em>dynamic</em> code: the image points at their own short link,
+      which then redirects to your address. That lets them count every scan — and it means your code stops
+      working the day they shut the service down or move it behind a paywall. The codes here are static:
+      your address is encoded directly into the pattern, nothing sits in between, and the code keeps working
+      forever regardless of what happens to this site.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Will my QR code expire?</summary>
+      <p>No. The content is encoded into the image itself, so there is no server in the middle and nothing to expire.</p>
+    </details>
+    <details>
+      <summary>Which error correction level should I pick?</summary>
+      <p>M is fine for most uses. Choose H if you plan to place a logo over the centre, so the code still scans when partly covered.</p>
+    </details>
+    <details>
+      <summary>My code will not scan.</summary>
+      <p>Usually the contrast is too low or the quiet zone is missing. Keep the margin at Normal, the code dark and the background light. Inverted codes (light code on dark background) fail on many phones.</p>
+    </details>
+    <details>
+      <summary>Can I use it commercially?</summary>
+      <p>Yes. No watermark, no attribution required, no usage limit.</p>
+    </details>
+    <details>
+      <summary>What size should I use for print?</summary>
+      <p>Save at 1024px or larger and print it at least 2cm (about 0.8in) wide.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="../qr-generate.html" hreflang="ko">한국어</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script src="../assets/vendor/qrious.min.js"></script>
+<script>
+(function () {
+  var canvas = document.getElementById('canvas');
+  var msg = document.getElementById('msg');
+  var placeholder = document.getElementById('placeholder');
+  var btnPng = document.getElementById('btn-png');
+  var btnCopy = document.getElementById('btn-copy');
+
+  function setMsg(t, cls) {
+    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  }
+
+  function showQr(on) {
+    canvas.hidden = !on;
+    placeholder.hidden = on;
+    btnPng.disabled = !on;
+    btnCopy.disabled = !on;
+    document.getElementById('size-note').textContent =
+      on ? 'Saved at ' + canvas.width + '×' + canvas.height + 'px (shown smaller on screen)' : '';
+  }
+
+  function whenReady(fn, tries) {
+    tries = (tries === undefined) ? 80 : tries;
+    if (typeof QRious !== 'undefined') { fn(); return; }
+    if (tries <= 0) { setMsg('The QR generator could not be loaded. Check your connection and refresh.', 'err'); return; }
+    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+  }
+
+  function render() {
+    var text = document.getElementById('text').value.trim();
+    if (!text || text === 'https://') { showQr(false); setMsg(''); return; }
+    whenReady(function () { draw(text); });
+  }
+
+  function draw(text) {
+    var size = parseInt(document.getElementById('size').value, 10);
+    var ratio = { 0: 0, 2: 0.04, 4: 0.08, 8: 0.14 }[document.getElementById('margin').value] || 0.08;
+    try {
+      new QRious({
+        element: canvas, value: text, size: size,
+        padding: Math.round(size * ratio),
+        level: document.getElementById('ecl').value,
+        foreground: document.getElementById('fg').value,
+        background: document.getElementById('bg').value
+      });
+      showQr(true); setMsg('');
+    } catch (e) {
+      showQr(false);
+      setMsg('That is too much text for one QR code. Shorten it, or lower the error correction to L.', 'err');
+    }
+  }
+
+  ['text', 'size', 'ecl', 'margin', 'fg', 'bg'].forEach(function (id) {
+    var el = document.getElementById(id);
+    el.addEventListener('input', render);
+    el.addEventListener('change', render);
+  });
+
+  document.getElementById('btn-png').addEventListener('click', function () {
+    if (!canvas.width) return;
+    var a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'qrcode.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var out = document.getElementById('copy-msg');
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      out.textContent = 'This browser cannot copy images. Please save it as PNG instead.';
+      return;
+    }
+    canvas.toBlob(function (blob) {
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function () {
+        out.textContent = 'Copied to the clipboard';
+        setTimeout(function () { out.textContent = ''; }, 2000);
+      }).catch(function () {
+        out.textContent = 'Could not copy. Please save it as PNG instead.';
+      });
+    });
+  });
+
+  window.addEventListener('load', render);
+  render();
+})();
+</script>
+</body>
+</html>

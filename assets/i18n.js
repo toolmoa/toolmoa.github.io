@@ -796,6 +796,15 @@
     document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: current } }));
   }
 
+  // 검색엔진에 색인되는 진짜 영어 페이지가 있는 파일들.
+  // 영어를 고르면 화면만 바꾸지 않고 그쪽으로 이동시킨다.
+  var EN_PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html',
+                  'pdf-merge.html', 'pdf-split.html', 'file-convert.html', 'qr-generate.html'];
+
+  function currentFile() {
+    return location.pathname.split('/').pop() || 'index.html';
+  }
+
   function buildSwitcher() {
     var wrap = document.querySelector('.site-header .wrap');
     if (!wrap) return;
@@ -806,7 +815,15 @@
     for (var k in LANGS) html += '<option value="' + k + '">' + LANGS[k] + '</option>';
     sel.innerHTML = html;
     sel.value = current;
-    sel.addEventListener('change', function () { apply(sel.value); });
+    sel.addEventListener('change', function () {
+      var v = sel.value;
+      if (v === 'en' && EN_PAGES.indexOf(currentFile()) >= 0) {
+        try { localStorage.setItem(STORE, 'en'); } catch (e) { /* 무시 */ }
+        location.href = 'en/' + currentFile();
+        return;
+      }
+      apply(v);
+    });
     wrap.appendChild(sel);
   }
 

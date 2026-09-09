@@ -322,28 +322,102 @@ function run() {
     return loadFrame('../index.html').then(function (f) {
       var d = f.contentDocument;
       var sel = d.querySelector('.lang-select');
-      if (!sel) { log('다국어 전환', false, '언어 선택기가 없음'); return; }
+      if (!sel) { log('다국어 전환 (일본어)', false, '언어 선택기가 없음'); return; }
       var koH1 = d.querySelector('h1').textContent.trim();
 
-      sel.value = 'en'; sel.dispatchEvent(new Event('change'));
-      var enH1 = d.querySelector('h1').textContent.trim();
-      var enNav = d.querySelector('.site-nav a').textContent.trim();
-      var enLang = d.documentElement.lang;
-
+      // 영어는 실제 /en/ 페이지로 이동하므로 여기서는 일본어 전환만 확인한다
+      // (영어 이동은 "EN 이동 연결" 항목에서 따로 검증)
       sel.value = 'ja'; sel.dispatchEvent(new Event('change'));
       var jaH1 = d.querySelector('h1').textContent.trim();
+      var jaNav = d.querySelector('.site-nav a').textContent.trim();
+      var jaLang = d.documentElement.lang;
 
       sel.value = 'ko'; sel.dispatchEvent(new Event('change'));  // 한국어 복귀 확인
       var backH1 = d.querySelector('h1').textContent.trim();
 
-      var ok = enH1 === 'Just the tool you need, free' &&
-               enNav === 'Compress image' && enLang === 'en' &&
-               jaH1 === '必要な道具だけ、無料で' &&
-               backH1 === koH1;
-      log('다국어 전환', ok,
-          'EN "' + enH1 + '" / JA "' + jaH1 + '" / 한국어 복귀 ' + (backH1 === koH1 ? 'OK' : '실패'));
+      var ok = jaH1 === '必要な道具だけ、無料で' && jaNav === '画像圧縮' &&
+               jaLang === 'ja' && backH1 === koH1;
+      log('다국어 전환 (일본어)', ok,
+          'JA "' + jaH1 + '" / 메뉴 "' + jaNav + '" / 한국어 복귀 ' + (backH1 === koH1 ? 'OK' : '실패'));
     });
-  }).catch(function (e) { log('다국어 전환', false, '오류: ' + e.message); });
+  }).catch(function (e) { log('다국어 전환 (일본어)', false, '오류: ' + e.message); });
+
+  // 14. 영어 페이지 - PDF 합치기가 실제로 동작하는지
+  chain = chain.then(function () {
+    if (typeof PDFLib === 'undefined') { log('EN: PDF merge', false, 'pdf-lib 로드 실패'); return; }
+    function makePdf(n, name) {
+      return PDFLib.PDFDocument.create().then(function (doc) {
+        for (var i = 0; i < n; i++) { doc.addPage([300, 400]); }
+        return doc.save();
+      }).then(function (b) { return new File([b], name, { type: 'application/pdf' }); });
+    }
+    return Promise.all([makePdf(2, 'a.pdf'), makePdf(4, 'b.pdf')]).then(function (files) {
+      return loadFrame('../en/pdf-merge.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), files);
+        return waitFor(function () { return txt(d, 't-files') !== '0'; }, 12000).then(function () {
+          var n = txt(d, 't-files'), pages = txt(d, 't-pages');
+          var h1 = d.querySelector('h1').textContent.trim();
+          log('EN: PDF merge', n === '2' && pages === '6' && h1 === 'Merge PDF without uploading',
+              n + ' files, ' + pages + ' pages (기대: 2/6), h1 "' + h1 + '"');
+        });
+      });
+    });
+  }).catch(function (e) { log('EN: PDF merge', false, '오류: ' + e.message); });
+
+  // 15. 영어 페이지 - CSV 읽기 (인코딩 처리 포함)
+  chain = chain.then(function () {
+    return loadFrame('../en/file-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      var csv = 'name,age,city\nJosé,30,Zürich\nAda,36,London\n';
+      setFiles(d.getElementById('file'), [new File([csv], 'test.csv', { type: 'text/csv' })]);
+      return waitFor(function () { return txt(d, 't-rows') !== '0'; }, 10000).then(function () {
+        var rows = txt(d, 't-rows'), cols = txt(d, 't-cols');
+        var accents = d.getElementById('preview').textContent.indexOf('José') >= 0 &&
+                      d.getElementById('preview').textContent.indexOf('Zürich') >= 0;
+        log('EN: CSV convert', rows === '2' && cols === '3' && accents,
+            rows + ' rows ' + cols + ' cols, accents ' + (accents ? 'OK' : 'mangled') + ' (기대: 2/3)');
+      });
+    });
+  }).catch(function (e) { log('EN: CSV convert', false, '오류: ' + e.message); });
+
+  // 16. 영어 페이지 - QR 생성
+  chain = chain.then(function () {
+    return loadFrame('../en/qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      var t = d.getElementById('text');
+      t.value = 'https://toolmoa.github.io/en/';
+      t.dispatchEvent(new Event('input'));
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+        var c = d.getElementById('canvas');
+        var px = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        var dark = 0, light = 0;
+        for (var i = 0; i < px.length; i += 4) {
+          if (px[i + 3] < 128) continue;
+          if (px[i] < 100) dark++; else if (px[i] > 200) light++;
+        }
+        log('EN: QR code', !c.hidden && dark > 500 && light > 500,
+            c.width + '×' + c.height + ', dark ' + dark.toLocaleString() + ' / light ' + light.toLocaleString());
+      });
+    });
+  }).catch(function (e) { log('EN: QR code', false, '오류: ' + e.message); });
+
+  // 17. 한국어 페이지에서 영어를 고르면 /en/ 로 이동하는지
+  chain = chain.then(function () {
+    return loadFrame('../pdf-merge.html').then(function (f) {
+      var d = f.contentDocument;
+      var sel = d.querySelector('.lang-select');
+      if (!sel) { log('EN 이동 연결', false, '언어 선택기 없음'); return; }
+      sel.value = 'en';
+      sel.dispatchEvent(new Event('change'));
+      return waitFor(function () {
+        return /\/en\/pdf-merge\.html$/.test(f.contentWindow.location.pathname);
+      }, 6000).then(function (ok) {
+        log('EN 이동 연결', ok,
+            '이동 결과: ' + f.contentWindow.location.pathname.split('/').slice(-2).join('/'));
+      });
+    });
+  }).catch(function (e) { log('EN 이동 연결', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

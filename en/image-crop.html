@@ -1,70 +1,62 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>이미지 자르기 · 사진 회전 · 크롭 - 무료 온라인 | 툴모아</title>
-<meta name="description" content="사진을 원하는 영역만 잘라내고 회전·좌우반전까지 할 수 있습니다. 1:1, 16:9 등 비율 고정도 지원합니다. 파일이 서버로 올라가지 않아 안전하며 워터마크가 없습니다.">
-<link rel="canonical" href="https://toolmoa.github.io/image-crop.html">
+<title>Crop image without uploading — free, in your browser</title>
+<meta name="description" content="Crop, rotate and flip a photo without uploading it. Fixed aspect ratios for profile pictures and video thumbnails. Everything runs inside your browser, so the image never reaches a server. No watermark.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-crop.html">
 <link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-crop.html">
 <link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-crop.html">
 <link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-crop.html">
-<meta property="og:title" content="이미지 자르기 · 사진 회전">
-<meta property="og:description" content="원하는 영역만 잘라내고 회전까지. 업로드 없이 브라우저에서 안전하게.">
-<meta property="og:locale" content="ko_KR">
+<meta property="og:title" content="Crop image without uploading">
+<meta property="og:description" content="Crop, rotate and flip photos entirely inside your browser.">
+<meta property="og:locale" content="en_US">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔲</text></svg>">
-<link rel="stylesheet" href="assets/style.css">
-<script src="assets/i18n.js" defer></script>
+<link rel="stylesheet" href="../assets/style.css">
 <style>
   #stage { position: relative; display: inline-block; max-width: 100%; touch-action: none; }
   #stage canvas { display: block; max-width: 100%; height: auto; border-radius: 8px; }
-  #box {
-    position: absolute; border: 2px solid #fff; cursor: move;
-    box-shadow: 0 0 0 9999px rgba(0,0,0,.5); box-sizing: border-box;
-  }
-  #box .h {
-    position: absolute; width: 14px; height: 14px; background: #fff;
-    border: 1px solid #666; border-radius: 3px;
-  }
+  #box { position: absolute; border: 2px solid #fff; cursor: move;
+         box-shadow: 0 0 0 9999px rgba(0,0,0,.5); box-sizing: border-box; }
+  #box .h { position: absolute; width: 14px; height: 14px; background: #fff;
+            border: 1px solid #666; border-radius: 3px; }
   #box .nw { left: -8px; top: -8px; cursor: nwse-resize; }
   #box .ne { right: -8px; top: -8px; cursor: nesw-resize; }
   #box .sw { left: -8px; bottom: -8px; cursor: nesw-resize; }
   #box .se { right: -8px; bottom: -8px; cursor: nwse-resize; }
 </style>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebApplication","name":"이미지 자르기","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+{"@context":"https://schema.org","@type":"WebApplication","name":"Crop image","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
 </script>
 </head>
-<body data-i18n-title="crop.title">
+<body>
 
 <header class="site-header">
   <div class="wrap">
-    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
     <nav class="site-nav">
-      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
-      <a href="image-crop.html" aria-current="page" data-i18n="nav.crop">이미지 자르기</a>
-      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
-      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
-      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
-      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
-      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
-      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
-      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
-      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
-      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html" aria-current="page">Crop image</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
     </nav>
+    <a class="lang-link" href="../image-crop.html" hreflang="ko">한국어</a>
   </div>
 </header>
 
 <main class="wrap">
-  <h1 data-i18n="crop.h1">이미지 자르기</h1>
-  <p class="lead" data-i18n="crop.lead">필요한 영역만 잘라내고 회전·좌우반전까지 한 번에 처리합니다.</p>
-  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+  <h1>Crop image without uploading</h1>
+  <p class="lead">Cut out just the part you need, then rotate or flip it in the same place.</p>
+  <span class="privacy-badge">🔒 Your photo never leaves your device</span>
 
   <div class="dropzone" id="dz">
     <span class="dz-icon">🔲</span>
-    <span class="dz-main" data-i18n="crop.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
-    <span class="dz-sub" data-i18n="crop.drop2">JPG · PNG · WebP · GIF · BMP</span>
+    <span class="dz-main">Drop a photo here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP</span>
     <input type="file" id="file" accept="image/*">
   </div>
 
@@ -73,21 +65,21 @@
   <div id="area" hidden>
     <div class="card">
       <div class="field">
-        <label for="ratio" data-i18n="crop.ratio">비율 고정</label>
+        <label for="ratio">Lock aspect ratio</label>
         <select id="ratio">
-          <option value="0" data-i18n="crop.ratioFree">자유롭게</option>
-          <option value="1" data-i18n="crop.ratio11">1:1 (정사각형 · 프로필)</option>
-          <option value="1.7777778" data-i18n="crop.ratio169">16:9 (와이드)</option>
-          <option value="1.3333333" data-i18n="crop.ratio43">4:3</option>
-          <option value="0.75" data-i18n="crop.ratio34">3:4 (세로)</option>
-          <option value="0.5625" data-i18n="crop.ratio916">9:16 (세로 영상)</option>
+          <option value="0">Free</option>
+          <option value="1">1:1 (square · profile picture)</option>
+          <option value="1.7777778">16:9 (widescreen)</option>
+          <option value="1.3333333">4:3</option>
+          <option value="0.75">3:4 (portrait)</option>
+          <option value="0.5625">9:16 (vertical video)</option>
         </select>
       </div>
       <div class="btn-row" style="margin-bottom:0">
-        <button class="btn secondary small" id="rot-l" data-i18n="crop.rotL">↺ 왼쪽 90°</button>
-        <button class="btn secondary small" id="rot-r" data-i18n="crop.rotR">↻ 오른쪽 90°</button>
-        <button class="btn secondary small" id="flip-h" data-i18n="crop.flip">좌우 반전</button>
-        <button class="btn secondary small" id="reset-box" data-i18n="crop.resetBox">선택 초기화</button>
+        <button class="btn secondary small" id="rot-l">↺ Rotate left</button>
+        <button class="btn secondary small" id="rot-r">↻ Rotate right</button>
+        <button class="btn secondary small" id="flip-h">Flip horizontally</button>
+        <button class="btn secondary small" id="reset-box">Reset selection</button>
       </div>
     </div>
 
@@ -99,68 +91,75 @@
     </div>
 
     <div class="stats">
-      <div class="stat"><span class="num" id="t-orig" style="font-size:18px">-</span><span class="lbl" data-i18n="crop.orig">원본 크기</span></div>
-      <div class="stat"><span class="num" id="t-crop" style="font-size:18px">-</span><span class="lbl" data-i18n="crop.crop">잘라낼 크기</span></div>
+      <div class="stat"><span class="num" id="t-orig" style="font-size:18px">-</span><span class="lbl">Original size</span></div>
+      <div class="stat"><span class="num" id="t-crop" style="font-size:18px">-</span><span class="lbl">Crop size</span></div>
     </div>
 
     <div class="field">
-      <label for="fmt" data-i18n="crop.fmt">저장 형식</label>
+      <label for="fmt">Save as</label>
       <select id="fmt">
-        <option value="image/png" data-i18n="crop.fmtPng">PNG (화질 손실 없음)</option>
-        <option value="image/jpeg" data-i18n="crop.fmtJpg">JPG (용량 작음)</option>
-        <option value="image/webp" data-i18n="crop.fmtWebp">WebP</option>
+        <option value="image/png">PNG (no quality loss)</option>
+        <option value="image/jpeg">JPG (smaller file)</option>
+        <option value="image/webp">WebP</option>
       </select>
     </div>
 
     <div class="btn-row">
-      <button class="btn" id="btn-save" data-i18n="crop.save">잘라서 저장</button>
-      <button class="btn secondary" id="btn-reset" data-i18n="crop.other">다른 사진 열기</button>
+      <button class="btn" id="btn-save">Crop and save</button>
+      <button class="btn secondary" id="btn-reset">Open another photo</button>
     </div>
   </div>
 
-  <div class="ad-slot"><!-- AD:CROP --></div>
+  <div class="ad-slot"><!-- AD:EN_CROP --></div>
 
-  <h2 data-ko-only>자주 묻는 질문</h2>
-  <div class="faq" data-ko-only>
+  <h2>Cropping does not always remove what you cut</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Some editors mark a region as hidden rather than actually discarding it, which is how cropped
+      screenshots have leaked the parts people thought they had removed. This tool redraws only the selected
+      pixels onto a new canvas and saves that — the discarded area is genuinely gone from the output file,
+      and the original photo is never uploaded in the first place.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
     <details>
-      <summary>사진이 서버로 올라가나요?</summary>
-      <p>아니요. 자르기와 회전 모두 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다.</p>
+      <summary>Is my photo uploaded?</summary>
+      <p>No. Cropping and rotation happen inside your browser, and nothing is transmitted.</p>
     </details>
     <details>
-      <summary>화질이 떨어지나요?</summary>
-      <p>PNG로 저장하면 화질 손실이 전혀 없습니다. 자르기는 원본 해상도 그대로 잘라내므로 화면에 작게 보여도 결과물은 원본 화질입니다.</p>
+      <summary>Does cropping reduce quality?</summary>
+      <p>Save as PNG and there is no quality loss at all. The crop is taken from the full-resolution original, so the result keeps the original detail even though the preview is displayed smaller.</p>
     </details>
     <details>
-      <summary>프로필 사진용으로 정사각형을 만들려면?</summary>
-      <p>비율 고정에서 <strong>1:1</strong>을 선택하면 어떻게 끌어도 정사각형이 유지됩니다.</p>
+      <summary>How do I make a square profile picture?</summary>
+      <p>Choose <strong>1:1</strong> under "Lock aspect ratio" and the selection stays square however you drag it.</p>
     </details>
     <details>
-      <summary>휴대폰에서도 되나요?</summary>
-      <p>됩니다. 손가락으로 선택 영역을 끌거나 모서리를 잡아 크기를 조절하세요.</p>
+      <summary>Does it work on a phone?</summary>
+      <p>Yes. Drag the selection with your finger, or grab a corner handle to resize it.</p>
     </details>
     <details>
-      <summary>여러 장을 한 번에 자를 수 있나요?</summary>
-      <p>이 도구는 한 번에 한 장씩 처리합니다. 여러 장의 용량을 한꺼번에 줄이시려면 <a href="image-compress.html">이미지 용량 줄이기</a>를 이용하세요.</p>
+      <summary>Can I crop several images at once?</summary>
+      <p>This tool handles one at a time. To shrink many files at once, use <a href="image-compress.html">Compress image</a>.</p>
     </details>
   </div>
 </main>
 
 <footer class="site-footer">
   <div class="wrap">
-            <nav>
-      <a href="index.html" data-i18n="nav.home">홈</a>
-      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
-      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
-      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
-      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
-      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
-      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
-      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
-      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
-      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
-      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="../image-crop.html" hreflang="ko">한국어</a>
     </nav>
-    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+    <div>© Toolmoa · Everything runs inside your browser</div>
   </div>
 </footer>
 
@@ -172,18 +171,16 @@
   var msg = document.getElementById('msg');
   var cv = document.getElementById('cv');
   var box = document.getElementById('box');
-  var stage = document.getElementById('stage');
   var ratioSel = document.getElementById('ratio');
 
-  var img = null;                       // 현재 원본 (회전 반영본)
-  var baseName = 'image';
-  var crop = { x: 0, y: 0, w: 0, h: 0 };  // 원본 픽셀 기준
+  var img = null, baseName = 'image';
+  var crop = { x: 0, y: 0, w: 0, h: 0 };
   var drag = null;
 
   function setMsg(t, cls) {
     msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
   }
-  function scale() { return cv.clientWidth / cv.width; }   // 화면 표시 배율
+  function scale() { return cv.clientWidth / cv.width; }
 
   dz.addEventListener('click', function () { fileInput.click(); });
   dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
@@ -197,19 +194,16 @@
   });
 
   function load(file) {
-    if (file.type.indexOf('image/') !== 0) { setMsg('이미지 파일을 선택해 주세요.', 'err'); return; }
+    if (file.type.indexOf('image/') !== 0) { setMsg('Please choose an image file.', 'err'); return; }
     baseName = file.name.replace(/\.[^.]+$/, '');
     var url = URL.createObjectURL(file);
     var im = new Image();
     im.onload = function () {
       URL.revokeObjectURL(url);
-      img = im;
-      draw();
-      resetBox();
-      area.hidden = false;
-      setMsg('');
+      img = im; draw(); resetBox();
+      area.hidden = false; setMsg('');
     };
-    im.onerror = function () { URL.revokeObjectURL(url); setMsg('이미지를 열 수 없습니다.', 'err'); };
+    im.onerror = function () { URL.revokeObjectURL(url); setMsg('This image could not be opened.', 'err'); };
     im.src = url;
   }
 
@@ -222,15 +216,10 @@
   function resetBox() {
     var r = parseFloat(ratioSel.value);
     var w, h;
-    if (r) {
-      w = Math.min(img.width, img.height * r) * 0.8;
-      h = w / r;
-    } else {
-      w = img.width * 0.8; h = img.height * 0.8;
-    }
+    if (r) { w = Math.min(img.width, img.height * r) * 0.8; h = w / r; }
+    else { w = img.width * 0.8; h = img.height * 0.8; }
     crop = { x: (img.width - w) / 2, y: (img.height - h) / 2, w: w, h: h };
-    clampCrop();
-    paintBox();
+    clampCrop(); paintBox();
   }
 
   function clampCrop() {
@@ -246,8 +235,7 @@
     box.style.top = (crop.y * s) + 'px';
     box.style.width = (crop.w * s) + 'px';
     box.style.height = (crop.h * s) + 'px';
-    document.getElementById('t-crop').textContent =
-      Math.round(crop.w) + '×' + Math.round(crop.h);
+    document.getElementById('t-crop').textContent = Math.round(crop.w) + '×' + Math.round(crop.h);
   }
 
   function pos(e) {
@@ -276,22 +264,20 @@
     var dx = p.x - drag.start.x, dy = p.y - drag.start.y;
     var o = drag.orig, r = parseFloat(ratioSel.value);
 
-    if (drag.mode === 'move') {
-      crop.x = o.x + dx; crop.y = o.y + dy;
-    } else {
+    if (drag.mode === 'move') { crop.x = o.x + dx; crop.y = o.y + dy; }
+    else {
       var nx = o.x, ny = o.y, nw = o.w, nh = o.h;
       if (drag.mode === 'se') { nw = o.w + dx; nh = o.h + dy; }
       if (drag.mode === 'sw') { nx = o.x + dx; nw = o.w - dx; nh = o.h + dy; }
       if (drag.mode === 'ne') { ny = o.y + dy; nw = o.w + dx; nh = o.h - dy; }
       if (drag.mode === 'nw') { nx = o.x + dx; ny = o.y + dy; nw = o.w - dx; nh = o.h - dy; }
-      if (r) {                                  // 비율 고정이면 높이를 폭에 맞춘다
+      if (r) {
         nh = nw / r;
         if (drag.mode === 'ne' || drag.mode === 'nw') ny = o.y + o.h - nh;
       }
       if (nw > 10 && nh > 10) { crop.x = nx; crop.y = ny; crop.w = nw; crop.h = nh; }
     }
-    clampCrop();
-    paintBox();
+    clampCrop(); paintBox();
   }
   document.addEventListener('mousemove', onMove);
   document.addEventListener('touchmove', onMove, { passive: false });
@@ -302,12 +288,10 @@
   document.getElementById('reset-box').addEventListener('click', resetBox);
   window.addEventListener('resize', function () { if (img) paintBox(); });
 
-  // 회전·반전은 원본 자체를 다시 그려서 반영한다
   function transform(fn, newW, newH) {
     var c = document.createElement('canvas');
     c.width = newW; c.height = newH;
-    var x = c.getContext('2d');
-    fn(x);
+    fn(c.getContext('2d'));
     var out = new Image();
     out.onload = function () { img = out; draw(); resetBox(); };
     out.src = c.toDataURL('image/png');
@@ -337,10 +321,10 @@
       var ext = type === 'image/jpeg' ? 'jpg' : (type === 'image/webp' ? 'webp' : 'png');
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
-      a.href = url; a.download = baseName + '_자름.' + ext;
+      a.href = url; a.download = baseName + '_cropped.' + ext;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-      setMsg('저장했습니다. ' + c.width + '×' + c.height, 'ok');
+      setMsg('Saved. ' + c.width + '×' + c.height, 'ok');
     }, type, 0.92);
   });
 

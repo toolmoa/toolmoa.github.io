@@ -354,3 +354,17 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 @media (max-width: 640px) {
   .lang-select { padding: 5px 6px; font-size: 12px; margin-left: 6px; }
 }
+
+/* ===== 영어 페이지의 언어 전환 링크 ===== */
+.lang-link {
+  flex: 0 0 auto;
+  margin-left: 10px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.lang-link:hover { color: var(--text); border-color: var(--muted); }
