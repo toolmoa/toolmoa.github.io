@@ -43,9 +43,77 @@
 
   <div class="card">
     <div class="field">
+      <label for="qtype">Kind</label>
+      <select id="qtype">
+        <option value="text">Link or text</option>
+        <option value="wifi">Wi-Fi login</option>
+        <option value="vcard">Contact card</option>
+        <option value="sms">Text message</option>
+        <option value="mail">Email</option>
+      </select>
+    </div>
+
+    <div class="field qgroup" id="g-text">
       <label for="text">Content (link or text)</label>
       <textarea id="text" style="min-height:90px" placeholder="https://example.com or any text">https://</textarea>
       <div class="hint">A web address should start with <code>https://</code> so it opens straight away when scanned.</div>
+    </div>
+
+    <div class="qgroup" id="g-wifi" hidden>
+      <div class="field">
+        <label for="w-ssid">Network name (SSID)</label>
+        <input type="text" id="w-ssid" placeholder="MyHomeWiFi">
+      </div>
+      <div class="field">
+        <label for="w-pw">Password</label>
+        <input type="text" id="w-pw">
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+        <div class="field" style="margin-bottom:0">
+          <label for="w-enc">Security</label>
+          <select id="w-enc">
+            <option value="WPA">WPA / WPA2 / WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">No password</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;display:flex;align-items:flex-end">
+          <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;margin:0">
+            <input type="checkbox" id="w-hidden" style="width:auto;margin:0">
+            <span>Hidden network</span>
+          </label>
+        </div>
+      </div>
+      <div class="hint">Guests point a camera at it and join without typing the password. Handy on a cafe or office wall.</div>
+    </div>
+
+    <div class="qgroup" id="g-vcard" hidden>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+        <div class="field" style="margin-bottom:0"><label for="v-name">Name</label><input type="text" id="v-name"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-tel">Phone</label><input type="text" id="v-tel"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-mail">Email</label><input type="text" id="v-mail"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-org">Company</label><input type="text" id="v-org"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-title">Job title</label><input type="text" id="v-title"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-url">Website</label><input type="text" id="v-url"></div>
+      </div>
+      <div class="hint">Scanning opens the save-contact screen straight away. Good for a business card.</div>
+    </div>
+
+    <div class="qgroup" id="g-sms" hidden>
+      <div class="field"><label for="s-num">To (number)</label><input type="text" id="s-num" placeholder="+15551234567"></div>
+      <div class="field" style="margin-bottom:0">
+        <label for="s-msg">Message to pre-fill</label>
+        <textarea id="s-msg" style="min-height:70px"></textarea>
+      </div>
+    </div>
+
+    <div class="qgroup" id="g-mail" hidden>
+      <div class="field"><label for="m-to">To</label><input type="text" id="m-to" placeholder="name@example.com"></div>
+      <div class="field"><label for="m-sub">Subject</label><input type="text" id="m-sub"></div>
+      <div class="field" style="margin-bottom:0">
+        <label for="m-body">Body</label>
+        <textarea id="m-body" style="min-height:70px"></textarea>
+      </div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
@@ -86,6 +154,18 @@
       </div>
     </div>
     <div class="hint" style="margin-top:-4px">A QR code will not scan if the two colours are too close in brightness. Keep the code dark and the background light.</div>
+
+    <div class="field" style="margin:16px 0 0">
+      <label for="logo">Logo in the centre (optional)</label>
+      <input type="file" id="logo" accept="image/*">
+      <div class="hint">
+        Adding a logo raises the error correction to H so the code still scans when the middle is
+        covered. Always test the result with a real phone before you print it.
+      </div>
+      <div class="btn-row" id="logo-row" hidden>
+        <button class="btn secondary small" id="logo-clear">Remove logo</button>
+      </div>
+    </div>
   </div>
 
   <div id="msg"></div>
@@ -186,9 +266,76 @@
     setTimeout(function () { whenReady(fn, tries - 1); }, 100);
   }
 
+  var logoImg = null;
+
+  // Separators inside a value must be escaped or the payload breaks
+  function esc(s) { return String(s || '').replace(/([\\;,:"])/g, '\\$1'); }
+
+  function buildPayload() {
+    var type = document.getElementById('qtype').value;
+    function v(id) { return (document.getElementById(id).value || '').trim(); }
+
+    if (type === 'wifi') {
+      if (!v('w-ssid')) return '';
+      var enc = document.getElementById('w-enc').value;
+      var s = 'WIFI:T:' + enc + ';S:' + esc(v('w-ssid')) + ';';
+      if (enc !== 'nopass') s += 'P:' + esc(v('w-pw')) + ';';
+      if (document.getElementById('w-hidden').checked) s += 'H:true;';
+      return s + ';';
+    }
+    if (type === 'vcard') {
+      if (!v('v-name') && !v('v-tel')) return '';
+      var L = ['BEGIN:VCARD', 'VERSION:3.0'];
+      if (v('v-name')) { L.push('N:' + v('v-name')); L.push('FN:' + v('v-name')); }
+      if (v('v-tel')) L.push('TEL;TYPE=CELL:' + v('v-tel'));
+      if (v('v-mail')) L.push('EMAIL:' + v('v-mail'));
+      if (v('v-org')) L.push('ORG:' + v('v-org'));
+      if (v('v-title')) L.push('TITLE:' + v('v-title'));
+      if (v('v-url')) L.push('URL:' + v('v-url'));
+      L.push('END:VCARD');
+      return L.join('\n');
+    }
+    if (type === 'sms') {
+      if (!v('s-num')) return '';
+      return 'SMSTO:' + v('s-num') + ':' + v('s-msg');
+    }
+    if (type === 'mail') {
+      if (!v('m-to')) return '';
+      var q = [];
+      if (v('m-sub')) q.push('subject=' + encodeURIComponent(v('m-sub')));
+      if (v('m-body')) q.push('body=' + encodeURIComponent(v('m-body')));
+      return 'MAILTO:' + v('m-to') + (q.length ? '?' + q.join('&') : '');
+    }
+    var t2 = v('text');
+    return (t2 === 'https://') ? '' : t2;
+  }
+
+  function switchGroup() {
+    var type = document.getElementById('qtype').value;
+    var map = { text: 'g-text', wifi: 'g-wifi', vcard: 'g-vcard', sms: 'g-sms', mail: 'g-mail' };
+    Object.keys(map).forEach(function (k) {
+      document.getElementById(map[k]).hidden = (k !== type);
+    });
+    render();
+  }
+
+  // Draw the logo over the middle, on a background-coloured pad so the code does not show through
+  function drawLogo(size) {
+    var ctx = canvas.getContext('2d');
+    var box = Math.round(size * 0.22);
+    var pad = Math.round(box * 0.12);
+    var x = Math.round((canvas.width - box) / 2);
+    var y = Math.round((canvas.height - box) / 2);
+    ctx.fillStyle = document.getElementById('bg').value;
+    ctx.fillRect(x - pad, y - pad, box + pad * 2, box + pad * 2);
+    var r = Math.min(box / logoImg.naturalWidth, box / logoImg.naturalHeight);
+    var w = logoImg.naturalWidth * r, h = logoImg.naturalHeight * r;
+    ctx.drawImage(logoImg, x + (box - w) / 2, y + (box - h) / 2, w, h);
+  }
+
   function render() {
-    var text = document.getElementById('text').value.trim();
-    if (!text || text === 'https://') { showQr(false); setMsg(''); return; }
+    var text = buildPayload();
+    if (!text) { showQr(false); setMsg(''); return; }
     whenReady(function () { draw(text); });
   }
 
@@ -208,6 +355,8 @@
   function draw(text) {
     var size = parseInt(document.getElementById('size').value, 10);
     var ratio = { 0: 0, 2: 0.04, 4: 0.08, 8: 0.14 }[document.getElementById('margin').value] || 0.08;
+    // A logo covers the middle, so the highest error correction is required
+    if (logoImg) document.getElementById('ecl').value = 'H';
     var level = document.getElementById('ecl').value;
     var bytes = new TextEncoder().encode(text).length;
     if (bytes > (CAP[level] || 2331)) {
@@ -225,6 +374,7 @@
         foreground: document.getElementById('fg').value,
         background: document.getElementById('bg').value
       });
+      if (logoImg) drawLogo(size);
       showQr(true); setMsg('');
     } catch (e) {
       showQr(false);
@@ -232,10 +382,42 @@
     }
   }
 
-  ['text', 'size', 'ecl', 'margin', 'fg', 'bg'].forEach(function (id) {
+  ['text', 'size', 'ecl', 'margin', 'fg', 'bg',
+   'w-ssid', 'w-pw', 'w-enc', 'w-hidden',
+   'v-name', 'v-tel', 'v-mail', 'v-org', 'v-title', 'v-url',
+   's-num', 's-msg', 'm-to', 'm-sub', 'm-body'].forEach(function (id) {
     var el = document.getElementById(id);
+    if (!el) return;
     el.addEventListener('input', render);
     el.addEventListener('change', render);
+  });
+
+  document.getElementById('qtype').addEventListener('change', switchGroup);
+
+  var logoInput = document.getElementById('logo');
+  logoInput.addEventListener('change', function () {
+    var f = logoInput.files && logoInput.files[0];
+    if (!f) return;
+    var url = URL.createObjectURL(f);
+    var im = new Image();
+    im.onload = function () {
+      URL.revokeObjectURL(url);
+      logoImg = im;
+      document.getElementById('logo-row').hidden = false;
+      render();
+    };
+    im.onerror = function () {
+      URL.revokeObjectURL(url);
+      setMsg('That logo image could not be opened.', 'err');
+    };
+    im.src = url;
+  });
+
+  document.getElementById('logo-clear').addEventListener('click', function () {
+    logoImg = null;
+    logoInput.value = '';
+    document.getElementById('logo-row').hidden = true;
+    render();
   });
 
   document.getElementById('btn-png').addEventListener('click', function () {

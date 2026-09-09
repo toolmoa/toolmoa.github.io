@@ -380,6 +380,33 @@ function run() {
     });
   }).catch(function (e) { log('규격 맞추기 (증명사진)', false, '오류: ' + e.message); });
 
+  // 10. 영어판 크롭 규격도 동일하게 동작하는지
+  chain = chain.then(function () {
+    if (!FX.photo) return;
+    return loadFrame('../en/image-crop.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      var ps = d.getElementById('preset');
+      if (!ps) { log('EN: 규격 맞추기', false, '영어판에 규격 선택이 없음'); return; }
+      setFiles(d.getElementById('file'), [new File([FX.photo], 'p.jpg', { type: 'image/jpeg' })]);
+      return waitFor(function () { return d.getElementById('t-orig').textContent !== '-'; }, 30000)
+        .then(function () {
+          ps.value = '600x600';                     // US passport 2x2in
+          ps.dispatchEvent(new Event('change'));
+          var shown = d.getElementById('t-crop').textContent;
+          var mark = got.length;
+          d.getElementById('btn-save').click();
+          return waitNew(got, mark, /jpeg|png|webp/, 30000, f.contentWindow).then(function () {
+            var out = pickNew(got, mark, /jpeg|png|webp/, f.contentWindow);
+            if (!out) { log('EN: 규격 맞추기', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+            return imgSize(out).then(function (s) {
+              log('EN: 규격 맞추기', s.w === 600 && s.h === 600 && shown === '600×600',
+                  '여권규격 선택 → 화면 "' + shown + '", 저장 ' + s.w + '×' + s.h + ' (기대 600×600)');
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('EN: 규격 맞추기', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 

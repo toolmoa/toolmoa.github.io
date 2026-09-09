@@ -421,6 +421,44 @@ function run() {
     });
   }).catch(function (e) { log('QR 한글 인코딩', false, '오류: ' + e.message); });
 
+  // 12. 영어판 QR도 같은 기능이 실제로 동작하는지 (한국어판만 고치고 넘어가기 쉬운 지점)
+  chain = chain.then(function () {
+    if (typeof jsQR === 'undefined') { log('EN: QR 프리셋·한글', false, 'jsQR 로드 실패'); return; }
+    return loadFrame('../en/qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      function decode() {
+        var c = d.getElementById('canvas');
+        if (c.hidden) return null;
+        var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+        var r = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+        return r ? r.data : null;
+      }
+      function set(id, v) {
+        var el = d.getElementById(id);
+        el.value = v;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      var ty = d.getElementById('qtype');
+      if (!ty) { log('EN: QR 프리셋·한글', false, '영어판에 종류 선택이 없음'); return; }
+
+      ty.value = 'wifi'; ty.dispatchEvent(new Event('change'));
+      set('w-ssid', 'Toolmoa Guest');
+      set('w-pw', 'hello123');
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+        var wifi = decode();
+        // 비ASCII도 영어판에서 제대로 인코딩되는지 확인 (한국어판만 고쳤을 위험)
+        ty.value = 'text'; ty.dispatchEvent(new Event('change'));
+        set('text', 'Café Toolmoa 안녕');
+        return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+          var uni = decode();
+          log('EN: QR 프리셋·비ASCII',
+              wifi === 'WIFI:T:WPA;S:Toolmoa Guest;P:hello123;;' && uni === 'Café Toolmoa 안녕',
+              '와이파이 → "' + wifi + '" · 비ASCII → "' + uni + '"');
+        });
+      });
+    });
+  }).catch(function (e) { log('EN: QR 프리셋·비ASCII', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 

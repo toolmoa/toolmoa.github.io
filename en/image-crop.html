@@ -75,6 +75,30 @@
           <option value="0.5625">9:16 (vertical video)</option>
         </select>
       </div>
+      <div class="field">
+        <label for="preset">Fit to an exact size</label>
+        <select id="preset">
+          <option value="">Off (crop at original resolution)</option>
+          <option value="600x600">US passport 2×2in (600×600)</option>
+          <option value="413x531">EU/UK passport 35×45mm (413×531)</option>
+          <option value="500x500">Profile square (500×500)</option>
+          <option value="1080x1080">Instagram square (1080×1080)</option>
+          <option value="1280x720">YouTube thumbnail (1280×720)</option>
+          <option value="custom">Custom size</option>
+        </select>
+        <div class="hint">
+          Choosing a size locks the selection to that shape and saves the file at exactly those
+          pixels. Passport sizes assume 300dpi printing.
+        </div>
+      </div>
+
+      <div class="field" id="custom-field" hidden>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><label for="cw">Width (px)</label><input type="number" id="cw" min="1" value="600"></div>
+          <div><label for="ch">Height (px)</label><input type="number" id="ch" min="1" value="800"></div>
+        </div>
+      </div>
+
       <div class="btn-row" style="margin-bottom:0">
         <button class="btn secondary small" id="rot-l">↺ Rotate left</button>
         <button class="btn secondary small" id="rot-r">↻ Rotate right</button>
@@ -193,6 +217,29 @@
     if (fileInput.files.length) load(fileInput.files[0]);
   });
 
+  var presetSel = document.getElementById('preset');
+  var customField = document.getElementById('custom-field');
+
+  // A chosen size decides the output pixels. Null when the option is off.
+  function presetSize() {
+    var v = presetSel.value;
+    if (!v) return null;
+    if (v === 'custom') {
+      var w = parseInt(document.getElementById('cw').value, 10);
+      var h = parseInt(document.getElementById('ch').value, 10);
+      return (w > 0 && h > 0) ? { w: w, h: h } : null;
+    }
+    var p = v.split('x');
+    return { w: parseInt(p[0], 10), h: parseInt(p[1], 10) };
+  }
+
+  // The chosen size wins over the aspect-ratio dropdown
+  function activeRatio() {
+    var p = presetSize();
+    if (p) return p.w / p.h;
+    return parseFloat(ratioSel.value);
+  }
+
   function load(file) {
     if (file.type.indexOf('image/') !== 0) { setMsg('Please choose an image file.', 'err'); return; }
     baseName = file.name.replace(/\.[^.]+$/, '');
@@ -217,7 +264,7 @@
   }
 
   function resetBox() {
-    var r = parseFloat(ratioSel.value);
+    var r = activeRatio();
     var w, h;
     if (r) { w = Math.min(img.width, img.height * r) * 0.8; h = w / r; }
     else { w = img.width * 0.8; h = img.height * 0.8; }
@@ -238,7 +285,11 @@
     box.style.top = (crop.y * s) + 'px';
     box.style.width = (crop.w * s) + 'px';
     box.style.height = (crop.h * s) + 'px';
-    document.getElementById('t-crop').textContent = Math.round(crop.w) + '×' + Math.round(crop.h);
+    var ps = presetSize();
+    // Showing the size that will actually be saved is less confusing
+    document.getElementById('t-crop').textContent = ps
+      ? ps.w + '×' + ps.h
+      : Math.round(crop.w) + '×' + Math.round(crop.h);
   }
 
   function pos(e) {
@@ -265,7 +316,7 @@
     e.preventDefault();
     var p = pos(e);
     var dx = p.x - drag.start.x, dy = p.y - drag.start.y;
-    var o = drag.orig, r = parseFloat(ratioSel.value);
+    var o = drag.orig, r = activeRatio();
 
     if (drag.mode === 'move') { crop.x = o.x + dx; crop.y = o.y + dy; }
     else {
@@ -286,6 +337,19 @@
   document.addEventListener('touchmove', onMove, { passive: false });
   document.addEventListener('mouseup', function () { drag = null; });
   document.addEventListener('touchend', function () { drag = null; });
+
+  function onPresetChange() {
+    customField.hidden = presetSel.value !== 'custom';
+    ratioSel.disabled = !!presetSel.value;   // the size decides the shape
+    if (img) { resetBox(); paintBox(); }
+  }
+  presetSel.addEventListener('change', onPresetChange);
+  ['cw', 'ch'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      if (img && presetSel.value === 'custom') { resetBox(); paintBox(); }
+    });
+  });
+  onPresetChange();
 
   ratioSel.addEventListener('change', resetBox);
   document.getElementById('reset-box').addEventListener('click', resetBox);
@@ -315,11 +379,17 @@
   document.getElementById('btn-save').addEventListener('click', function () {
     if (!img) return;
     var type = document.getElementById('fmt').value;
+    var ps = presetSize();
+    var sw = Math.round(crop.w), sh = Math.round(crop.h);
     var c = document.createElement('canvas');
-    c.width = Math.round(crop.w); c.height = Math.round(crop.h);
+    // With a chosen size, scale the selection to exactly those pixels
+    c.width = ps ? ps.w : sw;
+    c.height = ps ? ps.h : sh;
     var x = c.getContext('2d');
     if (type === 'image/jpeg') { x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); }
-    x.drawImage(img, Math.round(crop.x), Math.round(crop.y), c.width, c.height, 0, 0, c.width, c.height);
+    x.imageSmoothingEnabled = true;
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(img, Math.round(crop.x), Math.round(crop.y), sw, sh, 0, 0, c.width, c.height);
     c.toBlob(function (blob) {
       var ext = type === 'image/jpeg' ? 'jpg' : (type === 'image/webp' ? 'webp' : 'png');
       var url = URL.createObjectURL(blob);

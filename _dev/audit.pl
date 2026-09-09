@@ -79,3 +79,38 @@ for my $f (@files) {
 }
 
 print "\n총 문제 $errors 건\n";
+
+# --- 한국어판에 넣은 기능이 영어판에 빠지지 않았는지 대조 ---
+# 한쪽만 고치고 넘어가기 가장 쉬운 실수라 상시 검사로 둔다.
+print "\n=== 한국어 / 영어 기능 대조 ===\n";
+my @PAIRS = (
+  ['qr-generate.html',    ['id="qtype"', 'id="g-wifi"', 'id="g-vcard"', 'id="logo"',
+                           'toUtf8Chars', 'buildPayload', 'drawLogo', 'CAP = {']],
+  ['image-crop.html',     ['id="preset"', 'id="custom-field"', 'function presetSize',
+                           'function activeRatio', 'jpe?g/i.test']],
+  ['image-compress.html', ['id="target-size"', 'function encodeToTarget', 'function toBlob']],
+  ['pdf-merge.html',      ['ParseSpeeds.Fastest', 'new Uint8Array(buf)']],
+  ['pdf-split.html',      ['ParseSpeeds.Fastest']],
+  ['img-to-pdf.html',     ['toJpegBytes']],
+  ['file-convert.html',   ['function decodeText', 'type: \'string\'']],
+);
+
+my $gap = 0;
+for my $p (@PAIRS) {
+  my ($file, $marks) = @$p;
+  my $en = "en/$file";
+  unless (-e $en) { printf("%-22s 영어판 없음 (의도된 경우도 있음)\n", $file); next; }
+
+  my $ko_c = do { open(my $h, '<:raw', $file) or die $!; local $/; <$h> };
+  my $en_c = do { open(my $h, '<:raw', $en) or die $!; local $/; <$h> };
+  utf8::decode($ko_c); utf8::decode($en_c);
+
+  my @miss = grep { index($ko_c, $_) >= 0 && index($en_c, $_) < 0 } @$marks;
+  if (@miss) {
+    printf("%-22s ⚠ 영어판 누락: %s\n", $file, join(', ', @miss));
+    $gap += scalar(@miss);
+  } else {
+    printf("%-22s 동등\n", $file);
+  }
+}
+print $gap ? "\n기능 격차 $gap 건\n" : "\n기능 격차 없음\n";
