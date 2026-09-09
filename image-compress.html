@@ -70,6 +70,21 @@
       </select>
       <div class="hint" data-i18n="imgc.maxwHint">가로 기준으로 줄이며 세로는 비율에 맞춰 자동 조절됩니다. 원본보다 커지지는 않습니다.</div>
     </div>
+    <div class="field">
+      <label for="target-size" data-i18n="imgc.target">목표 용량</label>
+      <select id="target-size">
+        <option value="0" data-i18n="imgc.tgNone">제한 없음 (위 화질 그대로)</option>
+        <option value="102400" data-i18n="imgc.tg100">100KB 이하</option>
+        <option value="307200" data-i18n="imgc.tg300">300KB 이하</option>
+        <option value="524288" data-i18n="imgc.tg500">500KB 이하</option>
+        <option value="1048576" data-i18n="imgc.tg1m">1MB 이하</option>
+        <option value="2097152" data-i18n="imgc.tg2m">2MB 이하</option>
+      </select>
+      <div class="hint" data-i18n="imgc.targetHint">
+        지원서 사진이나 이메일 첨부처럼 용량 제한이 있을 때 쓰세요.
+        제한 안에서 가장 좋은 화질을 자동으로 찾아줍니다. (PNG에는 적용되지 않습니다)
+      </div>
+    </div>
     <div class="field" style="margin-bottom:0">
       <label for="format" data-i18n="imgc.format">저장 형식</label>
       <select id="format">
@@ -157,6 +172,7 @@
   var qVal = document.getElementById('q-val');
   var maxwSel = document.getElementById('maxw');
   var formatSel = document.getElementById('format');
+  var targetSel = document.getElementById('target-size');
   var msg = document.getElementById('msg');
   var resultBox = document.getElementById('result');
   var list = document.getElementById('list');
@@ -178,12 +194,31 @@
     qVal.textContent = quality.value + '%';
   });
 
+  // PNG는 화질 값이 없어 목표 용량을 맞출 수 없다. 조합이 어긋나면 바로 알려준다.
+  function warnPngTarget() {
+    if (parseInt(targetSel.value, 10) > 0 && formatSel.value === 'image/png') {
+      setMsg(t('imgc.pngTarget',
+        'PNG는 화질 조절이 없어 목표 용량을 맞출 수 없습니다. JPG나 WebP를 선택해 주세요.'), 'err');
+    }
+  }
+  targetSel.addEventListener('change', warnPngTarget);
+  formatSel.addEventListener('change', warnPngTarget);
+
   // 설정을 바꾸면 이미 넣은 사진을 자동으로 다시 변환
-  [quality, maxwSel, formatSel].forEach(function (el) {
+  [quality, maxwSel, formatSel, targetSel].forEach(function (el) {
     el.addEventListener('change', function () {
       if (lastFiles.length) process(lastFiles);
     });
   });
+
+  // 목표 용량을 쓰면 화질은 자동으로 정해지므로 슬라이더를 흐리게 해서 알려준다
+  function syncQualityState() {
+    var on = parseInt(targetSel.value, 10) > 0 && formatSel.value !== 'image/png';
+    quality.disabled = on;
+    qVal.textContent = on ? t('imgc.auto', '자동') : quality.value + '%';
+  }
+  targetSel.addEventListener('change', syncQualityState);
+  formatSel.addEventListener('change', syncQualityState);
 
   dz.addEventListener('click', function () { fileInput.click(); });
   dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
@@ -234,11 +269,39 @@
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, w, h);
 
-      return new Promise(function (resolve) {
-        canvas.toBlob(function (blob) {
-          resolve({ blob: blob, w: w, h: h, type: type });
-        }, type, parseInt(quality.value, 10) / 100);
+      var target = parseInt(document.getElementById('target-size').value, 10);
+      // PNG는 화질 값이 없어서 목표 용량을 맞출 수 없다
+      var canTarget = target > 0 && type !== 'image/png';
+
+      var job = canTarget
+        ? encodeToTarget(canvas, type, target)
+        : toBlob(canvas, type, parseInt(quality.value, 10) / 100);
+
+      return job.then(function (blob) {
+        return { blob: blob, w: w, h: h, type: type };
       });
+    });
+  }
+
+  function toBlob(canvas, type, q) {
+    return new Promise(function (r) { canvas.toBlob(r, type, q); });
+  }
+
+  // 목표 용량 이하이면서 가장 화질이 좋은 지점을 이분 탐색으로 찾는다.
+  // 한 장당 8번만 인코딩하므로 큰 사진에서도 체감 지연이 크지 않다.
+  function encodeToTarget(canvas, type, target) {
+    var lo = 0.05, hi = 0.96, best = null;
+    function step(n) {
+      if (n === 0) return Promise.resolve(best);
+      var mid = (lo + hi) / 2;
+      return toBlob(canvas, type, mid).then(function (b) {
+        if (b && b.size <= target) { best = b; lo = mid; } else { hi = mid; }
+        return step(n - 1);
+      });
+    }
+    return step(8).then(function (b) {
+      // 최저 화질로도 목표에 못 미치면 그거라도 돌려준다 (아래 안내에서 알려준다)
+      return b || toBlob(canvas, type, 0.05);
     });
   }
 
@@ -303,8 +366,12 @@
       list.appendChild(li);
     });
 
+    var tgt = parseInt(document.getElementById('target-size').value, 10);
+    var miss = tgt > 0 ? results.filter(function (r) { return r.after > tgt; }).length : 0;
     if (after > before) {
       setMsg(t('imgc.bigger','변환 후 용량이 더 커졌습니다. 화질을 낮추거나 JPG·WebP 형식을 선택해 보세요.'), 'err');
+    } else if (miss) {
+      setMsg(miss + t('imgc.missTarget','장은 최저 화질로도 목표 용량에 맞추지 못했습니다. 최대 가로 크기를 줄여 보세요.'), 'err');
     }
     resultBox.hidden = false;
   }

@@ -278,6 +278,30 @@ function run() {
     });
   }).catch(function (e) { log('실제 엑셀 파일', false, '오류: ' + e.message); });
 
+  // 7. 목표 용량 지정 압축 — 한도를 넘지 않으면서 한도를 충분히 활용하는지
+  chain = chain.then(function () {
+    if (!FX.photo) return;
+    var TARGET = 307200;   // 300KB
+    return loadFrame('../image-compress.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      d.getElementById('maxw').value = '0';
+      d.getElementById('format').value = 'image/jpeg';
+      d.getElementById('target-size').value = String(TARGET);
+      var mark = got.length;
+      setFiles(d.getElementById('file'), [new File([FX.photo], 'p.jpg', { type: 'image/jpeg' })]);
+      return waitNew(got, mark, /jpeg/, 40000, f.contentWindow).then(function () {
+        var out = pickNew(got, mark, /jpeg/, f.contentWindow);
+        if (!out) { log('목표 용량 지정 압축', false, '결과 없음 · 화면: ' + msgOf(d)); return; }
+        var use = out.size / TARGET;
+        // 한도를 넘으면 실패, 한도의 절반도 못 쓰면 화질을 낭비한 것이므로 역시 실패
+        log('목표 용량 지정 압축', out.size <= TARGET && use > 0.5,
+            '목표 300KB → 결과 ' + kb(out.size) +
+            ' (한도 내 ' + (out.size <= TARGET ? 'OK' : '초과 ⚠') +
+            ', 한도 활용률 ' + Math.round(use * 100) + '%)');
+      });
+    });
+  }).catch(function (e) { log('목표 용량 지정 압축', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 

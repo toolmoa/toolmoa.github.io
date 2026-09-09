@@ -66,6 +66,21 @@
       </select>
       <div class="hint">Height follows automatically to keep the aspect ratio. Images are never enlarged.</div>
     </div>
+    <div class="field">
+      <label for="target-size">Target file size</label>
+      <select id="target-size">
+        <option value="0">No limit (use the quality above)</option>
+        <option value="102400">Under 100KB</option>
+        <option value="307200">Under 300KB</option>
+        <option value="524288">Under 500KB</option>
+        <option value="1048576">Under 1MB</option>
+        <option value="2097152">Under 2MB</option>
+      </select>
+      <div class="hint">
+        Useful when a form or a mail server caps the file size. The best quality that still
+        fits the limit is found automatically. (Not available for PNG.)
+      </div>
+    </div>
     <div class="field" style="margin-bottom:0">
       <label for="format">Save as</label>
       <select id="format">
@@ -176,10 +191,24 @@
     msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
 
+  var targetSel = document.getElementById('target-size');
+
   quality.addEventListener('input', function () { qVal.textContent = quality.value + '%'; });
-  [quality, maxwSel, formatSel].forEach(function (el) {
+  [quality, maxwSel, formatSel, targetSel].forEach(function (el) {
     el.addEventListener('change', function () { if (lastFiles.length) process(lastFiles); });
   });
+
+  // With a target size the quality is chosen automatically, so grey the slider out
+  function syncQualityState() {
+    var on = parseInt(targetSel.value, 10) > 0 && formatSel.value !== 'image/png';
+    quality.disabled = on;
+    qVal.textContent = on ? 'auto' : quality.value + '%';
+    if (parseInt(targetSel.value, 10) > 0 && formatSel.value === 'image/png') {
+      setMsg('PNG has no quality setting, so a target size cannot be applied. Choose JPG or WebP instead.', 'err');
+    }
+  }
+  targetSel.addEventListener('change', syncQualityState);
+  formatSel.addEventListener('change', syncQualityState);
 
   dz.addEventListener('click', function () { fileInput.click(); });
   dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
@@ -221,11 +250,34 @@
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, w, h);
-      return new Promise(function (resolve) {
-        canvas.toBlob(function (blob) { resolve({ blob: blob, w: w, h: h, type: type }); },
-                      type, parseInt(quality.value, 10) / 100);
-      });
+
+      var target = parseInt(targetSel.value, 10);
+      // PNG has no quality parameter, so a target size cannot be honoured
+      var job = (target > 0 && type !== 'image/png')
+        ? encodeToTarget(canvas, type, target)
+        : toBlob(canvas, type, parseInt(quality.value, 10) / 100);
+
+      return job.then(function (blob) { return { blob: blob, w: w, h: h, type: type }; });
     });
+  }
+
+  function toBlob(canvas, type, q) {
+    return new Promise(function (r) { canvas.toBlob(r, type, q); });
+  }
+
+  // Binary-search the quality setting for the best result that still fits the target.
+  // Eight encodes per image keeps this fast enough even for large photos.
+  function encodeToTarget(canvas, type, target) {
+    var lo = 0.05, hi = 0.96, best = null;
+    function step(n) {
+      if (n === 0) return Promise.resolve(best);
+      var mid = (lo + hi) / 2;
+      return toBlob(canvas, type, mid).then(function (b) {
+        if (b && b.size <= target) { best = b; lo = mid; } else { hi = mid; }
+        return step(n - 1);
+      });
+    }
+    return step(8).then(function (b) { return b || toBlob(canvas, type, 0.05); });
   }
 
   function newName(orig, type) {
@@ -283,8 +335,12 @@
       list.appendChild(li);
     });
 
+    var tgt = parseInt(targetSel.value, 10);
+    var miss = tgt > 0 ? results.filter(function (r) { return r.after > tgt; }).length : 0;
     if (after > before) {
       setMsg('The result came out larger. Try lowering the quality or choosing JPG or WebP.', 'err');
+    } else if (miss) {
+      setMsg(miss + ' image(s) could not reach the target even at the lowest quality. Try reducing the maximum width.', 'err');
     }
     resultBox.hidden = false;
   }
