@@ -195,6 +195,14 @@
   // Maximum bytes a single QR can hold (byte mode, version 40).
   // The library does not throw when you exceed this — it silently produces a broken
   // code — so we have to reject it here, or people print codes that never scan.
+  // QRious maps one character to one byte, so multi-byte characters (accents, CJK)
+  // produce a corrupt code that will not scan at all. Convert to UTF-8 bytes first.
+  function toUtf8Chars(s) {
+    var b = new TextEncoder().encode(s), out = '';
+    for (var i = 0; i < b.length; i++) out += String.fromCharCode(b[i]);
+    return out;
+  }
+
   var CAP = { L: 2953, M: 2331, Q: 1663, H: 1273 };
 
   function draw(text) {
@@ -211,7 +219,7 @@
     }
     try {
       new QRious({
-        element: canvas, value: text, size: size,
+        element: canvas, value: toUtf8Chars(text), size: size,
         padding: Math.round(size * ratio),
         level: document.getElementById('ecl').value,
         foreground: document.getElementById('fg').value,

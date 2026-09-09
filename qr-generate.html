@@ -50,9 +50,77 @@
 
   <div class="card">
     <div class="field">
+      <label for="qtype" data-i18n="qr.type">종류</label>
+      <select id="qtype">
+        <option value="text" data-i18n="qr.tText">주소 · 문자</option>
+        <option value="wifi" data-i18n="qr.tWifi">와이파이 접속</option>
+        <option value="vcard" data-i18n="qr.tCard">연락처</option>
+        <option value="sms" data-i18n="qr.tSms">문자 보내기</option>
+        <option value="mail" data-i18n="qr.tMail">이메일 보내기</option>
+      </select>
+    </div>
+
+    <div class="field qgroup" id="g-text">
       <label for="text" data-i18n="qr.content">내용 (주소 또는 문자)</label>
       <textarea id="text" style="min-height:90px" placeholder="https://example.com 또는 원하는 문구를 입력하세요" data-i18n-ph="qr.ph">https://</textarea>
       <div class="hint">웹 주소는 <code>https://</code>로 시작해야 스캔 시 바로 열립니다.</div>
+    </div>
+
+    <div class="qgroup" id="g-wifi" hidden>
+      <div class="field">
+        <label for="w-ssid" data-i18n="qr.wSsid">와이파이 이름 (SSID)</label>
+        <input type="text" id="w-ssid" placeholder="MyHomeWiFi">
+      </div>
+      <div class="field">
+        <label for="w-pw" data-i18n="qr.wPw">비밀번호</label>
+        <input type="text" id="w-pw">
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px">
+        <div class="field" style="margin-bottom:0">
+          <label for="w-enc" data-i18n="qr.wEnc">보안 방식</label>
+          <select id="w-enc">
+            <option value="WPA">WPA / WPA2 / WPA3</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass" data-i18n="qr.wOpen">비밀번호 없음</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;display:flex;align-items:flex-end">
+          <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer;margin:0">
+            <input type="checkbox" id="w-hidden" style="width:auto;margin:0">
+            <span data-i18n="qr.wHidden">숨겨진 네트워크</span>
+          </label>
+        </div>
+      </div>
+      <div class="hint" data-i18n="qr.wHint">손님이 카메라로 찍으면 비밀번호를 입력하지 않고 바로 접속됩니다. 매장이나 사무실 입구에 붙여두기 좋습니다.</div>
+    </div>
+
+    <div class="qgroup" id="g-vcard" hidden>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+        <div class="field" style="margin-bottom:0"><label for="v-name" data-i18n="qr.vName">이름</label><input type="text" id="v-name"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-tel" data-i18n="qr.vTel">전화번호</label><input type="text" id="v-tel"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-mail" data-i18n="qr.vMail">이메일</label><input type="text" id="v-mail"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-org" data-i18n="qr.vOrg">회사</label><input type="text" id="v-org"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-title" data-i18n="qr.vTitle">직함</label><input type="text" id="v-title"></div>
+        <div class="field" style="margin-bottom:0"><label for="v-url" data-i18n="qr.vUrl">웹사이트</label><input type="text" id="v-url"></div>
+      </div>
+      <div class="hint" data-i18n="qr.vHint">스캔하면 연락처 저장 화면이 바로 뜹니다. 명함에 넣어두면 좋습니다.</div>
+    </div>
+
+    <div class="qgroup" id="g-sms" hidden>
+      <div class="field"><label for="s-num" data-i18n="qr.sNum">받는 번호</label><input type="text" id="s-num" placeholder="01012345678"></div>
+      <div class="field" style="margin-bottom:0">
+        <label for="s-msg" data-i18n="qr.sMsg">미리 채워둘 내용</label>
+        <textarea id="s-msg" style="min-height:70px"></textarea>
+      </div>
+    </div>
+
+    <div class="qgroup" id="g-mail" hidden>
+      <div class="field"><label for="m-to" data-i18n="qr.mTo">받는 사람</label><input type="text" id="m-to" placeholder="name@example.com"></div>
+      <div class="field"><label for="m-sub" data-i18n="qr.mSub">제목</label><input type="text" id="m-sub"></div>
+      <div class="field" style="margin-bottom:0">
+        <label for="m-body" data-i18n="qr.mBody">내용</label>
+        <textarea id="m-body" style="min-height:70px"></textarea>
+      </div>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
@@ -93,6 +161,18 @@
       </div>
     </div>
     <div class="hint" style="margin-top:-4px">QR 색상과 배경의 명암 차이가 작으면 스캔이 되지 않습니다. 어두운 QR + 밝은 배경 조합을 권합니다.</div>
+
+    <div class="field" style="margin:16px 0 0">
+      <label for="logo" data-i18n="qr.logo">가운데 로고 (선택)</label>
+      <input type="file" id="logo" accept="image/*">
+      <div class="hint" data-i18n="qr.logoHint">
+        로고를 넣으면 오류 복원 수준이 자동으로 H로 올라갑니다. 가운데가 가려져도 읽히게 하려는 것입니다.
+        넣은 뒤에는 반드시 휴대폰으로 실제 스캔해 보세요.
+      </div>
+      <div class="btn-row" id="logo-row" hidden>
+        <button class="btn secondary small" id="logo-clear" data-i18n="qr.logoClear">로고 빼기</button>
+      </div>
+    </div>
   </div>
 
   <div id="msg"></div>
@@ -170,9 +250,12 @@
 (function () {
   var canvas = document.getElementById('canvas');
   var msg = document.getElementById('msg');
-  var inputs = ['text', 'size', 'ecl', 'margin', 'fg', 'bg'].map(function (id) {
+  var inputs = ['text', 'size', 'ecl', 'margin', 'fg', 'bg',
+                'w-ssid', 'w-pw', 'w-enc', 'w-hidden',
+                'v-name', 'v-tel', 'v-mail', 'v-org', 'v-title', 'v-url',
+                's-num', 's-msg', 'm-to', 'm-sub', 'm-body'].map(function (id) {
     return document.getElementById(id);
-  });
+  }).filter(Boolean);
 
   function setMsg(t, cls) {
     msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
@@ -202,9 +285,71 @@
     setTimeout(function () { whenReady(fn, tries - 1); }, 100);
   }
 
+  var logoImg = null;
+
+  // 문자열을 UTF-8 바이트로 바꾼 뒤, 각 바이트를 한 글자로 담은 문자열을 만든다.
+  // QR 라이브러리가 이 문자열을 그대로 바이트로 쓰기 때문에 결과가 올바른 UTF-8이 된다.
+  function toUtf8Chars(s) {
+    var b = new TextEncoder().encode(s), out = '';
+    for (var i = 0; i < b.length; i++) out += String.fromCharCode(b[i]);
+    return out;
+  }
+
+  // QR 규격에 정해진 형식으로 만들어야 카메라가 알아본다.
+  // 값 안에 들어간 구분자(\ ; , :)는 반드시 이스케이프해야 한다.
+  function esc(s) { return String(s || '').replace(/([\\;,:"])/g, '\\$1'); }
+
+  function buildPayload() {
+    var type = document.getElementById('qtype').value;
+    function v(id) { return (document.getElementById(id).value || '').trim(); }
+
+    if (type === 'wifi') {
+      if (!v('w-ssid')) return '';
+      var enc = document.getElementById('w-enc').value;
+      var s = 'WIFI:T:' + enc + ';S:' + esc(v('w-ssid')) + ';';
+      if (enc !== 'nopass') s += 'P:' + esc(v('w-pw')) + ';';
+      if (document.getElementById('w-hidden').checked) s += 'H:true;';
+      return s + ';';
+    }
+    if (type === 'vcard') {
+      if (!v('v-name') && !v('v-tel')) return '';
+      var L = ['BEGIN:VCARD', 'VERSION:3.0'];
+      if (v('v-name')) { L.push('N:' + v('v-name')); L.push('FN:' + v('v-name')); }
+      if (v('v-tel')) L.push('TEL;TYPE=CELL:' + v('v-tel'));
+      if (v('v-mail')) L.push('EMAIL:' + v('v-mail'));
+      if (v('v-org')) L.push('ORG:' + v('v-org'));
+      if (v('v-title')) L.push('TITLE:' + v('v-title'));
+      if (v('v-url')) L.push('URL:' + v('v-url'));
+      L.push('END:VCARD');
+      return L.join('\n');
+    }
+    if (type === 'sms') {
+      if (!v('s-num')) return '';
+      return 'SMSTO:' + v('s-num') + ':' + v('s-msg');
+    }
+    if (type === 'mail') {
+      if (!v('m-to')) return '';
+      var q = [];
+      if (v('m-sub')) q.push('subject=' + encodeURIComponent(v('m-sub')));
+      if (v('m-body')) q.push('body=' + encodeURIComponent(v('m-body')));
+      return 'MAILTO:' + v('m-to') + (q.length ? '?' + q.join('&') : '');
+    }
+    var t2 = v('text');
+    return (t2 === 'https://') ? '' : t2;
+  }
+
+  function switchGroup() {
+    var type = document.getElementById('qtype').value;
+    var map = { text: 'g-text', wifi: 'g-wifi', vcard: 'g-vcard', sms: 'g-sms', mail: 'g-mail' };
+    Object.keys(map).forEach(function (k) {
+      document.getElementById(map[k]).hidden = (k !== type);
+    });
+    render();
+  }
+
   function render() {
-    var text = document.getElementById('text').value.trim();
-    if (!text || text === 'https://') {
+    var text = buildPayload();
+    if (!text) {
       showQr(false);
       setMsg('');
       return;
@@ -221,6 +366,8 @@
     var size = parseInt(document.getElementById('size').value, 10);
     // 선택한 여백 단계를 이미지 크기에 비례한 픽셀값으로 환산한다
     var ratio = { 0: 0, 2: 0.04, 4: 0.08, 8: 0.14 }[document.getElementById('margin').value] || 0.08;
+    // 로고가 가운데를 가리므로 복원 수준을 최고로 올려야 읽힌다
+    if (logoImg) document.getElementById('ecl').value = 'H';
     var level = document.getElementById('ecl').value;
     var bytes = new TextEncoder().encode(text).length;
     if (bytes > (CAP[level] || 2331)) {
@@ -233,13 +380,17 @@
     try {
       new QRious({
         element: canvas,
-        value: text,
+        // QRious는 문자열을 바이트로 옮길 때 한 글자를 1바이트로만 취급한다.
+        // 한글처럼 여러 바이트인 문자는 그대로 넘기면 코드가 깨져 스캔이 아예 안 된다.
+        // 그래서 UTF-8 바이트로 먼저 바꾼 뒤 한 바이트씩 넘긴다. (ASCII는 결과가 동일)
+        value: toUtf8Chars(text),
         size: size,
         padding: Math.round(size * ratio),
         level: document.getElementById('ecl').value,
         foreground: document.getElementById('fg').value,
         background: document.getElementById('bg').value
       });
+      if (logoImg) drawLogo(size);
       showQr(true);
       setMsg('');
     } catch (e) {
@@ -251,6 +402,51 @@
   inputs.forEach(function (el) {
     el.addEventListener('input', render);
     el.addEventListener('change', render);
+  });
+
+  document.getElementById('qtype').addEventListener('change', switchGroup);
+
+  // 가운데에 로고를 얹는다. 코드가 비치지 않도록 배경색 판을 먼저 깔고 그 위에 그린다.
+  function drawLogo(size) {
+    var ctx = canvas.getContext('2d');
+    var box = Math.round(size * 0.22);        // 복원 수준 H가 감당할 수 있는 범위 안쪽
+    var pad = Math.round(box * 0.12);
+    var x = Math.round((canvas.width - box) / 2);
+    var y = Math.round((canvas.height - box) / 2);
+
+    ctx.fillStyle = document.getElementById('bg').value;
+    ctx.fillRect(x - pad, y - pad, box + pad * 2, box + pad * 2);
+
+    // 로고 비율을 유지한 채 정사각형 안에 맞춰 넣는다
+    var r = Math.min(box / logoImg.naturalWidth, box / logoImg.naturalHeight);
+    var w = logoImg.naturalWidth * r, h = logoImg.naturalHeight * r;
+    ctx.drawImage(logoImg, x + (box - w) / 2, y + (box - h) / 2, w, h);
+  }
+
+  var logoInput = document.getElementById('logo');
+  logoInput.addEventListener('change', function () {
+    var f = logoInput.files && logoInput.files[0];
+    if (!f) return;
+    var url = URL.createObjectURL(f);
+    var im = new Image();
+    im.onload = function () {
+      URL.revokeObjectURL(url);
+      logoImg = im;
+      document.getElementById('logo-row').hidden = false;
+      render();
+    };
+    im.onerror = function () {
+      URL.revokeObjectURL(url);
+      setMsg(t('qr.logoFail', '로고 이미지를 열 수 없습니다.'), 'err');
+    };
+    im.src = url;
+  });
+
+  document.getElementById('logo-clear').addEventListener('click', function () {
+    logoImg = null;
+    logoInput.value = '';
+    document.getElementById('logo-row').hidden = true;
+    render();
   });
 
   document.getElementById('btn-png').addEventListener('click', function () {

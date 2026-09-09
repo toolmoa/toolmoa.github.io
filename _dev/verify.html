@@ -351,6 +351,76 @@ function run() {
     });
   }).catch(function (e) { log('EN: PDF 합치기 결과', false, '오류: ' + e.message); });
 
+  // 10. QR 프리셋 — 와이파이·연락처가 규격대로 인코딩되는지 실제 판독으로 확인
+  chain = chain.then(function () {
+    if (typeof jsQR === 'undefined') { log('QR 프리셋 판독', false, 'jsQR 로드 실패'); return; }
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+
+      function decode() {
+        var c = d.getElementById('canvas');
+        if (c.hidden) return null;
+        var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+        var r = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+        return r ? r.data : null;
+      }
+      function set(id, v) {
+        var el = d.getElementById(id);
+        el.value = v;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+
+      // --- 와이파이 ---
+      var ty = d.getElementById('qtype');
+      ty.value = 'wifi'; ty.dispatchEvent(new Event('change'));
+      set('w-ssid', 'Cafe Toolmoa');
+      set('w-pw', 'pass1234');
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+        var wifi = decode();
+        var wifiOk = wifi === 'WIFI:T:WPA;S:Cafe Toolmoa;P:pass1234;;';
+
+        // --- 연락처 ---
+        ty.value = 'vcard'; ty.dispatchEvent(new Event('change'));
+        set('v-name', '홍길동');
+        set('v-tel', '01012345678');
+        return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+          var card = decode() || '';
+          var cardOk = card.indexOf('BEGIN:VCARD') === 0 &&
+                       card.indexOf('FN:홍길동') >= 0 &&
+                       card.indexOf('TEL;TYPE=CELL:01012345678') >= 0 &&
+                       card.indexOf('END:VCARD') > 0;
+
+          var cv = d.getElementById('canvas');
+          log('QR 프리셋 판독', wifiOk && cardOk,
+              '와이파이 → "' + wifi + '" ' + (wifiOk ? 'OK' : '규격 불일치 ⚠') +
+              ' · 연락처 → "' + card.replace(/\n/g, ' / ') + '" ' + (cardOk ? 'OK' : '불일치 ⚠') +
+              ' [캔버스 ' + (cv.hidden ? '숨김' : cv.width + 'x' + cv.height) +
+              ', 화면메시지 "' + (d.getElementById('msg').textContent.trim() || '없음') + '"]');
+        });
+      });
+    });
+  }).catch(function (e) { log('QR 프리셋 판독', false, '오류: ' + e.message); });
+
+  // 11. 한글이 들어간 QR이 제대로 인코딩되는지 (한국어 사이트에서는 치명적인 지점)
+  chain = chain.then(function () {
+    if (typeof jsQR === 'undefined') { log('QR 한글 인코딩', false, 'jsQR 로드 실패'); return; }
+    var KO = '안녕하세요 툴모아입니다';
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      var t2 = d.getElementById('text');
+      t2.value = KO;
+      t2.dispatchEvent(new Event('input'));
+      return waitFor(function () { return !d.getElementById('canvas').hidden; }, 8000).then(function () {
+        var c = d.getElementById('canvas');
+        var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+        var r = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+        var got = r ? r.data : '(판독 실패)';
+        log('QR 한글 인코딩', got === KO,
+            '원본 "' + KO + '" → 판독 "' + got + '"' + (got === KO ? '' : ' ⚠'));
+      });
+    });
+  }).catch(function (e) { log('QR 한글 인코딩', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 
