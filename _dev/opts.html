@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 선택지 전수 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">선택지 전수 점검</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  coverage2.pl 이 "검사에서 한 번도 안 골랐다"고 지목한 선택지 47개를 전부 골라 본다.
+  셀렉트를 하나만 눌러보고 "이 셀렉트는 검증됨"으로 넘어가면, 나머지 선택지가 통째로 미검증으로 남는다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:200px">경로</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="jsQR.js"></script>
+<script>
+// 언어 설정은 localStorage 에 남아 다음 검사까지 따라간다.
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 12000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 80);
+    })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 250);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function capture(f) {
+  var w = f.contentWindow, out = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () {};
+  return out;
+}
+function pickAll(got, mark, re) {
+  return got.slice(mark).filter(function (b) {
+    if (b && typeof b.name === 'string') return false;
+    return re.test(b.type || '');
+  });
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function set(d, id, v, ev) {
+  var el = d.getElementById(id);
+  el.value = v; el.dispatchEvent(new Event(ev || 'input', { bubbles: true }));
+  return el;
+}
+function makeImg(w, h) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  var g = x.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, '#2f6df6'); g.addColorStop(1, '#fff');
+  x.fillStyle = g; x.fillRect(0, 0, w, h);
+  for (var i = 0; i < 400; i++) {          // 목표 용량 시험이 의미 있으려면 압축이 잘 안 되는 그림이어야 한다
+    x.fillStyle = 'rgba(' + (i * 17 % 255) + ',' + (i * 31 % 255) + ',' + (i * 47 % 255) + ',.75)';
+    x.fillRect((i * 53) % w, (i * 37) % h, 26, 26);
+  }
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+function decodeCanvas(c) {
+  var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+  var r = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+  return r ? r.data : null;
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 텍스트 정리 — 정렬 5가지 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-clean.html').then(function (f) {
+      var d = f.contentDocument;
+      set(d, 'src', '다라마\n가\n나다\n마바사아');
+      ['dedup', 'noblank', 'number', 'joinone'].forEach(function (k) {
+        var e = d.getElementById(k); e.checked = false; e.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      var got = {}, rows = [], bad = 0;
+      ['none', 'asc', 'desc', 'len', 'shuffle'].forEach(function (v) {
+        set(d, 'sort', v, 'change');
+        got[v] = d.getElementById('out').value.split('\n').filter(Boolean);
+      });
+      var base = ['다라마', '가', '나다', '마바사아'];
+      var okNone = got.none.join(',') === base.join(',');
+      var okAsc = got.asc.join(',') === base.slice().sort().join(',');
+      var okDesc = got.desc.join(',') === base.slice().sort().reverse().join(',');
+      var okLen = got.len.map(function (s) { return s.length; }).join(',') === '1,2,3,4';
+      // 무작위는 값이 매번 달라지므로 "같은 줄이 모두 그대로 있는지"로 본다
+      var okShuf = got.shuffle.slice().sort().join(',') === base.slice().sort().join(',') &&
+                   got.shuffle.length === 4;
+      [['그대로', okNone], ['오름차순', okAsc], ['역순', okDesc], ['짧은 줄부터', okLen], ['무작위', okShuf]]
+        .forEach(function (x) { if (!x[1]) bad++; rows.push(x[0] + (x[1] ? ' O' : ' X')); });
+      log('텍스트 정렬 5종', bad === 0 && !f.dataset.errs,
+          rows.join(' · ') + ' | 역순 결과 [' + got.desc.join(', ') + '], 짧은순 [' + got.len.join(', ') + ']' +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('텍스트 정렬 5종', false, '오류: ' + e.message); });
+
+  // ===== 2. 텍스트 정리 — 대소문자 4가지 · 구분 3가지 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-clean.html').then(function (f) {
+      var d = f.contentDocument;
+      ['dedup', 'noblank', 'number', 'joinone'].forEach(function (k) {
+        var e = d.getElementById(k); e.checked = false; e.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      set(d, 'sort', 'none', 'change');
+      set(d, 'src', 'hello world\nGOOD morning');
+      var cases = {}, bad = 0;
+      ['none', 'upper', 'lower', 'title'].forEach(function (v) {
+        set(d, 'case', v, 'change');
+        cases[v] = d.getElementById('out').value.split('\n')[0];
+      });
+      if (cases.none !== 'hello world') bad++;
+      if (cases.upper !== 'HELLO WORLD') bad++;
+      if (cases.lower !== 'hello world') bad++;
+      if (cases.title !== 'Hello World') bad++;
+
+      // 구분 방식 3가지
+      set(d, 'case', 'none', 'change');
+      var sep = {};
+      set(d, 'src', 'a,b,c');
+      set(d, 'sep', 'line', 'change');  sep.line = d.getElementById('out').value.split('\n').filter(Boolean).length;
+      set(d, 'sep', 'comma', 'change'); sep.comma = d.getElementById('out').value.split('\n').filter(Boolean).length;
+      set(d, 'src', 'a b c');
+      set(d, 'sep', 'space', 'change'); sep.space = d.getElementById('out').value.split('\n').filter(Boolean).length;
+      if (sep.line !== 1) bad++;
+      if (sep.comma !== 3) bad++;
+      if (sep.space !== 3) bad++;
+
+      log('대소문자 4종 · 구분 3종', bad === 0 && !f.dataset.errs,
+          '대소문자: 그대로 "' + cases.none + '" / 대문자 "' + cases.upper + '" / 소문자 "' + cases.lower +
+          '" / 첫글자 "' + cases.title + '" | 구분: 줄 ' + sep.line + '개(기대 1), 쉼표 ' + sep.comma +
+          '개(기대 3), 공백 ' + sep.space + '개(기대 3)' +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('대소문자 4종 · 구분 3종', false, '오류: ' + e.message); });
+
+  // ===== 3. 파일 변환 — JSON 으로 내보내기, 탭 구분자 =====
+  chain = chain.then(function () {
+    var csv = new Blob(['﻿이름,점수\n가,90\n나,80\n'], { type: 'text/csv' });
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([csv], 'a.csv', { type: 'text/csv' })]);
+      return waitFor(function () { return txt(d, 't-rows') === '2'; }, 20000).then(function () {
+        set(d, 'target', 'json', 'change');
+        var mark = got.length;
+        d.getElementById('btn-convert').click();
+        return waitFor(function () { return pickAll(got, mark, /json/).length > 0; }, 15000).then(function () {
+          var b = pickAll(got, mark, /json/)[0];
+          if (!b) { log('JSON 내보내기 · 탭 구분자', false, 'JSON 결과가 없음'); return; }
+          return b.text().then(function (s) {
+            var arr = null, err = '';
+            try { arr = JSON.parse(s); } catch (e) { err = e.message; }
+            var jsonOk = arr && arr.length === 2 && arr[0]['이름'] === '가' && arr[0]['점수'] === '90';
+
+            // 탭으로 나뉜 파일을 구분자 지정으로 읽는다
+            var tsv = new Blob(['﻿부서\t인원\n영업\t7\n'], { type: 'text/plain' });
+            return loadFrame('../file-convert.html').then(function (f2) {
+              var d2 = f2.contentDocument;
+              setFiles(d2.getElementById('file'), [new File([tsv], 'b.txt', { type: 'text/plain' })]);
+              return waitFor(function () { return txt(d2, 't-rows') !== '0'; }, 20000).then(function () {
+                set(d2, 'fs', '\\t', 'change');
+                return waitFor(function () { return txt(d2, 't-cols') === '2'; }, 15000).then(function () {
+                  var cols = txt(d2, 't-cols'), rws = txt(d2, 't-rows');
+                  var head = d2.querySelector('#preview').textContent;
+                  log('JSON 내보내기 · 탭 구분자',
+                      jsonOk && cols === '2' && rws === '1' && head.indexOf('부서') >= 0 &&
+                      !f.dataset.errs && !f2.dataset.errs,
+                      'JSON ' + (jsonOk ? '2건 정상 ' + JSON.stringify(arr[0]) : '어긋남 ' + err) +
+                      ' | 탭 지정 → ' + cols + '열 ' + rws + '행 (기대 2열 1행), 머리글에 "부서" ' +
+                      (head.indexOf('부서') >= 0 ? 'O' : 'X'));
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('JSON 내보내기 · 탭 구분자', false, '오류: ' + e.message); });
+
+  // ===== 4. 이미지 자르기 — 비율 4종 · 규격 4종 =====
+  chain = chain.then(function () {
+    return makeImg(1600, 1200).then(function (blob) {
+      var ratios = [['1.7777778', 16 / 9], ['1.3333333', 4 / 3], ['0.75', 3 / 4], ['0.5625', 9 / 16]];
+      var seq = Promise.resolve(), rows = [], bad = 0;
+      ratios.forEach(function (r) {
+        seq = seq.then(function () {
+          return loadFrame('../image-crop.html').then(function (f) {
+            var d = f.contentDocument;
+            setFiles(d.getElementById('file'), [new File([blob], 'r.png', { type: 'image/png' })]);
+            return waitFor(function () { return txt(d, 't-crop') !== '-'; }, 20000).then(function () {
+              set(d, 'preset', '', 'change');
+              set(d, 'ratio', r[0], 'change');
+              return waitFor(function () { return true; }, 500).then(function () {
+                var m = txt(d, 't-crop').match(/(\d+)\D+(\d+)/);
+                if (!m) { bad++; rows.push(r[0] + ' 표시없음'); return; }
+                var got = parseInt(m[1], 10) / parseInt(m[2], 10);
+                var ok = Math.abs(got - r[1]) < 0.02;
+                if (!ok) bad++;
+                rows.push(r[0] + ' → ' + m[1] + '×' + m[2] + ' (' + got.toFixed(3) + (ok ? ' O' : ' X') + ')');
+              });
+            });
+          });
+        });
+      });
+      return seq.then(function () {
+        log('자르기 비율 4종', bad === 0, rows.join(' · '));
+      });
+    });
+  }).catch(function (e) { log('자르기 비율 4종', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return makeImg(2000, 2000).then(function (blob) {
+      var presets = ['413x531', '500x500', '1080x1080', '1280x720'];
+      var seq = Promise.resolve(), rows = [], bad = 0;
+      presets.forEach(function (pv) {
+        seq = seq.then(function () {
+          return loadFrame('../image-crop.html').then(function (f) {
+            var d = f.contentDocument, got = capture(f);
+            setFiles(d.getElementById('file'), [new File([blob], 'p.png', { type: 'image/png' })]);
+            return waitFor(function () { return txt(d, 't-crop') !== '-'; }, 20000).then(function () {
+              set(d, 'preset', pv, 'change');
+              var mark = got.length;
+              d.getElementById('btn-save').click();
+              return waitFor(function () { return pickAll(got, mark, /image/).length > 0; }, 20000)
+                .then(function () {
+                  var b = pickAll(got, mark, /image/)[0];
+                  if (!b) { bad++; rows.push(pv + ' 저장실패'); return; }
+                  return createImageBitmap(b).then(function (bmp) {
+                    var want = pv.split('x');
+                    var ok = bmp.width === +want[0] && bmp.height === +want[1];
+                    if (!ok) bad++;
+                    rows.push(pv + ' → ' + bmp.width + '×' + bmp.height + (ok ? ' O' : ' X'));
+                  });
+                });
+            });
+          });
+        });
+      });
+      return seq.then(function () { log('자르기 규격 4종', bad === 0, rows.join(' · ')); });
+    });
+  }).catch(function (e) { log('자르기 규격 4종', false, '오류: ' + e.message); });
+
+  // ===== 5. 이미지 압축 — 최대 가로 5종 · 목표 용량 5종 =====
+  chain = chain.then(function () {
+    return makeImg(2400, 1800).then(function (blob) {
+      var widths = ['1920', '1280', '1024', '800', '640'];
+      var seq = Promise.resolve(), rows = [], bad = 0;
+      widths.forEach(function (wv) {
+        seq = seq.then(function () {
+          return loadFrame('../image-compress.html').then(function (f) {
+            var d = f.contentDocument, got = capture(f);
+            set(d, 'target-size', '0', 'change');
+            set(d, 'maxw', wv, 'change');
+            setFiles(d.getElementById('file'), [new File([blob], 'w.png', { type: 'image/png' })]);
+            // 결과 Blob 은 저장 버튼을 누를 때가 아니라 "압축이 끝나는 시점"에 만들어진다.
+            // 버튼을 누른 뒤부터 살펴보면 아무것도 못 본다.
+            return waitFor(function () { return txt(d, 't-count') === '1'; }, 25000).then(function () {
+              return waitFor(function () { return pickAll(got, 0, /image/).length > 0; }, 20000)
+                .then(function () {
+                  var list = pickAll(got, 0, /image/);
+                  var b = list[list.length - 1];
+                  if (!b) { bad++; rows.push(wv + ' 결과없음'); return; }
+                  return createImageBitmap(b).then(function (bmp) {
+                    var ok = bmp.width === +wv;
+                    if (!ok) bad++;
+                    rows.push(wv + 'px → ' + bmp.width + '×' + bmp.height + (ok ? ' O' : ' X'));
+                  });
+                });
+            });
+          });
+        });
+      });
+      return seq.then(function () { log('최대 가로 5종', bad === 0, rows.join(' · ')); });
+    });
+  }).catch(function (e) { log('최대 가로 5종', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return makeImg(2400, 1800).then(function (blob) {
+      var targets = ['102400', '307200', '524288', '1048576', '2097152'];
+      var seq = Promise.resolve(), rows = [], bad = 0;
+      targets.forEach(function (tv) {
+        seq = seq.then(function () {
+          return loadFrame('../image-compress.html').then(function (f) {
+            var d = f.contentDocument;
+            set(d, 'maxw', '0', 'change');
+            set(d, 'target-size', tv, 'change');
+            setFiles(d.getElementById('file'), [new File([blob], 't.png', { type: 'image/png' })]);
+            return waitFor(function () { return txt(d, 't-count') === '1'; }, 30000).then(function () {
+              var after = txt(d, 't-after');
+              var m = after.match(/([\d.]+)\s*(KB|MB|B)/);
+              var bytes = m ? parseFloat(m[1]) * (m[2] === 'MB' ? 1048576 : m[2] === 'KB' ? 1024 : 1) : NaN;
+              var ok = isFinite(bytes) && bytes <= +tv;
+              if (!ok) bad++;
+              rows.push(Math.round(tv / 1024) + 'KB 이하 → ' + after + (ok ? ' O' : ' X'));
+            });
+          });
+        });
+      });
+      return seq.then(function () { log('목표 용량 5종', bad === 0, rows.join(' · ')); });
+    });
+  }).catch(function (e) { log('목표 용량 5종', false, '오류: ' + e.message); });
+
+  // ===== 6. 이미지→PDF — 여백 3종 =====
+  chain = chain.then(function () {
+    return makeImg(600, 400).then(function (blob) {
+      var margins = ['0', '20', '45'];
+      var seq = Promise.resolve(), sizes = {}, bad = 0;
+      margins.forEach(function (mv) {
+        seq = seq.then(function () {
+          return loadFrame('../img-to-pdf.html').then(function (f) {
+            var d = f.contentDocument, got = capture(f);
+            set(d, 'pagesize', 'fit', 'change');
+            set(d, 'margin', mv, 'change');
+            setFiles(d.getElementById('file'), [new File([blob], 'm.png', { type: 'image/png' })]);
+            return waitFor(function () { return txt(d, 't-count') === '1'; }, 20000).then(function () {
+              var mark = got.length;
+              d.getElementById('btn-make').click();
+              return waitFor(function () { return pickAll(got, mark, /pdf/).length > 0; }, 25000).then(function () {
+                var b = pickAll(got, mark, /pdf/)[0];
+                if (!b) { sizes[mv] = 'none'; bad++; return; }
+                return b.arrayBuffer().then(function (ab) {
+                  return PDFLib.PDFDocument.load(new Uint8Array(ab), { ignoreEncryption: true });
+                }).then(function (doc) {
+                  var s = doc.getPage(0).getSize();
+                  sizes[mv] = Math.round(s.width) + '×' + Math.round(s.height);
+                });
+              });
+            });
+          });
+        });
+      });
+      return seq.then(function () {
+        // 여백이 커질수록 페이지가 커져야 한다 (사진 맞춤 기준)
+        function w(v) { return parseInt((sizes[v] || '0').split('×')[0], 10); }
+        var grows = w('0') < w('20') && w('20') < w('45');
+        log('이미지→PDF 여백 3종', grows && bad === 0,
+            '여백 없음 ' + sizes['0'] + ' < 보통 ' + sizes['20'] + ' < 넓게 ' + sizes['45'] +
+            ' — 여백이 커질수록 페이지가 커져야 함 ' + (grows ? 'OK' : '어긋남'));
+      });
+    });
+  }).catch(function (e) { log('이미지→PDF 여백 3종', false, '오류: ' + e.message); });
+
+  // ===== 7. QR — 오류 복원 수준 4종이 모두 판독되는지 =====
+  chain = chain.then(function () {
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument;
+      var want = 'https://toolmoa.github.io/qr-generate.html';
+      set(d, 'text', want);
+      var levels = ['L', 'M', 'Q', 'H'], rows = [], bad = 0;
+      var seq = Promise.resolve();
+      levels.forEach(function (lv) {
+        seq = seq.then(function () {
+          set(d, 'ecl', lv, 'change');
+          return waitFor(function () { return decodeCanvas(d.getElementById('canvas')) === want; }, 12000)
+            .then(function (ok) {
+              if (!ok) bad++;
+              rows.push(lv + (ok ? ' 판독O' : ' 판독X'));
+            });
+        });
+      });
+      return seq.then(function () {
+        log('QR 복원 수준 4종', bad === 0 && !f.dataset.errs,
+            rows.join(' · ') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+      });
+    });
+  }).catch(function (e) { log('QR 복원 수준 4종', false, '오류: ' + e.message); });
+
+  // ===== 8. 글자수 제한 프리셋 · 날짜 달력일 단위 =====
+  chain = chain.then(function () {
+    return loadFrame('../char-count.html').then(function (f) {
+      var d = f.contentDocument;
+      var ta = d.getElementById('ta');
+      ta.value = new Array(601).join('가');     // 600자
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      var rows = [], bad = 0;
+      ['500', '700', '1000', '1500', '2000'].forEach(function (v) {
+        set(d, 'goal-preset', v, 'change');
+        var m = txt(d, 'goal-msg');
+        var over = d.getElementById('goal-msg').className.indexOf('over') >= 0;
+        var shouldBeOver = 600 > +v;
+        if (over !== shouldBeOver) bad++;
+        rows.push(v + '자 → ' + (over ? '초과' : '여유') + (over === shouldBeOver ? '' : ' X'));
+      });
+      set(d, 'goal-basis', 'all', 'change');
+      log('글자수 제한 프리셋 5종', bad === 0 && !f.dataset.errs,
+          '600자 입력 · ' + rows.join(' · ') + ' (500자만 초과여야 함)');
+    });
+  }).catch(function (e) { log('글자수 제한 프리셋 5종', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return loadFrame('../date-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      set(d, 'base', '2026-01-02', 'change');   // 금요일
+      set(d, 'delta', '3', 'input');
+      set(d, 'unit', 'cal', 'change');
+      var cal = txt(d, 'a-date');
+      set(d, 'unit', 'biz', 'change');
+      var biz = txt(d, 'a-date');
+      log('날짜 더하기 단위 2종',
+          cal === '2026년 1월 5일' && biz === '2026년 1월 7일' && !f.dataset.errs,
+          '금요일 + 3 · 달력일 → ' + cal + ' (기대 2026년 1월 5일), ' +
+          '근무일 → ' + biz + ' (기대 2026년 1월 7일, 주말 건너뜀)' +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('날짜 더하기 단위 2종', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'OPTS ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

@@ -246,8 +246,8 @@
   var btnPng = document.getElementById('btn-png');
   var btnCopy = document.getElementById('btn-copy');
 
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
 
   function showQr(on) {

@@ -172,8 +172,8 @@
 
   var workbook = null, rows = [], baseName = 'converted', detectedEnc = '';
 
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
   function whenReady(fn, tries) {
     tries = (tries === undefined) ? 80 : tries;

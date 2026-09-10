@@ -24,6 +24,9 @@
 <tbody id="rows"></tbody></table>
 
 <script>
+// 언어 설정은 localStorage 에 남아 다음 검사까지 따라간다.
+// 검사끼리 서로를 오염시키지 않도록 시작할 때 한국어로 맞춘다.
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
 var results = [];
 function log(name, ok, detail) { results.push({ name: name, ok: ok, detail: detail }); }
 function waitFor(cond, ms) {

@@ -48,7 +48,7 @@
     <div class="field" style="margin-bottom:0">
       <label for="birth" data-i18n="age.birth">생년월일</label>
       <input type="date" id="birth">
-      <div class="hint">2023년 6월부터 법적·행정적으로는 <strong>만 나이</strong>가 기준입니다.</div>
+      <div class="hint"><span data-i18n="age.birthHint">2023년 6월부터 법적·행정적으로는 <strong>만 나이</strong>가 기준입니다.</span></div>
     </div>
   </div>
 
@@ -128,23 +128,36 @@
 
 <script>
 (function () {
-  var DOW = ['일', '월', '화', '수', '목', '금', '토'];
-  var ZODIAC = ['원숭이', '닭', '개', '돼지', '쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양'];
+  var DOW_KO = ['일', '월', '화', '수', '목', '금', '토'];
+  var ZODIAC_KO = ['원숭이', '닭', '개', '돼지', '쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양'];
+  function dow(i) { return tt('dow.' + i, DOW_KO[i] + '요일'); }
+  function zodiac(i) { return tt('zod.' + i, ZODIAC_KO[i] + '띠'); }
   var MS = 86400000;
   var birth = document.getElementById('birth');
+  // i18n.js 는 defer 라 이 스크립트보다 늦게 실행된다
+  function tt(k, ko) { return (typeof t === 'function') ? t(k, ko) : ko; }
 
   function parse(v) { if (!v) return null; var p = v.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
   function today() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
   function num(n) { return n.toLocaleString('ko-KR'); }
+  // "12월 25일" 은 한국어 표기다. 언어에 맞는 틀을 쓴다.
+  function fmtMd(d) {
+    return tt('date.mdFmt', '{m}월 {d}일')
+      .replace('{m}', d.getMonth() + 1).replace('{d}', d.getDate());
+  }
 
   function starSign(m, d) {
-    var t = [[1, 20, '염소자리'], [2, 19, '물병자리'], [3, 21, '물고기자리'], [4, 20, '양자리'],
-             [5, 21, '황소자리'], [6, 22, '쌍둥이자리'], [7, 23, '게자리'], [8, 23, '사자자리'],
-             [9, 23, '처녀자리'], [10, 23, '천칭자리'], [11, 23, '전갈자리'], [12, 25, '사수자리']];
-    for (var i = 0; i < t.length; i++) {
-      if (m === t[i][0]) return d < t[i][1] ? (i === 0 ? '사수자리' : t[i - 1][2]) : t[i][2];
+    var tbl = [[1, 20, 'cap'], [2, 19, 'aqu'], [3, 21, 'pis'], [4, 20, 'ari'],
+             [5, 21, 'tau'], [6, 22, 'gem'], [7, 23, 'can'], [8, 23, 'leo'],
+             [9, 23, 'vir'], [10, 23, 'lib'], [11, 23, 'sco'], [12, 25, 'sag']];
+    var KO = { cap: '염소자리', aqu: '물병자리', pis: '물고기자리', ari: '양자리',
+               tau: '황소자리', gem: '쌍둥이자리', can: '게자리', leo: '사자자리',
+               vir: '처녀자리', lib: '천칭자리', sco: '전갈자리', sag: '사수자리' };
+    function name(k) { return tt('star.' + k, KO[k]); }
+    for (var i = 0; i < tbl.length; i++) {
+      if (m === tbl[i][0]) return d < tbl[i][1] ? name(i === 0 ? 'sag' : tbl[i - 1][2]) : name(tbl[i][2]);
     }
-    return '염소자리';
+    return name('cap');
   }
 
   function calc() {
@@ -156,7 +169,8 @@
       document.getElementById('a-year').textContent = '-';
       document.getElementById('detail').innerHTML =
         '<tr><td style="padding:12px 0;color:var(--muted)">' +
-        (b && b > t ? '오늘보다 뒤의 날짜입니다.' : '생년월일을 입력하면 결과가 나옵니다.') + '</td></tr>';
+        (b && b > t ? tt('age.future', '오늘보다 뒤의 날짜입니다.')
+                    : tt('age.prompt', '생년월일을 입력하면 결과가 나옵니다.')) + '</td></tr>';
       return;
     }
 
@@ -169,9 +183,10 @@
     var korean = t.getFullYear() - b.getFullYear() + 1;   // 세는 나이
     var yearAge = t.getFullYear() - b.getFullYear();      // 연 나이
 
-    full.textContent = age + '세';
-    document.getElementById('a-korean').textContent = korean + '세';
-    document.getElementById('a-year').textContent = yearAge + '세';
+    var uAge = tt('age.u.age', '세');
+    full.textContent = age + uAge;
+    document.getElementById('a-korean').textContent = korean + uAge;
+    document.getElementById('a-year').textContent = yearAge + uAge;
 
     // 다음 생일
     var next = new Date(t.getFullYear(), b.getMonth(), b.getDate());
@@ -180,15 +195,17 @@
     var lived = Math.round((t - b) / MS);
 
     var rows = [
-      ['만 나이', age + '세 (공식 기준)'],
-      ['세는 나이', korean + '세'],
-      ['연 나이', yearAge + '세'],
-      ['태어난 요일', DOW[b.getDay()] + '요일'],
-      ['띠', ZODIAC[b.getFullYear() % 12] + '띠'],
-      ['별자리', starSign(b.getMonth() + 1, b.getDate())],
-      ['다음 생일', toNext === 0 ? '오늘입니다 🎂' : toNext + '일 뒤 (' + (next.getMonth() + 1) + '월 ' + next.getDate() + '일 ' + DOW[next.getDay()] + '요일)'],
-      ['살아온 날', num(lived) + '일'],
-      ['살아온 주', num(Math.floor(lived / 7)) + '주']
+      [tt('age.d.full', '만 나이'), age + uAge + tt('age.official', ' (공식 기준)')],
+      [tt('age.d.korean', '세는 나이'), korean + uAge],
+      [tt('age.d.year', '연 나이'), yearAge + uAge],
+      [tt('age.d.dow', '태어난 요일'), dow(b.getDay())],
+      [tt('age.d.zodiac', '띠'), zodiac(b.getFullYear() % 12)],
+      [tt('age.d.star', '별자리'), starSign(b.getMonth() + 1, b.getDate())],
+      [tt('age.d.next', '다음 생일'), toNext === 0
+        ? tt('age.todayBd', '오늘입니다 🎂')
+        : toNext + tt('age.inDays', '일 뒤') + ' (' + fmtMd(next) + ' ' + dow(next.getDay()) + ')'],
+      [tt('age.d.lived', '살아온 날'), num(lived) + tt('age.u.days', '일')],
+      [tt('age.d.weeks', '살아온 주'), num(Math.floor(lived / 7)) + tt('age.u.weeks', '주')]
     ];
     document.getElementById('detail').innerHTML = rows.map(function (r) {
       return '<tr><td style="padding:9px 0;border-bottom:1px solid var(--border);color:var(--muted)">' + r[0] +
@@ -196,6 +213,7 @@
     }).join('');
   }
 
+  document.addEventListener('langchange', calc);
   birth.addEventListener('input', calc);
   birth.addEventListener('change', calc);
   calc();

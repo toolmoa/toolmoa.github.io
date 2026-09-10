@@ -146,8 +146,8 @@
   var pages = [];        // {index, rot, del}
   var dragIdx = null;
 
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
   function ready(fn, tries) {
     tries = (tries === undefined) ? 120 : tries;

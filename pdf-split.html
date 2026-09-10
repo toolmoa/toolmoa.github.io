@@ -86,8 +86,7 @@
         <label for="range" data-i18n="split.range">뽑을 페이지</label>
         <input type="text" id="range" placeholder="예: 1-3,7,10-12" data-i18n-ph="split.rangePh">
         <div class="hint">
-          쉼표로 구분하고, 연속된 페이지는 <code>1-3</code> 처럼 붙임표를 씁니다.
-          <code>2-</code> 라고 쓰면 2쪽부터 끝까지입니다.
+<span data-i18n="split.rangeHint">쉼표로 구분하고, 연속된 페이지는 <code>1-3</code> 처럼 붙임표를 씁니다. <code>2-</code> 라고 쓰면 2쪽부터 끝까지입니다.</span>
         </div>
       </div>
     </div>
@@ -172,8 +171,8 @@
     if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
     return (b / 1024 / 1024).toFixed(2) + ' MB';
   }
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
   function whenReady(fn, tries) {
     tries = (tries === undefined) ? 100 : tries;
@@ -215,11 +214,11 @@
 
   function load(file) {
     if (!(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) {
-      setMsg('PDF 파일을 선택해 주세요.', 'err'); return;
+      setMsg(t('split.cantOpen', 'PDF 파일을 선택해 주세요.'), 'err'); return;
     }
     whenReady(function () {
       baseName = file.name.replace(/\.[^.]+$/, '');
-      setMsg('파일을 읽는 중입니다…');
+      setMsg(t('msg.reading', '파일을 읽는 중입니다…'));
       file.arrayBuffer().then(function (buf) {
         bytes = new Uint8Array(buf);
         return PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest });
@@ -246,7 +245,7 @@
               ' (' + ((err && err.message) || err) + ')';
           });
       }).catch(function (e) {
-        setMsg('파일을 열 수 없습니다. 비밀번호가 걸려 있거나 손상된 PDF일 수 있습니다. — ' +
+        setMsg(t('split.cantOpen', '파일을 열 수 없습니다. 비밀번호가 걸려 있거나 손상된 PDF일 수 있습니다. — ') +
                ((e && e.message) || e), 'err');
       });
     });
@@ -262,7 +261,7 @@
       if (m) {
         var a = parseInt(m[1], 10);
         var b = m[2] ? parseInt(m[2], 10) : pageCount;
-        if (a > b) { var t = a; a = b; b = t; }
+        if (a > b) { var sw = a; a = b; b = sw; }
         for (var i = a; i <= b; i++) {
           if (i >= 1 && i <= pageCount && !seen[i]) { seen[i] = 1; out.push(i - 1); }
         }
@@ -398,7 +397,7 @@
 
       var picked = parseRange(rangeInput.value);
       if (!picked.length) {
-        setMsg('뽑을 페이지를 올바르게 입력해 주세요. 예: 1-3,7', 'err');
+        setMsg(t('split.badRange', '뽑을 페이지를 올바르게 입력해 주세요. 예: 1-3,7'), 'err');
         return;
       }
       return PDFLib.PDFDocument.create().then(function (out) {
@@ -407,13 +406,13 @@
           return out.save();
         });
       }).then(function (b) {
-        save(b, baseName + '_추출.pdf');
-        setMsg(picked.length + '쪽을 뽑아 저장했습니다.', 'ok');
+        save(b, baseName + '_' + t('split.suffix', '추출') + '.pdf');
+        setMsg(picked.length + t('split.doneRange', '쪽을 뽑아 저장했습니다.'), 'ok');
       });
     }).then(function () {
       btn.disabled = false;
     }).catch(function (e) {
-      setMsg('처리 중 오류가 발생했습니다: ' + ((e && e.message) || e), 'err');
+      setMsg(t('split.fail', '처리 중 오류가 발생했습니다: ') + ((e && e.message) || e), 'err');
       btn.disabled = false;
     });
   });

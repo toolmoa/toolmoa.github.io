@@ -206,8 +206,8 @@
   var crop = { x: 0, y: 0, w: 0, h: 0 };
   var drag = null;
 
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
   function scale() { return cv.clientWidth / cv.width; }
 
@@ -324,8 +324,8 @@
 
   function pos(e) {
     var r = cv.getBoundingClientRect();
-    var t = e.touches ? e.touches[0] : e;
-    return { x: (t.clientX - r.left) / scale(), y: (t.clientY - r.top) / scale() };
+    var pt = e.touches ? e.touches[0] : e;
+    return { x: (pt.clientX - r.left) / scale(), y: (pt.clientY - r.top) / scale() };
   }
 
   function startDrag(e, mode) {

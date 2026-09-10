@@ -66,7 +66,7 @@
     <div class="field">
       <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
         <input type="checkbox" id="inclusive" style="width:auto;margin:0">
-        <span data-i18n="date.incl">시작일을 포함해서 세기 (근무일·숙박일 계산 시)</span>
+        <span data-i18n="date.inclusive">시작일을 포함해서 세기 (근무일·숙박일 계산 시)</span>
       </label>
     </div>
     <div class="field" style="margin-bottom:0">
@@ -167,7 +167,9 @@
 
 <script>
 (function () {
-  var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+  function tt(k, ko) { return (typeof t === 'function') ? t(k, ko) : ko; }
+  var DOW_KO = ['일', '월', '화', '수', '목', '금', '토'];
+  function dow(i) { return tt('dow.' + i, DOW_KO[i] + '요일'); }
   var MS = 86400000;
 
   // 시각을 버리고 날짜만 다룬다 (서머타임·시차 영향 제거)
@@ -177,7 +179,8 @@
     return new Date(+p[0], +p[1] - 1, +p[2]);
   }
   function fmt(d) {
-    return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
+    return tt('date.ymdFmt', '{y}년 {m}월 {d}일')
+      .replace('{y}', d.getFullYear()).replace('{m}', d.getMonth() + 1).replace('{d}', d.getDate());
   }
   function iso(d) {
     return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
@@ -188,6 +191,9 @@
   }
   function diffDays(a, b) { return Math.round((b - a) / MS); }
   function num(n) { return n.toLocaleString('ko-KR'); }
+  function wd(w, d) {
+    return w + tt('date.uWeeks', '주 ') + d + tt('date.uDays', '일');
+  }
 
   // --- 쉬는 날 ---
   // 음력 공휴일(설·추석·부처님오신날)과 대체공휴일은 해마다 달라서 계산으로 못 낸다.
@@ -237,19 +243,21 @@
   // --- 디데이 ---
   var dday = document.getElementById('dday');
   function calcDday() {
-    var t = parse(dday.value);
+    var target = parse(dday.value);
     var lab = document.getElementById('d-label'), sub = document.getElementById('d-sub');
-    if (!t) { lab.textContent = '-'; sub.textContent = '목표 날짜를 고르세요';
+    if (!target) { lab.textContent = '-'; sub.textContent = tt('date.pickTarget', '목표 날짜를 고르세요');
               document.getElementById('d-weeks').textContent = '-';
               document.getElementById('d-dow').textContent = '-'; return; }
-    var n = diffDays(today(), t);
+    var n = diffDays(today(), target);
     lab.textContent = n === 0 ? 'D-day' : (n > 0 ? 'D-' + num(n) : 'D+' + num(-n));
-    sub.textContent = n === 0 ? '바로 오늘입니다' : (n > 0 ? num(n) + '일 남음' : num(-n) + '일 지남');
+    sub.textContent = n === 0 ? t('date.today', '바로 오늘입니다')
+                    : (n > 0 ? num(n) + t('date.left', '일 남음') : num(-n) + t('date.past', '일 지남'));
     lab.style.color = n === 0 ? 'var(--accent)' : (n > 0 ? 'var(--text)' : 'var(--muted)');
     var w = Math.abs(n);
-    document.getElementById('d-weeks').textContent = Math.floor(w / 7) + '주 ' + (w % 7) + '일';
-    document.getElementById('d-dow').textContent = DOW[t.getDay()] + '요일';
+    document.getElementById('d-weeks').textContent = wd(Math.floor(w / 7), w % 7);
+    document.getElementById('d-dow').textContent = dow(target.getDay());
   }
+  document.addEventListener('langchange', function () { calcDday(); calcBetween(); calcAdd(); });
   dday.addEventListener('change', calcDday);
   dday.addEventListener('input', calcDday);
 
@@ -263,15 +271,17 @@
     if (!a || !b) { dEl.textContent = wEl.textContent = yEl.textContent = kEl.textContent = '-'; return; }
     var n = Math.abs(diffDays(a, b));
     if (inclusive.checked) n += 1;
-    dEl.textContent = num(n) + '일';
-    kEl.textContent = num(countWorkdays(a, b, inclusive.checked)) + '일';
-    wEl.textContent = Math.floor(n / 7) + '주 ' + (n % 7) + '일';
+    var uD = tt('date.uDays', '일');
+    dEl.textContent = num(n) + uD;
+    kEl.textContent = num(countWorkdays(a, b, inclusive.checked)) + uD;
+    wEl.textContent = wd(Math.floor(n / 7), n % 7);
 
     var s = a <= b ? a : b, e = a <= b ? b : a;
     var months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
     if (e.getDate() < s.getDate()) months--;
     if (months < 0) months = 0;
-    yEl.textContent = Math.floor(months / 12) + '년 ' + (months % 12) + '개월';
+    yEl.textContent = Math.floor(months / 12) + tt('date.uYears', '년 ') +
+                      (months % 12) + tt('date.uMonths', '개월');
   }
   [from, to, inclusive, holiInput].forEach(function (el) {
     el.addEventListener('change', function () { calcBetween(); calcAdd(); });
@@ -307,7 +317,7 @@
       ? shiftWorkdays(b, Math.abs(n), dir)
       : new Date(b.getTime() + n * dir * MS);
     dEl.textContent = fmt(r);
-    wEl.textContent = DOW[r.getDay()] + '요일';
+    wEl.textContent = dow(r.getDay());
   }
   [base, delta, op, document.getElementById('unit')].forEach(function (el) {
     el.addEventListener('change', calcAdd);
@@ -315,10 +325,11 @@
   });
 
   // 초기값: 오늘 기준으로 채워 첫 화면이 비어 보이지 않게 한다
-  var t = today();
-  from.value = iso(t);
-  to.value = iso(new Date(t.getTime() + 30 * MS));
-  base.value = iso(t);
+  // 변수 이름을 t 로 쓰면 var 호이스팅 때문에 이 함수 전체에서 번역 함수 t() 가 가려진다.
+  var now = today();
+  from.value = iso(now);
+  to.value = iso(new Date(now.getTime() + 30 * MS));
+  base.value = iso(now);
   calcDday(); calcBetween(); calcAdd();
 })();
 </script>

@@ -170,6 +170,8 @@
 <script>
 (function () {
   var ta = document.getElementById('ta');
+  // i18n.js 는 defer 라 이 스크립트보다 늦게 실행된다. 첫 렌더에서 t()를 바로 부르면 죽는다.
+  function tt(k, ko) { return (typeof t === 'function') ? t(k, ko) : ko; }
   var fmt = function (n) { return n.toLocaleString('ko-KR'); };
 
   // EUC-KR 바이트 추정: ASCII 1바이트, 그 외(한글/한자/전각) 2바이트
@@ -182,16 +184,16 @@
   }
 
   function update() {
-    var t = ta.value;
-    var all = Array.from(t).length;                       // 이모지 등 서로게이트쌍 안전 처리
-    var noSpace = Array.from(t.replace(/\s/g, '')).length;
-    var words = t.trim() ? t.trim().split(/\s+/).length : 0;
-    var lines = t === '' ? 0 : t.split(/\n/).length;
-    var paras = t.trim() ? t.trim().split(/\n\s*\n/).length : 0;
+    var src = ta.value;
+    var all = Array.from(src).length;                       // 이모지 등 서로게이트쌍 안전 처리
+    var noSpace = Array.from(src.replace(/\s/g, '')).length;
+    var words = src.trim() ? src.trim().split(/\s+/).length : 0;
+    var lines = src === '' ? 0 : src.split(/\n/).length;
+    var paras = src.trim() ? src.trim().split(/\n\s*\n/).length : 0;
     var manuscript = Math.ceil(all / 200);
-    var utf8 = new TextEncoder().encode(t).length;
-    var euckr = eucKrBytes(t);
-    var readMin = Math.max(t.trim() ? 1 : 0, Math.round(all / 500)); // 분당 약 500자
+    var utf8 = new TextEncoder().encode(src).length;
+    var euckr = eucKrBytes(src);
+    var readMin = Math.max(src.trim() ? 1 : 0, Math.round(all / 500)); // 분당 약 500자
 
     document.getElementById('s-all').textContent = fmt(all);
     document.getElementById('s-nospace').textContent = fmt(noSpace);
@@ -200,17 +202,19 @@
     document.getElementById('s-manu').textContent = fmt(manuscript);
     updateGoal(all, noSpace);
 
+    var uChars = tt('char.u.chars', '자');
+    var uCount = tt('char.u.count', '개');
     var rows = [
-      ['공백 포함 글자수', fmt(all) + '자'],
-      ['공백 제외 글자수', fmt(noSpace) + '자'],
-      ['공백 개수', fmt(all - noSpace) + '개'],
-      ['단어 수', fmt(words) + '개'],
-      ['줄 수', fmt(lines) + '줄'],
-      ['문단 수', fmt(paras) + '개'],
-      ['원고지 매수 (200자)', fmt(manuscript) + '매'],
-      ['UTF-8 바이트', fmt(utf8) + ' bytes'],
-      ['EUC-KR 바이트 (추정)', fmt(euckr) + ' bytes'],
-      ['예상 읽기 시간', readMin + '분']
+      [tt('char.d.all', '공백 포함 글자수'), fmt(all) + uChars],
+      [tt('char.d.nospace', '공백 제외 글자수'), fmt(noSpace) + uChars],
+      [tt('char.d.spaces', '공백 개수'), fmt(all - noSpace) + uCount],
+      [tt('char.d.words', '단어 수'), fmt(words) + uCount],
+      [tt('char.d.lines', '줄 수'), fmt(lines) + tt('char.u.lines', '줄')],
+      [tt('char.d.para', '문단 수'), fmt(paras) + uCount],
+      [tt('char.d.manu', '원고지 매수 (200자)'), fmt(manuscript) + tt('char.u.pages', '매')],
+      [tt('char.d.utf8', 'UTF-8 바이트'), fmt(utf8) + ' bytes'],
+      [tt('char.d.euckr', 'EUC-KR 바이트 (추정)'), fmt(euckr) + ' bytes'],
+      [tt('char.d.read', '예상 읽기 시간'), readMin + tt('char.u.min', '분')]
     ];
     document.getElementById('detail-table').innerHTML = rows.map(function (r) {
       return '<tr><td style="padding:9px 0;border-bottom:1px solid var(--border);color:var(--muted)">' + r[0] +
@@ -218,7 +222,16 @@
     }).join('');
   }
 
+  // 선택지 글자의 단위(자)도 언어를 타야 한다. 숫자는 그대로 두고 단위만 갈아끼운다.
+  function relabelPresets() {
+    var u = tt('char.u.chars', '자');
+    Array.prototype.forEach.call(goalPreset.options, function (o) {
+      if (/^[0-9]+$/.test(o.value)) o.textContent = o.value + u;
+    });
+  }
   ta.addEventListener('input', update);
+  // 언어가 바뀌면 스크립트가 만든 표도 다시 그려야 한다
+  document.addEventListener('langchange', function () { relabelPresets(); update(); });
 
   document.getElementById('btn-clear').addEventListener('click', function () {
     ta.value = ''; update(); ta.focus();
@@ -226,18 +239,17 @@
 
   document.getElementById('btn-copy').addEventListener('click', function () {
     var msg = document.getElementById('copy-msg');
-    if (!ta.value) { msg.textContent = '복사할 내용이 없습니다'; return; }
+    if (!ta.value) { msg.textContent = tt('char.nothing', '복사할 내용이 없습니다'); return; }
     navigator.clipboard.writeText(ta.value).then(function () {
-      msg.textContent = '복사했습니다';
+      msg.textContent = tt('char.copied', '복사했습니다');
       setTimeout(function () { msg.textContent = ''; }, 2000);
     }).catch(function () {
-      msg.textContent = '복사에 실패했습니다';
+      msg.textContent = tt('char.copyFail', '복사에 실패했습니다');
     });
   });
 
   // --- 글자수 제한 맞추기 ---
   // 자소서는 "1000자 이내"처럼 상한이 정해져 있다. 넘었는지 몇 자 남았는지가 핵심이다.
-  function tt(k, ko) { return (typeof t === 'function') ? t(k, ko) : ko; }
   var goalPreset = document.getElementById('goal-preset');
   var goalCustom = document.getElementById('goal-custom');
   var goalCustomField = document.getElementById('goal-custom-field');
@@ -270,6 +282,7 @@
                         fmt(lim - used) + tt('char.goalLeft', '자 남음');
     }
   }
+  relabelPresets();
   goalPreset.addEventListener('change', function () {
     goalCustomField.hidden = goalPreset.value !== 'custom';
     update();

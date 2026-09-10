@@ -153,6 +153,25 @@
     temp:   { base: '°C', units: [['섭씨(°C)', 1], ['화씨(°F)', 1], ['켈빈(K)', 1]] }
   };
 
+  function tt(k, ko) { return (typeof t === 'function') ? t(k, ko) : ko; }
+
+  // 단위 이름을 번역 키에 잇는다. 값(배율)은 건드리지 않는다 — 이름만 언어를 탄다.
+  // 한국 고유 단위는 일본어에 같은 한자 단위가 있고(坪·斤·貫·升·斗·尺),
+  // 영어에는 대응어가 없어 로마자와 미터법 환산으로 적는다.
+  var UKEY = {
+    '평': 'u.pyeong', '헥타르(ha)': 'u.ha', '아르(a)': 'u.are',
+    '제곱피트(ft²)': 'u.sqft', '제곱야드': 'u.sqyd',
+    '인치(in)': 'u.inch', '피트(ft)': 'u.foot', '야드(yd)': 'u.yard',
+    '마일(mi)': 'u.mile', '자(척)': 'u.ja',
+    '톤(t)': 'u.ton', '파운드(lb)': 'u.lb', '온스(oz)': 'u.oz',
+    '근(고기 600g)': 'u.geun', '관': 'u.gwan',
+    '갤런(미국)': 'u.gallon', '쿼트': 'u.quart', '컵(200mL)': 'u.cup',
+    '되': 'u.doe', '말': 'u.mal',
+    '노트(kn)': 'u.knot', '바이트(B)': 'u.byte',
+    '섭씨(°C)': 'u.celsius', '화씨(°F)': 'u.fahrenheit', '켈빈(K)': 'u.kelvin'
+  };
+  function uname(ko) { return UKEY[ko] ? tt(UKEY[ko], ko) : ko; }
+
   var catSel = document.getElementById('cat');
   var unitSel = document.getElementById('unit');
   var valInput = document.getElementById('val');
@@ -160,7 +179,7 @@
   function fillUnits() {
     var d = DATA[catSel.value];
     unitSel.innerHTML = d.units.map(function (u, i) {
-      return '<option value="' + i + '">' + u[0] + '</option>';
+      return '<option value="' + i + '">' + uname(u[0]) + '</option>';
     }).join('');
     // 넓이는 '평'을 기본으로 두는 편이 한국에서 쓰기 편하다
     if (catSel.value === 'area') unitSel.value = '1';
@@ -189,6 +208,13 @@
     return c + 273.15;
   }
 
+  document.addEventListener('langchange', function () {
+    var keep = unitSel.value;
+    fillUnits();
+    if (keep !== '' && unitSel.options[keep]) unitSel.value = keep;
+    calc();
+  });
+
   function calc() {
     var d = DATA[catSel.value];
     var v = parseFloat(valInput.value);
@@ -196,13 +222,14 @@
     var out = document.getElementById('out');
 
     if (isNaN(v)) {
-      out.innerHTML = '<tr><td style="padding:12px 0;color:var(--muted)">숫자를 입력하세요.</td></tr>';
+      out.innerHTML = '<tr><td style="padding:12px 0;color:var(--muted)">' +
+        t('unit.enterNum', '숫자를 입력하세요.') + '</td></tr>';
       return;
     }
 
     var results = d.units.map(function (u, i) {
-      if (catSel.value === 'temp') return [u[0], fromC(toC(v, idx), i)];
-      return [u[0], v * d.units[idx][1] / u[1]];
+      if (catSel.value === 'temp') return [uname(u[0]), fromC(toC(v, idx), i)];
+      return [uname(u[0]), v * d.units[idx][1] / u[1]];
     });
 
     out.innerHTML = results.map(function (r, i) {

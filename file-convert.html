@@ -99,7 +99,7 @@
       <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
     </div>
 
-    <h2>미리보기 <span class="hint" style="font-weight:400">(앞 20행)</span></h2>
+    <h2><span data-i18n="conv.preview">미리보기</span> <span class="hint" style="font-weight:400" data-i18n="conv.previewNote">(앞 20행)</span></h2>
     <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
       <table id="preview" style="width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap"></table>
     </div>
@@ -185,8 +185,8 @@
   var rows = [];         // 현재 표 데이터 (객체 배열)
   var baseName = 'converted';
 
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
 
   dz.addEventListener('click', function () { fileInput.click(); });
@@ -212,10 +212,10 @@
     tries = (tries === undefined) ? 80 : tries;
     if (typeof XLSX !== 'undefined') { fn(); return; }
     if (tries <= 0) {
-      setMsg('변환 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.', 'err');
+      setMsg(t('conv.notReady', '변환 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.'), 'err');
       return;
     }
-    setMsg('변환 기능을 준비하는 중입니다…');
+    setMsg(t('conv.preparing', '변환 기능을 준비하는 중입니다…'));
     setTimeout(function () { whenReady(fn, tries - 1); }, 100);
   }
 
@@ -246,19 +246,19 @@
     lastFile = file;
     // 구분자는 텍스트 계열에서만 의미가 있다. 엑셀·JSON에는 구분자가 없다.
     document.getElementById('fs-field').hidden = !(ext === 'csv' || ext === 'tsv' || ext === 'txt');
-    setMsg('파일을 읽는 중입니다…');
+    setMsg(t('msg.reading', '파일을 읽는 중입니다…'));
 
     if (ext === 'json') {
       file.text().then(function (txt) {
         var data;
         try { data = JSON.parse(txt); }
-        catch (e) { setMsg('JSON 형식이 올바르지 않습니다. 파일 내용을 확인해 주세요.', 'err'); return; }
+        catch (e) { setMsg(t('conv.badJson', 'JSON 형식이 올바르지 않습니다. 파일 내용을 확인해 주세요.'), 'err'); return; }
 
         if (!Array.isArray(data)) {
           // 최상위가 객체면 내부의 첫 배열을 찾아본다
           var found = Object.keys(data).map(function (k) { return data[k]; })
                             .filter(function (v) { return Array.isArray(v); })[0];
-          if (!found) { setMsg('객체가 들어 있는 배열 형태여야 표로 변환할 수 있습니다.', 'err'); return; }
+          if (!found) { setMsg(t('conv.needArray', '객체가 들어 있는 배열 형태여야 표로 변환할 수 있습니다.'), 'err'); return; }
           data = found;
         }
         rows = data.map(function (r) {
@@ -293,7 +293,7 @@
           workbook = XLSX.read(u8, { type: 'array', cellDates: true, raw: false });
         }
       } catch (e) {
-        setMsg('파일을 열 수 없습니다. 손상되었거나 지원하지 않는 형식일 수 있습니다.', 'err');
+        setMsg(t('conv.cantOpen', '파일을 열 수 없습니다. 손상되었거나 지원하지 않는 형식일 수 있습니다.'), 'err');
         return;
       }
       var names = workbook.SheetNames;
@@ -326,9 +326,9 @@
   });
 
   function show(fromLabel) {
-    if (!rows.length) { setMsg('데이터가 비어 있습니다.', 'err'); return; }
+    if (!rows.length) { setMsg(t('conv.empty', '데이터가 비어 있습니다.'), 'err'); return; }
     if (detectedEnc === 'EUC-KR') {
-      setMsg('한글이 EUC-KR로 저장된 파일이라 자동으로 변환했습니다. CSV로 내보내면 UTF-8로 저장되어 더 이상 깨지지 않습니다.', 'ok');
+      setMsg(t('conv.euckr', '한글이 EUC-KR로 저장된 파일이라 자동으로 변환했습니다. CSV로 내보내면 UTF-8로 저장되어 더 이상 깨지지 않습니다.'), 'ok');
     } else {
       setMsg('');
     }
@@ -385,7 +385,8 @@
       download(new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
                baseName + '.xlsx');
     }
-    setMsg('저장했습니다. (' + rows.length.toLocaleString('ko-KR') + '행)', 'ok');
+    setMsg(t('conv.saved', '저장했습니다. ') + '(' + rows.length.toLocaleString('ko-KR') +
+           t('conv.rowsUnit', '행') + ')', 'ok');
   });
 
   document.getElementById('btn-reset').addEventListener('click', function () {

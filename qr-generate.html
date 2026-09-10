@@ -63,7 +63,7 @@
     <div class="field qgroup" id="g-text">
       <label for="text" data-i18n="qr.content">내용 (주소 또는 문자)</label>
       <textarea id="text" style="min-height:90px" placeholder="https://example.com 또는 원하는 문구를 입력하세요" data-i18n-ph="qr.ph">https://</textarea>
-      <div class="hint">웹 주소는 <code>https://</code>로 시작해야 스캔 시 바로 열립니다.</div>
+      <div class="hint" data-i18n="qr.contentHint">웹 주소는 <code>https://</code>로 시작해야 스캔 시 바로 열립니다.</div>
     </div>
 
     <div class="qgroup" id="g-wifi" hidden>
@@ -160,7 +160,7 @@
         <input type="color" id="bg" value="#ffffff" style="width:100%;height:42px;padding:4px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
       </div>
     </div>
-    <div class="hint" style="margin-top:-4px">QR 색상과 배경의 명암 차이가 작으면 스캔이 되지 않습니다. 어두운 QR + 밝은 배경 조합을 권합니다.</div>
+    <div class="hint" style="margin-top:-4px" data-i18n="qr.contrastHint">QR 색상과 배경의 명암 차이가 작으면 스캔이 되지 않습니다. 어두운 QR + 밝은 배경 조합을 권합니다.</div>
 
     <div class="field" style="margin:16px 0 0">
       <label for="logo" data-i18n="qr.logo">가운데 로고 (선택)</label>
@@ -257,8 +257,8 @@
     return document.getElementById(id);
   }).filter(Boolean);
 
-  function setMsg(t, cls) {
-    msg.innerHTML = t ? '<div class="notice ' + (cls || '') + '">' + t + '</div>' : '';
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
 
   var placeholder = document.getElementById('placeholder');
@@ -271,7 +271,8 @@
     btnPng.disabled = !on;
     btnCopy.disabled = !on;
     document.getElementById('size-note').textContent =
-      on ? '실제 저장 크기: ' + canvas.width + '×' + canvas.height + 'px (화면에는 축소해 보여줍니다)' : '';
+      on ? t('qr.actual', '실제 저장 크기: ') + canvas.width + '×' + canvas.height +
+           t('qr.actual2', 'px (화면에는 축소해 보여줍니다)') : '';
   }
 
   // 라이브러리가 늦게 도착할 수 있으므로 최대 8초까지 기다린다
@@ -279,7 +280,7 @@
     tries = (tries === undefined) ? 80 : tries;
     if (typeof QRious !== 'undefined') { fn(); return; }
     if (tries <= 0) {
-      setMsg('QR 생성 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.', 'err');
+      setMsg(t('qr.notReady', 'QR 생성 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.'), 'err');
       return;
     }
     setTimeout(function () { whenReady(fn, tries - 1); }, 100);
@@ -395,10 +396,12 @@
       setMsg('');
     } catch (e) {
       showQr(false);
-      setMsg('내용이 너무 길어 QR코드로 만들 수 없습니다. 글자 수를 줄이거나 오류 복원 수준을 L로 낮춰 보세요.', 'err');
+      setMsg(t('qr.tooLong', '내용이 너무 길어 QR코드로 만들 수 없습니다. 글자 수를 줄이거나 오류 복원 수준을 L로 낮춰 보세요.'), 'err');
     }
   }
 
+  // 저장 크기 안내처럼 스크립트가 만든 글자는 언어가 바뀌면 다시 그려야 한다
+  document.addEventListener('langchange', render);
   inputs.forEach(function (el) {
     el.addEventListener('input', render);
     el.addEventListener('change', render);
@@ -475,15 +478,15 @@
   document.getElementById('btn-copy').addEventListener('click', function () {
     var out = document.getElementById('copy-msg');
     if (!navigator.clipboard || !window.ClipboardItem) {
-      out.textContent = '이 브라우저는 이미지 복사를 지원하지 않습니다. PNG로 저장해 주세요.';
+      out.textContent = t('qr.noCopy', '이 브라우저는 이미지 복사를 지원하지 않습니다. PNG로 저장해 주세요.');
       return;
     }
     canvas.toBlob(function (blob) {
       navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function () {
-        out.textContent = '클립보드에 복사했습니다';
+        out.textContent = t('qr.copied', '클립보드에 복사했습니다');
         setTimeout(function () { out.textContent = ''; }, 2000);
       }).catch(function () {
-        out.textContent = '복사에 실패했습니다. PNG로 저장해 주세요.';
+        out.textContent = t('qr.copyFail', '복사에 실패했습니다. PNG로 저장해 주세요.');
       });
     });
   });

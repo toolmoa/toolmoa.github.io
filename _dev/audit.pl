@@ -71,6 +71,16 @@ for my $f (@files) {
   push @issues, "example.github.io 잔존" if $c =~ /example\.github\.io/;
   push @issues, "TODO/FIXME 잔존" if $c =~ /\b(TODO|FIXME)\b/;
 
+  # 번역 함수는 전역 t() 다. 같은 이름의 변수나 인자를 만들면 var 호이스팅 때문에
+  # 그 함수 전체에서 t() 가 가려져, 언어를 바꾸는 순간 조용히 죽는다.
+  # 실제로 date-calc 의 var t = today() 하나 때문에 날짜 계산기 번역이 통째로 멈춰 있었다.
+  if ($c =~ /(?<![\w.])tt?\(/) {
+    push @issues, "t() 를 쓰면서 var t 를 선언함 (호이스팅으로 t() 가 가려진다)"
+      if $c =~ /\bvar\s+t\s*[=;]/;
+    push @issues, "t() 를 쓰면서 함수 인자 이름을 t 로 씀"
+      if $c =~ /function\s*[\w]*\s*\(\s*t\s*[,)]/;
+  }
+
   if (@issues) {
     printf("%-26s\n", $f);
     print "   ⚠ $_\n" for @issues;
