@@ -53,7 +53,7 @@
   <p class="lead">Cut out just the part you need, then rotate or flip it in the same place.</p>
   <span class="privacy-badge">🔒 Your photo never leaves your device</span>
 
-  <div class="dropzone" id="dz">
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
     <span class="dz-icon">🔲</span>
     <span class="dz-main">Drop a photo here, or click to choose</span>
     <span class="dz-sub">JPG · PNG · WebP · GIF · BMP</span>
@@ -212,6 +212,13 @@
   function scale() { return cv.clientWidth / cv.width; }
 
   dz.addEventListener('click', function () { fileInput.click(); });
+  // The file input is hidden, so it is out of the tab order. Without this, keyboard-only
+  // users have no way at all to pick a file.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
   dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
   dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
   dz.addEventListener('drop', function (e) {

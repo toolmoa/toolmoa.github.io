@@ -41,7 +41,7 @@
   <p class="lead">Combine several photos into a single PDF document, in the order you choose.</p>
   <span class="privacy-badge">🔒 Your photos never leave your device</span>
 
-  <div class="dropzone" id="dz">
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
     <span class="dz-icon">🖨️</span>
     <span class="dz-main">Drop photos here, or click to choose</span>
     <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · multiple files supported</span>
@@ -169,6 +169,13 @@
   }
 
   dz.addEventListener('click', function () { fileInput.click(); });
+  // The file input is hidden, so it is out of the tab order. Without this, keyboard-only
+  // users have no way at all to pick a file.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
   dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
   dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
   dz.addEventListener('drop', function (e) {

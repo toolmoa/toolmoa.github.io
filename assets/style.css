@@ -11,6 +11,7 @@
   --accent-soft: #eaf1ff;
   --ok: #17864a;
   --warn: #9a6400;
+  --danger: #c62828;
   --radius: 12px;
   --radius-sm: 8px;
   --maxw: 880px;
@@ -30,6 +31,7 @@
     --accent-soft: #1b2743;
     --ok: #4ade80;
     --warn: #fbbf24;
+    --danger: #ff6b6b;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
   }
 }
@@ -277,7 +279,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   border: 1px solid var(--border);
   background: var(--surface-2);
 }
-.notice.err { border-color: #e5484d; color: #e5484d; background: transparent; }
+.notice.err { border-color: var(--danger); color: var(--danger); background: transparent; }
 .notice.ok { border-color: var(--ok); color: var(--ok); background: transparent; }
 
 .privacy-badge {
@@ -400,7 +402,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 }
 .pcard .ops button:hover:not(:disabled) { background: var(--surface-2); }
 .pcard .ops button:disabled { opacity: .35; cursor: default; }
-.pcard .ops button.on { border-color: #e5484d; color: #e5484d; }
+.pcard .ops button.on { border-color: var(--danger); color: var(--danger); }
 .pcard.dragging { opacity: .4; }
 .pcard .grab { position: absolute; top: 6px; left: 8px; color: var(--muted); cursor: grab; font-size: 13px; }
 
@@ -426,16 +428,16 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   background: var(--accent);
   transition: width .12s linear;
 }
-.goal-bar span.near { background: #e0a800; }
-.goal-bar span.over { background: #d93025; }
+.goal-bar span.near { background: var(--warn); }
+.goal-bar span.over { background: var(--danger); }
 .goal-msg {
   font-size: 15px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
-.goal-msg.near { color: #b98700; }
-.goal-msg.over { color: #d93025; }
+.goal-msg.near { color: var(--warn); }
+.goal-msg.over { color: var(--danger); }
 
 /* 버튼 줄 아래에 붙는 체크박스 한 줄 */
 .inline-check {
@@ -456,3 +458,13 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   font-size: 13px;
   color: var(--muted);
 }
+
+/* 드롭존은 role="button" tabindex="0" 이라 키보드로 도달할 수 있다.
+   초점이 어디 있는지 보이지 않으면 도달할 수 있어도 쓸 수가 없다. */
+.dropzone:focus-visible,
+.dropzone:focus {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-color: var(--accent);
+}
+.dropzone:focus:not(:focus-visible) { outline: none; }

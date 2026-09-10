@@ -395,6 +395,9 @@
   document.getElementById('qtype').addEventListener('change', switchGroup);
 
   var logoInput = document.getElementById('logo');
+  // 로고를 넣으면 복원 수준이 H로 강제된다. 로고를 다시 뺐을 때 원래 고르셨던 값으로
+  // 돌려놓지 않으면, 사용자가 만진 적 없는데 H에 갇혀 담을 수 있는 글자 수가 줄어든다.
+  var eclBeforeLogo = null;
   logoInput.addEventListener('change', function () {
     var f = logoInput.files && logoInput.files[0];
     if (!f) return;
@@ -402,6 +405,7 @@
     var im = new Image();
     im.onload = function () {
       URL.revokeObjectURL(url);
+      if (eclBeforeLogo === null) eclBeforeLogo = document.getElementById('ecl').value;
       logoImg = im;
       document.getElementById('logo-row').hidden = false;
       render();
@@ -417,15 +421,26 @@
     logoImg = null;
     logoInput.value = '';
     document.getElementById('logo-row').hidden = true;
+    if (eclBeforeLogo !== null) {
+      document.getElementById('ecl').value = eclBeforeLogo;
+      eclBeforeLogo = null;
+    }
     render();
   });
 
   document.getElementById('btn-png').addEventListener('click', function () {
     if (!canvas.width) return;
-    var a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
-    a.download = 'qrcode.png';
-    document.body.appendChild(a); a.click(); a.remove();
+    // 데이터 URL 대신 Blob으로 내려받는다. 사이트의 다른 저장 경로와 방식을 맞추고,
+    // 큰 이미지를 통째로 문자열에 담지 않는다.
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'qrcode.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    }, 'image/png');
   });
 
   document.getElementById('btn-copy').addEventListener('click', function () {

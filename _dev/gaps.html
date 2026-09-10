@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>툴모아 빈틈 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1050px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">빈틈 점검</h1>
+<p style="color:#555;font-size:14px;max-width:950px">
+  지금까지 화면 상태만 보고 넘어갔거나 아예 손대지 않은 경로를 실제 결과물로 확인한다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:210px">경로</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/xlsx.full.min.js"></script>
+<script src="jsQR.js"></script>
+<script>
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 12000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 80);
+    })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 250);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function capture(f) {
+  var w = f.contentWindow, out = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () {};
+  return out;
+}
+function pickAll(got, mark, re) {
+  return got.slice(mark).filter(function (b) {
+    if (b && typeof b.name === 'string') return false;   // 입력 File은 제외
+    return re.test(b.type || '');
+  });
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function set(d, id, v, ev) {
+  var el = d.getElementById(id);
+  el.value = v; el.dispatchEvent(new Event(ev || 'input', { bubbles: true }));
+  return el;
+}
+function makeImg(w, h) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  x.fillStyle = '#2f6df6'; x.fillRect(0, 0, w, h);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, Math.round(w / 3), Math.round(h / 3));
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+// 페이지마다 가로 크기를 다르게 만들어, 나중에 순서가 지켜졌는지 크기로 알아본다
+function makeSizedPdf(widths) {
+  return PDFLib.PDFDocument.create().then(function (doc) {
+    widths.forEach(function (w) { doc.addPage([w, 400]); });
+    return doc.save();
+  });
+}
+function pageWidths(bytes) {
+  return PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true }).then(function (doc) {
+    var out = [];
+    for (var i = 0; i < doc.getPageCount(); i++) out.push(Math.round(doc.getPage(i).getSize().width));
+    return out;
+  });
+}
+function decodeCanvas(c) {
+  var im = c.getContext('2d').getImageData(0, 0, c.width, c.height);
+  var r = jsQR(new Uint8ClampedArray(im.data), c.width, c.height);
+  return r ? r.data : null;
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // 1. PDF 회전·삭제 — 화면에서 바꾼 "순서"가 저장된 파일에도 반영되는지.
+  //    지금까지는 카드 번호만 봤다. copyPages가 순서를 지키는지는 확인한 적이 없다.
+  chain = chain.then(function () {
+    return makeSizedPdf([310, 320, 330, 340]).then(function (bytes) {
+      return loadFrame('../pdf-edit.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 'order.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-total') === '4'; }, 30000).then(function () {
+          // 첫 페이지를 맨 뒤로 보낸다: 310,320,330,340 → 320,330,340,310
+          for (var k = 0; k < 3; k++) {
+            var ops = Array.prototype.slice.call(d.querySelectorAll('.pcard')[k].querySelectorAll('.ops button'));
+            var right = ops.filter(function (b) { return b.textContent.trim() === '→'; })[0];
+            if (!right) { log('PDF 편집 순서 저장', false, '→ 버튼 없음'); return; }
+            right.click();
+          }
+          var mark = got.length;
+          d.getElementById('btn-save').click();
+          return waitFor(function () { return pickAll(got, mark, /pdf/).length > 0; }, 40000).then(function () {
+            var b = pickAll(got, mark, /pdf/)[0];
+            if (!b) { log('PDF 편집 순서 저장', false, '저장 결과가 없음'); return; }
+            return b.arrayBuffer().then(function (ab) { return pageWidths(new Uint8Array(ab)); })
+              .then(function (ws) {
+                var want = [320, 330, 340, 310];
+                var ok = ws.join(',') === want.join(',');
+                log('PDF 편집 순서 저장', ok && !f.dataset.errs,
+                    '원본 310/320/330/340, 첫 장을 맨 뒤로 → 저장된 파일 ' + ws.join('/') +
+                    ' (기대 ' + want.join('/') + ')' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+              });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 편집 순서 저장', false, '오류: ' + e.message); });
+
+  // 2. QR 가운데 로고 — 로고를 얹은 뒤에도 실제로 판독되는지.
+  //    "휴대폰으로 스캔해 보세요"라고 안내만 하고 한 번도 기계로 읽어본 적이 없다.
+  chain = chain.then(function () {
+    if (typeof jsQR === 'undefined') { log('QR 로고 판독', false, 'jsQR 없음'); return; }
+    return makeImg(200, 200).then(function (logo) {
+      return loadFrame('../qr-generate.html').then(function (f) {
+        var d = f.contentDocument;
+        var want = 'https://toolmoa.github.io/qr-generate.html';
+        set(d, 'text', want);
+        return waitFor(function () { return decodeCanvas(d.getElementById('canvas')) === want; }, 15000)
+          .then(function (before) {
+            var eclBefore = d.getElementById('ecl').value;
+            setFiles(d.getElementById('logo'), [new File([logo], 'logo.png', { type: 'image/png' })]);
+            return waitFor(function () { return !d.getElementById('logo-row').hidden; }, 15000)
+              .then(function () { return waitFor(function () { return true; }, 900); })
+              .then(function () {
+                var after = decodeCanvas(d.getElementById('canvas'));
+                var ecl = d.getElementById('ecl').value;
+                log('QR 로고 판독',
+                    before && after === want && ecl === 'H' && !f.dataset.errs,
+                    '로고 없이 판독 ' + (before ? 'OK' : '실패') + ' → 로고 얹은 뒤 판독 ' +
+                    (after === want ? 'OK' : '"' + after + '" (실패)') +
+                    ', 복원 수준 ' + eclBefore + ' → ' + ecl + ' (기대 H)' +
+                    (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+              });
+          });
+      });
+    });
+  }).catch(function (e) { log('QR 로고 판독', false, '오류: ' + e.message); });
+
+  // 3. QR PNG 저장 — 내려받은 파일이 진짜 이미지이고 그 안의 QR이 읽히는지
+  chain = chain.then(function () {
+    return loadFrame('../qr-generate.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      var want = '툴모아 QR 저장 확인';
+      set(d, 'text', want);
+      return waitFor(function () { return decodeCanvas(d.getElementById('canvas')) === want; }, 15000)
+        .then(function () {
+          var mark = got.length;
+          d.getElementById('btn-png').click();
+          return waitFor(function () { return pickAll(got, mark, /image/).length > 0; }, 15000).then(function () {
+            var b = pickAll(got, mark, /image/)[0];
+            if (!b) { log('QR PNG 저장', false, '저장 결과가 없음'); return; }
+            return createImageBitmap(b).then(function (bmp) {
+              var c = document.createElement('canvas');
+              c.width = bmp.width; c.height = bmp.height;
+              c.getContext('2d').drawImage(bmp, 0, 0);
+              var read = decodeCanvas(c);
+              log('QR PNG 저장', read === want && !f.dataset.errs,
+                  '저장 파일 ' + bmp.width + '×' + bmp.height + ' ' + b.type +
+                  ', 다시 판독 "' + read + '" (원본 "' + want + '")' +
+                  (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('QR PNG 저장', false, '오류: ' + e.message); });
+
+  // 4. 비밀번호 — 고른 문자 종류가 정말 하나씩 들어가는지, 헷갈리는 문자가 빠지는지.
+  //    한 번 뽑아 보고 넘어가면 확률적으로 통과해 버린다. 여러 번 뽑아 전수 확인한다.
+  chain = chain.then(function () {
+    return loadFrame('../password-gen.html').then(function (f) {
+      var d = f.contentDocument;
+      ['lower', 'upper', 'digit', 'symbol', 'each', 'noamb'].forEach(function (k) {
+        var el = d.getElementById(k);
+        if (el && !el.checked) { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      set(d, 'len', '12', 'input');
+      set(d, 'count', '20', 'input');
+
+      var AMB = 'Il1O0o';
+      var bad = { len: 0, kind: 0, amb: 0 }, rounds = 10, seen = {};
+      function once() {
+        d.getElementById('btn-gen').click();
+        var codes = Array.prototype.map.call(d.querySelectorAll('#list code'), function (c) { return c.textContent; });
+        codes.forEach(function (pw) {
+          seen[pw] = (seen[pw] || 0) + 1;
+          if (pw.length !== 12) bad.len++;
+          if (!/[a-z]/.test(pw) || !/[A-Z]/.test(pw) || !/[0-9]/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) bad.kind++;
+          for (var i = 0; i < pw.length; i++) if (AMB.indexOf(pw[i]) >= 0) bad.amb++;
+        });
+        return codes.length;
+      }
+      var total = 0;
+      for (var r = 0; r < rounds; r++) total += once();
+      var dup = Object.keys(seen).filter(function (k) { return seen[k] > 1; }).length;
+      var entropy = txt(d, 'entropy');
+      log('비밀번호 규칙 (200개 전수)',
+          total === 200 && bad.len === 0 && bad.kind === 0 && bad.amb === 0 && dup === 0 && !f.dataset.errs,
+          total + '개 생성 · 길이 어긋남 ' + bad.len + ' · 종류 누락 ' + bad.kind +
+          ' · 헷갈리는 문자(Il1O0o) ' + bad.amb + ' · 같은 값 중복 ' + dup +
+          ' · 표시 "' + entropy + '"' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('비밀번호 규칙 (200개 전수)', false, '오류: ' + e.message); });
+
+  // 5. 텍스트 정리 — txt로 저장한 파일의 실제 바이트 (메모장 한글 깨짐 방지 BOM)
+  chain = chain.then(function () {
+    return loadFrame('../text-clean.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      set(d, 'src', '사과\n\n\n배\n사과\n  감  \n');
+      var dedup = d.getElementById('dedup'); dedup.checked = true;
+      dedup.dispatchEvent(new Event('change', { bubbles: true }));
+      var noblank = d.getElementById('noblank'); noblank.checked = true;
+      noblank.dispatchEvent(new Event('change', { bubbles: true }));
+      return waitFor(function () { return d.getElementById('out').value.length > 0; }, 8000).then(function () {
+        var shown = d.getElementById('out').value;
+        var mark = got.length;
+        d.getElementById('btn-down').click();
+        return waitFor(function () { return pickAll(got, mark, /text|octet/).length > 0; }, 8000).then(function () {
+          var b = pickAll(got, mark, /text|octet/)[0];
+          if (!b) { log('텍스트 정리 저장', false, '저장 결과가 없음'); return; }
+          return b.arrayBuffer().then(function (ab) {
+            var u8 = new Uint8Array(ab);
+            var bom = u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF;
+            var body = new TextDecoder('utf-8').decode(u8.subarray(bom ? 3 : 0));
+            log('텍스트 정리 저장',
+                bom && body === shown && shown.indexOf('사과') === 0 && !f.dataset.errs,
+                'BOM ' + (bom ? '있음 (EF BB BF)' : '없음 — 메모장에서 한글이 깨진다') +
+                ', 저장 내용이 화면과 ' + (body === shown ? '일치' : '불일치') +
+                ', 결과 "' + shown.replace(/\n/g, '/') + '"' +
+                (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('텍스트 정리 저장', false, '오류: ' + e.message); });
+
+  // 6. 새로 넣은 항목들이 일본어로도 실제로 바뀌는지.
+  //    사전에 키만 넣어두고 화면에 연결이 안 된 경우를 잡는다.
+  chain = chain.then(function () {
+    var targets = [
+      ['../char-count.html',   'goal-preset',  'char.goalPreset'],
+      ['../date-calc.html',    'holidays',     'date.holi'],
+      ['../file-convert.html', 'fs',           'conv.fs'],
+      ['../pdf-split.html',    'as-zip',       'split.zip']
+    ];
+    var seq = Promise.resolve(), report = [], bad = 0;
+    targets.forEach(function (tg) {
+      seq = seq.then(function () {
+        return loadFrame(tg[0]).then(function (f) {
+          var d = f.contentDocument;
+          var sel = d.querySelector('.lang-select');
+          if (!sel) { report.push(tg[2] + '=선택기없음'); bad++; return; }
+          function labelOf() {
+            var el = d.querySelector('[data-i18n="' + tg[2] + '"]');
+            return el ? el.textContent.trim() : '';
+          }
+          var ko = labelOf();
+          sel.value = 'ja'; sel.dispatchEvent(new Event('change'));
+          var ja = labelOf();
+          sel.value = 'ko'; sel.dispatchEvent(new Event('change'));
+          var back = labelOf();
+          var ok = ko && ja && ja !== ko && back === ko;
+          if (!ok) bad++;
+          report.push(tg[2] + ': "' + ko + '" → "' + ja + '"' + (back === ko ? '' : ' (복귀실패)'));
+        });
+      });
+    });
+    return seq.then(function () {
+      log('새 항목 일본어 전환', bad === 0, report.join(' · '));
+    });
+  }).catch(function (e) { log('새 항목 일본어 전환', false, '오류: ' + e.message); });
+
+  // 7. 파일 변환 — 시트가 여러 개인 엑셀에서 시트를 바꿨을 때 내용이 실제로 바뀌는지
+  chain = chain.then(function () {
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet([{ 이름: '가', 값: 1 }]), '첫시트');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+      [{ 부서: '영업', 인원: 7 }, { 부서: '기획', 인원: 3 }]), '둘째시트');
+    var out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    return loadFrame('../file-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      setFiles(d.getElementById('file'), [new File([out], 'multi.xlsx',
+        { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })]);
+      return waitFor(function () { return txt(d, 't-rows') !== '0'; }, 20000).then(function () {
+        var shown = !d.getElementById('sheet-field').hidden;
+        var r1 = txt(d, 't-rows'), c1 = txt(d, 't-cols');
+        var sheet = d.getElementById('sheet');
+        var names = Array.prototype.map.call(sheet.options, function (o) { return o.value; });
+        sheet.value = '둘째시트'; sheet.dispatchEvent(new Event('change', { bubbles: true }));
+        return waitFor(function () { return txt(d, 't-rows') === '2'; }, 10000).then(function () {
+          var r2 = txt(d, 't-rows'), c2 = txt(d, 't-cols');
+          var head = d.querySelector('#preview').textContent;
+          log('엑셀 여러 시트 전환',
+              shown && names.length === 2 && r1 === '1' && r2 === '2' && c2 === '2' &&
+              head.indexOf('부서') >= 0 && !f.dataset.errs,
+              '시트 선택칸 ' + (shown ? '보임' : '숨음') + ', 목록 [' + names.join(', ') + '], ' +
+              '첫시트 ' + r1 + '행 ' + c1 + '열 → 둘째시트 ' + r2 + '행 ' + c2 + '열 (기대 2행 2열), ' +
+              '미리보기에 "부서" ' + (head.indexOf('부서') >= 0 ? 'O' : 'X') +
+              (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+        });
+      });
+    });
+  }).catch(function (e) { log('엑셀 여러 시트 전환', false, '오류: ' + e.message); });
+
+  // 8. 이미지 자르기 — 규격 "직접 입력" 경로 (프리셋만 확인했고 이쪽은 안 눌러봤다)
+  chain = chain.then(function () {
+    return makeImg(1200, 900).then(function (blob) {
+      return loadFrame('../image-crop.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([blob], 'c.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-orig') !== '-'; }, 15000).then(function () {
+          var preset = d.getElementById('preset');
+          preset.value = 'custom'; preset.dispatchEvent(new Event('change', { bubbles: true }));
+          var shown = !d.getElementById('custom-field').hidden;
+          set(d, 'cw', '640', 'input');
+          set(d, 'ch', '240', 'input');
+          return waitFor(function () { return txt(d, 't-crop').indexOf('640') >= 0; }, 8000).then(function () {
+            var onScreen = txt(d, 't-crop');
+            var mark = got.length;
+            d.getElementById('btn-save').click();
+            return waitFor(function () { return pickAll(got, mark, /image/).length > 0; }, 20000).then(function () {
+              var b = pickAll(got, mark, /image/)[0];
+              if (!b) { log('자르기 직접 입력 규격', false, '저장 결과가 없음'); return; }
+              return createImageBitmap(b).then(function (bmp) {
+                var ok = bmp.width === 640 && bmp.height === 240;
+                log('자르기 직접 입력 규격', ok && shown && !f.dataset.errs,
+                    '직접 입력칸 ' + (shown ? '보임' : '숨음') + ', 640×240 지정 → 화면 "' + onScreen +
+                    '", 저장된 파일 ' + bmp.width + '×' + bmp.height + ' (기대 640×240)' +
+                    (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('자르기 직접 입력 규격', false, '오류: ' + e.message); });
+
+  // 9. 날짜 계산 근무일 경계 — 주말만 있는 구간, 하루짜리 구간
+  chain = chain.then(function () {
+    return loadFrame('../date-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      // 2026-01-03(토) ~ 2026-01-04(일) : 근무일 0
+      set(d, 'from', '2026-01-03', 'change');
+      set(d, 'to', '2026-01-04', 'change');
+      var inc = d.getElementById('inclusive');
+      inc.checked = true; inc.dispatchEvent(new Event('change', { bubbles: true }));
+      var weekend = txt(d, 'b-work');
+      // 같은 날(월요일) 하루, 시작일 포함 → 1
+      set(d, 'from', '2026-01-05', 'change');
+      set(d, 'to', '2026-01-05', 'change');
+      var oneDay = txt(d, 'b-work');
+      // 시작일 미포함이면 0
+      inc.checked = false; inc.dispatchEvent(new Event('change', { bubbles: true }));
+      var zero = txt(d, 'b-work');
+      log('근무일 경계값',
+          weekend === '0일' && oneDay === '1일' && zero === '0일' && !f.dataset.errs,
+          '토~일 ' + weekend + ' (기대 0일), 월요일 하루 포함 ' + oneDay + ' (기대 1일), ' +
+          '시작일 미포함 ' + zero + ' (기대 0일)' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('근무일 경계값', false, '오류: ' + e.message); });
+
+  // 10. 글자수 세기 — 긴 글을 붙여넣어도 멈추지 않는지 (자소서보다 훨씬 긴 분량)
+  chain = chain.then(function () {
+    return loadFrame('../char-count.html').then(function (f) {
+      var d = f.contentDocument;
+      var block = '가나다라마바사아자차카타파하 abcdefghij 0123456789\n';
+      var big = new Array(2500).join(block);          // 약 10만 자
+      var t0 = performance.now();
+      var ta = d.getElementById('ta');
+      ta.value = big;
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      var ms = Math.round(performance.now() - t0);
+      var shown = txt(d, 's-all').replace(/,/g, '');
+      var expect = Array.from(big).length;
+      log('긴 글 처리',
+          String(expect) === shown && ms < 3000 && !f.dataset.errs,
+          expect.toLocaleString('ko-KR') + '자 붙여넣기 → 표시 ' + Number(shown).toLocaleString('ko-KR') +
+          '자, 걸린 시간 ' + ms + 'ms (3초 안쪽이어야 함)' +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('긴 글 처리', false, '오류: ' + e.message); });
+
+  // 11. QR 로고를 뺐을 때 복원 수준이 원래대로 돌아오는지.
+  //     로고를 넣으면 H로 강제되는데, 되돌리지 않으면 사용자가 만진 적 없는 설정이
+  //     H에 갇혀 담을 수 있는 글자 수가 절반 아래로 줄어든다.
+  chain = chain.then(function () {
+    return makeImg(160, 160).then(function (logo) {
+      return loadFrame('../qr-generate.html').then(function (f) {
+        var d = f.contentDocument;
+        set(d, 'text', 'https://toolmoa.github.io');
+        var ecl = d.getElementById('ecl');
+        ecl.value = 'Q'; ecl.dispatchEvent(new Event('change', { bubbles: true }));
+        var chosen = ecl.value;
+        setFiles(d.getElementById('logo'), [new File([logo], 'l.png', { type: 'image/png' })]);
+        return waitFor(function () { return d.getElementById('ecl').value === 'H'; }, 15000)
+          .then(function () {
+            var forced = d.getElementById('ecl').value;
+            d.getElementById('logo-clear').click();
+            return waitFor(function () { return true; }, 400).then(function () {
+              var back = d.getElementById('ecl').value;
+              var hidden = d.getElementById('logo-row').hidden;
+              log('QR 로고 뺀 뒤 복원 수준',
+                  chosen === 'Q' && forced === 'H' && back === 'Q' && hidden && !f.dataset.errs,
+                  '사용자가 고른 값 ' + chosen + ' → 로고 넣으면 ' + forced +
+                  ' → 로고 빼면 ' + back + ' (기대 Q), 로고 버튼 숨김 ' + (hidden ? 'OK' : '실패') +
+                  (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('QR 로고 뺀 뒤 복원 수준', false, '오류: ' + e.message); });
+
+  // 12. 글자색이 배경 위에서 실제로 읽히는지 (밝은 테마·어두운 테마 모두).
+  //     고정 색을 박아두면 한쪽 테마에서만 안 보이는데, 눈으로는 잘 안 걸린다.
+  chain = chain.then(function () {
+    function lum(rgb) {
+      var m = rgb.match(/\d+(\.\d+)?/g);
+      if (!m) return null;
+      var c = m.slice(0, 3).map(function (v) {
+        var x = parseFloat(v) / 255;
+        return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    }
+    function ratio(fg, bg) {
+      var a = lum(fg), b = lum(bg);
+      if (a === null || b === null) return null;
+      if (b > a) { var t2 = a; a = b; b = t2; }
+      return (a + 0.05) / (b + 0.05);
+    }
+    return loadFrame('../char-count.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow;
+      var ta = d.getElementById('ta');
+      ta.value = '가나다라마바사아자차카타파하';   // 14자
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      var preset = d.getElementById('goal-preset');
+      preset.value = 'custom'; preset.dispatchEvent(new Event('change', { bubbles: true }));
+
+      var rows = [], bad = 0;
+      function check(label, el, min) {
+        var st = w.getComputedStyle(el);
+        // 배경은 카드 색을 쓴다. 요소 자체는 배경이 투명하다.
+        var card = el.closest('.card') || d.body;
+        var bg = w.getComputedStyle(card).backgroundColor;
+        if (!bg || bg === 'rgba(0, 0, 0, 0)') bg = w.getComputedStyle(d.body).backgroundColor;
+        var r = ratio(st.color, bg);
+        if (r === null || r < min) bad++;
+        rows.push(label + ' ' + (r === null ? '측정불가' : r.toFixed(2) + ':1') + (r >= min ? '' : ' ✗'));
+      }
+      // 한도에 가까울 때 (노랑)
+      set(d, 'goal-custom', '15', 'input');
+      check('한도 근접', d.getElementById('goal-msg'), 4.5);
+      // 넘었을 때 (빨강)
+      set(d, 'goal-custom', '5', 'input');
+      check('한도 초과', d.getElementById('goal-msg'), 4.5);
+      // 안내 문구 일반색
+      check('보통 안내', d.querySelector('.hint'), 4.5);
+      log('글자 대비 (현재 테마)', bad === 0,
+          (w.matchMedia('(prefers-color-scheme: dark)').matches ? '어두운' : '밝은') +
+          ' 테마 · ' + rows.join(' · ') + ' (기준 4.5:1)');
+    });
+  }).catch(function (e) { log('글자 대비 (현재 테마)', false, '오류: ' + e.message); });
+
+  // 13. 단위 변환 — 종류를 바꿨을 때 이전 단위 선택이 남아 엉뚱한 값이 나오지 않는지
+  chain = chain.then(function () {
+    return loadFrame('../unit-convert.html').then(function (f) {
+      var d = f.contentDocument;
+      var cat = d.getElementById('cat'), unit = d.getElementById('unit');
+      cat.value = 'weight'; cat.dispatchEvent(new Event('change', { bubbles: true }));
+      var last = unit.options.length - 1;
+      unit.value = String(last); unit.dispatchEvent(new Event('change', { bubbles: true }));
+      var weightUnits = unit.options.length;
+      // 단위 수가 더 적은 종류로 바꾼다 (속도는 4가지)
+      cat.value = 'speed'; cat.dispatchEvent(new Event('change', { bubbles: true }));
+      var speedUnits = unit.options.length;
+      var chosen = unit.value;
+      var body = d.getElementById('out').textContent;
+      var hasNaN = /NaN|Infinity|undefined/.test(body);
+      log('단위 종류 전환 뒤 상태',
+          weightUnits > speedUnits && chosen !== '' && Number(chosen) < speedUnits &&
+          !hasNaN && body.length > 0 && !f.dataset.errs,
+          '무게 ' + weightUnits + '가지에서 마지막(' + last + '번)을 고른 뒤 속도 ' + speedUnits +
+          '가지로 전환 → 선택값 "' + chosen + '" (범위 안이어야 함), 결과표에 NaN ' +
+          (hasNaN ? '있음 ✗' : '없음') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('단위 종류 전환 뒤 상태', false, '오류: ' + e.message); });
+
+  // 14. 날짜 계산 — 쉬는 날을 여러 형식으로 적어도 알아듣는지
+  chain = chain.then(function () {
+    return loadFrame('../date-calc.html').then(function (f) {
+      var d = f.contentDocument;
+      set(d, 'from', '2026-01-05', 'change');   // 월
+      set(d, 'to', '2026-01-09', 'change');     // 금
+      var inc = d.getElementById('inclusive');
+      inc.checked = true; inc.dispatchEvent(new Event('change', { bubbles: true }));
+      var base = txt(d, 'b-work');                       // 5일
+      set(d, 'holidays', '2026-01-06, 2026.01.07 2026/1/8', 'input');
+      var after = txt(d, 'b-work');                      // 3일 빠져 2일
+      log('쉬는 날 입력 형식',
+          base === '5일' && after === '2일' && !f.dataset.errs,
+          '월~금 ' + base + ' (기대 5일) → 하이픈·점·빗금 3가지 형식으로 3일 제외 → ' + after +
+          ' (기대 2일)' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('쉬는 날 입력 형식', false, '오류: ' + e.message); });
+
+  // 15. PDF 나누기 — 범위 입력을 사람이 쓰는 대로 적어도 받아주는지
+  chain = chain.then(function () {
+    return makeSizedPdf([300, 300, 300, 300, 300, 300]).then(function (bytes) {
+      return loadFrame('../pdf-split.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 'r.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '6'; }, 20000).then(function () {
+          var cases = [
+            [' 1 - 2 , 5 ', 3],     // 공백이 섞인 경우
+            ['3-', 4],              // 3쪽부터 끝까지
+            ['2,2,2', 1],           // 같은 쪽을 여러 번
+            ['6-3', 4]              // 거꾸로 쓴 범위
+          ];
+          var out = [], bad = 0;
+          cases.forEach(function (c) {
+            set(d, 'range', c[0]);
+            var shown = txt(d, 't-pick');
+            var n = parseInt(shown, 10);
+            if (n !== c[1]) bad++;
+            out.push('"' + c[0] + '" → ' + shown + ' (기대 ' + c[1] + '쪽)');
+          });
+          log('범위 입력 관용성', bad === 0 && !f.dataset.errs,
+              out.join(' · ') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+        });
+      });
+    });
+  }).catch(function (e) { log('범위 입력 관용성', false, '오류: ' + e.message); });
+
+  // 16. 어두운 테마에서도 글자가 읽히는지.
+  //     OS 설정을 바꿀 수 없으므로, style.css에 실제로 적힌 어두운 테마 값을 꺼내
+  //     그대로 덮어씌운 뒤 잰다. 값을 테스트에 베껴 적으면 나중에 바뀌어도 못 잡는다.
+  chain = chain.then(function () {
+    return fetch('../assets/style.css').then(function (r) { return r.text(); }).then(function (css) {
+      var m = css.match(/@media\s*\(prefers-color-scheme:\s*dark\)\s*\{\s*:root\s*\{([\s\S]*?)\}/);
+      if (!m) { log('글자 대비 (어두운 테마)', false, 'style.css에서 어두운 테마 값을 찾지 못함'); return; }
+      var darkVars = m[1];
+      return loadFrame('../char-count.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow;
+        var st = d.createElement('style');
+        st.textContent = ':root{' + darkVars + '}';
+        d.head.appendChild(st);
+
+        var ta = d.getElementById('ta');
+        ta.value = '가나다라마바사아자차카타파하';
+        ta.dispatchEvent(new Event('input', { bubbles: true }));
+        var preset = d.getElementById('goal-preset');
+        preset.value = 'custom'; preset.dispatchEvent(new Event('change', { bubbles: true }));
+
+        function lum(rgb) {
+          var v = rgb.match(/\d+(\.\d+)?/g);
+          if (!v) return null;
+          var c = v.slice(0, 3).map(function (x) {
+            var n = parseFloat(x) / 255;
+            return n <= 0.03928 ? n / 12.92 : Math.pow((n + 0.055) / 1.055, 2.4);
+          });
+          return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        }
+        function ratio(fg, bg) {
+          var a = lum(fg), b = lum(bg);
+          if (a === null || b === null) return null;
+          if (b > a) { var t2 = a; a = b; b = t2; }
+          return (a + 0.05) / (b + 0.05);
+        }
+        var rows = [], bad = 0;
+        function check(label, el, min) {
+          var card = el.closest('.card') || d.body;
+          var bg = w.getComputedStyle(card).backgroundColor;
+          if (!bg || bg === 'rgba(0, 0, 0, 0)') bg = w.getComputedStyle(d.body).backgroundColor;
+          var r = ratio(w.getComputedStyle(el).color, bg);
+          if (r === null || r < min) bad++;
+          rows.push(label + ' ' + (r === null ? '측정불가' : r.toFixed(2) + ':1') + (r >= min ? '' : ' ✗'));
+        }
+        set(d, 'goal-custom', '15', 'input');
+        check('한도 근접', d.getElementById('goal-msg'), 4.5);
+        set(d, 'goal-custom', '5', 'input');
+        check('한도 초과', d.getElementById('goal-msg'), 4.5);
+        check('보통 안내', d.querySelector('.hint'), 4.5);
+        check('본문', d.querySelector('h1'), 4.5);
+        log('글자 대비 (어두운 테마)', bad === 0,
+            'style.css의 어두운 값을 적용 · ' + rows.join(' · ') + ' (기준 4.5:1)');
+      });
+    });
+  }).catch(function (e) { log('글자 대비 (어두운 테마)', false, '오류: ' + e.message); });
+
+  // 17. 키보드만으로 파일을 고를 수 있는지.
+  //     파일 입력은 display:none이라 탭 순서에 없다. 드롭존이 대신 초점을 받아야 한다.
+  chain = chain.then(function () {
+    var pages = ['../image-compress.html', '../pdf-merge.html', '../file-convert.html',
+                 '../en/image-compress.html'];
+    var seq = Promise.resolve(), rows = [], bad = 0;
+    pages.forEach(function (src) {
+      seq = seq.then(function () {
+        return loadFrame(src).then(function (f) {
+          var d = f.contentDocument, w = f.contentWindow;
+          var dz = d.getElementById('dz');
+          var input = d.getElementById('file');
+          var name = src.replace('../', '');
+
+          var reachable = dz && dz.getAttribute('tabindex') === '0' &&
+                          dz.getAttribute('role') === 'button' && !!dz.getAttribute('aria-label');
+          // 실제로 초점을 받고, Enter로 파일 선택창이 열리는지 (click 호출을 가로채 확인)
+          var opened = 0;
+          input.click = function () { opened++; };
+          dz.focus();
+          var focused = d.activeElement === dz;
+          dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+          dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }));
+          // 초점 표시가 보이는지 (테두리가 사라지면 도달해도 쓸 수 없다)
+          var outline = w.getComputedStyle(dz, ':focus').outlineWidth;
+
+          var ok = reachable && focused && opened === 2;
+          if (!ok) bad++;
+          rows.push(name + ': 탭 도달 ' + (reachable ? 'O' : 'X') + '/초점 ' + (focused ? 'O' : 'X') +
+                    '/Enter·Space ' + opened + '회');
+        });
+      });
+    });
+    return seq.then(function () {
+      log('키보드로 파일 고르기', bad === 0, rows.join(' · ') + ' (Enter·Space 각 1회씩 열려야 함)');
+    });
+  }).catch(function (e) { log('키보드로 파일 고르기', false, '오류: ' + e.message); });
+
+  // 18. 비밀번호 강도 색이 실제로 적용되는지.
+  //     인라인 스타일에 var(--danger) 를 넣었는데, 파싱에 실패하면 대입이 조용히 무시된다.
+  chain = chain.then(function () {
+    return loadFrame('../password-gen.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow;
+      var strength = d.getElementById('strength');
+      var normal = w.getComputedStyle(d.querySelector('h1')).color;
+
+      // 약함: 6자 숫자만
+      ['lower', 'upper', 'symbol'].forEach(function (k) {
+        var el = d.getElementById(k);
+        if (el.checked) { el.checked = false; el.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      set(d, 'len', '6', 'input');
+      d.getElementById('btn-gen').click();
+      var weakLabel = strength.textContent.trim();
+      var weakColor = w.getComputedStyle(strength).color;
+      var weakBar = w.getComputedStyle(d.getElementById('bar')).backgroundColor;
+
+      // 매우 강함: 전부 켜고 32자
+      ['lower', 'upper', 'symbol'].forEach(function (k) {
+        var el = d.getElementById(k);
+        if (!el.checked) { el.checked = true; el.dispatchEvent(new Event('change', { bubbles: true })); }
+      });
+      set(d, 'len', '32', 'input');
+      d.getElementById('btn-gen').click();
+      var strongLabel = strength.textContent.trim();
+      var strongColor = w.getComputedStyle(strength).color;
+
+      var applied = weakColor !== normal && weakColor !== '' &&
+                    weakColor !== 'rgba(0, 0, 0, 0)' && weakColor !== strongColor;
+      var barOk = weakBar && weakBar !== 'rgba(0, 0, 0, 0)';
+      log('강도 표시 색 적용',
+          applied && barOk && weakLabel === '약함' && strongLabel === '매우 강함' && !f.dataset.errs,
+          '6자 숫자만 → "' + weakLabel + '" 색 ' + weakColor + ' (본문색 ' + normal + '), ' +
+          '막대 ' + weakBar + ' · 32자 전체 → "' + strongLabel + '" 색 ' + strongColor +
+          (applied ? '' : ' ✗ 색이 적용되지 않음') +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+    });
+  }).catch(function (e) { log('강도 표시 색 적용', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'GAPS ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>
