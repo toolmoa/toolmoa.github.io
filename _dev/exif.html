@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>EXIF 0/0</title>
+<style>
+  body { font-family: "Malgun Gothic", sans-serif; margin: 24px; line-height: 1.7; }
+  .ok { color: #17864a; } .no { color: #c62828; }
+  table { border-collapse: collapse; margin-top: 12px; }
+  td, th { border: 1px solid #ddd; padding: 6px 12px; font-size: 14px; text-align: left; }
+  canvas { border: 1px solid #ccc; margin-top: 12px; max-width: 200px; height: auto; }
+</style>
+</head>
+<body>
+<h1>EXIF 방향 태그 반영 검사</h1>
+<p>
+  휴대전화로 세로로 찍은 사진은 화소를 가로로 저장하고 "돌려서 보라"는 태그만 붙인다.
+  이 태그를 무시하면 결과물이 옆으로 눕는다. 우리 도구는 사진을 캔버스에 다시 그려서 쓰므로,
+  <strong>브라우저가 태그를 반영해 그려 주는지</strong>가 곧 결과물의 방향을 결정한다.
+  <code>fixtures/photo-rot90.jpg</code> 는 화소가 3000×2000 이고 Orientation=6(오른쪽 90도)이다.
+  제대로 반영된다면 2000×3000 으로 읽혀야 한다.
+</p>
+<div id="out"></div>
+
+<script>
+var EXPECT_STORED = [3000, 2000];   // 파일에 저장된 화소
+var EXPECT_SHOWN  = [2000, 3000];   // 태그를 반영했을 때 보여야 할 크기
+
+var rows = [], pass = 0, total = 0;
+function check(name, cond, detail) {
+  total++; if (cond) pass++;
+  rows.push('<tr><td>' + name + '</td><td class="' + (cond ? 'ok' : 'no') + '">'
+    + (cond ? '통과' : '실패') + '</td><td>' + detail + '</td></tr>');
+}
+
+// 도구와 똑같은 경로로 읽는다: fetch -> File -> createObjectURL -> new Image
+fetch('fixtures/photo-rot90.jpg')
+  .then(function (r) { return r.blob(); })
+  .then(function (b) {
+    var file = new File([b], 'photo-rot90.jpg', { type: 'image/jpeg' });
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); res(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('열 수 없음')); };
+      img.src = url;
+    });
+  })
+  .then(function (img) {
+    var w = img.naturalWidth, h = img.naturalHeight;
+
+    check('사진을 읽었다', w > 0 && h > 0, w + '×' + h);
+    check('브라우저가 방향 태그를 반영한다',
+          w === EXPECT_SHOWN[0] && h === EXPECT_SHOWN[1],
+          '읽힌 크기 ' + w + '×' + h + ' / 반영 시 기대 ' + EXPECT_SHOWN.join('×')
+          + ' / 무시 시 ' + EXPECT_STORED.join('×'));
+
+    // 도구가 하는 것과 같은 방식으로 캔버스에 옮긴다
+    var c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0);
+
+    check('캔버스로 옮긴 뒤에도 세로가 길다', c.height > c.width,
+          '캔버스 ' + c.width + '×' + c.height);
+
+    // 캔버스가 정말 그려졌는지 — 전부 흰색이면 그리기가 실패한 것이다
+    var d = ctx.getImageData(0, 0, c.width, c.height).data;
+    var white = true;
+    for (var i = 0; i < d.length; i += 4 * 997) {
+      if (d[i] !== 255 || d[i + 1] !== 255 || d[i + 2] !== 255) { white = false; break; }
+    }
+    check('캔버스에 사진이 실제로 그려졌다', !white, white ? '전부 흰색' : '화소 있음');
+
+    document.getElementById('out').innerHTML =
+      '<table><tr><th>검사</th><th>결과</th><th>내용</th></tr>' + rows.join('') + '</table>';
+    c.style.maxWidth = '200px';
+    document.body.appendChild(c);
+    document.title = 'EXIF ' + pass + '/' + total;
+  })
+  .catch(function (e) {
+    document.getElementById('out').textContent = '오류: ' + e.message;
+    document.title = 'EXIF 0/' + (total || 1);
+  });
+</script>
+</body>
+</html>

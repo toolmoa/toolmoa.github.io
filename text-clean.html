@@ -15,6 +15,26 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"텍스트 정리","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/text-clean.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/text-clean.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="텍스트 정리 · 중복 줄 제거 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="텍스트 정리 · 중복 줄 제거 · 줄 정렬">
+<meta name="twitter:description" content="중복 제거·정렬·공백 정리를 한 번에. 브라우저 안에서만 처리됩니다.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/text-clean.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"중복 제거는 대소문자를 구분하나요?","acceptedAnswer":{"@type":"Answer","text":"구분합니다. Apple과 apple은 다른 줄로 봅니다. 같게 처리하려면 먼저 \"전부 소문자\"를 적용한 뒤 중복 제거를 쓰세요."}},{"@type":"Question","name":"순서가 유지되나요?","acceptedAnswer":{"@type":"Answer","text":"정렬을 \"그대로 두기\"로 두면 처음 나온 순서를 유지한 채 뒤쪽 중복만 지웁니다."}},{"@type":"Question","name":"입력한 내용이 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"저장되지 않습니다. 브라우저 안에서만 처리되고 탭을 닫으면 사라집니다."}},{"@type":"Question","name":"아주 긴 목록도 되나요?","acceptedAnswer":{"@type":"Answer","text":"수만 줄까지는 무리 없습니다. 그보다 크면 브라우저가 잠시 멈출 수 있습니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"텍스트 정리 · 중복 줄 제거","item":"https://toolmoa.github.io/text-clean.html"}]}
+</script>
+<!-- /SEO:AUTO -->
 </head>
 <body data-i18n-title="txt.title">
 
@@ -41,7 +61,7 @@
 </header>
 
 <main class="wrap">
-  <h1 data-i18n="txt.h1">텍스트 정리</h1>
+  <h1 data-i18n="txt.h1">텍스트 정리 · 중복 줄 제거</h1>
   <p class="lead" data-i18n="txt.lead">중복된 줄을 지우고, 정렬하고, 지저분한 공백을 없앱니다.</p>
   <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 글은 어디로도 전송되지 않습니다</span>
 
@@ -136,6 +156,21 @@
       메일 주소 목록을 <strong style="color:var(--text)">쉼표로 나눠 한 줄씩</strong> 만들 때,
       엑셀에서 복사해 온 값의 <strong style="color:var(--text)">앞뒤 공백</strong>을 털어낼 때 씁니다.
       모든 처리가 브라우저 안에서 일어나므로 고객 명단처럼 민감한 목록도 안전합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>눈에 안 보이는 공백이 목록을 망칩니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      웹페이지나 PDF에서 복사한 글에는 <strong style="color:var(--text)">보통 공백처럼 보이지만 다른 문자</strong>가
+      섞여 들어옵니다. 화면에서는 똑같아 보이는데 엑셀에서 찾기가 안 되고, 중복 제거를 해도 같은 이름이
+      두 번 남고, 정렬 순서가 이상해지는 일이 여기서 생깁니다.
+      <strong style="color:var(--text)">줄 앞뒤 공백 제거</strong>를 켜면 이런 특수 공백까지 함께 걷어냅니다.
+    </p>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      그래서 붙여넣은 목록은 <strong style="color:var(--text)">공백 제거 → 빈 줄 제거 → 중복 제거 → 정렬</strong> 순서로
+      다듬는 것이 안전합니다. 공백을 먼저 털어내야 같은 값이 같은 값으로 인식되기 때문입니다.
+      기본값이 이 순서로 맞춰져 있습니다.
     </p>
   </div>
 

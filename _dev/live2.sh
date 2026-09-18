@@ -5,7 +5,7 @@ fail=0
 echo "=== 8. sitemap 이 실제 페이지 목록과 정확히 일치하는가 ==="
 # 저장소에 있는 공개 페이지 목록
 repo=$(ls *.html en/*.html 2>/dev/null \
-       | grep -v '^google' | grep -v '^naver' \
+       | grep -v '^google' | grep -v '^naver' | grep -v '^404\.html$' \
        | sed 's|^|/|' | sed 's|^/index.html$|/|' | sed 's|^/en/index.html$|/en/|' | sort)
 sm=$(curl -s "$BASE/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed 's|</\?loc>||g' \
      | sed "s|$BASE||" | sed 's|^$|/|' | sort)

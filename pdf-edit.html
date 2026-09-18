@@ -15,6 +15,26 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"PDF 페이지 편집","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/pdf-edit.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/pdf-edit.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PDF 페이지 회전 · 삭제 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDF 페이지 회전 · 삭제 · 순서 변경">
+<meta name="twitter:description" content="페이지를 보면서 회전·삭제·정렬. 업로드 없이 브라우저에서 안전하게.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/pdf-edit.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"스캔한 문서가 옆으로 누워 있는데요.","acceptedAnswer":{"@type":"Answer","text":"미리보기를 보면서 해당 페이지의 ↻ 또는 ↺ 를 눌러 바로 세우면 됩니다. 여러 장이 같은 방향이면 위쪽의 \"전체 오른쪽/왼쪽\" 버튼이 빠릅니다."}},{"@type":"Question","name":"회전이 진짜로 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"네. 보기만 돌리는 것이 아니라 PDF 파일 자체의 페이지 회전값을 바꿔서 저장하므로, 어떤 프로그램에서 열어도 바로 서 있습니다."}},{"@type":"Question","name":"파일이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 미리보기 생성부터 저장까지 전부 브라우저 안에서 이뤄집니다."}},{"@type":"Question","name":"페이지가 많으면 느린가요?","acceptedAnswer":{"@type":"Answer","text":"미리보기를 만드는 데 잠깐 걸립니다. 100쪽이 넘는 문서는 앞부분부터 순서대로 나타납니다."}},{"@type":"Question","name":"원본이 바뀌나요?","acceptedAnswer":{"@type":"Answer","text":"바뀌지 않습니다. 항상 새 파일로 저장됩니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"PDF 페이지 회전 · 삭제","item":"https://toolmoa.github.io/pdf-edit.html"}]}
+</script>
+<!-- /SEO:AUTO -->
 </head>
 <body data-i18n-title="edit.title">
 
@@ -84,6 +104,31 @@
   </p>
 
   <div class="ad-slot"><!-- AD:PDFEDIT --></div>
+
+  <h2 data-ko-only>스캔한 문서가 자꾸 누워 보이는 이유</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      PDF는 페이지마다 <strong style="color:var(--text)">회전값</strong>을 따로 들고 있습니다.
+      스캐너나 복합기가 이 값을 원본 그대로 두는 바람에, 화면에서는 멀쩡해 보이던 문서가
+      상대방 컴퓨터나 인쇄물에서는 옆으로 누워 나오는 일이 생깁니다.
+      뷰어에서 돌려 보는 것은 그 순간의 화면만 돌리는 것이라 파일에는 남지 않습니다.
+      여기서 돌린 결과는 파일의 회전값 자체를 바꿔 저장하므로 어디서 열어도 바로 서 있습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>이럴 때 씁니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">뒤집힌 스캔 바로잡기</strong> — 자동급지로 스캔하다 몇 장만 거꾸로 들어간 경우.<br>
+      <strong style="color:var(--text)">빈 페이지 지우기</strong> — 양면 스캔에서 뒷면이 백지로 딸려 들어온 경우.<br>
+      <strong style="color:var(--text)">순서 바로잡기</strong> — 페이지가 뒤섞여 들어온 문서를 제출 전에 정렬.<br>
+      <strong style="color:var(--text)">민감한 쪽 제외</strong> — 공유하기 전에 보여줄 필요 없는 페이지를 빼고 새 파일로 저장.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      쪽을 <strong style="color:var(--text)">뽑아내는</strong> 쪽이 목적이라면 <a href="pdf-split.html">PDF 나누기</a>가,
+      여러 파일을 <strong style="color:var(--text)">하나로 묶는</strong> 것이라면 <a href="pdf-merge.html">PDF 합치기</a>가 더 빠릅니다.
+    </p>
+  </div>
 
   <h2 data-ko-only>자주 묻는 질문</h2>
   <div class="faq" data-ko-only>

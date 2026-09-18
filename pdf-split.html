@@ -18,6 +18,26 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"PDF 나누기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/pdf-split.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/pdf-split.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PDF 나누기 · 페이지 추출 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDF 나누기 · 페이지 추출">
+<meta name="twitter:description" content="원하는 페이지만 뽑아내거나 낱장으로 분할. 업로드 없이 안전하게.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/pdf-split.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"파일이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다. 계약서나 사내 문서에도 안전합니다."}},{"@type":"Question","name":"페이지 범위는 어떻게 쓰나요?","acceptedAnswer":{"@type":"Answer","text":"1-3,7 이라고 쓰면 1·2·3쪽과 7쪽을 뽑습니다. 5- 는 5쪽부터 마지막까지입니다. 띄어쓰기는 있어도 되고 없어도 됩니다."}},{"@type":"Question","name":"낱장으로 나누면 파일이 몇 개 받아지나요?","acceptedAnswer":{"@type":"Answer","text":"기본적으로 ZIP 파일 한 개로 묶어서 드립니다. 압축을 풀면 페이지 수만큼 PDF가 들어 있습니다. 파일을 하나씩 받고 싶으면 \"ZIP 파일 한 개로 받기\" 체크를 푸세요. 다만 그 경우 브라우저가 여러 번 확인을 묻고, 휴대전화에서는 첫 파일만 저장되는 일이 있습니다."}},{"@type":"Question","name":"비밀번호가 걸린 PDF도 되나요?","acceptedAnswer":{"@type":"Answer","text":"암호화된 PDF는 열 수 없습니다. 먼저 비밀번호를 해제한 뒤 시도해 주세요."}},{"@type":"Question","name":"원본이 손상되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 원본은 그대로 두고 새 파일을 만들어 저장합니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"PDF 나누기 · 페이지 추출","item":"https://toolmoa.github.io/pdf-split.html"}]}
+</script>
+<!-- /SEO:AUTO -->
 </head>
 <body data-i18n-title="split.title">
 
@@ -44,7 +64,7 @@
 </header>
 
 <main class="wrap">
-  <h1 data-i18n="split.h1">PDF 나누기</h1>
+  <h1 data-i18n="split.h1">PDF 나누기 · 페이지 추출</h1>
   <p class="lead" data-i18n="split.lead">필요한 페이지만 뽑아내거나, 모든 페이지를 낱장 파일로 나눕니다.</p>
   <span class="privacy-badge" data-i18n="badge.file">🔒 파일이 서버로 업로드되지 않습니다</span>
 
@@ -103,6 +123,27 @@
   </div>
 
   <div class="ad-slot"><!-- AD:PDFSPLIT --></div>
+
+  <h2 data-ko-only>왜 브라우저 안에서 나눠야 하나요</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      페이지를 뽑아낸다는 것은 <strong style="color:var(--text)">문서의 일부만 보여주고 싶다</strong>는 뜻입니다.
+      통장 사본에서 한 장, 계약서에서 서명한 쪽, 보고서에서 한 단원처럼요.
+      나머지를 감추려고 하는 일인데, 그러자고 전체 파일을 먼저 남의 서버에 올리는 것은 앞뒤가 맞지 않습니다.
+      이 페이지는 PDF를 브라우저 메모리 안에서만 읽고 고른 페이지만 새 파일로 써서 내려줍니다.
+      숨기려던 나머지 쪽은 애초에 기기 밖으로 나가지 않습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>이럴 때 씁니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">서류 제출</strong> — 등본이나 통장 사본처럼 여러 장인 PDF에서 요구하는 쪽만 따로 냅니다.<br>
+      <strong style="color:var(--text)">메일 용량</strong> — 첨부 한도에 걸릴 때 필요한 부분만 잘라 보내면 대개 해결됩니다.<br>
+      <strong style="color:var(--text)">스캔 묶음 풀기</strong> — 여러 장을 한 번에 스캔해 한 파일이 돼 버렸을 때 낱장으로 나눠 정리합니다.<br>
+      <strong style="color:var(--text)">인쇄 의뢰</strong> — 특정 쪽만 인쇄소에 넘길 때 그 쪽만 뽑아 전달합니다.
+    </p>
+  </div>
 
   <h2 data-ko-only>자주 묻는 질문</h2>
   <div class="faq" data-ko-only>

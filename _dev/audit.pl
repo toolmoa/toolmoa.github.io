@@ -39,7 +39,10 @@ for my $f (@files) {
     next if $seen{$t}++;
     my $p = $t;
     $p =~ s{^\./}{};
-    my $full = ($p =~ m{^\.\./}) ? do { my $x = $p; $x =~ s{^\.\./}{}; $x }
+    # / 로 시작하면 사이트 뿌리 기준이다. 404.html 은 아무 주소에서나 뜨기 때문에
+    # 상대경로를 쓸 수 없어 이 형태를 쓴다. 뿌리 기준으로 풀어야 한다.
+    my $full = ($p =~ m{^/})     ? do { my $x = $p; $x =~ s{^/}{}; $x || 'index.html' }
+             : ($p =~ m{^\.\./}) ? do { my $x = $p; $x =~ s{^\.\./}{}; $x }
              : ($dir eq 'en' ? "en/$p" : $p);
     push @issues, "깨진 링크: $t" unless -e $full;
   }
@@ -54,7 +57,10 @@ for my $f (@files) {
   push @issues, "title 너무 김 (" . length($title) . "자)" if $title && length($title) > 65;
   push @issues, "description 없음" unless $desc;
   push @issues, "description 너무 김 (" . length($desc) . "자)" if $desc && length($desc) > 165;
-  push @issues, "canonical 없음" unless $canon;
+  # 색인시키지 않는 페이지(404 등)는 canonical 이 없는 것이 맞다.
+  # 여러 주소에서 뜨는 페이지에 canonical 을 박으면 오히려 틀린 신호가 된다.
+  my $noindex = $c =~ m{<meta name="robots" content="[^"]*noindex};
+  push @issues, "canonical 없음" unless $canon || $noindex;
   push @issues, "h1이 ${h1cnt}개 (1개여야 함)" if $h1cnt != 1;
   push @issues, "lang 속성 없음" unless $c =~ /<html lang="/;
   push @issues, "viewport 없음" unless $c =~ /name="viewport"/;

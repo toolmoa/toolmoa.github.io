@@ -15,6 +15,26 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"단위 변환기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
 </script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/unit-convert.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/unit-convert.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="단위 변환기 · 평수 계산 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="단위 변환기 · 평수 계산 · 인치 cm 변환">
+<meta name="twitter:description" content="값 하나만 넣으면 모든 단위로 동시에 변환됩니다.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/unit-convert.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"평수 계산이 부동산 표기와 다릅니다.","acceptedAnswer":{"@type":"Answer","text":"분양 광고의 \"몇 평\"은 공급면적(전용+공용)을 말하는 경우가 많고, 등기부의 면적은 전용면적입니다. 어떤 면적을 넣었는지에 따라 결과가 달라지니 기준을 확인하세요."}},{"@type":"Question","name":"근이 600g인가요 375g인가요?","acceptedAnswer":{"@type":"Answer","text":"둘 다 쓰입니다. 고기·생선은 600g, 채소·과일은 375g을 쓰는 경우가 많습니다. 이 변환기는 고기 기준인 600g을 사용합니다."}},{"@type":"Question","name":"소수점이 너무 길게 나옵니다.","acceptedAnswer":{"@type":"Answer","text":"값의 크기에 맞춰 자동으로 자릿수를 조절합니다. 표시된 숫자를 복사하면 반올림된 값이 그대로 복사됩니다."}},{"@type":"Question","name":"입력값이 저장되나요?","acceptedAnswer":{"@type":"Answer","text":"저장되지 않습니다. 모든 계산은 브라우저 안에서만 이뤄집니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"단위 변환기 · 평수 계산","item":"https://toolmoa.github.io/unit-convert.html"}]}
+</script>
+<!-- /SEO:AUTO -->
 </head>
 <body data-i18n-title="unit.title">
 
@@ -41,7 +61,7 @@
 </header>
 
 <main class="wrap">
-  <h1 data-i18n="unit.h1">단위 변환기</h1>
+  <h1 data-i18n="unit.h1">단위 변환기 · 평수 계산</h1>
   <p class="lead" data-i18n="unit.lead">값 하나만 넣으면 같은 종류의 모든 단위로 한 번에 변환됩니다.</p>
 
   <div class="card">
@@ -85,6 +105,26 @@
       <strong style="color:var(--text)">1파운드 = 453.6g</strong> — 해외 직구 배송 무게에 자주 나옵니다.<br>
       <strong style="color:var(--text)">1근 = 600g</strong> (고기 기준) — 정육점에서 쓰는 단위입니다.<br>
       <strong style="color:var(--text)">화씨 → 섭씨</strong> — (화씨 − 32) ÷ 1.8 로 계산합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>아파트 면적은 세 가지를 구분해야 합니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">전용면적</strong> — 현관 안쪽, 우리 집만 쓰는 공간입니다.
+      등기부와 청약 공고에 적히는 "84㎡"가 이것입니다.<br>
+      <strong style="color:var(--text)">공급면적</strong> — 전용면적에 계단·복도·엘리베이터 같은 주거 공용면적을 더한 값입니다.
+      흔히 말하는 "몇 평형"이 여기서 나옵니다.<br>
+      <strong style="color:var(--text)">계약면적</strong> — 공급면적에 지하주차장·관리사무소 같은 기타 공용면적까지 더해 가장 넓게 나옵니다.
+    </p>
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      그래서 전용 84㎡(약 25.4평)인 집을 보통 <strong style="color:var(--text)">"34평형"</strong>이라고 부릅니다.
+      앞의 숫자는 전용, 뒤의 평형은 공급 기준이라 서로 다를 수밖에 없습니다.
+      위 계산기에는 <strong style="color:var(--text)">비교하려는 쪽과 같은 기준의 면적</strong>을 넣으세요.
+    </p>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      암산으로 어림잡을 때는 제곱미터를 3으로 나눈 뒤 10%쯤 빼면 평에 가깝습니다(84 ÷ 3 = 28, −10% ≈ 25).
+      반대로 평에 3.3을 곱하면 제곱미터입니다.
     </p>
   </div>
 
