@@ -143,9 +143,11 @@
       <button class="btn" id="btn-copy" data-i18n="txt.copy">결과 복사</button>
       <button class="btn secondary" id="btn-down" data-i18n="txt.down">txt로 저장</button>
       <button class="btn secondary" id="btn-clear" data-i18n="txt.clear">지우기</button>
-      <span class="hint" id="copy-msg" style="align-self:center;margin:0"></span>
+      <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
     </div>
   </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="txt.cross">다듬은 글의 <strong style="color:var(--text)">글자수·원고지 매수</strong>가 궁금하면 <a href="char-count.html">글자수 세기</a>로 바로 확인할 수 있습니다.</p>
 
   <div class="ad-slot"><!-- AD:TEXT --></div>
 

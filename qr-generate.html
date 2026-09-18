@@ -195,7 +195,7 @@
     </div>
   </div>
 
-  <div id="msg"></div>
+  <div id="msg" role="status" aria-live="polite"></div>
 
   <div class="card" style="text-align:center">
     <div id="placeholder" style="padding:56px 20px;border:2px dashed var(--border);border-radius:8px;color:var(--muted);font-size:14px" data-i18n="qr.placeholder">
@@ -206,9 +206,11 @@
       <button class="btn" id="btn-png" disabled data-i18n="qr.savePng">PNG로 저장</button>
       <button class="btn secondary" id="btn-copy" disabled data-i18n="qr.copyImg">이미지 복사</button>
     </div>
-    <div class="hint" id="copy-msg"></div>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
     <div class="hint" id="size-note"></div>
   </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="qr.cross">QR 가운데에 넣을 <strong style="color:var(--text)">로고를 정사각형으로 맞추려면</strong> <a href="image-crop.html">이미지 자르기</a>를, 파일이 너무 크면 <a href="image-compress.html">이미지 용량 줄이기</a>를 쓰세요.</p>
 
   <div class="ad-slot"><!-- AD:QR --></div>
 

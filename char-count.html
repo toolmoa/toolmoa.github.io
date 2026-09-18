@@ -79,7 +79,7 @@
     <div class="btn-row">
       <button class="btn secondary small" id="btn-clear" data-i18n="char.clear">지우기</button>
       <button class="btn secondary small" id="btn-copy" data-i18n="char.copy">복사</button>
-      <span class="hint" id="copy-msg" style="align-self:center;margin:0"></span>
+      <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
     </div>
   </div>
 
@@ -123,6 +123,8 @@
       <tbody id="detail-table"></tbody>
     </table>
   </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="char.cross">목록이나 명단에서 <strong style="color:var(--text)">중복된 줄을 지우고 정렬</strong>하려면 <a href="text-clean.html">텍스트 정리</a>를 쓰세요.</p>
 
   <div class="ad-slot"><!-- AD:CHARCOUNT --></div>
 

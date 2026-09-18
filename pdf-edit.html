@@ -72,7 +72,7 @@
     <input type="file" id="file" accept="application/pdf,.pdf">
   </div>
 
-  <div id="msg"></div>
+  <div id="msg" role="status" aria-live="polite"></div>
 
   <div id="area" hidden>
     <div class="stats">
@@ -177,8 +177,7 @@
   </div>
 </footer>
 
-<script src="assets/vendor/pdf-lib.min.js"></script>
-<script src="assets/vendor/pdf.min.js"></script>
+<!-- pdf-lib · pdf.js 는 여기서 미리 받지 않는다. 아래 loadLibs() 가 파일을 고른 뒤에 받는다. -->
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -194,11 +193,38 @@
   function setMsg(text, cls) {
     msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
-  function ready(fn, tries) {
-    tries = (tries === undefined) ? 120 : tries;
+  // 스크립트를 필요할 때 받는다. 이미 있으면 그대로 쓴다.
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // pdf-lib 과 pdf.js 는 둘이 합쳐 압축 전송 기준 약 300KB 다.
+  // 파일을 고른 뒤에 받는다. 검색으로 들어와 둘러보기만 하고 떠나는 사람이 훨씬 많다.
+  var libPromise = null;
+  function loadLibs() {
+    if (!libPromise) {
+      libPromise = Promise.all([
+        needScript('PDFLib', 'assets/vendor/pdf-lib.min.js'),
+        needScript('pdfjsLib', 'assets/vendor/pdf.min.js')
+      ]).then(function () {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/vendor/pdf.worker.min.js';
+      }).catch(function (e) { libPromise = null; throw e; });
+    }
+    return libPromise;
+  }
+  function ready(fn) {
     if (typeof PDFLib !== 'undefined' && typeof pdfjsLib !== 'undefined') { fn(); return; }
-    if (tries <= 0) { setMsg(t('edit.notReady', 'PDF 기능을 불러오지 못했습니다. 새로고침해 주세요.'), 'err'); return; }
-    setTimeout(function () { ready(fn, tries - 1); }, 100);
+    setMsg(t('edit.preparing', 'PDF 기능을 준비하는 중입니다…'));
+    loadLibs().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg(t('edit.notReady', 'PDF 기능을 불러오지 못했습니다. 새로고침해 주세요.'), 'err');
+    });
   }
 
   dz.addEventListener('click', function () { fileInput.click(); });

@@ -75,7 +75,7 @@
     <input type="file" id="file" accept="application/pdf,.pdf" multiple>
   </div>
 
-  <div id="msg"></div>
+  <div id="msg" role="status" aria-live="polite"></div>
 
   <div id="area" hidden>
     <h2 style="margin-bottom:6px" data-i18n="merge.orderH">합칠 순서</h2>
@@ -156,7 +156,8 @@
   </div>
 </footer>
 
-<script src="assets/vendor/pdf-lib.min.js"></script>
+<!-- pdf-lib 은 여기서 미리 받지 않는다. 아래 loadLib() 이 파일을 고른 뒤에 받는다. -->
+
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -194,15 +195,35 @@
   fileInput.addEventListener('change', function () { add(fileInput.files); });
 
   // pdf-lib은 용량이 커서 늦게 도착할 수 있다. 준비될 때까지 최대 10초 기다린다.
-  function whenReady(fn, tries) {
-    tries = (tries === undefined) ? 100 : tries;
-    if (typeof PDFLib !== 'undefined') { fn(); return; }
-    if (tries <= 0) {
-      setMsg('PDF 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.', 'err');
-      return;
+  // 스크립트를 필요할 때 받는다. 이미 있으면 그대로 쓴다.
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // pdf-lib(압축 전송 기준 약 200KB)은 파일을 고른 뒤에 받는다.
+  // 첫 화면에서 미리 받으면 검색으로 들어와 둘러보기만 하고 떠나는 사람까지
+  // 쓰지도 않을 용량을 내려받게 된다.
+  var libPromise = null;
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('PDFLib', 'assets/vendor/pdf-lib.min.js')
+        .catch(function (e) { libPromise = null; throw e; });   // 실패하면 다시 시도할 수 있게
     }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof PDFLib !== 'undefined') { fn(); return; }
     setMsg('PDF 기능을 준비하는 중입니다…');
-    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg('PDF 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.', 'err');
+    });
   }
 
   function add(fileList) { whenReady(function () { doAdd(fileList); }); }

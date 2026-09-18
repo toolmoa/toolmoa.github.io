@@ -75,7 +75,7 @@
     <input type="file" id="file" accept=".csv,.json,.xlsx,.xls,.tsv,.txt">
   </div>
 
-  <div id="msg"></div>
+  <div id="msg" role="status" aria-live="polite"></div>
 
   <div id="area" hidden>
     <div class="stats">
@@ -124,6 +124,8 @@
       <table id="preview" style="width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap"></table>
     </div>
   </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="conv.cross">변환하기 전에 <strong style="color:var(--text)">중복된 줄이나 빈 줄을 걸러내려면</strong> <a href="text-clean.html">텍스트 정리</a>를 먼저 거치세요.</p>
 
   <div class="ad-slot"><!-- AD:CONVERT --></div>
 
@@ -191,7 +193,7 @@
   </div>
 </footer>
 
-<script src="assets/vendor/xlsx.full.min.js"></script>
+<!-- xlsx 는 여기서 미리 받지 않는다. 아래 loadLib() 이 파일을 고른 뒤에 받는다. -->
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -227,16 +229,31 @@
     if (fileInput.files.length) load(fileInput.files[0]);
   });
 
-  // 라이브러리가 아직 로드되지 않았으면 최대 8초까지 기다렸다가 실행한다
-  function whenReady(fn, tries) {
-    tries = (tries === undefined) ? 80 : tries;
+  // 변환 라이브러리(xlsx, 압축 전송 기준 약 310KB)는 파일을 고른 뒤에 받는다.
+  // 첫 화면에서 미리 받으면 검색으로 들어와 그냥 둘러보고 떠나는 사람까지
+  // 쓰지도 않을 수백 KB를 내려받게 된다.
+  var libPromise = null;
+  function loadLib() {
+    if (libPromise) return libPromise;
+    libPromise = new Promise(function (res, rej) {
+      if (typeof XLSX !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = 'assets/vendor/xlsx.full.min.js';
+      sc.onload = function () { res(); };
+      sc.onerror = function () { libPromise = null; rej(new Error('xlsx')); };
+      document.head.appendChild(sc);
+    });
+    return libPromise;
+  }
+  function whenReady(fn) {
     if (typeof XLSX !== 'undefined') { fn(); return; }
-    if (tries <= 0) {
-      setMsg(t('conv.notReady', '변환 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.'), 'err');
-      return;
-    }
     setMsg(t('conv.preparing', '변환 기능을 준비하는 중입니다…'));
-    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+    loadLib().then(function () {
+      setMsg('');
+      fn();
+    }).catch(function () {
+      setMsg(t('conv.notReady', '변환 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.'), 'err');
+    });
   }
 
   // CSV는 인코딩 정보가 파일에 없어서 직접 판별해야 한다.

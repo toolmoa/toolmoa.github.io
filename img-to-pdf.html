@@ -76,7 +76,7 @@
     <input type="file" id="file" accept="image/*" multiple>
   </div>
 
-  <div id="msg"></div>
+  <div id="msg" role="status" aria-live="polite"></div>
 
   <div id="area" hidden>
     <div class="card">
@@ -186,7 +186,8 @@
   </div>
 </footer>
 
-<script src="assets/vendor/pdf-lib.min.js"></script>
+<!-- pdf-lib 은 여기서 미리 받지 않는다. 아래 loadLib() 이 사진을 고른 뒤에 받는다. -->
+
 <script>
 (function () {
   var dz = document.getElementById('dz');
@@ -208,11 +209,34 @@
     msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
   }
 
-  function whenReady(fn, tries) {
-    tries = (tries === undefined) ? 100 : tries;
+  // 스크립트를 필요할 때 받는다. 이미 있으면 그대로 쓴다.
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // pdf-lib(압축 전송 기준 약 200KB)은 사진을 고른 뒤에 받는다.
+  // 첫 화면에서 미리 받으면 둘러보기만 하고 떠나는 사람까지 내려받게 된다.
+  var libPromise = null;
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('PDFLib', 'assets/vendor/pdf-lib.min.js')
+        .catch(function (e) { libPromise = null; throw e; });
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
     if (typeof PDFLib !== 'undefined') { fn(); return; }
-    if (tries <= 0) { setMsg('PDF 기능을 불러오지 못했습니다. 새로고침해 주세요.', 'err'); return; }
-    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+    setMsg('PDF 기능을 준비하는 중입니다…');
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg('PDF 기능을 불러오지 못했습니다. 새로고침해 주세요.', 'err');
+    });
   }
 
   dz.addEventListener('click', function () { fileInput.click(); });

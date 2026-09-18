@@ -18,9 +18,13 @@ CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"
 
 for name in "$@"; do
   [ -f "_dev/$name.html" ] || { echo "없는 검사: $name"; exit 1; }
-  "$CHROME" --user-data-dir="$ROOT/_dev/.prof-$name" \
+  # nohup + disown 이 없으면 이 스크립트가 끝날 때 크롬이 같이 죽는다.
+  # (창이 떴다가 결과를 읽기도 전에 사라진다)
+  nohup "$CHROME" --user-data-dir="$ROOT/_dev/.prof-$name" \
     --allow-file-access-from-files --no-first-run --no-default-browser-check \
     --disable-features=ChromeWhatsNewUI \
     --new-window "file:///$ROOT/_dev/$name.html" >/dev/null 2>&1 &
+  disown 2>/dev/null || true
 done
+sleep 2
 echo "띄운 검사: $*"
