@@ -79,12 +79,18 @@ dead=$(echo "$out" | grep -o "깨진 것 [0-9]*" | grep -o "[0-9]*")
 fail=$((fail+dead))
 
 echo "=== 7. 외부 요청이 0인가 (업로드 안 함이 이 사이트의 핵심 주장) ==="
+# 브라우저가 실제로 받아오는 것만 센다: src=, <link href=>, CSS의 url().
+# <a href="...">는 사람이 눌러야 움직이는 링크라 요청이 아니다.
+# licenses.html 은 라이선스 원문을 링크해야 하는 페이지이고, 그건 고지 의무를
+# 지키는 것이지 외부 요청이 아니다. 둘을 섞어 세면 검사가 거짓말을 하게 된다.
 ext=0
 for u in $urls; do
-  hits=$(body_of "$u" | grep -o '\(src\|href\)="https\?://[^"]*"' | grep -v 'toolmoa.github.io' | grep -v 'schema.org' | grep -v 'www.w3.org')
+  hits=$(body_of "$u" \
+    | grep -o '<link[^>]*href="https\?://[^"]*"\|src="https\?://[^"]*"\|url(https\?://[^)]*)' \
+    | grep -v 'toolmoa.github.io')
   if [ -n "$hits" ]; then echo "  $u"; echo "$hits" | sed 's/^/    /'; ext=$((ext+1)); fi
 done
-[ $ext -eq 0 ] && echo "  외부 자원 참조 없음" || fail=$((fail+ext))
+[ $ext -eq 0 ] && echo "  외부에서 받아오는 자원 없음" || fail=$((fail+ext))
 
 echo
 echo "================================"
