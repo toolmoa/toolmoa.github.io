@@ -47,7 +47,7 @@ done
 echo
 echo "=== 3. 자산 파일 ==="
 for a in assets/style.css assets/i18n.js assets/zip.js assets/vendor/pdf-lib.min.js \
-         assets/vendor/pdf.min.js assets/vendor/pdf.worker.min.js assets/vendor/qrious.min.js \
+         assets/vendor/pdf.min.js assets/vendor/pdf.worker.min.js assets/vendor/qrcode.min.js \
          assets/vendor/xlsx.full.min.js robots.txt sitemap.xml; do
   r="$(code_of "$BASE/$a") $(curl -s -o /dev/null -w '%{size_download}' --max-time 25 "$BASE/$a")"
   code=${r%% *}; size=${r##* }

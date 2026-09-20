@@ -253,11 +253,16 @@
       <a href="file-convert.html">Convert file</a>
       <a href="../qr-generate.html" hreflang="ko">한국어</a>
     </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
     <div>© Toolmoa · Everything runs inside your browser</div>
   </div>
 </footer>
 
-<script src="../assets/vendor/qrious.min.js"></script>
+<!-- The QR library is not fetched up front. loadLib() below fetches it once there is content. -->
 <script>
 (function () {
   var canvas = document.getElementById('canvas');
@@ -279,11 +284,26 @@
       on ? 'Saved at ' + canvas.width + '×' + canvas.height + 'px (shown smaller on screen)' : '';
   }
 
-  function whenReady(fn, tries) {
-    tries = (tries === undefined) ? 80 : tries;
-    if (typeof QRious !== 'undefined') { fn(); return; }
-    if (tries <= 0) { setMsg('The QR generator could not be loaded. Check your connection and refresh.', 'err'); return; }
-    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+  // The QR library is fetched once there is something to encode, not on page load.
+  var libPromise = null;
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = new Promise(function (res, rej) {
+        if (typeof qrcode !== 'undefined') { res(); return; }
+        var sc = document.createElement('script');
+        sc.src = '../assets/vendor/qrcode.min.js';
+        sc.onload = function () { res(); };
+        sc.onerror = function () { libPromise = null; rej(new Error('qrcode')); };
+        document.head.appendChild(sc);
+      });
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof qrcode !== 'undefined') { fn(); return; }
+    loadLib().then(fn).catch(function () {
+      setMsg('The QR generator could not be loaded. Check your connection and refresh.', 'err');
+    });
   }
 
   var logoImg = null;
@@ -360,10 +380,10 @@
   }
 
   // Maximum bytes a single QR can hold (byte mode, version 40).
-  // The library does not throw when you exceed this — it silently produces a broken
-  // code — so we have to reject it here, or people print codes that never scan.
-  // QRious maps one character to one byte, so multi-byte characters (accents, CJK)
-  // produce a corrupt code that will not scan at all. Convert to UTF-8 bytes first.
+  // The library does throw past that, but only with a terse message, so we check
+  // first and tell people exactly how much they are over.
+  // It maps one character to one byte, so multi-byte characters (accents, CJK)
+  // would produce a corrupt code. Convert to UTF-8 bytes first.
   function toUtf8Chars(s) {
     var b = new TextEncoder().encode(s), out = '';
     for (var i = 0; i < b.length; i++) out += String.fromCharCode(b[i]);
@@ -387,13 +407,33 @@
       return;
     }
     try {
-      new QRious({
-        element: canvas, value: toUtf8Chars(text), size: size,
-        padding: Math.round(size * ratio),
-        level: document.getElementById('ecl').value,
-        foreground: document.getElementById('fg').value,
-        background: document.getElementById('bg').value
-      });
+      // The library only returns a dark/light module grid; we paint it ourselves.
+      var qr = qrcode(0, level);          // 0 = pick the smallest version that fits
+      qr.addData(toUtf8Chars(text), 'Byte');
+      qr.make();
+
+      var pad = Math.round(size * ratio);
+      var n = qr.getModuleCount();
+      var cell = (size - pad * 2) / n;
+
+      canvas.width = size;
+      canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = document.getElementById('bg').value;
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = document.getElementById('fg').value;
+
+      for (var r = 0; r < n; r++) {
+        for (var c = 0; c < n; c++) {
+          if (!qr.isDark(r, c)) continue;
+          // Round both edges, not the width — rounding the width leaves hairline
+          // gaps between modules that can stop the code from scanning.
+          var x1 = Math.round(pad + c * cell), x2 = Math.round(pad + (c + 1) * cell);
+          var y1 = Math.round(pad + r * cell), y2 = Math.round(pad + (r + 1) * cell);
+          ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+        }
+      }
+
       if (logoImg) drawLogo(size);
       showQr(true); setMsg('');
     } catch (e) {

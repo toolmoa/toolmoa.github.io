@@ -263,11 +263,16 @@
       <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
       <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
     </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
     <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
   </div>
 </footer>
 
-<script src="assets/vendor/qrious.min.js"></script>
+<!-- QR 라이브러리는 여기서 미리 받지 않는다. 아래 loadLib() 이 내용을 입력한 뒤에 받는다. -->
 <script>
 (function () {
   var canvas = document.getElementById('canvas');
@@ -297,15 +302,26 @@
            t('qr.actual2', 'px (화면에는 축소해 보여줍니다)') : '';
   }
 
-  // 라이브러리가 늦게 도착할 수 있으므로 최대 8초까지 기다린다
-  function whenReady(fn, tries) {
-    tries = (tries === undefined) ? 80 : tries;
-    if (typeof QRious !== 'undefined') { fn(); return; }
-    if (tries <= 0) {
-      setMsg(t('qr.notReady', 'QR 생성 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.'), 'err');
-      return;
+  // QR 라이브러리는 내용을 입력한 뒤에 받는다. 페이지를 열자마자 받을 이유가 없다.
+  var libPromise = null;
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = new Promise(function (res, rej) {
+        if (typeof qrcode !== 'undefined') { res(); return; }
+        var sc = document.createElement('script');
+        sc.src = 'assets/vendor/qrcode.min.js';
+        sc.onload = function () { res(); };
+        sc.onerror = function () { libPromise = null; rej(new Error('qrcode')); };
+        document.head.appendChild(sc);
+      });
     }
-    setTimeout(function () { whenReady(fn, tries - 1); }, 100);
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof qrcode !== 'undefined') { fn(); return; }
+    loadLib().then(fn).catch(function () {
+      setMsg(t('qr.notReady', 'QR 생성 기능을 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 새로고침해 주세요.'), 'err');
+    });
   }
 
   var logoImg = null;
@@ -381,8 +397,8 @@
   }
 
   // QR 한 장에 담을 수 있는 최대 바이트 수 (바이트 모드, 버전 40 기준).
-  // 라이브러리가 한계를 넘어도 예외를 던지지 않고 조용히 깨진 코드를 만들기 때문에
-  // 여기서 직접 막지 않으면 스캔되지 않는 QR을 정상인 줄 알고 쓰게 된다.
+  // 라이브러리도 한계를 넘으면 예외를 던지지만, 그 메시지는 영어 한 줄이라
+  // 무엇을 어떻게 고쳐야 하는지 알 수 없다. 여기서 먼저 막고 남은 여유를 알려 준다.
   var CAP = { L: 2953, M: 2331, Q: 1663, H: 1273 };
 
   function draw(text) {
@@ -401,18 +417,35 @@
       return;
     }
     try {
-      new QRious({
-        element: canvas,
-        // QRious는 문자열을 바이트로 옮길 때 한 글자를 1바이트로만 취급한다.
-        // 한글처럼 여러 바이트인 문자는 그대로 넘기면 코드가 깨져 스캔이 아예 안 된다.
-        // 그래서 UTF-8 바이트로 먼저 바꾼 뒤 한 바이트씩 넘긴다. (ASCII는 결과가 동일)
-        value: toUtf8Chars(text),
-        size: size,
-        padding: Math.round(size * ratio),
-        level: document.getElementById('ecl').value,
-        foreground: document.getElementById('fg').value,
-        background: document.getElementById('bg').value
-      });
+      // 라이브러리는 검은 칸/흰 칸 표만 만들어 준다. 그림은 우리가 직접 그린다.
+      // 문자열을 바이트로 옮길 때 한 글자를 1바이트로만 취급하므로(charCode & 0xff),
+      // 한글처럼 여러 바이트인 문자는 UTF-8 바이트로 먼저 바꿔 넘겨야 코드가 깨지지 않는다.
+      var qr = qrcode(0, level);          // 0 = 내용 길이에 맞는 버전을 알아서 고른다
+      qr.addData(toUtf8Chars(text), 'Byte');
+      qr.make();
+
+      var pad = Math.round(size * ratio);
+      var n = qr.getModuleCount();
+      var cell = (size - pad * 2) / n;
+
+      canvas.width = size;
+      canvas.height = size;
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = document.getElementById('bg').value;
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = document.getElementById('fg').value;
+
+      for (var r = 0; r < n; r++) {
+        for (var c = 0; c < n; c++) {
+          if (!qr.isDark(r, c)) continue;
+          // 칸의 양쪽 경계를 각각 반올림한다. 너비를 반올림하면 칸 사이에
+          // 머리카락 같은 흰 줄이 생겨 스캔이 안 되는 경우가 있다.
+          var x1 = Math.round(pad + c * cell), x2 = Math.round(pad + (c + 1) * cell);
+          var y1 = Math.round(pad + r * cell), y2 = Math.round(pad + (r + 1) * cell);
+          ctx.fillRect(x1, y1, x2 - x1, y2 - y1);
+        }
+      }
+
       if (logoImg) drawLogo(size);
       showQr(true);
       setMsg('');

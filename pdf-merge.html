@@ -97,7 +97,10 @@
   <!-- 수익화 지점: Gumroad 상품 링크를 만든 뒤 href를 교체하세요 -->
   <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="merge.cross">반대로 <strong style="color:var(--text)">PDF를 나누고 싶으시면</strong> <a href="pdf-split.html">PDF 나누기</a>를, 사진을 문서로 묶으려면 <a href="img-to-pdf.html">이미지 PDF 변환</a>을 쓰세요. 둘 다 무료입니다.</p>
 
-  <div class="upsell">
+  <!-- 수익화 지점. 아직 팔 물건이 없어 숨겨 두었다.
+       없는 제품을 약속하고 눌러도 아무 일이 없으면, 가장 살 마음이 큰 사람의 신뢰를 잃는다.
+       Gumroad 상품을 만든 뒤 아래 href 를 그 주소로 바꾸고 hidden 만 지우면 그대로 살아난다. -->
+  <div class="upsell" hidden>
     <h3 data-i18n="merge.upsellH">폴더 안의 PDF 수백 개를 규칙대로 자동 처리하려면</h3>
     <p data-i18n="merge.upsellP">데스크톱 버전은 폴더를 통째로 읽어 파일명 규칙에 따라 자동으로 묶고, 페이지 회전·용량 압축까지 한 번에 처리합니다. 브라우저를 열어둘 필요가 없습니다.</p>
     <a class="btn" href="#" id="upsell-link" data-i18n="merge.upsellB">일괄 처리 버전 보기</a>
@@ -151,6 +154,11 @@
       <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
       <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
       <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
     </nav>
     <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
   </div>

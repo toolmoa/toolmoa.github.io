@@ -23,6 +23,9 @@
 ```
 index.html            홈 (툴 목록)
 404.html              없는 주소로 들어왔을 때 (툴 목록으로 안내)
+privacy.html          개인정보처리방침   ← 애드센스 승인 요건이기도 하다
+terms.html            이용약관 · 면책
+licenses.html         오픈소스 고지 (Apache-2.0 고지 의무 이행)
 image-compress.html   이미지 용량 줄이기      ← 키워드: 이미지 용량 줄이기, 사진 크기 조절
 image-crop.html       이미지 자르기           ← 키워드: 사진 자르기, 이미지 크롭
 img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변환
@@ -47,6 +50,16 @@ sitemap.xml           사이트맵 (생성물)
 
 `assets/og/` 와 `sitemap.xml` 그리고 각 HTML 안의 `<!-- SEO:AUTO -->` 블록은
 **스크립트가 만든다. 손으로 고치지 말 것** (다음 실행 때 덮어쓰인다).
+
+## 라이브러리를 들일 때의 규칙
+
+**허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
+브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 14종과 검사 체계를 통째로 복제해도 막을 수 없다.
+실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
+
+현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
+새로 들일 때는 `npm view <이름> license` 로 먼저 확인할 것.
 
 외부 라이브러리는 `assets/vendor/`에 **직접 포함**되어 있다 (CDN을 쓰지 않는다).
 `pdf-lib`(PDF 병합), `xlsx`(파일 변환), `qrious`(QR 생성). 셋 다 무료·오픈소스다.
