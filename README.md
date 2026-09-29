@@ -28,15 +28,19 @@ terms.html            이용약관 · 면책
 licenses.html         오픈소스 고지 (Apache-2.0 고지 의무 이행)
 image-compress.html   이미지 용량 줄이기      ← 키워드: 이미지 용량 줄이기, 사진 크기 조절
 image-crop.html       이미지 자르기           ← 키워드: 사진 자르기, 이미지 크롭
+image-convert.html    이미지 형식 변환        ← 키워드: png jpg 변환, webp jpg 변환
+image-join.html       사진 이어붙이기         ← 키워드: 사진 이어붙이기, 이미지 합치기
 img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변환
 char-count.html       글자수 세기·원고지 계산  ← 키워드: 글자수 세기, 원고지 매수
 text-clean.html       텍스트 정리             ← 키워드: 중복 줄 제거, 명단 정리
 pdf-merge.html        PDF 합치기             ← 키워드: PDF 합치기, PDF 병합
 pdf-split.html        PDF 나누기             ← 키워드: PDF 나누기, 페이지 추출
 pdf-edit.html         PDF 회전·삭제·순서 변경  ← 키워드: PDF 회전, PDF 페이지 삭제
+pdf-to-image.html     PDF 이미지 변환         ← 키워드: pdf 이미지 변환, pdf jpg 변환
 file-convert.html     CSV·JSON·엑셀 변환     ← 키워드: csv json 변환, 엑셀 변환
 qr-generate.html      QR코드 만들기           ← 키워드: QR코드 만들기, QR 생성
 password-gen.html     비밀번호 생성기         ← 키워드: 비밀번호 생성기
+random-pick.html      랜덤 뽑기·추첨기        ← 키워드: 랜덤 뽑기, 추첨기, 조 나누기
 unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 계산, 인치 cm 변환
 date-calc.html        날짜 계산기·디데이       ← 키워드: 디데이 계산, 근무일수
 age-calc.html         만 나이 계산기          ← 키워드: 만 나이 계산기, 세는 나이
@@ -55,14 +59,15 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 14종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 18종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
 새로 들일 때는 `npm view <이름> license` 로 먼저 확인할 것.
 
 외부 라이브러리는 `assets/vendor/`에 **직접 포함**되어 있다 (CDN을 쓰지 않는다).
-`pdf-lib`(PDF 병합), `xlsx`(파일 변환), `qrious`(QR 생성). 셋 다 무료·오픈소스다.
+`pdf-lib`(PDF 편집·생성), `pdf.js`(PDF 읽기·미리보기·이미지 변환), `xlsx`(파일 변환),
+`qrcode-generator`(QR 생성). 전부 MIT 또는 Apache-2.0 이다.
 CDN을 안 쓰는 이유는 주소가 바뀌거나 CDN이 죽으면 사이트가 통째로 망가지기 때문이다.
 실제로 처음에 쓰려던 `qrcode` 패키지의 CDN 경로가 404여서 QR이 동작하지 않았다.
 
@@ -88,10 +93,16 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full
 ```
 
-결과는 **창 제목**에 실린다 (`RESULT 20/20 :: …`). 헤드리스로 돌리지 말 것 —
+결과는 **창 제목**에 실린다 (`RESULT 26/26 :: …`). 헤드리스로 돌리지 말 것 —
 파일을 읽는 검사는 읽기가 끝나기 전에 판정이 나 버린다.
 `paths`·`gaps` 처럼 PDF 미리보기를 보는 검사는 **한 번에 하나씩** 돌린다
 (pdf.js 1.3MB 를 나중에 받는 구조라 창을 여러 개 띄우면 거짓 실패한다).
+
+**창이 다른 창에 가려지면 안 된다.** pdf.js 의 캔버스 렌더는 `requestAnimationFrame` 으로
+이어 그리는데, 크롬은 창이 완전히 가려지면 그것을 멈춘다. 그러면 렌더가 끝나지도 실패하지도
+않고 영영 멈춰 "미리보기 0장"이 된다. `run.sh` 에 `--disable-backgrounding-occluded-windows`
+등 세 플래그를 넣어 막아 두었으니, 직접 크롬을 띄울 때도 같은 플래그를 붙일 것.
+2026-09-29 에 이것 때문에 하루치 거짓 실패를 쫓았다 — 제품이 아니라 검사 환경의 문제였다.
 
 ### 생성기 (툴을 고치거나 늘린 뒤 다시 돌린다)
 
@@ -142,5 +153,13 @@ FAQ 구조화 데이터는 페이지에 이미 적힌 `<details>` 문답을 **�
 
 - 별도 HTML 파일로 만든다 (한 페이지에 몰면 키워드가 분산된다)
 - `<title>`과 `description`에 **사람들이 실제로 검색하는 한국어 표현**을 넣는다
-- 모든 페이지의 헤더/푸터 링크와 `sitemap.xml`에 추가한다
 - 서버가 필요한 기능은 만들지 않는다 (비용 0원 원칙)
+- 메뉴는 손으로 고치지 않는다. `_dev/navfix5.pl` 위쪽의 표에 한 줄 추가한 뒤
+  `perl _dev/navfix5.pl $(ls *.html | grep -v 404)` 로 **모든 페이지의 헤더·푸터를 한 번에** 다시 쓴다.
+  (`404.html` 은 절대경로를 쓰므로 제외한다)
+- 번역 키를 `assets/i18n.js` 의 en·ja 양쪽에 넣는다. 값이 빈 문자열이면 안 된다 —
+  `t()` 가 빈 값을 "번역 없음"으로 보고 한국어로 되돌린다. 어순이 다른 곳(예: "1조" / "Team 1")은
+  `{n}` 자리를 두고 치환한다.
+- 결과를 스크립트로 그리는 페이지는 `langchange` 에서 **결과까지 다시 그린다**.
+  안내문구만 다시 그리면 이미 나온 결과가 한국어로 남는다 (`_dev/i18nlive.html` 이 잡는다)
+- 마지막에 생성기 4개를 다시 돌리고, 정적 4종 + 브라우저 12종을 전부 통과시킨다

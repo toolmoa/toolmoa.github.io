@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 이어붙이기 · 이미지 합치기 (세로 · 가로 · 격자) - 무료 온라인 | 툴모아</title>
+<meta name="description" content="여러 장의 사진을 한 장으로 이어붙입니다. 세로·가로·격자로 배치하고 간격과 배경색을 고를 수 있습니다. 파일이 서버로 올라가지 않아 안전하며 워터마크가 없습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/image-join.html">
+<meta property="og:title" content="사진 이어붙이기 · 이미지 합치기">
+<meta property="og:description" content="여러 장을 한 장으로. 세로·가로·격자 배치. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"사진 이어붙이기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/image-join.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/image-join.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="사진 이어붙이기 · 이미지 합치기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="사진 이어붙이기 · 이미지 합치기">
+<meta name="twitter:description" content="여러 장을 한 장으로. 세로·가로·격자 배치. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/image-join.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"사진이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다. 인터넷을 끊은 상태에서도 그대로 동작하는 것이 그 증거입니다. 대화 캡처나 서류에도 안전합니다."}},{"@type":"Question","name":"붙는 순서를 바꿀 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"목록에서 각 사진의 ↑ ↓ 버튼으로 순서를 옮기고 ✕로 뺄 수 있습니다. 미리보기가 바로 따라 바뀝니다. 사진을 더 고르면 목록 뒤에 추가됩니다."}},{"@type":"Question","name":"사진 크기가 서로 다르면 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"기본값은 가장 작은 사진에 맞춰 줄이기입니다. 원본보다 키우지 않으므로 화질이 흐려지지 않습니다. \"가장 큰 사진에 맞춰 늘리기\"를 고르면 작은 사진이 늘어나 조금 흐릿해질 수 있고, \"원본 크기 그대로\"를 고르면 크기를 건드리지 않고 남는 자리를 배경색으로 채웁니다."}},{"@type":"Question","name":"몇 장까지 붙일 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"장수 제한은 두지 않았습니다. 다만 결과가 너무 커지면 브라우저가 그림을 만들지 못하므로, 약 1억 화소를 넘으면 그 안에 들어오도록 전체를 자동으로 줄이고 그 사실을 미리보기 위에 알려 줍니다."}},{"@type":"Question","name":"결과가 세로로 너무 길어집니다","acceptedAnswer":{"@type":"Answer","text":"세로로 여러 장을 붙이면 당연히 길어집니다. 격자로 배치를 바꾸고 한 줄에 2~3장씩 넣으면 한 화면에 들어오는 비율이 됩니다."}},{"@type":"Question","name":"투명한 PNG를 붙이면 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"JPG로 저장하면 투명한 부분이 배경색으로 채워집니다. 투명을 지켜야 하면 저장 형식을 PNG로 고르고 배경색은 그대로 두세요. PNG로 저장할 때도 간격과 남는 자리는 고른 색으로 채워집니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"사진 이어붙이기 · 이미지 합치기","item":"https://toolmoa.github.io/image-join.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="ijn.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" aria-current="page" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="ijn.h1">사진 이어붙이기 · 이미지 합치기</h1>
+  <p class="lead" data-i18n="ijn.lead">여러 장의 사진을 한 장으로 붙입니다. 세로로 길게, 가로로 나란히, 또는 격자로 배치할 수 있습니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🧩</span>
+    <span class="dz-main" data-i18n="ijn.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="ijn.drop2">여러 장을 한 번에 고르세요. 고른 순서대로 붙습니다.</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <ul class="file-list" id="list"></ul>
+
+    <div class="card">
+      <div class="field">
+        <label for="dir" data-i18n="ijn.dir">배치 방향</label>
+        <select id="dir">
+          <option value="v" selected data-i18n="ijn.dV">세로로 이어붙이기 (위에서 아래로)</option>
+          <option value="h" data-i18n="ijn.dH">가로로 이어붙이기 (왼쪽에서 오른쪽으로)</option>
+          <option value="g" data-i18n="ijn.dG">격자로 배치</option>
+        </select>
+      </div>
+      <div class="field" id="cols-field" hidden>
+        <label for="cols" data-i18n="ijn.cols">한 줄에 넣을 장수</label>
+        <input type="number" id="cols" min="1" max="10" value="2">
+        <div class="hint" data-i18n="ijn.colsHint">격자에서는 사진마다 같은 크기의 칸을 주고, 칸 안에 비율을 지킨 채 넣습니다.</div>
+      </div>
+      <div class="field" id="align-field">
+        <label for="align" data-i18n="ijn.align">크기 맞추기</label>
+        <select id="align">
+          <option value="fit" selected data-i18n="ijn.aFit">가장 작은 사진에 맞춰 줄이기 (권장)</option>
+          <option value="max" data-i18n="ijn.aMax">가장 큰 사진에 맞춰 늘리기</option>
+          <option value="none" data-i18n="ijn.aNone">원본 크기 그대로 (가운데 정렬)</option>
+        </select>
+        <div class="hint" id="align-hint"></div>
+      </div>
+      <div class="field">
+        <label for="gap" data-i18n="ijn.gap">사진 사이 간격 (px)</label>
+        <input type="number" id="gap" min="0" max="200" value="0">
+      </div>
+      <div class="field">
+        <label for="bgc" data-i18n="ijn.bgc">배경 · 간격 색</label>
+        <input type="color" id="bgc" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        <div class="hint" data-i18n="ijn.bgcHint">간격과, 크기가 달라 남는 자리를 채우는 색입니다.</div>
+      </div>
+      <div class="field">
+        <label for="fmt" data-i18n="ijn.fmt">저장 형식</label>
+        <select id="fmt">
+          <option value="image/jpeg" selected data-i18n="ijn.fJpg">JPG — 용량이 작습니다</option>
+          <option value="image/png" data-i18n="ijn.fPng">PNG — 손실이 없습니다 (용량 큼)</option>
+        </select>
+      </div>
+      <div class="field" id="q-field" style="margin-bottom:0">
+        <label for="quality"><span data-i18n="ijn.quality">화질</span> <span id="q-val" style="color:var(--accent)">92%</span></label>
+        <input type="range" id="quality" min="50" max="100" value="92" step="2">
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl" data-i18n="ijn.count">붙일 장수</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl" data-i18n="ijn.outSize">결과 크기</span></div>
+    </div>
+
+    <p class="hint" id="cap-note" style="margin:0 0 6px"></p>
+    <div class="card" style="text-align:center;overflow:auto">
+      <canvas id="preview" style="max-width:100%;height:auto;border:1px solid var(--border)"></canvas>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-save" data-i18n="ijn.save">한 장으로 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="ijn.cross">여러 장을 <strong style="color:var(--text)">문서 한 개로 묶으려면</strong> <a href="img-to-pdf.html">이미지 PDF 변환</a>이 더 맞습니다. 붙인 그림의 용량을 줄이려면 <a href="image-compress.html">이미지 용량 줄이기</a>, 필요한 부분만 남기려면 <a href="image-crop.html">이미지 자르기</a>를 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:IMAGEJOIN --></div>
+
+  <h2 data-ko-only>한 장으로 붙이면 편한 이유</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      사진 다섯 장을 따로 보내면 받는 쪽은 다섯 번 눌러서 봐야 하고, 순서도 뒤섞입니다.
+      <strong style="color:var(--text)">긴 문서를 여러 번 찍은 것, 대화 내용을 나눠 캡처한 것,
+      전후 비교 사진</strong>처럼 함께 봐야 뜻이 통하는 것들은 한 장으로 붙여야 제대로 전달됩니다.
+      중고 거래 글이나 블로그에 올릴 사진도 한 장으로 합치면 한 화면에서 다 보입니다.
+      이 페이지는 사진을 브라우저 안에서만 읽어 화면에 이어 그린 뒤 그 결과를 저장합니다.
+      캡처한 대화나 서류가 기기 밖으로 나가지 않습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>이럴 때 씁니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">긴 화면 캡처 이어붙이기</strong> — 나눠 찍은 대화나 목록을 세로로 붙여 한 장으로 만듭니다.<br>
+      <strong style="color:var(--text)">전후 비교</strong> — 가로로 나란히 붙이면 차이가 한눈에 보입니다.<br>
+      <strong style="color:var(--text)">중고 거래·블로그</strong> — 여러 각도의 사진을 격자로 한 장에 담습니다.<br>
+      <strong style="color:var(--text)">서류 제출</strong> — 앞면·뒷면을 한 장으로 붙여 제출합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 브라우저 안에서만 처리되며 파일은 외부로 전송되지 않습니다. 인터넷을 끊은 상태에서도 그대로 동작하는 것이 그 증거입니다. 대화 캡처나 서류에도 안전합니다.</p>
+    </details>
+    <details>
+      <summary>붙는 순서를 바꿀 수 있나요?</summary>
+      <p>목록에서 각 사진의 <strong>↑ ↓</strong> 버튼으로 순서를 옮기고 <strong>✕</strong>로 뺄 수 있습니다. 미리보기가 바로 따라 바뀝니다. 사진을 더 고르면 목록 뒤에 추가됩니다.</p>
+    </details>
+    <details>
+      <summary>사진 크기가 서로 다르면 어떻게 되나요?</summary>
+      <p>기본값은 <strong>가장 작은 사진에 맞춰 줄이기</strong>입니다. 원본보다 키우지 않으므로 화질이 흐려지지 않습니다. "가장 큰 사진에 맞춰 늘리기"를 고르면 작은 사진이 늘어나 조금 흐릿해질 수 있고, "원본 크기 그대로"를 고르면 크기를 건드리지 않고 남는 자리를 배경색으로 채웁니다.</p>
+    </details>
+    <details>
+      <summary>몇 장까지 붙일 수 있나요?</summary>
+      <p>장수 제한은 두지 않았습니다. 다만 결과가 너무 커지면 브라우저가 그림을 만들지 못하므로, 약 1억 화소를 넘으면 그 안에 들어오도록 전체를 자동으로 줄이고 그 사실을 미리보기 위에 알려 줍니다.</p>
+    </details>
+    <details>
+      <summary>결과가 세로로 너무 길어집니다</summary>
+      <p>세로로 여러 장을 붙이면 당연히 길어집니다. 격자로 배치를 바꾸고 한 줄에 2~3장씩 넣으면 한 화면에 들어오는 비율이 됩니다.</p>
+    </details>
+    <details>
+      <summary>투명한 PNG를 붙이면 어떻게 되나요?</summary>
+      <p>JPG로 저장하면 투명한 부분이 배경색으로 채워집니다. 투명을 지켜야 하면 저장 형식을 PNG로 고르고 배경색은 그대로 두세요. PNG로 저장할 때도 간격과 남는 자리는 고른 색으로 채워집니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var list = document.getElementById('list');
+  var canvas = document.getElementById('preview');
+  var dirSel = document.getElementById('dir');
+  var colsInput = document.getElementById('cols');
+  var alignSel = document.getElementById('align');
+  var gapInput = document.getElementById('gap');
+  var bgcInput = document.getElementById('bgc');
+  var fmtSel = document.getElementById('fmt');
+  var qual = document.getElementById('quality');
+
+  // 결과가 너무 커지면 브라우저가 캔버스를 만들지 못하고 빈 그림을 준다.
+  // 한도를 두고, 넘으면 전체를 줄인 뒤 그 사실을 화면에 남긴다.
+  var MAX_PIXELS = 100e6;
+
+  var items = [];      // {img, name, w, h}
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  document.addEventListener('paste', function (e) {
+    var clip = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < clip.length; i++) {
+      if (clip[i].kind !== 'file' || clip[i].type.indexOf('image/') !== 0) continue;
+      var f = clip[i].getAsFile();
+      if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], '붙여넣은-사진-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    handle(picked);
+  });
+
+  [dirSel, colsInput, alignSel, gapInput, bgcInput, fmtSel].forEach(function (el) {
+    el.addEventListener('change', function () { syncFields(); draw(); });
+  });
+  qual.addEventListener('input', function () {
+    document.getElementById('q-val').textContent = qual.value + '%';
+  });
+  // 언어를 바꾸면 스크립트가 쓴 안내문과 목록도 다시 만들어야 한다
+  document.addEventListener('langchange', function () { syncFields(); renderList(); draw(); });
+
+  function syncFields() {
+    var g = dirSel.value === 'g';
+    document.getElementById('cols-field').hidden = !g;
+    document.getElementById('q-field').hidden = fmtSel.value !== 'image/jpeg';
+    document.getElementById('align-hint').textContent =
+      g ? t('ijn.aHintG', '격자에서는 모든 칸이 같은 크기이고, 사진은 칸 안에 비율을 지킨 채 들어갑니다.')
+      : dirSel.value === 'v' ? t('ijn.aHintV', '세로로 붙일 때는 폭을 맞춥니다.')
+      : t('ijn.aHintH', '가로로 붙일 때는 높이를 맞춥니다.');
+  }
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type.indexOf('image/') === 0;
+    });
+    if (!files.length) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    setMsg(t('ijn.reading', '사진을 읽는 중입니다…'));
+    Promise.all(files.map(loadOne)).then(function (loaded) {
+      var ok = loaded.filter(Boolean);
+      if (!ok.length) { setMsg(t('ijn.none', '열 수 있는 사진이 없습니다.'), 'err'); return; }
+      // 고른 순서를 지켜 목록 뒤에 붙인다
+      items = items.concat(ok);
+      area.hidden = false;
+      setMsg(loaded.length > ok.length
+        ? (loaded.length - ok.length) + t('ijn.someFail', '장은 열지 못해 건너뛰었습니다.')
+        : '', loaded.length > ok.length ? 'err' : '');
+      syncFields();
+      renderList();
+      draw();
+    });
+  }
+
+  function loadOne(file) {
+    return new Promise(function (res) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        // 미리보기 썸네일에 같은 주소를 다시 쓰므로 여기서 놓아주지 않는다.
+        // 목록에서 빼거나 초기화할 때 정리한다.
+        res({ img: img, url: url, name: file.name, w: img.naturalWidth, h: img.naturalHeight });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); res(null); };
+      img.src = url;
+    });
+  }
+
+  function renderList() {
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<img src="' + it.url + '" alt="" class="thumb">' +
+        '<span class="fname" title="' + it.name + '">' + (i + 1) + '. ' + it.name + '</span>' +
+        '<span class="fmeta">' + it.w + '×' + it.h + '</span>';
+      var ops = document.createElement('span');
+      ops.style.cssText = 'display:flex;gap:4px';
+      ops.appendChild(opBtn('↑', t('ijn.up', '앞으로'), i === 0, function () { move(i, -1); }));
+      ops.appendChild(opBtn('↓', t('ijn.down', '뒤로'), i === items.length - 1, function () { move(i, 1); }));
+      ops.appendChild(opBtn('✕', t('ijn.remove', '빼기'), false, function () { remove(i); }));
+      li.appendChild(ops);
+      list.appendChild(li);
+    });
+    document.getElementById('t-count').textContent = items.length;
+  }
+
+  function opBtn(label, title, disabled, fn) {
+    var b = document.createElement('button');
+    b.className = 'btn small secondary';
+    b.textContent = label;
+    b.title = title;
+    b.setAttribute('aria-label', title);
+    b.disabled = !!disabled;
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  function move(i, d) {
+    var j = i + d;
+    if (j < 0 || j >= items.length) return;
+    var tmp = items[i]; items[i] = items[j]; items[j] = tmp;
+    renderList(); draw();
+  }
+
+  function remove(i) {
+    URL.revokeObjectURL(items[i].url);
+    items.splice(i, 1);
+    renderList();
+    if (!items.length) { area.hidden = true; setMsg(''); return; }
+    draw();
+  }
+
+  // 사진을 어디에 어떤 크기로 그릴지 먼저 계산한다.
+  // 그리기와 계산을 나눠 두면 미리보기와 저장이 절대 어긋나지 않는다.
+  function layout() {
+    if (!items.length) return null;
+    var gap = Math.max(0, Math.min(200, parseInt(gapInput.value, 10) || 0));
+    var mode = dirSel.value, how = alignSel.value;
+    var boxes = [], W = 0, H = 0;
+    var i;
+
+    if (mode === 'v') {
+      var ws = items.map(function (it) { return it.w; });
+      var base = how === 'fit' ? Math.min.apply(null, ws)
+               : how === 'max' ? Math.max.apply(null, ws) : 0;
+      W = base || Math.max.apply(null, ws);
+      var y = 0;
+      for (i = 0; i < items.length; i++) {
+        var it = items[i];
+        var w = base ? base : it.w;
+        var h = base ? Math.round(it.h * (base / it.w)) : it.h;
+        boxes.push({ i: i, x: Math.round((W - w) / 2), y: y, w: w, h: h });
+        y += h + (i < items.length - 1 ? gap : 0);
+      }
+      H = y;
+    } else if (mode === 'h') {
+      var hs = items.map(function (it) { return it.h; });
+      var hbase = how === 'fit' ? Math.min.apply(null, hs)
+                : how === 'max' ? Math.max.apply(null, hs) : 0;
+      H = hbase || Math.max.apply(null, hs);
+      var x = 0;
+      for (i = 0; i < items.length; i++) {
+        var it2 = items[i];
+        var h2 = hbase ? hbase : it2.h;
+        var w2 = hbase ? Math.round(it2.w * (hbase / it2.h)) : it2.w;
+        boxes.push({ i: i, x: x, y: Math.round((H - h2) / 2), w: w2, h: h2 });
+        x += w2 + (i < items.length - 1 ? gap : 0);
+      }
+      W = x;
+    } else {
+      // 격자: 칸 크기를 하나로 정하고, 사진은 칸 안에 비율을 지킨 채 넣는다
+      var cols = Math.max(1, Math.min(10, parseInt(colsInput.value, 10) || 2));
+      var cw = how === 'max' ? Math.max.apply(null, items.map(function (it) { return it.w; }))
+                             : Math.min.apply(null, items.map(function (it) { return it.w; }));
+      var ch = how === 'max' ? Math.max.apply(null, items.map(function (it) { return it.h; }))
+                             : Math.min.apply(null, items.map(function (it) { return it.h; }));
+      var rows = Math.ceil(items.length / cols);
+      W = cols * cw + (cols - 1) * gap;
+      H = rows * ch + (rows - 1) * gap;
+      for (i = 0; i < items.length; i++) {
+        var it3 = items[i];
+        var c = i % cols, r = Math.floor(i / cols);
+        var k = Math.min(cw / it3.w, ch / it3.h);
+        if (how === 'none') k = Math.min(1, k);    // 원본보다 키우지 않는다
+        var w3 = Math.round(it3.w * k), h3 = Math.round(it3.h * k);
+        boxes.push({
+          i: i,
+          x: c * (cw + gap) + Math.round((cw - w3) / 2),
+          y: r * (ch + gap) + Math.round((ch - h3) / 2),
+          w: w3, h: h3
+        });
+      }
+    }
+
+    W = Math.max(1, Math.round(W)); H = Math.max(1, Math.round(H));
+    // 너무 커지면 전체를 같은 비율로 줄인다
+    var scale = 1;
+    if (W * H > MAX_PIXELS) scale = Math.sqrt(MAX_PIXELS / (W * H));
+    return { boxes: boxes, w: W, h: H, scale: scale, gap: gap };
+  }
+
+  function draw() {
+    var L = layout();
+    var note = document.getElementById('cap-note');
+    if (!L) { note.textContent = ''; return; }
+
+    var w = Math.max(1, Math.round(L.w * L.scale));
+    var h = Math.max(1, Math.round(L.h * L.scale));
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = bgcInput.value;
+    ctx.fillRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    L.boxes.forEach(function (b) {
+      ctx.drawImage(items[b.i].img,
+        Math.round(b.x * L.scale), Math.round(b.y * L.scale),
+        Math.max(1, Math.round(b.w * L.scale)), Math.max(1, Math.round(b.h * L.scale)));
+    });
+
+    document.getElementById('t-size').textContent = w + '×' + h;
+    note.textContent = L.scale < 1
+      ? t('ijn.capped', '결과가 너무 커서 ') + Math.round(L.scale * 100) +
+        t('ijn.capped2', '% 크기로 줄였습니다. 원본 크기로는 브라우저가 그림을 만들지 못합니다.')
+      : '';
+  }
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!items.length) return;
+    var btn = this;
+    btn.disabled = true;
+    var type = fmtSel.value;
+    var q = parseInt(qual.value, 10) / 100;
+    // 미리보기 캔버스가 곧 결과다. 따로 다시 그리지 않으므로 보이는 것과 저장되는 것이 같다.
+    canvas.toBlob(function (blob) {
+      btn.disabled = false;
+      if (!blob) { setMsg(t('ijn.fail', '그림을 만들지 못했습니다. 장수를 줄이거나 간격을 줄여 보세요.'), 'err'); return; }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = t('ijn.filename', '이어붙인-사진') + '.' + (type === 'image/png' ? 'png' : 'jpg');
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(items.length + t('ijn.done', '장을 한 장으로 붙여 저장했습니다. ') +
+             canvas.width + '×' + canvas.height + ' · ' + humanSize(blob.size), 'ok');
+    }, type, type === 'image/png' ? undefined : q);
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    items.forEach(function (it) { URL.revokeObjectURL(it.url); });
+    items = [];
+    list.innerHTML = '';
+    fileInput.value = '';
+    document.getElementById('cap-note').textContent = '';
+    area.hidden = true;
+    setMsg('');
+  });
+
+  syncFields();
+})();
+</script>
+</body>
+</html>

@@ -666,6 +666,128 @@ function run() {
     });
   }).catch(function (e) { log('붙여넣기로 이미지 넣기', false, '오류: ' + e.message); });
 
+  // ===== 2026-09-29 추가한 툴 4종 =====
+
+  // 색을 확인할 목적의 그림은 잡음이 없어야 한다. makeImg 는 압축이 줄어드는지 보려고
+  // 잡음을 넣으므로 픽셀 검사에는 쓸 수 없다.
+  function makeSolid(w, h, color) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var x = c.getContext('2d');
+    x.fillStyle = color; x.fillRect(0, 0, w, h);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+  }
+  // 왼쪽 절반이 완전히 투명하고 오른쪽 절반만 칠해진 PNG.
+  // 투명한 부분을 무슨 색으로 메우는지 확인하는 데 쓴다.
+  function makeHalfAlpha(w, h, color) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var x = c.getContext('2d');
+    x.clearRect(0, 0, w, h);
+    x.fillStyle = color; x.fillRect(Math.floor(w / 2), 0, Math.ceil(w / 2), h);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+  }
+  // 저장된 그림을 실제로 디코딩해 특정 좌표의 색을 읽는다
+  function samplePixels(blob, pts) {
+    return createImageBitmap(blob).then(function (bmp) {
+      var c = document.createElement('canvas');
+      c.width = bmp.width; c.height = bmp.height;
+      var x = c.getContext('2d');
+      x.drawImage(bmp, 0, 0);
+      return pts.map(function (p) {
+        var d = x.getImageData(p[0], p[1], 1, 1).data;
+        return [d[0], d[1], d[2], d[3]];
+      });
+    });
+  }
+  function near(px, r, g, b, tol) {
+    var t = tol === undefined ? 24 : tol;
+    return Math.abs(px[0] - r) <= t && Math.abs(px[1] - g) <= t && Math.abs(px[2] - b) <= t;
+  }
+
+  // PDF→이미지의 결과물 검증은 _dev/verify-real.html 에 있다.
+  // pdf-lib 으로 만든 합성 PDF 는 pdf.js 의 렌더가 끝나지 않아(3.11.174에서 확인) 여기서는 검증할 수 없다.
+
+  // 20. 이미지 형식 변환 — 투명 PNG를 JPG로 바꿀 때 고른 색으로 메워지는지 픽셀로 확인.
+  //     여기가 조용히 깨지면 투명한 부분이 검게 나오는데, 화면 표시로는 알 수 없다.
+  chain = chain.then(function () {
+    return makeHalfAlpha(40, 20, '#ff0000').then(function (blob) {
+      return loadFrame('../image-convert.html').then(function (f) {
+        var d = f.contentDocument, got = capture(f);
+        d.getElementById('to').value = 'image/jpeg';
+        d.getElementById('to').dispatchEvent(new Event('change', { bubbles: true }));
+        var bg = d.getElementById('bg');
+        bg.value = '#000000'; bg.dispatchEvent(new Event('change', { bubbles: true }));
+        var mark = got.length;
+        setFiles(d.getElementById('file'), [new File([blob], '로고.png', { type: 'image/png' })]);
+        return waitNew(got, mark, /jpeg/, 20000).then(function () {
+          // 목록은 변환이 끝난 뒤에 그려진다. Blob 이 생긴 시점과 같지 않으므로 따로 기다린다.
+          return waitFor(function () { return !!d.querySelector('#list .fname'); }, 10000);
+        }).then(function () {
+          var out = pickNew(got, mark, /jpeg/);
+          if (!out) { log('형식 변환 결과', false, 'JPG가 만들어지지 않음'); return; }
+          var name = d.querySelector('#list .fname');
+          return Promise.all([imgSize(out), samplePixels(out, [[5, 10], [35, 10]])])
+            .then(function (both) {
+              var s = both[0], px = both[1];
+              var filled = near(px[0], 0, 0, 0);         // 투명했던 왼쪽 → 검정
+              var kept = near(px[1], 255, 0, 0, 40);     // 칠해져 있던 오른쪽 → 빨강 유지
+              var renamed = !!name && /\.jpg$/.test(name.textContent);
+              log('형식 변환 결과', s.w === 40 && s.h === 20 && filled && kept && renamed,
+                  '저장된 JPG ' + s.w + '×' + s.h + ', 투명했던 자리 rgb(' + px[0].slice(0, 3) +
+                  ') 기대 검정 ' + (filled ? 'OK' : '실패') + ', 원래 색 rgb(' + px[1].slice(0, 3) +
+                  ') 유지 ' + (kept ? 'OK' : '실패') + ', 파일명 "' +
+                  (name ? name.textContent : '없음') + '"');
+            });
+        });
+      });
+    });
+  }).catch(function (e) { log('형식 변환 결과', false, '오류: ' + e.message); });
+
+  // 21. 사진 이어붙이기 — 순서와 배치가 실제 픽셀로 맞는지 확인.
+  //     크기만 보면 위아래가 뒤바뀐 것을 잡지 못한다.
+  chain = chain.then(function () {
+    return Promise.all([makeSolid(40, 20, '#ff0000'), makeSolid(40, 20, '#0000ff')])
+      .then(function (blobs) {
+        return loadFrame('../image-join.html').then(function (f) {
+          var d = f.contentDocument, got = capture(f);
+          setFiles(d.getElementById('file'), [
+            new File([blobs[0]], '1-빨강.png', { type: 'image/png' }),
+            new File([blobs[1]], '2-파랑.png', { type: 'image/png' })
+          ]);
+          return waitFor(function () { return d.getElementById('t-count').textContent === '2'; }, 15000)
+            .then(function () {
+              d.getElementById('dir').value = 'v';
+              d.getElementById('dir').dispatchEvent(new Event('change', { bubbles: true }));
+              d.getElementById('gap').value = '0';
+              d.getElementById('gap').dispatchEvent(new Event('change', { bubbles: true }));
+              d.getElementById('fmt').value = 'image/png';
+              d.getElementById('fmt').dispatchEvent(new Event('change', { bubbles: true }));
+              var shown = d.getElementById('t-size').textContent;
+              var mark = got.length;
+              d.getElementById('btn-save').click();
+              return waitNew(got, mark, /png/, 20000).then(function () {
+                var out = pickNew(got, mark, /png/);
+                if (!out) { log('사진 이어붙이기 결과', false, '결과 그림이 만들어지지 않음'); return; }
+                return Promise.all([imgSize(out), samplePixels(out, [[20, 5], [20, 30]])])
+                  .then(function (both) {
+                    var s = both[0], px = both[1];
+                    var top = near(px[0], 255, 0, 0);
+                    var bottom = near(px[1], 0, 0, 255);
+                    var sized = s.w === 40 && s.h === 40;
+                    var matches = shown === (s.w + '×' + s.h);
+                    log('사진 이어붙이기 결과', sized && top && bottom && matches,
+                        '저장된 그림 ' + s.w + '×' + s.h + ' (기대 40×40), 화면 표시 "' + shown +
+                        '" 일치 ' + (matches ? 'OK' : '불일치') + ', 위 rgb(' + px[0].slice(0, 3) +
+                        ') 빨강 ' + (top ? 'OK' : '실패') + ', 아래 rgb(' + px[1].slice(0, 3) +
+                        ') 파랑 ' + (bottom ? 'OK' : '실패'));
+                  });
+              });
+            });
+        });
+      });
+  }).catch(function (e) { log('사진 이어붙이기 결과', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 

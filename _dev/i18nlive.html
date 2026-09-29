@@ -138,13 +138,23 @@ var SETUP = {
   'qr-generate.html': function (d) {
     var t = d.getElementById('text');
     t.value = 'https://toolmoa.github.io'; t.dispatchEvent(new Event('input', { bubbles: true }));
+  },
+  // 결과를 스크립트가 그리는 페이지다. 뽑아 둔 상태에서 봐야 조 이름·안내까지 검사된다.
+  // 명단은 일부러 한글이 아닌 것으로 넣는다 — 사용자가 적은 이름은 번역 대상이 아닌데,
+  // 한글 이름을 넣으면 이 검사가 "번역이 안 된 한국어"로 잘못 집어낸다.
+  'random-pick.html': function (d) {
+    var n = d.getElementById('names');
+    n.value = 'A\nB\nC\nD';
+    n.dispatchEvent(new Event('input', { bubbles: true }));
+    d.getElementById('btn-go').click();
   }
 };
 
 var PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html',
              'char-count.html', 'text-clean.html', 'pdf-merge.html', 'pdf-split.html',
              'pdf-edit.html', 'file-convert.html', 'qr-generate.html', 'password-gen.html',
-             'unit-convert.html', 'date-calc.html', 'age-calc.html'];
+             'unit-convert.html', 'date-calc.html', 'age-calc.html',
+             'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html'];
 
 function run() {
   var seq = Promise.resolve();

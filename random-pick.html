@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>랜덤 뽑기 · 추첨기 · 순서 섞기 · 조 나누기 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="명단을 붙여넣고 당첨자를 뽑거나 순서를 섞거나 조를 나눕니다. 브라우저의 암호학적 난수를 써서 치우침이 없습니다. 입력한 명단은 어디로도 전송되지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/random-pick.html">
+<meta property="og:title" content="랜덤 뽑기 · 추첨기 · 조 나누기">
+<meta property="og:description" content="명단을 붙여넣고 공정하게 뽑기·섞기·조 나누기. 전송 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"랜덤 뽑기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/random-pick.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/random-pick.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="랜덤 뽑기 · 추첨기 · 조 나누기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="랜덤 뽑기 · 추첨기 · 조 나누기">
+<meta name="twitter:description" content="명단을 붙여넣고 공정하게 뽑기·섞기·조 나누기. 전송 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/random-pick.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"명단이 서버로 전송되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 입력한 명단과 결과는 브라우저 안에만 있습니다. 인터넷을 끊은 상태에서도 그대로 동작하는 것이 그 증거입니다. 기기에 저장해 두지도 않으므로 새로고침하면 사라집니다."}},{"@type":"Question","name":"정말 공정한가요? 결과를 믿을 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"브라우저의 암호학적 난수 생성기를 쓰고, 나머지 연산에서 생기는 치우침까지 제거했습니다. 다만 공개 추첨에서 참가자에게 공정함을 납득시키려면 화면을 공유한 상태에서 명단을 붙여넣고 그 자리에서 뽑는 방식을 권합니다. 어떤 도구든 결과만 보여 주면 믿기 어려운 것은 마찬가지입니다."}},{"@type":"Question","name":"같은 사람이 두 번 뽑히게 할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"\"같은 사람이 여러 번 뽑혀도 됨\"을 켜면 됩니다. 경품 1등·2등·3등을 각각 따로 추첨하는 경우처럼 매번 전원을 대상으로 뽑고 싶을 때 씁니다. 꺼 두면 한 번 뽑힌 사람은 다시 나오지 않습니다."}},{"@type":"Question","name":"사다리타기처럼 짝을 정하고 싶어요","acceptedAnswer":{"@type":"Answer","text":"순서 섞기를 쓰면 됩니다. 사다리타기는 보기에 재미있을 뿐 결과는 무작위 순서 하나를 고르는 것과 똑같습니다. 사람과 항목을 짝지으려면 한쪽 명단을 넣고 순서를 섞은 다음, 나온 순서대로 항목을 붙이면 됩니다."}},{"@type":"Question","name":"중복된 이름이나 빈 줄은 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"빈 줄은 자동으로 무시합니다. 같은 이름이 두 번 들어 있으면 서로 다른 참가자로 보고 그대로 둡니다(동명이인일 수 있으므로 임의로 지우지 않습니다). 몇 개가 겹쳤는지는 명단 아래에 알려 주므로, 실수라면 텍스트 정리로 중복을 지운 뒤 다시 넣으세요."}},{"@type":"Question","name":"엑셀에서 붙여넣어도 되나요?","acceptedAnswer":{"@type":"Answer","text":"됩니다. 한 열을 복사해 붙여넣으면 한 줄에 한 명씩 들어갑니다. 여러 열을 붙여넣으면 탭으로 이어진 한 줄이 되므로, 이름만 있는 열을 골라 복사하세요."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"랜덤 뽑기 · 추첨기 · 조 나누기","item":"https://toolmoa.github.io/random-pick.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="rnd.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" aria-current="page" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="rnd.h1">랜덤 뽑기 · 추첨기 · 조 나누기</h1>
+  <p class="lead" data-i18n="rnd.lead">명단을 붙여넣고 당첨자를 뽑거나, 발표 순서를 섞거나, 조를 나눕니다. 결과는 브라우저의 암호학적 난수로 정해집니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 내용은 어디로도 전송되지 않습니다</span>
+
+  <div class="card" style="margin-top:18px">
+    <div class="field">
+      <label for="names" data-i18n="rnd.names">명단 (한 줄에 한 명)</label>
+      <textarea id="names" placeholder="김민준&#10;이서연&#10;박지호&#10;최수아" data-i18n-ph="rnd.ph"></textarea>
+      <div class="hint" id="count-hint"></div>
+    </div>
+    <div class="field">
+      <label for="mode" data-i18n="rnd.mode">무엇을 할까요</label>
+      <select id="mode">
+        <option value="draw" selected data-i18n="rnd.mDraw">당첨자 뽑기</option>
+        <option value="shuffle" data-i18n="rnd.mShuffle">순서 섞기 (전원)</option>
+        <option value="teams" data-i18n="rnd.mTeams">조 나누기</option>
+      </select>
+    </div>
+    <div class="field" id="pick-field">
+      <label for="pick" data-i18n="rnd.pick">뽑을 인원</label>
+      <input type="number" id="pick" min="1" max="1000" value="1">
+      <label class="inline-check" style="margin:10px 0 0">
+        <input type="checkbox" id="dup">
+        <span data-i18n="rnd.dup">같은 사람이 여러 번 뽑혀도 됨 (경품 여러 개를 따로 추첨할 때)</span>
+      </label>
+    </div>
+    <div class="field" id="groups-field" hidden>
+      <label for="groups" data-i18n="rnd.groups">조 개수</label>
+      <input type="number" id="groups" min="2" max="100" value="2">
+      <div class="hint" data-i18n="rnd.groupsHint">인원이 딱 나뉘지 않으면 앞쪽 조에 한 명씩 더 들어갑니다.</div>
+    </div>
+    <div class="btn-row" style="margin-bottom:0">
+      <button class="btn" id="btn-go" data-i18n="rnd.go">뽑기</button>
+      <button class="btn secondary" id="btn-copy" data-i18n="rnd.copy">결과 복사</button>
+      <button class="btn secondary" id="btn-clear" data-i18n="rnd.clear">비우기</button>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="out"></div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="rnd.cross">명단에 <strong style="color:var(--text)">중복이나 빈 줄이 섞여 있으면</strong> <a href="text-clean.html">텍스트 정리</a>로 먼저 다듬으면 편합니다. 추첨용 비밀번호나 번호가 필요하면 <a href="password-gen.html">비밀번호 생성기</a>를 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:RANDOMPICK --></div>
+
+  <h2 data-ko-only>어떻게 공정함을 보장하나요</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      흔히 쓰는 <code>Math.random()</code>은 빠르지만 예측할 수 있는 난수라 추첨에는 적합하지 않습니다.
+      이 페이지는 브라우저가 제공하는 <strong style="color:var(--text)">암호학적 난수(crypto.getRandomValues)</strong>를 씁니다.
+      또 난수를 인원수로 나눈 나머지를 그대로 쓰면 앞번호가 조금 더 자주 뽑히는 치우침이 생기는데,
+      그 구간에 걸린 값은 버리고 다시 뽑는 방식으로 치우침을 없앴습니다.
+      섞기는 <strong style="color:var(--text)">피셔-예이츠</strong> 방식으로, 모든 순서가 같은 확률로 나옵니다.
+      결과는 화면에서만 만들어지고 명단은 기기 밖으로 나가지 않습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>이럴 때 씁니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">이벤트 당첨자 추첨</strong> — 댓글 명단을 붙여넣고 당첨 인원만큼 뽑습니다.<br>
+      <strong style="color:var(--text)">발표·면접 순서</strong> — 전원 순서를 섞어 그대로 공지합니다.<br>
+      <strong style="color:var(--text)">조 편성</strong> — 수업이나 워크숍에서 조를 고르게 나눕니다.<br>
+      <strong style="color:var(--text)">청소·당직 정하기</strong> — 사다리타기 대신 순서를 섞어 정합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>명단이 서버로 전송되나요?</summary>
+      <p>아니요. 입력한 명단과 결과는 브라우저 안에만 있습니다. 인터넷을 끊은 상태에서도 그대로 동작하는 것이 그 증거입니다. 기기에 저장해 두지도 않으므로 새로고침하면 사라집니다.</p>
+    </details>
+    <details>
+      <summary>정말 공정한가요? 결과를 믿을 수 있나요?</summary>
+      <p>브라우저의 암호학적 난수 생성기를 쓰고, 나머지 연산에서 생기는 치우침까지 제거했습니다. 다만 공개 추첨에서 참가자에게 공정함을 납득시키려면 <strong>화면을 공유한 상태에서 명단을 붙여넣고 그 자리에서 뽑는</strong> 방식을 권합니다. 어떤 도구든 결과만 보여 주면 믿기 어려운 것은 마찬가지입니다.</p>
+    </details>
+    <details>
+      <summary>같은 사람이 두 번 뽑히게 할 수 있나요?</summary>
+      <p>"같은 사람이 여러 번 뽑혀도 됨"을 켜면 됩니다. 경품 1등·2등·3등을 각각 따로 추첨하는 경우처럼 매번 전원을 대상으로 뽑고 싶을 때 씁니다. 꺼 두면 한 번 뽑힌 사람은 다시 나오지 않습니다.</p>
+    </details>
+    <details>
+      <summary>사다리타기처럼 짝을 정하고 싶어요</summary>
+      <p>순서 섞기를 쓰면 됩니다. 사다리타기는 보기에 재미있을 뿐 결과는 무작위 순서 하나를 고르는 것과 똑같습니다. 사람과 항목을 짝지으려면 한쪽 명단을 넣고 순서를 섞은 다음, 나온 순서대로 항목을 붙이면 됩니다.</p>
+    </details>
+    <details>
+      <summary>중복된 이름이나 빈 줄은 어떻게 되나요?</summary>
+      <p>빈 줄은 자동으로 무시합니다. 같은 이름이 두 번 들어 있으면 서로 다른 참가자로 보고 그대로 둡니다(동명이인일 수 있으므로 임의로 지우지 않습니다). 몇 개가 겹쳤는지는 명단 아래에 알려 주므로, 실수라면 <a href="text-clean.html">텍스트 정리</a>로 중복을 지운 뒤 다시 넣으세요.</p>
+    </details>
+    <details>
+      <summary>엑셀에서 붙여넣어도 되나요?</summary>
+      <p>됩니다. 한 열을 복사해 붙여넣으면 한 줄에 한 명씩 들어갑니다. 여러 열을 붙여넣으면 탭으로 이어진 한 줄이 되므로, 이름만 있는 열을 골라 복사하세요.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var namesEl = document.getElementById('names');
+  var modeSel = document.getElementById('mode');
+  var pickInput = document.getElementById('pick');
+  var dupChk = document.getElementById('dup');
+  var groupsInput = document.getElementById('groups');
+  var msg = document.getElementById('msg');
+  var out = document.getElementById('out');
+
+  var lastText = '';      // 복사용으로 마지막 결과를 글로도 보관한다
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+
+  // 0 이상 n 미만의 정수를 치우침 없이 뽑는다.
+  // getRandomValues 값을 n 으로 나눈 나머지를 그대로 쓰면 앞쪽 번호가 조금 더 자주 나온다.
+  // 32비트를 n 의 배수로 자른 뒤 남는 꼬리에 걸린 값은 버리고 다시 뽑는다.
+  function randBelow(n) {
+    if (n <= 1) return 0;
+    var limit = Math.floor(0x100000000 / n) * n;
+    var buf = new Uint32Array(1);
+    var v;
+    do { crypto.getRandomValues(buf); v = buf[0]; } while (v >= limit);
+    return v % n;
+  }
+
+  // 피셔-예이츠. 모든 순서가 같은 확률로 나온다.
+  function shuffled(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = randBelow(i + 1);
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function parseNames() {
+    return namesEl.value.split(/\r?\n/)
+      .map(function (s) { return s.trim(); })
+      .filter(function (s) { return s.length > 0; });
+  }
+
+  function syncCount() {
+    var list = parseNames();
+    var seen = {}, dups = 0;
+    list.forEach(function (n) {
+      if (seen[n]) dups++; else seen[n] = 1;
+    });
+    var el = document.getElementById('count-hint');
+    if (!list.length) {
+      el.textContent = t('rnd.empty', '명단을 한 줄에 한 명씩 붙여넣으세요.');
+    } else {
+      el.textContent = t('rnd.cnt1', '참가자 ') + list.length + t('rnd.cnt2', '명') +
+        (dups ? t('rnd.dupFound1', ' · 같은 이름이 ') + dups + t('rnd.dupFound2', '개 겹칩니다 (그대로 각각 참가자로 셉니다)') : '');
+    }
+    pickInput.max = Math.max(1, list.length);
+    groupsInput.max = Math.max(2, list.length);
+  }
+
+  namesEl.addEventListener('input', syncCount);
+  modeSel.addEventListener('change', syncMode);
+  // 언어를 바꾸면 스크립트가 쓴 안내문과 결과도 다시 만들어야 한다
+  document.addEventListener('langchange', function () { syncCount(); syncMode(); });
+
+  function syncMode() {
+    var m = modeSel.value;
+    document.getElementById('pick-field').hidden = m !== 'draw';
+    document.getElementById('groups-field').hidden = m !== 'teams';
+    document.getElementById('btn-go').textContent =
+      m === 'draw' ? t('rnd.go', '뽑기')
+      : m === 'shuffle' ? t('rnd.goShuffle', '순서 섞기')
+      : t('rnd.goTeams', '조 나누기');
+  }
+
+  function card(title, body) {
+    return '<div class="card"><h3 style="margin:0 0 10px;font-size:16px">' + title + '</h3>' + body + '</div>';
+  }
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // 뽑은 결과 자체(누가 뽑혔는지)와, 그것을 화면에 옮기는 일을 나눠 둔다.
+  // 언어를 바꿨을 때 다시 뽑지 않고 같은 결과를 그대로 다른 언어로 다시 그리기 위해서다.
+  var last = null;    // { kind: 'draw'|'shuffle'|'teams', total, picked|order|teams }
+
+  document.addEventListener('langchange', function () { if (last) paint(); });
+
+  function paint() {
+    if (!last) return;
+
+    if (last.kind === 'draw') {
+      lastText = last.picked.map(function (v, i) { return (i + 1) + '. ' + v; }).join('\n');
+      out.innerHTML = card(
+        t('rnd.result', '당첨') + ' ' + last.picked.length + t('rnd.cnt2', '명'),
+        '<ol style="margin:0;padding-left:22px;font-size:17px;line-height:2">' +
+        last.picked.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ol>');
+      setMsg(last.total + t('rnd.of', '명 중에서 ') + last.picked.length +
+             t('rnd.drew', '명을 뽑았습니다.'), 'ok');
+      return;
+    }
+
+    if (last.kind === 'shuffle') {
+      lastText = last.order.map(function (v, i) { return (i + 1) + '. ' + v; }).join('\n');
+      out.innerHTML = card(
+        t('rnd.order', '섞은 순서'),
+        '<ol style="margin:0;padding-left:22px;font-size:16px;line-height:1.9">' +
+        last.order.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ol>');
+      setMsg(last.order.length + t('rnd.shuffled', '명의 순서를 섞었습니다.'), 'ok');
+      return;
+    }
+
+    // 조 이름은 언어마다 어순이 다르다 ("1조" / "Team 1"). 번호 자리를 {n} 으로 비워 둔다.
+    function teamName(i) { return t('rnd.teamHead', '{n}조').replace('{n}', i + 1); }
+
+    lastText = last.teams.map(function (tm, i) {
+      return teamName(i) + ' (' + tm.length + t('rnd.cnt2', '명') + ')\n' +
+             tm.map(function (v) { return '  - ' + v; }).join('\n');
+    }).join('\n\n');
+
+    out.innerHTML = '<div class="grid">' + last.teams.map(function (tm, i) {
+      return '<div class="card" style="margin:0">' +
+        '<h3 style="margin:0 0 8px;font-size:16px">' + teamName(i) +
+        ' <span style="color:var(--muted);font-weight:400;font-size:13px">' + tm.length + t('rnd.cnt2', '명') + '</span></h3>' +
+        '<ul style="margin:0;padding-left:20px;font-size:15px;line-height:1.8">' +
+        tm.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ul></div>';
+    }).join('') + '</div>';
+    setMsg(last.total + t('rnd.intoTeams1', '명을 ') + last.teams.length +
+           t('rnd.intoTeams2', '개 조로 나눴습니다.'), 'ok');
+  }
+
+  document.getElementById('btn-go').addEventListener('click', function () {
+    var list = parseNames();
+    if (!list.length) {
+      setMsg(t('rnd.needNames', '명단을 먼저 입력해 주세요.'), 'err');
+      out.innerHTML = ''; lastText = ''; last = null; return;
+    }
+    var m = modeSel.value;
+
+    if (m === 'draw') {
+      var n = parseInt(pickInput.value, 10) || 1;
+      var allowDup = dupChk.checked;
+      if (!allowDup && n > list.length) {
+        setMsg(t('rnd.tooMany', '뽑을 인원이 참가자보다 많습니다. 중복을 허용하거나 인원을 줄여 주세요.'), 'err');
+        return;
+      }
+      var picked = [];
+      if (allowDup) {
+        for (var i = 0; i < n; i++) picked.push(list[randBelow(list.length)]);
+      } else {
+        picked = shuffled(list).slice(0, n);
+      }
+      last = { kind: 'draw', total: list.length, picked: picked };
+      paint();
+      return;
+    }
+
+    if (m === 'shuffle') {
+      last = { kind: 'shuffle', total: list.length, order: shuffled(list) };
+      paint();
+      return;
+    }
+
+    var g = parseInt(groupsInput.value, 10) || 2;
+    if (g > list.length) {
+      setMsg(t('rnd.tooManyG', '조 개수가 참가자보다 많습니다.'), 'err');
+      return;
+    }
+    var pool = shuffled(list);
+    var teams = [];
+    for (var k = 0; k < g; k++) teams.push([]);
+    // 앞쪽 조부터 한 명씩 돌려 담으면 인원 차이가 최대 한 명으로 유지된다
+    pool.forEach(function (name, idx) { teams[idx % g].push(name); });
+
+    last = { kind: 'teams', total: list.length, teams: teams };
+    paint();
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    if (!lastText) { setMsg(t('rnd.nothing', '복사할 결과가 없습니다. 먼저 뽑아 주세요.'), 'err'); return; }
+    var done = function () { setMsg(t('rnd.copied', '결과를 복사했습니다.'), 'ok'); };
+    var fail = function () { setMsg(t('rnd.copyFail', '복사하지 못했습니다. 결과를 직접 선택해 복사해 주세요.'), 'err'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lastText).then(done, fail);
+      return;
+    }
+    // 예전 브라우저나 보안 맥락이 아닐 때를 위한 대체 경로
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = lastText;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      ta.remove();
+      ok ? done() : fail();
+    } catch (e) { fail(); }
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    namesEl.value = '';
+    out.innerHTML = '';
+    lastText = ''; last = null;
+    setMsg('');
+    syncCount();
+  });
+
+  syncCount();
+  syncMode();
+})();
+</script>
+</body>
+</html>

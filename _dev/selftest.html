@@ -472,6 +472,256 @@ function run() {
     });
   }).catch(function (e) { log('비밀번호 생성기', false, '오류: ' + e.message); });
 
+  // ===== 2026-09-29 추가한 툴 4종 (화면 동작) =====
+
+  function makeSolid(w, h, color) {
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var x = c.getContext('2d');
+    x.fillStyle = color; x.fillRect(0, 0, w, h);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+  }
+
+  var NAMES = ['김민준', '이서연', '박지호', '최수아', '정하윤'];
+
+  // 랜덤 뽑기 — 뽑은 결과가 명단 안에 있고 서로 겹치지 않는지
+  chain = chain.then(function () {
+    return loadFrame('../random-pick.html').then(function (f) {
+      var d = f.contentDocument;
+      var ta = d.getElementById('names');
+      ta.value = NAMES.join('\n');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      d.getElementById('mode').value = 'draw';
+      d.getElementById('mode').dispatchEvent(new Event('change', { bubbles: true }));
+      d.getElementById('pick').value = '3';
+      d.getElementById('btn-go').click();
+
+      var items = Array.prototype.map.call(d.querySelectorAll('#out li'), function (li) {
+        return li.textContent.trim();
+      });
+      var uniq = items.filter(function (v, i, a) { return a.indexOf(v) === i; }).length;
+      var inList = items.every(function (v) { return NAMES.indexOf(v) >= 0; });
+      var hintOk = /5/.test(d.getElementById('count-hint').textContent);
+
+      // 중복 허용을 켜면 인원보다 많이 뽑을 수 있어야 한다
+      d.getElementById('dup').checked = true;
+      d.getElementById('pick').value = '7';
+      d.getElementById('btn-go').click();
+      var many = d.querySelectorAll('#out li').length;
+
+      log('랜덤 뽑기', items.length === 3 && uniq === 3 && inList && hintOk && many === 7,
+          '5명 중 3명 뽑기 → ' + items.length + '명 (서로 다름 ' + uniq + '/3, 명단 안 ' +
+          (inList ? 'OK' : '벗어남') + '), 참가자 수 표시 ' + (hintOk ? 'OK' : '실패') +
+          ', 중복 허용 7명 요청 → ' + many + '명');
+    });
+  }).catch(function (e) { log('랜덤 뽑기', false, '오류: ' + e.message); });
+
+  // 랜덤 조 나누기·순서 섞기 — 한 명도 빠지거나 늘지 않아야 한다
+  chain = chain.then(function () {
+    return loadFrame('../random-pick.html').then(function (f) {
+      var d = f.contentDocument;
+      var ta = d.getElementById('names');
+      ta.value = NAMES.join('\n');
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+
+      var mode = d.getElementById('mode');
+      mode.value = 'teams'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+      var groupsShown = !d.getElementById('groups-field').hidden;
+      d.getElementById('groups').value = '2';
+      d.getElementById('btn-go').click();
+      var cards = d.querySelectorAll('#out .card').length;
+      var inTeams = Array.prototype.map.call(d.querySelectorAll('#out li'), function (li) {
+        return li.textContent.trim();
+      }).sort().join(',');
+
+      mode.value = 'shuffle'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+      d.getElementById('btn-go').click();
+      var shuffled = Array.prototype.map.call(d.querySelectorAll('#out li'), function (li) {
+        return li.textContent.trim();
+      });
+      var sameSet = shuffled.slice().sort().join(',') === NAMES.slice().sort().join(',');
+
+      d.getElementById('btn-clear').click();
+      var cleared = d.getElementById('out').innerHTML === '' && d.getElementById('names').value === '';
+
+      log('랜덤 조 나누기·섞기',
+          groupsShown && cards === 2 && inTeams === NAMES.slice().sort().join(',') &&
+          shuffled.length === 5 && sameSet && cleared,
+          '2개 조 → 카드 ' + cards + '개, 조에 담긴 인원 ' + inTeams.split(',').length +
+          '명 (명단과 일치 ' + (inTeams === NAMES.slice().sort().join(',') ? 'OK' : '불일치') +
+          '), 섞기 ' + shuffled.length + '명 집합 동일 ' + (sameSet ? 'OK' : '실패') +
+          ', 비우기 ' + (cleared ? 'OK' : '실패'));
+    });
+  }).catch(function (e) { log('랜덤 조 나누기·섞기', false, '오류: ' + e.message); });
+
+  // 복사할 것이 없을 때 조용히 넘어가지 않고 알려주는지
+  chain = chain.then(function () {
+    return loadFrame('../random-pick.html').then(function (f) {
+      var d = f.contentDocument;
+      d.getElementById('btn-copy').click();
+      var err = d.querySelector('#msg .notice.err');
+      d.getElementById('btn-go').click();          // 명단이 비어 있을 때도 알려야 한다
+      var err2 = d.querySelector('#msg .notice.err');
+      log('랜덤 뽑기 빈 입력 안내', !!err && !!err2,
+          '결과 없이 복사 → ' + (err ? '안내 표시' : '반응 없음') +
+          ', 명단 없이 뽑기 → ' + (err2 ? '안내 표시' : '반응 없음'));
+    });
+  }).catch(function (e) { log('랜덤 뽑기 빈 입력 안내', false, '오류: ' + e.message); });
+
+  // 이미지 형식 변환 — 형식에 따라 화질·배경 칸이 맞게 나타나는지
+  chain = chain.then(function () {
+    return makeSolid(30, 20, '#123456').then(function (blob) {
+      return loadFrame('../image-convert.html').then(function (f) {
+        var d = f.contentDocument;
+        var to = d.getElementById('to');
+        to.value = 'image/png'; to.dispatchEvent(new Event('change', { bubbles: true }));
+        var qHiddenForPng = d.getElementById('q-field').hidden;
+        var noneAllowed = !d.querySelector('#bg option[value="none"]').disabled;
+
+        to.value = 'image/jpeg'; to.dispatchEvent(new Event('change', { bubbles: true }));
+        var qShownForJpg = !d.getElementById('q-field').hidden;
+        // JPG 는 투명을 담을 수 없으므로 "투명하게 두기"를 고를 수 없어야 한다
+        var noneBlocked = d.querySelector('#bg option[value="none"]').disabled;
+
+        var bg = d.getElementById('bg');
+        bg.value = 'custom'; bg.dispatchEvent(new Event('change', { bubbles: true }));
+        var pickerShown = !d.getElementById('bg-color').hidden;
+        d.getElementById('quality').value = '80';
+        d.getElementById('quality').dispatchEvent(new Event('input', { bubbles: true }));
+        var qLabel = d.getElementById('q-val').textContent;
+
+        setFiles(d.getElementById('file'), [new File([blob], '그림.png', { type: 'image/png' })]);
+        return waitFor(function () { return d.getElementById('t-count').textContent === '1'; }, 15000)
+          .then(function (ok) {
+            var hasSave = !!d.getElementById('btn-all');
+            var meta = (d.querySelector('#list .fmeta') || {}).textContent || '';
+            log('이미지 형식 변환 화면',
+                qHiddenForPng && noneAllowed && qShownForJpg && noneBlocked &&
+                pickerShown && qLabel === '80%' && ok && hasSave && /30×20/.test(meta),
+                'PNG 선택 시 화질칸 숨김 ' + (qHiddenForPng ? 'OK' : '실패') +
+                ', JPG 선택 시 표시 ' + (qShownForJpg ? 'OK' : '실패') +
+                ', JPG에서 투명 유지 차단 ' + (noneBlocked ? 'OK' : '실패') +
+                ', 색 고르기 칸 ' + (pickerShown ? 'OK' : '실패') +
+                ', 화질 표시 ' + qLabel + ', 목록 "' + meta.trim() + '"');
+          });
+      });
+    });
+  }).catch(function (e) { log('이미지 형식 변환 화면', false, '오류: ' + e.message); });
+
+  // 사진 이어붙이기 — 방향·격자·간격에 따라 결과 크기가 계산대로 나오는지
+  chain = chain.then(function () {
+    return Promise.all([makeSolid(100, 50, '#ff0000'), makeSolid(60, 30, '#0000ff')])
+      .then(function (blobs) {
+        return loadFrame('../image-join.html').then(function (f) {
+          var d = f.contentDocument;
+          setFiles(d.getElementById('file'), [
+            new File([blobs[0]], 'a.png', { type: 'image/png' }),
+            new File([blobs[1]], 'b.png', { type: 'image/png' })
+          ]);
+          return waitFor(function () { return d.getElementById('t-count').textContent === '2'; }, 15000)
+            .then(function () {
+              function set(id, v) {
+                var el = d.getElementById(id);
+                el.value = v;
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+              set('align', 'fit');
+              set('gap', '0');
+              set('bgc', '#ffffff');
+              set('dir', 'v');
+              var vSize = d.getElementById('t-size').textContent;    // 기대 60×60
+              set('dir', 'h');
+              var hSize = d.getElementById('t-size').textContent;    // 기대 120×30
+              set('dir', 'g');
+              var colsShown = !d.getElementById('cols-field').hidden;
+              set('cols', '2');
+              set('gap', '10');
+              var gSize = d.getElementById('t-size').textContent;    // 기대 130×30
+              // 순서를 바꾸면 목록 번호도 따라 바뀌어야 한다
+              var second = d.querySelectorAll('#list li')[1];
+              second.querySelector('button[aria-label]').click();     // ↑ 앞으로
+              var firstName = d.querySelector('#list .fname').textContent;
+
+              log('사진 이어붙이기 배치',
+                  vSize === '60×60' && hSize === '120×30' && colsShown && gSize === '130×30' &&
+                  /b\.png$/.test(firstName),
+                  '세로 ' + vSize + ' (기대 60×60), 가로 ' + hSize + ' (기대 120×30), 격자 2열·간격10 ' +
+                  gSize + ' (기대 130×30), 한 줄 장수 칸 ' + (colsShown ? 'OK' : '숨음') +
+                  ', ↑로 옮긴 뒤 첫 항목 "' + firstName + '"');
+            });
+        });
+      });
+  }).catch(function (e) { log('사진 이어붙이기 배치', false, '오류: ' + e.message); });
+
+  // PDF → 이미지 — 페이지 선택과 해상도 안내가 화면에 맞게 나오는지.
+  //
+  // 반드시 실제 PDF 를 쓴다. pdf-lib 으로 만든 합성 PDF 는 pdf.js 3.11.174 에서
+  // getDocument 까지는 되는데 page.render 가 끝나지도 실패하지도 않는다.
+  // 합성 PDF 로 검사하면 미리보기가 영영 0장이라 거짓 실패가 난다.
+  chain = chain.then(function () {
+    return fetch('fixtures/real-b.pdf').then(function (r) { return r.ok ? r.blob() : null; })
+      .catch(function () { return null; })
+      .then(function (blob) {
+        if (!blob) { log('PDF→이미지 화면', false, '고정자료 fixtures/real-b.pdf 없음'); return; }
+        return loadFrame('../pdf-to-image.html').then(function (f) {
+          var d = f.contentDocument;
+          setFiles(d.getElementById('file'), [new File([blob], 'real-b.pdf', { type: 'application/pdf' })]);
+          return waitFor(function () { return d.getElementById('t-pages').textContent !== '0'; }, 40000)
+            .then(function (loaded) {
+              var pages = parseInt(d.getElementById('t-pages').textContent, 10);
+              // 비워 두면 전체를 뜻한다
+              var allPick = d.getElementById('t-pick').textContent;
+              var allOk = parseInt(allPick, 10) === pages;
+              var r2 = d.getElementById('range');
+              r2.value = '1'; r2.dispatchEvent(new Event('input', { bubbles: true }));
+              var onePick = d.getElementById('t-pick').textContent;
+              var zipHiddenForOne = d.getElementById('zip-field').hidden;
+
+              // 고정자료의 쪽수에 기대지 않는다 (1쪽짜리로 바뀌어도 거짓 실패하지 않게)
+              r2.value = pages >= 2 ? '1-2' : '1';
+              r2.dispatchEvent(new Event('input', { bubbles: true }));
+              var zipShown = pages < 2 || !d.getElementById('zip-field').hidden;
+
+              function px(scale) {
+                var s = d.getElementById('scale');
+                s.value = String(scale); s.dispatchEvent(new Event('change', { bubbles: true }));
+                var n = (d.getElementById('s-hint').textContent.match(/\d+/g) || []).slice(-2);
+                return n.map(Number);
+              }
+              var at1 = px(1), at2 = px(2);
+              // 배율을 두 배로 하면 픽셀도 두 배가 되어야 한다 (한도에 걸리지 않는 한)
+              var doubles = at1.length === 2 && at2.length === 2 &&
+                            Math.abs(at2[0] - at1[0] * 2) <= 2 && Math.abs(at2[1] - at1[1] * 2) <= 2;
+
+              var fmt = d.getElementById('fmt');
+              fmt.value = 'png'; fmt.dispatchEvent(new Event('change', { bubbles: true }));
+              var qHidden = d.getElementById('q-field').hidden;
+              fmt.value = 'jpg'; fmt.dispatchEvent(new Event('change', { bubbles: true }));
+              var qShown = !d.getElementById('q-field').hidden;
+              d.getElementById('quality').value = '70';
+              d.getElementById('quality').dispatchEvent(new Event('input', { bubbles: true }));
+              var qLabel = d.getElementById('q-val').textContent;
+
+              // 카드만 있고 그림이 비어도 화면상으로는 티가 안 난다. 캔버스 수로 본다.
+              return waitFor(function () {
+                return d.querySelectorAll('#grid canvas').length === pages;
+              }, 40000).then(function (thumbs) {
+                var drawn = d.querySelectorAll('#grid canvas').length;
+                log('PDF→이미지 화면',
+                    loaded && allOk && parseInt(onePick, 10) === 1 && zipHiddenForOne &&
+                    zipShown && doubles && qHidden && qShown && qLabel === '70' && thumbs,
+                    pages + '쪽 · 비움=전체 "' + allPick + '" ' + (allOk ? 'OK' : '불일치') +
+                    ', 1쪽 선택 "' + onePick + '", ZIP칸 1장일 때 ' +
+                    (zipHiddenForOne ? '숨음' : '표시') + '·2장일 때 ' + (zipShown ? '표시' : '숨음') +
+                    ', 1배 ' + at1.join('×') + ' → 2배 ' + at2.join('×') + ' (두 배 ' +
+                    (doubles ? 'OK' : '어긋남') + '), PNG에서 화질칸 ' + (qHidden ? '숨김' : '표시') +
+                    ', 화질 표시 ' + qLabel + ', 미리보기 ' + drawn + '/' + pages + '장');
+              });
+            });
+        });
+      });
+  }).catch(function (e) { log('PDF→이미지 화면', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 

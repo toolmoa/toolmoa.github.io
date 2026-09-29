@@ -415,6 +415,103 @@ function run() {
     });
   }).catch(function (e) { log('EN: 규격 맞추기', false, '오류: ' + e.message); });
 
+  // 11. 실제 PDF → 이미지. 화면이 예고한 픽셀 수와 저장된 파일이 같은지 본다.
+  //     (합성 PDF 로는 검증할 수 없다 — pdf-lib 이 만든 문서는 pdf.js 렌더가 끝나지 않는다)
+  chain = chain.then(function () {
+    if (!FX.pdfB) { log('실제 PDF→이미지', false, '고정자료 없음'); return; }
+    return loadFrame('../pdf-to-image.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([FX.pdfB], 'real-b.pdf', { type: 'application/pdf' })]);
+      return waitFor(function () { return d.getElementById('t-pages').textContent !== '0'; }, 40000)
+        .then(function () {
+          var r = d.getElementById('range');
+          r.value = '1'; r.dispatchEvent(new Event('input', { bubbles: true }));
+          d.getElementById('fmt').value = 'jpg';
+          d.getElementById('fmt').dispatchEvent(new Event('change', { bubbles: true }));
+          d.getElementById('scale').value = '2';
+          d.getElementById('scale').dispatchEvent(new Event('change', { bubbles: true }));
+          // 화면이 "1쪽이 800 × 1067 픽셀로 저장됩니다" 라고 예고한 값을 그대로 쓴다
+          var nums = (d.getElementById('s-hint').textContent.match(/\d+/g) || []).slice(-2);
+          var mark = got.length;
+          d.getElementById('btn-go').click();
+          return waitNew(got, mark, /jpeg/, 60000).then(function () {
+            var out = pickNew(got, mark, /jpeg/);
+            if (!out) { log('실제 PDF→이미지', false, 'JPG가 만들어지지 않음 · ' + msgOf(d)); return; }
+            return Promise.all([imgSize(out), out.arrayBuffer()]).then(function (both) {
+              var s = both[0], u8 = new Uint8Array(both[1]);
+              var jpeg = u8[0] === 0xFF && u8[1] === 0xD8 && u8[2] === 0xFF;
+              var promised = nums.length === 2 && parseInt(nums[0], 10) === s.w &&
+                             parseInt(nums[1], 10) === s.h;
+              log('실제 PDF→이미지', jpeg && promised && s.w > 0 && !f.dataset.errs,
+                  '화면 예고 ' + nums.join('×') + ' → 저장된 파일 ' + s.w + '×' + s.h +
+                  ' (일치 ' + (promised ? 'OK' : '불일치') + '), JPEG 서명 ' + (jpeg ? 'OK' : '아님') +
+                  ', ' + kb(out.size) + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('실제 PDF→이미지', false, '오류: ' + e.message); });
+
+  // 12. 여러 쪽을 고르면 ZIP 한 개 안에 진짜 JPG 가 들어 있는지
+  chain = chain.then(function () {
+    if (!FX.pdfB || FX.pagesB < 2) { log('실제 PDF→이미지 ZIP', false, '2쪽 이상인 고정자료 없음'); return; }
+    return loadFrame('../pdf-to-image.html').then(function (f) {
+      var d = f.contentDocument, got = capture(f);
+      setFiles(d.getElementById('file'), [new File([FX.pdfB], 'real-b.pdf', { type: 'application/pdf' })]);
+      return waitFor(function () { return d.getElementById('t-pages').textContent !== '0'; }, 40000)
+        .then(function () {
+          var r = d.getElementById('range');
+          r.value = '1-2'; r.dispatchEvent(new Event('input', { bubbles: true }));
+          d.getElementById('scale').value = '1';   // 두 장이므로 가볍게
+          d.getElementById('scale').dispatchEvent(new Event('change', { bubbles: true }));
+          var zipShown = !d.getElementById('zip-field').hidden;
+          var checked = d.getElementById('as-zip').checked;
+          var mark = got.length;
+          d.getElementById('btn-go').click();
+          return waitNew(got, mark, /zip/, 90000).then(function () {
+            var z = pickNew(got, mark, /zip/);
+            var loose = got.slice(mark).filter(function (x) {
+              return !(x && typeof x.name === 'string') && /jpeg/.test(x.type || '');
+            });
+            if (!z) { log('실제 PDF→이미지 ZIP', false, 'ZIP이 만들어지지 않음 · ' + msgOf(d)); return; }
+            return z.arrayBuffer().then(function (ab) {
+              var u8 = new Uint8Array(ab);
+              // 쓰는 쪽 코드를 그대로 쓰면 순환 논증이 된다. 여기서 직접 읽는다.
+              var dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+              var eocd = -1;
+              for (var i = u8.length - 22; i >= 0; i--) {
+                if (dv.getUint32(i, true) === 0x06054B50) { eocd = i; break; }
+              }
+              var count = eocd >= 0 ? dv.getUint16(eocd + 10, true) : 0;
+              var cdOff = eocd >= 0 ? dv.getUint32(eocd + 16, true) : 0;
+              var dec = new TextDecoder('utf-8');
+              var names = [], allJpeg = true, p = cdOff;
+              for (var n = 0; n < count; n++) {
+                var nameLen = dv.getUint16(p + 28, true);
+                var extraLen = dv.getUint16(p + 30, true);
+                var cmtLen = dv.getUint16(p + 32, true);
+                var lhOff = dv.getUint32(p + 42, true);
+                names.push(dec.decode(u8.subarray(p + 46, p + 46 + nameLen)));
+                var lnLen = dv.getUint16(lhOff + 26, true);
+                var lxLen = dv.getUint16(lhOff + 28, true);
+                var start = lhOff + 30 + lnLen + lxLen;
+                if (!(u8[start] === 0xFF && u8[start + 1] === 0xD8 && u8[start + 2] === 0xFF)) allJpeg = false;
+                p += 46 + nameLen + extraLen + cmtLen;
+              }
+              var named = names.length === 2 && /_1\.jpg$/.test(names[0]) && /_2\.jpg$/.test(names[1]);
+              log('실제 PDF→이미지 ZIP',
+                  zipShown && checked && count === 2 && allJpeg && named &&
+                  loose.length === 0 && !f.dataset.errs,
+                  'ZIP(' + kb(z.size) + ') 안에 ' + count + '개 [' + names.join(', ') +
+                  '], 전부 JPEG ' + (allJpeg ? 'OK' : '아님') + ', 개별 다운로드 ' + loose.length +
+                  '건 (기대 0), 체크박스 표시 ' + (zipShown ? 'OK' : '숨음') +
+                  (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+            });
+          });
+        });
+    });
+  }).catch(function (e) { log('실제 PDF→이미지 ZIP', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 
