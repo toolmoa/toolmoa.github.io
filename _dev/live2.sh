@@ -19,11 +19,14 @@ echo
 echo "=== 9. 홈에서 모든 툴로 갈 수 있는가 ==="
 home=$(curl -s "$BASE/")
 missing=0
-for t in image-compress image-crop img-to-pdf char-count text-clean pdf-merge pdf-split \
-         pdf-edit file-convert qr-generate password-gen unit-convert date-calc age-calc; do
+# 툴을 늘리면 여기에도 반드시 추가할 것. 빠뜨리면 이 검사가 조용히 옛 목록만 본다.
+TOOLS="image-compress image-crop image-convert image-join img-to-pdf char-count text-clean
+       pdf-merge pdf-split pdf-edit pdf-to-image file-convert qr-generate password-gen
+       random-pick unit-convert date-calc age-calc"
+for t in $TOOLS; do
   echo "$home" | grep -q "$t.html" || { echo "  홈에 링크 없음: $t"; missing=$((missing+1)); }
 done
-[ $missing -eq 0 ] && echo "  툴 14종 전부 홈에서 연결됨" || fail=$((fail+missing))
+[ $missing -eq 0 ] && echo "  툴 $(echo $TOOLS | wc -w | tr -d ' ')종 전부 홈에서 연결됨" || fail=$((fail+missing))
 
 echo
 echo "=== 10. hreflang 이 서로를 가리키는가 ==="
