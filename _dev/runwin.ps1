@@ -30,7 +30,13 @@ public static class Win {
 
 $prefix = @{}
 foreach ($n in $Names) {
-  $page = Join-Path $root "_dev\$n.html"
+  # 이름 대신 경로를 주면 사이트 밖의 검사 페이지도 띄운다 (예: 판매용 제품 폴더의 _dev\test.html)
+  if ($n -match '[\\/]') {
+    $page = (Resolve-Path $n).Path
+    $n = 'ext-' + (Split-Path (Split-Path (Split-Path $page -Parent) -Parent) -Leaf)
+  } else {
+    $page = Join-Path $root "_dev\$n.html"
+  }
   if (-not (Test-Path $page)) { throw "없는 검사: $n" }
   $url = 'file:///' + (($page -replace '\\', '/') -replace ' ', '%20')
   $prof = Join-Path $root "_dev\.prof-$n"
