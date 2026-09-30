@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>영어판 4종 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">영어판 4종 점검 (2026-09-30)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  coverage.pl 은 id 이름으로만 대조하므로, 한국어판과 id 가 같은 영어판은 한 번도 띄워 보지 않아도
+  "검사됨"으로 나온다. 그래서 영어판을 실제로 띄워 결과물을 다시 읽어 확인한다.
+  ZIP 은 verify.html 과 같은 원칙으로 zip.js 를 쓰지 않는 별도 해석기로 읽는다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:220px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 15000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 80);
+    })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 250);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+// 내려받기를 가로채 Blob 을 모은다. 입력 File 은 name 이 있어 걸러낸다.
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+function outputs(cap, re) {
+  return cap.blobs.filter(function (b) { return !(b && typeof b.name === 'string') && re.test(b.type || ''); });
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function set(d, id, v, ev) {
+  var el = d.getElementById(id);
+  el.value = v; el.dispatchEvent(new Event(ev || 'change', { bubbles: true }));
+  return el;
+}
+function click(d, id) { d.getElementById(id).click(); }
+
+// 모서리 10px 이 투명하고 가운데만 파랗게 칠한 PNG
+function makePng(w, h, color) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  x.fillStyle = color || '#2f6df6';
+  x.fillRect(10, 10, w - 20, h - 20);
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+function pixel(blob, px, py) {
+  return createImageBitmap(blob).then(function (bm) {
+    var c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height;
+    var x = c.getContext('2d'); x.drawImage(bm, 0, 0);
+    var d = x.getImageData(px, py, 1, 1).data;
+    return { w: bm.width, h: bm.height, r: d[0], g: d[1], b: d[2], a: d[3] };
+  });
+}
+
+// zip.js 를 쓰지 않는 별도 해석기 (쓰는 쪽과 읽는 쪽이 같은 실수를 공유하지 않게)
+function readZip(u8) {
+  var dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  var eocd = -1;
+  for (var i = u8.length - 22; i >= 0; i--) if (dv.getUint32(i, true) === 0x06054B50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('EOCD 없음');
+  var count = dv.getUint16(eocd + 10, true), p = dv.getUint32(eocd + 16, true);
+  var dec = new TextDecoder('utf-8'), out = [];
+  for (var n = 0; n < count; n++) {
+    var size = dv.getUint32(p + 24, true), nl = dv.getUint16(p + 28, true);
+    var el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lh = dv.getUint32(p + 42, true);
+    var name = dec.decode(u8.subarray(p + 46, p + 46 + nl));
+    var start = lh + 30 + dv.getUint16(lh + 26, true) + dv.getUint16(lh + 28, true);
+    out.push({ name: name, bytes: u8.subarray(start, start + size) });
+    p += 46 + nl + el + cl;
+  }
+  return out;
+}
+
+// 한국어 링크("한국어") 말고 한글이 남아 있으면 영어판에 번역이 빠진 것
+function hangulLeft(d) {
+  var s = d.body.innerText.replace(/한국어/g, '');
+  var m = s.match(/[가-힣]+/g);
+  return m ? m.slice(0, 5).join(',') : '';
+}
+
+var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html'];
+var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
+              'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 영어판 12쪽: 메뉴 11개 · 현재 표시 · 한글 잔존 · JS 오류 =====
+  chain = chain.then(function () {
+    var bad = [], seq = Promise.resolve();
+    ALL_EN.forEach(function (p) {
+      seq = seq.then(function () {
+        return loadFrame('../en/' + p).then(function (f) {
+          var d = f.contentDocument;
+          var nav = d.querySelectorAll('.site-nav a');
+          var cur = d.querySelector('.site-nav a[aria-current="page"]');
+          var foot = d.querySelectorAll('.site-footer nav:first-child a');
+          var han = hangulLeft(d);
+          var probs = [];
+          if (nav.length !== 11) probs.push('메뉴 ' + nav.length + '개');
+          if (p !== 'index.html' && (!cur || cur.getAttribute('href') !== p)) probs.push('현재표시 틀림');
+          if (han) probs.push('한글: ' + han);
+          if (f.dataset.errs) probs.push('JS오류 ' + f.dataset.errs);
+          // 바닥 링크가 전부 실제 영어 페이지를 가리키는지
+          Array.prototype.forEach.call(foot, function (a) {
+            var h = a.getAttribute('href');
+            if (!/^\.\.\//.test(h) && ALL_EN.indexOf(h) < 0) probs.push('바닥 링크 ' + h);
+          });
+          if (probs.length) bad.push(p + ' → ' + probs.join(' / '));
+          f.remove();
+        });
+      });
+    });
+    return seq.then(function () {
+      log('영어판 12쪽 공통', bad.length === 0, bad.length ? bad.join(' ;; ') : '메뉴 11개 · 현재 표시 · 한글 0 · JS 오류 0 · 바닥 링크 정상');
+    });
+  }).catch(function (e) { log('영어판 12쪽 공통', false, '오류: ' + e.message); });
+
+  // ===== 2. 영어 홈 카드가 12종 전부를 가리키는지 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/index.html').then(function (f) {
+      var hrefs = Array.prototype.map.call(f.contentDocument.querySelectorAll('.tool-card'),
+        function (a) { return a.getAttribute('href'); });
+      var miss = ALL_EN.filter(function (p) { return p !== 'index.html' && hrefs.indexOf(p) < 0; });
+      log('영어 홈 카드', miss.length === 0 && hrefs.length === 11,
+          '카드 ' + hrefs.length + '개' + (miss.length ? ' · 빠짐: ' + miss.join(',') : ' · 11종 전부'));
+      f.remove();
+    });
+  }).catch(function (e) { log('영어 홈 카드', false, '오류: ' + e.message); });
+
+  // ===== 3. 형식 변환: PNG(투명 모서리) → JPG 흰색 채움 / WebP 투명 유지 / ZIP 2개 =====
+  chain = chain.then(function () {
+    return Promise.all([makePng(120, 80), makePng(60, 40, '#e33')]).then(function (pngs) {
+      return loadFrame('../en/image-convert.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([pngs[0]], 'logo.png', { type: 'image/png' }),
+          new File([pngs[1]], 'badge.png', { type: 'image/png' })]);
+        return waitFor(function () { return !d.getElementById('result').hidden && d.querySelectorAll('#list li').length === 2; })
+          .then(function () {
+            var names = Array.prototype.map.call(d.querySelectorAll('#list .fname'), function (e) { return e.textContent; });
+            // 결과는 끝난 순서대로 만들어지므로 크기로 골라낸다
+            return Promise.all(outputs(cap, /^image\/jpeg$/).map(function (b) { return pixel(b, 0, 0); })).then(function (all) {
+              var px = all.filter(function (p) { return p.w === 120; })[0] || all[0];
+              var okJpg = all.length === 2 && px.w === 120 && px.h === 80 && px.r > 245 && px.g > 245 && px.b > 245;
+              var noneDis = d.querySelector('#bg option[value="none"]').disabled;
+              // 이제 WebP + 투명 그대로. 설정을 바꿀 때마다 다시 변환하므로 첫 변환이 끝난 뒤에 표시를 한다.
+              set(d, 'to', 'image/webp');
+              return waitFor(function () { return outputs(cap, /^image\/webp$/).length >= 2; }).then(function () {
+                return new Promise(function (r) { setTimeout(r, 300); });
+              }).then(function () {
+                var m0 = cap.blobs.length;
+                set(d, 'bg', 'none');
+                return waitFor(function () { return outputs({ blobs: cap.blobs.slice(m0) }, /^image\/webp$/).length >= 2; })
+                  .then(function () {
+                    return Promise.all(outputs({ blobs: cap.blobs.slice(m0) }, /^image\/webp$/).map(function (b) { return pixel(b, 0, 0); }));
+                  });
+              }).then(function (wps) {
+                var wp = { a: Math.max.apply(null, wps.map(function (p) { return p.a; })) };
+                var mark = cap.blobs.length;
+                click(d, 'btn-all');
+                return waitFor(function () { return outputs({ blobs: cap.blobs.slice(mark) }, /zip/).length; }).then(function () {
+                  var z = outputs({ blobs: cap.blobs.slice(mark) }, /zip/)[0];
+                  return z.arrayBuffer().then(function (ab) {
+                    var ents = readZip(new Uint8Array(ab));
+                    var zn = ents.map(function (e) { return e.name; }).sort().join(',');
+                    var ok = okJpg && noneDis && names.join(',') === 'logo.jpg,badge.jpg' &&
+                             wp.a === 0 && zn === 'badge.webp,logo.webp' &&
+                             cap.names.indexOf('converted-images.zip') >= 0 && !f.dataset.errs;
+                    log('형식 변환 (영어)', ok,
+                        '이름 ' + names.join(',') + ' · JPG 모서리 rgb(' + px.r + ',' + px.g + ',' + px.b + ') ' + px.w + '×' + px.h +
+                        ' · JPG일 때 "투명 유지" 막힘 ' + noneDis + ' · WebP 모서리 alpha ' + wp.a +
+                        ' · ZIP[' + zn + '] 이름 ' + cap.names.filter(function (n) { return /zip$/.test(n); }).join(',') +
+                        (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+                    f.remove();
+                  });
+                });
+              });
+            });
+          });
+      });
+    });
+  }).catch(function (e) { log('형식 변환 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 4. 이어붙이기: 크기 계산 3방식 · 순서 바꾸기 · 빼기 · 저장물 = 미리보기 =====
+  chain = chain.then(function () {
+    return Promise.all([makePng(100, 50, '#e33'), makePng(200, 100, '#33e')]).then(function (pngs) {
+      return loadFrame('../en/image-join.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [
+          new File([pngs[0]], 'a.png', { type: 'image/png' }),
+          new File([pngs[1]], 'b.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') === '2' && txt(d, 't-size') !== '-'; }).then(function () {
+          var got = {};
+          got.v = txt(d, 't-size');                      // 폭 100 에 맞춤: 100×(50+50)
+          set(d, 'dir', 'h'); got.h = txt(d, 't-size');   // 높이 50 에 맞춤: (100+100)×50
+          set(d, 'gap', '10'); got.hg = txt(d, 't-size'); // 간격 10: 210×50
+          set(d, 'dir', 'g'); set(d, 'cols', '1'); got.g = txt(d, 't-size'); // 칸 100×50, 1열 2행 + 간격: 100×110
+          set(d, 'gap', '0'); set(d, 'dir', 'v'); set(d, 'align', 'none'); got.none = txt(d, 't-size'); // 200×150
+          set(d, 'align', 'fit');
+          var first = d.querySelector('#list .fname').textContent;
+          d.querySelectorAll('#list li')[1].querySelectorAll('button')[0].click();   // b 를 앞으로
+          var firstAfter = d.querySelector('#list .fname').textContent;
+          set(d, 'fmt', 'image/png');
+          var mark = cap.blobs.length;
+          click(d, 'btn-save');
+          return waitFor(function () { return outputs({ blobs: cap.blobs.slice(mark) }, /png/).length; }).then(function () {
+            var out = outputs({ blobs: cap.blobs.slice(mark) }, /png/)[0];
+            // b(파랑)가 위로 올라왔으니 위쪽 가운데는 파랑이어야 한다
+            return pixel(out, 50, 25).then(function (px) {
+              var removeBtn = d.querySelectorAll('#list li')[0].querySelectorAll('button')[2];
+              removeBtn.click();
+              var after = txt(d, 't-count');
+              var ok = got.v === '100×100' && got.h === '200×50' && got.hg === '210×50' &&
+                       got.g === '100×110' && got.none === '200×150' &&
+                       /^1\. a\.png/.test(first) && /^1\. b\.png/.test(firstAfter) &&
+                       px.w === 100 && px.h === 100 && px.b > 200 && px.r < 80 &&
+                       after === '1' && cap.names.indexOf('combined-image.png') >= 0 && !f.dataset.errs;
+              log('이어붙이기 (영어)', ok,
+                  '세로 ' + got.v + ' · 가로 ' + got.h + ' · 간격10 ' + got.hg + ' · 격자1열 ' + got.g +
+                  ' · 원본크기 ' + got.none + ' · 순서 ' + first + ' → ' + firstAfter +
+                  ' · 저장 ' + px.w + '×' + px.h + ' 위쪽 rgb(' + px.r + ',' + px.g + ',' + px.b + ')' +
+                  ' · 빼기 후 ' + after + '장 · 이름 ' + cap.names.join(',') +
+                  (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+              f.remove();
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('이어붙이기 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 5. PDF → 이미지: 미리보기 3장 · 해상도 안내 · 1,3쪽만 ZIP · 실제 픽셀 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (doc) {
+      for (var i = 0; i < 3; i++) {
+        var pg = doc.addPage([216, 288]);           // 3×4 인치
+        pg.drawRectangle({ x: 0, y: 0, width: 108, height: 288, color: PDFLib.rgb(0, 0, 0.8) });  // 왼쪽 절반 파랑
+      }
+      return doc.save();
+    }).then(function (bytes) {
+      return loadFrame('../en/pdf-to-image.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 'report.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return d.querySelectorAll('#grid canvas').length === 3; }, 30000).then(function () {
+          var thumbs = d.querySelectorAll('#grid canvas').length;
+          set(d, 'scale', '1');
+          var hint1 = txt(d, 's-hint');           // 216pt × 96/72 = 288, 288pt → 384
+          set(d, 'range', '1,3', 'input');
+          var pick = txt(d, 't-pick');
+          set(d, 'fmt', 'png');
+          var mark = cap.blobs.length;
+          click(d, 'btn-go');
+          return waitFor(function () { return outputs({ blobs: cap.blobs.slice(mark) }, /zip/).length; }, 30000).then(function () {
+            var z = outputs({ blobs: cap.blobs.slice(mark) }, /zip/)[0];
+            return z.arrayBuffer().then(function (ab) {
+              var ents = readZip(new Uint8Array(ab));
+              var names = ents.map(function (e) { return e.name; }).join(',');
+              var png = new Blob([ents[0].bytes], { type: 'image/png' });
+              return Promise.all([pixel(png, 20, 100), pixel(png, 260, 100)]).then(function (px) {
+                var ok = thumbs === 3 && hint1 === 'Page 1 will be saved at 288 × 384 pixels' &&
+                         pick === '2 pages' && names === 'report_1.png,report_3.png' &&
+                         Math.abs(px[0].w - 288) <= 1 && Math.abs(px[0].h - 384) <= 1 &&
+                         px[0].b > 150 && px[0].r < 60 &&                  // 왼쪽 파랑
+                         px[1].r > 245 && px[1].g > 245 && px[1].b > 245 && px[1].a === 255 &&  // 오른쪽 흰 배경(투명 아님)
+                         cap.names.indexOf('report_images.zip') >= 0 && !f.dataset.errs;
+                log('PDF → 이미지 (영어)', ok,
+                    '미리보기 ' + thumbs + '장 · 안내 "' + hint1 + '" · 선택 ' + pick + ' · ZIP[' + names + '] ' +
+                    px[0].w + '×' + px[0].h + ' · 왼쪽 rgb(' + px[0].r + ',' + px[0].g + ',' + px[0].b + ')' +
+                    ' 오른쪽 rgba(' + px[1].r + ',' + px[1].g + ',' + px[1].b + ',' + px[1].a + ')' +
+                    ' · 이름 ' + cap.names.join(',') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+                f.remove();
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF → 이미지 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 6. 랜덤 뽑기: 중복 없는 추첨 · 초과 거부 · 중복 허용 · 섞기 · 조 · 공정성 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/random-pick.html').then(function (f) {
+      var d = f.contentDocument;
+      var names = ['Ann', 'Ben', 'Cy', 'Di', 'Ed'];
+      set(d, 'names', names.join('\n') + '\n\nAnn', 'input');
+      var cnt = txt(d, 'count-hint');
+      function items() { return Array.prototype.map.call(d.querySelectorAll('#out li'), function (e) { return e.textContent; }); }
+
+      set(d, 'names', names.join('\n'), 'input');
+      set(d, 'pick', '3', 'input');
+      click(d, 'btn-go');
+      var drawn = items();
+      var uniq = drawn.filter(function (v, i) { return drawn.indexOf(v) === i && names.indexOf(v) >= 0; }).length === 3;
+
+      set(d, 'pick', '9', 'input');
+      click(d, 'btn-go');
+      var refused = /more winners than there are entrants/.test(txt(d, 'msg'));
+
+      d.getElementById('dup').checked = true;
+      click(d, 'btn-go');
+      var dupOk = items().length === 9;
+      d.getElementById('dup').checked = false;
+
+      set(d, 'mode', 'shuffle');
+      var btnLabel = d.getElementById('btn-go').textContent;
+      click(d, 'btn-go');
+      var perm = items().slice().sort().join(',') === names.slice().sort().join(',');
+
+      set(d, 'mode', 'teams');
+      set(d, 'groups', '2', 'input');
+      click(d, 'btn-go');
+      var sizes = Array.prototype.map.call(d.querySelectorAll('#out .grid ul'), function (u) { return u.children.length; }).join(',');
+
+      // 공정성: 3명에서 1명 뽑기를 3000번. 각자 1000번 근처(±10%)여야 한다.
+      set(d, 'mode', 'draw');
+      set(d, 'names', 'X\nY\nZ', 'input');
+      set(d, 'pick', '1', 'input');
+      var tally = { X: 0, Y: 0, Z: 0 };
+      for (var i = 0; i < 3000; i++) { click(d, 'btn-go'); tally[items()[0]]++; }
+      var fair = [tally.X, tally.Y, tally.Z].every(function (n) { return n > 900 && n < 1100; });
+
+      click(d, 'btn-clear');
+      var cleared = d.getElementById('names').value === '' && d.getElementById('out').innerHTML === '';
+
+      var ok = /^6 entrants · 1 repeated/.test(cnt) && uniq && refused && dupOk && btnLabel === 'Shuffle' &&
+               perm && sizes === '3,2' && fair && cleared && !f.dataset.errs;
+      log('랜덤 뽑기 (영어)', ok,
+          '안내 "' + cnt + '" · 3명 중복없음 ' + uniq + ' [' + drawn.join(',') + '] · 초과 거부 ' + refused +
+          ' · 중복허용 9명 ' + dupOk + ' · 버튼 "' + btnLabel + '" · 섞기=순열 ' + perm + ' · 조 ' + sizes +
+          ' · 3000회 X' + tally.X + ' Y' + tally.Y + ' Z' + tally.Z + ' · 비우기 ' + cleared +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+      f.remove();
+    });
+  }).catch(function (e) { log('랜덤 뽑기 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 7. 한국어 4쪽에서 English 를 고르면 /en/ 같은 페이지로 가는지 =====
+  chain = chain.then(function () {
+    var bad = [], seq = Promise.resolve();
+    NEW.forEach(function (p) {
+      seq = seq.then(function () {
+        return loadFrame('../' + p).then(function (f) {
+          return waitFor(function () { return f.contentDocument.querySelector('.lang-select'); }).then(function () {
+            var sel = f.contentDocument.querySelector('.lang-select');
+            var gone = new Promise(function (r) { f.onload = function () { r(); }; });
+            sel.value = 'en';
+            sel.dispatchEvent(new Event('change', { bubbles: true }));
+            return Promise.race([gone, new Promise(function (r) { setTimeout(r, 5000); })]).then(function () {
+              var path = f.contentWindow.location.pathname;
+              if (!new RegExp('/en/' + p.replace('.', '\\.') + '$').test(path)) bad.push(p + ' → ' + path);
+              var hl = f.contentDocument.querySelector('link[hreflang="ko"]');
+              if (!hl || hl.getAttribute('href') !== 'https://toolmoa.github.io/' + p) bad.push(p + ' hreflang ko 틀림');
+              f.remove();
+            });
+          });
+        });
+      });
+    });
+    return seq.then(function () {
+      try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+      log('한국어 → English 이동', bad.length === 0, bad.length ? bad.join(' ;; ') : '4쪽 전부 /en/ 같은 이름으로 이동 · 되돌아가는 hreflang 정상');
+    });
+  }).catch(function (e) { log('한국어 → English 이동', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'EN4 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

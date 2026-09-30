@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Random name picker &amp; team generator — fair, private, free</title>
+<meta name="description" content="Draw winners, shuffle an order or split names into teams. Cryptographic randomness with no modulo bias, and your list never leaves the browser.">
+<link rel="canonical" href="https://toolmoa.github.io/en/random-pick.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/random-pick.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/random-pick.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/random-pick.html">
+<meta property="og:title" content="Random name picker &amp; team generator">
+<meta property="og:description" content="Draw winners, shuffle an order or split teams with cryptographic randomness. The list stays in your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Random name picker","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/random-pick.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-random-pick.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Random name picker &amp; team generator — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Random name picker &amp;amp; team generator">
+<meta name="twitter:description" content="Draw winners, shuffle an order or split teams with cryptographic randomness. The list stays in your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-random-pick.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my list sent to a server?","acceptedAnswer":{"@type":"Answer","text":"No. The list and the result exist only in your browser — the page works with the internet switched off. Nothing is stored on your device either, so reloading clears it."}},{"@type":"Question","name":"Is it really fair?","acceptedAnswer":{"@type":"Answer","text":"It uses the browser's cryptographic random number generator and removes the bias that plain remainder arithmetic introduces. For a public draw, though, the most convincing approach is to share your screen, paste the list and draw live — any tool that only shows a final result is hard for participants to trust."}},{"@type":"Question","name":"Can the same person win twice?","acceptedAnswer":{"@type":"Answer","text":"Tick \"Allow the same person to be drawn more than once\". That is for running separate draws over the whole list, such as first, second and third prize. Leave it off and nobody is drawn twice."}},{"@type":"Question","name":"How do I pair people with tasks or gifts?","acceptedAnswer":{"@type":"Answer","text":"Use \"Shuffle the order\". Put one list in, shuffle it, and match the result line by line against the other list. A randomly shuffled order is exactly as fair as any visual \"spin the wheel\" — it just skips the animation."}},{"@type":"Question","name":"What about blank lines and duplicate names?","acceptedAnswer":{"@type":"Answer","text":"Blank lines are ignored. A name that appears twice is treated as two separate entrants (they may be two different people), and the number of repeats is shown under the list so you can fix it if it was a mistake."}},{"@type":"Question","name":"Can I paste from Excel or Google Sheets?","acceptedAnswer":{"@type":"Answer","text":"Yes. Copy a single column and paste it — one cell becomes one line. Copying several columns gives tab-separated lines, so pick just the column with the names."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Random name picker & team generator","item":"https://toolmoa.github.io/en/random-pick.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html" aria-current="page">Random picker</a>
+    </nav>
+    <a class="lang-link" href="../random-pick.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Random name picker &amp; team generator</h1>
+  <p class="lead">Paste a list to draw winners, shuffle a running order or split people into teams. Results come from your browser's cryptographic random number generator.</p>
+  <span class="privacy-badge">🔒 Your list is never sent anywhere</span>
+
+  <div class="card" style="margin-top:18px">
+    <div class="field">
+      <label for="names">Names (one per line)</label>
+      <textarea id="names" placeholder="Olivia&#10;Liam&#10;Emma&#10;Noah"></textarea>
+      <div class="hint" id="count-hint"></div>
+    </div>
+    <div class="field">
+      <label for="mode">What to do</label>
+      <select id="mode">
+        <option value="draw" selected>Draw winners</option>
+        <option value="shuffle">Shuffle the order (everyone)</option>
+        <option value="teams">Split into teams</option>
+      </select>
+    </div>
+    <div class="field" id="pick-field">
+      <label for="pick">How many to draw</label>
+      <input type="number" id="pick" min="1" max="1000" value="1">
+      <label class="inline-check" style="margin:10px 0 0">
+        <input type="checkbox" id="dup">
+        <span>Allow the same person to be drawn more than once (separate draws for several prizes)</span>
+      </label>
+    </div>
+    <div class="field" id="groups-field" hidden>
+      <label for="groups">Number of teams</label>
+      <input type="number" id="groups" min="2" max="100" value="2">
+      <div class="hint">If the numbers do not divide evenly, the first teams get one extra person each.</div>
+    </div>
+    <div class="btn-row" style="margin-bottom:0">
+      <button class="btn" id="btn-go">Draw</button>
+      <button class="btn secondary" id="btn-copy">Copy result</button>
+      <button class="btn secondary" id="btn-clear">Clear</button>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="out"></div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">Need to share the result as a scannable link? <a href="qr-generate.html">QR code</a> makes one without a watermark. To turn a spreadsheet of entries into a clean list first, <a href="file-convert.html">Convert file</a> reads Excel and CSV.</p>
+
+  <div class="ad-slot"><!-- AD:EN_RANDOMPICK --></div>
+
+  <h2>How the draw is kept fair</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Most pickers use <code>Math.random()</code>, which is fast but predictable and not meant for anything that has to be fair.
+      This page uses the browser's <strong style="color:var(--text)">cryptographic generator (<code>crypto.getRandomValues</code>)</strong>.
+      It also removes <strong style="color:var(--text)">modulo bias</strong>: taking a random number "mod" the list length makes the first
+      names very slightly more likely, so values that fall in the uneven tail are thrown away and drawn again.
+      Shuffling uses the <strong style="color:var(--text)">Fisher–Yates</strong> method, so every possible order is equally likely.
+      And because nothing runs on a server, a list of customer emails or employee names never leaves your device.
+    </p>
+  </div>
+
+  <h2>Common uses</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Giveaways</strong> — paste the entrants from comments and draw as many winners as you have prizes.<br>
+      <strong style="color:var(--text)">Presentation or interview order</strong> — shuffle everyone and post the list as-is.<br>
+      <strong style="color:var(--text)">Classroom and workshop groups</strong> — split people into evenly sized teams.<br>
+      <strong style="color:var(--text)">Chores and rotas</strong> — settle who goes first without arguing about it.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my list sent to a server?</summary>
+      <p>No. The list and the result exist only in your browser — the page works with the internet switched off. Nothing is stored on your device either, so reloading clears it.</p>
+    </details>
+    <details>
+      <summary>Is it really fair?</summary>
+      <p>It uses the browser's cryptographic random number generator and removes the bias that plain remainder arithmetic introduces. For a public draw, though, the most convincing approach is to <strong>share your screen, paste the list and draw live</strong> — any tool that only shows a final result is hard for participants to trust.</p>
+    </details>
+    <details>
+      <summary>Can the same person win twice?</summary>
+      <p>Tick "Allow the same person to be drawn more than once". That is for running separate draws over the whole list, such as first, second and third prize. Leave it off and nobody is drawn twice.</p>
+    </details>
+    <details>
+      <summary>How do I pair people with tasks or gifts?</summary>
+      <p>Use "Shuffle the order". Put one list in, shuffle it, and match the result line by line against the other list. A randomly shuffled order is exactly as fair as any visual "spin the wheel" — it just skips the animation.</p>
+    </details>
+    <details>
+      <summary>What about blank lines and duplicate names?</summary>
+      <p>Blank lines are ignored. A name that appears twice is treated as two separate entrants (they may be two different people), and the number of repeats is shown under the list so you can fix it if it was a mistake.</p>
+    </details>
+    <details>
+      <summary>Can I paste from Excel or Google Sheets?</summary>
+      <p>Yes. Copy a single column and paste it — one cell becomes one line. Copying several columns gives tab-separated lines, so pick just the column with the names.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="../random-pick.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var namesEl = document.getElementById('names');
+  var modeSel = document.getElementById('mode');
+  var pickInput = document.getElementById('pick');
+  var dupChk = document.getElementById('dup');
+  var groupsInput = document.getElementById('groups');
+  var msg = document.getElementById('msg');
+  var out = document.getElementById('out');
+
+  var lastText = '';      // the last result as plain text, for copying
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function people(n) { return n + (n === 1 ? ' person' : ' people'); }
+
+  // An unbiased integer in [0, n).
+  // Taking getRandomValues mod n makes low numbers slightly more likely. Cut the 32-bit range
+  // to a multiple of n and redraw any value that lands in the leftover tail.
+  function randBelow(n) {
+    if (n <= 1) return 0;
+    var limit = Math.floor(0x100000000 / n) * n;
+    var buf = new Uint32Array(1);
+    var v;
+    do { crypto.getRandomValues(buf); v = buf[0]; } while (v >= limit);
+    return v % n;
+  }
+
+  // Fisher–Yates. Every order is equally likely.
+  function shuffled(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = randBelow(i + 1);
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
+  function parseNames() {
+    return namesEl.value.split(/\r?\n/)
+      .map(function (s) { return s.trim(); })
+      .filter(function (s) { return s.length > 0; });
+  }
+
+  function syncCount() {
+    var list = parseNames();
+    var seen = {}, dups = 0;
+    list.forEach(function (n) {
+      if (seen[n]) dups++; else seen[n] = 1;
+    });
+    var el = document.getElementById('count-hint');
+    if (!list.length) {
+      el.textContent = 'Paste your list, one name per line.';
+    } else {
+      el.textContent = list.length + (list.length === 1 ? ' entrant' : ' entrants') +
+        (dups ? ' · ' + dups + ' repeated name(s) — each still counts as a separate entrant' : '');
+    }
+    pickInput.max = Math.max(1, list.length);
+    groupsInput.max = Math.max(2, list.length);
+  }
+
+  namesEl.addEventListener('input', syncCount);
+  modeSel.addEventListener('change', syncMode);
+
+  function syncMode() {
+    var m = modeSel.value;
+    document.getElementById('pick-field').hidden = m !== 'draw';
+    document.getElementById('groups-field').hidden = m !== 'teams';
+    document.getElementById('btn-go').textContent =
+      m === 'draw' ? 'Draw' : m === 'shuffle' ? 'Shuffle' : 'Make teams';
+  }
+
+  function card(title, body) {
+    return '<div class="card"><h3 style="margin:0 0 10px;font-size:16px">' + title + '</h3>' + body + '</div>';
+  }
+
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  document.getElementById('btn-go').addEventListener('click', function () {
+    var list = parseNames();
+    if (!list.length) {
+      setMsg('Please enter some names first.', 'err');
+      out.innerHTML = ''; lastText = ''; return;
+    }
+    var m = modeSel.value;
+
+    if (m === 'draw') {
+      var n = parseInt(pickInput.value, 10) || 1;
+      var allowDup = dupChk.checked;
+      if (!allowDup && n > list.length) {
+        setMsg('You asked for more winners than there are entrants. Allow repeats or draw fewer.', 'err');
+        return;
+      }
+      var picked = [];
+      if (allowDup) {
+        for (var i = 0; i < n; i++) picked.push(list[randBelow(list.length)]);
+      } else {
+        picked = shuffled(list).slice(0, n);
+      }
+      lastText = picked.map(function (v, i) { return (i + 1) + '. ' + v; }).join('\n');
+      out.innerHTML = card(
+        (picked.length === 1 ? 'Winner' : picked.length + ' winners'),
+        '<ol style="margin:0;padding-left:22px;font-size:17px;line-height:2">' +
+        picked.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ol>');
+      setMsg('Drew ' + picked.length + ' from ' + list.length + '.', 'ok');
+      return;
+    }
+
+    if (m === 'shuffle') {
+      var order = shuffled(list);
+      lastText = order.map(function (v, i) { return (i + 1) + '. ' + v; }).join('\n');
+      out.innerHTML = card('Shuffled order',
+        '<ol style="margin:0;padding-left:22px;font-size:16px;line-height:1.9">' +
+        order.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ol>');
+      setMsg('Shuffled ' + people(order.length) + '.', 'ok');
+      return;
+    }
+
+    var g = parseInt(groupsInput.value, 10) || 2;
+    if (g > list.length) {
+      setMsg('There are more teams than entrants.', 'err');
+      return;
+    }
+    var pool = shuffled(list);
+    var teams = [];
+    for (var k = 0; k < g; k++) teams.push([]);
+    // Dealing one at a time from the first team keeps sizes within one of each other
+    pool.forEach(function (name, idx) { teams[idx % g].push(name); });
+
+    lastText = teams.map(function (tm, i) {
+      return 'Team ' + (i + 1) + ' (' + people(tm.length) + ')\n' +
+             tm.map(function (v) { return '  - ' + v; }).join('\n');
+    }).join('\n\n');
+
+    out.innerHTML = '<div class="grid">' + teams.map(function (tm, i) {
+      return '<div class="card" style="margin:0">' +
+        '<h3 style="margin:0 0 8px;font-size:16px">Team ' + (i + 1) +
+        ' <span style="color:var(--muted);font-weight:400;font-size:13px">' + people(tm.length) + '</span></h3>' +
+        '<ul style="margin:0;padding-left:20px;font-size:15px;line-height:1.8">' +
+        tm.map(function (v) { return '<li>' + esc(v) + '</li>'; }).join('') + '</ul></div>';
+    }).join('') + '</div>';
+    setMsg('Split ' + people(list.length) + ' into ' + g + ' teams.', 'ok');
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    if (!lastText) { setMsg('Nothing to copy yet — run a draw first.', 'err'); return; }
+    var done = function () { setMsg('Result copied.', 'ok'); };
+    var fail = function () { setMsg('Could not copy. Please select the result and copy it by hand.', 'err'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lastText).then(done, fail);
+      return;
+    }
+    // Fallback for older browsers or non-secure contexts
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = lastText;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      ta.remove();
+      ok ? done() : fail();
+    } catch (e) { fail(); }
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    namesEl.value = '';
+    out.innerHTML = '';
+    lastText = '';
+    setMsg('');
+    syncCount();
+  });
+
+  syncCount();
+  syncMode();
+})();
+</script>
+</body>
+</html>

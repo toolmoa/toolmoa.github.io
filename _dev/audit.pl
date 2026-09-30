@@ -112,6 +112,14 @@ my @PAIRS = (
   ['pdf-split.html',      ['ParseSpeeds.Fastest']],
   ['img-to-pdf.html',     ['toJpegBytes', "addEventListener('paste'"]],
   ['file-convert.html',   ['function decodeText', q{type: 'string'}, 'id="fs"', 'opt.FS', 'lastFile']],
+  ['image-convert.html',  ['id="bg-color"', 'noneOpt.disabled', 'function newName', 'makeZip(entries)',
+                           "addEventListener('paste'", 'canvas.width = canvas.height = 1']],
+  ['image-join.html',     ['MAX_PIXELS', 'function layout', "how === 'none'", 'function move',
+                           "addEventListener('paste'", 'URL.revokeObjectURL(items[i].url)']],
+  ['pdf-to-image.html',   ['MAX_PIXELS', 'function loadLib', '.slice() }', 'function toRangeText',
+                           "ctx.fillStyle = '#ffffff'", 'c.width = c.height = 1', 'makeZip(entries)']],
+  ['random-pick.html',    ['crypto.getRandomValues', 'while (v >= limit)', 'function shuffled',
+                           'teams[idx % g]', 'execCommand']],
 );
 
 my $gap = 0;

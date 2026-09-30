@@ -31,7 +31,7 @@ done
 echo
 echo "=== 10. hreflang 이 서로를 가리키는가 ==="
 bad=0
-for p in index image-compress image-crop img-to-pdf pdf-merge pdf-split file-convert qr-generate; do
+for p in index image-compress image-crop img-to-pdf pdf-merge pdf-split file-convert qr-generate image-convert image-join pdf-to-image random-pick; do
   # index 는 canonical 과 맞춰 디렉터리 형태(/ · /en/)를 쓴다
   ko="$BASE/$p.html"; en="$BASE/en/$p.html"
   if [ "$p" = "index" ]; then ko="$BASE/"; en="$BASE/en/"; fi
@@ -39,7 +39,7 @@ for p in index image-compress image-crop img-to-pdf pdf-merge pdf-split file-con
   echo "$koHtml" | grep -q "hreflang=\"en\" href=\"$en\"" || { echo "  ko→en 없음: $p"; bad=$((bad+1)); }
   echo "$enHtml" | grep -q "hreflang=\"ko\" href=\"$ko\"" || { echo "  en→ko 없음: $p"; bad=$((bad+1)); }
 done
-[ $bad -eq 0 ] && echo "  8쌍 전부 양방향 연결" || fail=$((fail+bad))
+[ $bad -eq 0 ] && echo "  12쌍 전부 양방향 연결" || fail=$((fail+bad))
 
 echo
 echo "=== 11. 페이지 용량 (첫 화면에 받는 HTML) ==="

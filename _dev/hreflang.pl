@@ -11,6 +11,10 @@ my %PAIR = (
   'pdf-split.html'      => 'pdf-split.html',
   'file-convert.html'   => 'file-convert.html',
   'qr-generate.html'    => 'qr-generate.html',
+  'image-convert.html'  => 'image-convert.html',
+  'image-join.html'     => 'image-join.html',
+  'pdf-to-image.html'   => 'pdf-to-image.html',
+  'random-pick.html'    => 'random-pick.html',
 );
 
 my $BASE = 'https://toolmoa.github.io/';

@@ -44,7 +44,7 @@ random-pick.html      랜덤 뽑기·추첨기        ← 키워드: 랜덤 뽑�
 unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 계산, 인치 cm 변환
 date-calc.html        날짜 계산기·디데이       ← 키워드: 디데이 계산, 근무일수
 age-calc.html         만 나이 계산기          ← 키워드: 만 나이 계산기, 세는 나이
-en/                   영어 SEO 페이지 8종 (번역본이 아니라 따로 쓴 글)
+en/                   영어 SEO 페이지 12종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
 assets/style.css      공통 스타일 (다크모드 포함)
 assets/i18n.js        다국어 엔진 겸 사전 (ko/en/ja)
 assets/og/            공유용 이미지 1200×630 (페이지마다 1장, 생성물)
@@ -90,8 +90,15 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4
 ```
+
+에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.
+그때는 PowerShell 로 `_dev/runwin.ps1 en4 edge …` 를 쓴다. 같은 플래그로 띄우고, 창 제목을
+기다렸다가 결과를 글로 출력한다(같은 검사의 이전 창은 먼저 닫는다).
+
+`en4` 는 영어판을 실제로 띄워 결과물을 다시 읽는다. `coverage.pl` 은 id 이름으로만 대조하므로
+한국어판과 id 가 같은 영어판은 한 번도 띄우지 않아도 "검사됨" 으로 나온다 — 그 빈틈을 메운다.
 
 결과는 **창 제목**에 실린다 (`RESULT 26/26 :: …`). 헤드리스로 돌리지 말 것 —
 파일을 읽는 검사는 읽기가 끝나기 전에 판정이 나 버린다.

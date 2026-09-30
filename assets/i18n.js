@@ -1729,7 +1729,8 @@
   // 검색엔진에 색인되는 진짜 영어 페이지가 있는 파일들.
   // 영어를 고르면 화면만 바꾸지 않고 그쪽으로 이동시킨다.
   var EN_PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html',
-                  'pdf-merge.html', 'pdf-split.html', 'file-convert.html', 'qr-generate.html'];
+                  'pdf-merge.html', 'pdf-split.html', 'file-convert.html', 'qr-generate.html',
+                  'image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html'];
 
   function currentFile() {
     return location.pathname.split('/').pop() || 'index.html';

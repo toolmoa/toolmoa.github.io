@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert WebP to JPG, PNG to JPG without uploading — free</title>
+<meta name="description" content="Convert images between JPG, PNG and WebP without uploading them. Batch conversion in your browser, with every file bundled into one ZIP.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-convert.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-convert.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-convert.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-convert.html">
+<meta property="og:title" content="Convert image format without uploading">
+<meta property="og:description" content="WebP, PNG and JPG converted to each other inside your browser. Nothing is uploaded.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔀</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Convert image format","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/image-convert.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-image-convert.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Convert image format without uploading — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Convert image format without uploading">
+<meta name="twitter:description" content="WebP, PNG and JPG converted to each other inside your browser. Nothing is uploaded.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-image-convert.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Are my images uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. The conversion happens inside your browser and the files never leave your device. The page keeps working with the internet switched off, which is the easiest way to check."}},{"@type":"Question","name":"What happens to a transparent background when I convert PNG to JPG?","acceptedAnswer":{"@type":"Answer","text":"JPG has no concept of transparency, so those areas must be filled with some colour. You choose which; the default is white. If a logo needs to stay transparent, convert to PNG or WebP instead. Without any fill, transparent areas would come out black."}},{"@type":"Question","name":"What is WebP?","acceptedAnswer":{"@type":"Answer","text":"An image format made by Google that is typically 20–30% smaller than JPG at the same quality, which is why most websites now serve it. Older software and some upload forms still cannot open it, so convert to JPG when you need to hand an image to one of those."}},{"@type":"Question","name":"What quality should I use?","acceptedAnswer":{"@type":"Answer","text":"If you only need a different format, leave it at 92% — the difference is hard to see. You can go down to 75–85% to save more space, but Compress image can hit an exact target size for you, which is easier."}},{"@type":"Question","name":"Does saving several images download them one at a time?","acceptedAnswer":{"@type":"Answer","text":"No. They are bundled into a single ZIP file by default. Untick the box under \"Save all\" for separate files — the browser will then ask for confirmation, and phones often keep only the first one."}},{"@type":"Question","name":"Can it convert iPhone HEIC photos?","acceptedAnswer":{"@type":"Answer","text":"Not in most browsers, because they cannot decode HEIC at all. On an iPhone, go to Settings → Camera → Formats and choose \"Most Compatible\" so new photos are taken as JPG. Existing HEIC photos are usually converted to JPG automatically when you share them from the phone."}},{"@type":"Question","name":"Is GIF animation kept?","acceptedAnswer":{"@type":"Answer","text":"No. An animated GIF is saved as its first frame only, because the browser converts by drawing a single still picture."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Convert image format without uploading","item":"https://toolmoa.github.io/en/image-convert.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html" aria-current="page">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+    </nav>
+    <a class="lang-link" href="../image-convert.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Convert image format without uploading</h1>
+  <p class="lead">WebP to JPG, PNG to JPG, JPG to PNG and back. Dimensions stay exactly as they are — only the format changes, for as many images as you drop in.</p>
+  <span class="privacy-badge">🔒 Your images never leave your device</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🔀</span>
+    <span class="dz-main">Drop images here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · multiple files supported</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <div class="field">
+      <label for="to">Convert to</label>
+      <select id="to">
+        <option value="image/jpeg" selected>JPG — opens everywhere (best for photos)</option>
+        <option value="image/png">PNG — lossless, keeps transparency</option>
+        <option value="image/webp">WebP — smallest files (for the web)</option>
+      </select>
+      <div class="hint" id="to-hint"></div>
+    </div>
+    <div class="field" id="q-field">
+      <label for="quality">Quality <span id="q-val" style="color:var(--accent)">92%</span></label>
+      <input type="range" id="quality" min="50" max="100" value="92" step="2">
+      <div class="hint">The point here is changing the format, so the default is a high 92%. Lower it if you also want smaller files.</div>
+    </div>
+    <div class="field" id="bg-field" style="margin-bottom:0">
+      <label for="bg">Fill transparent areas with</label>
+      <select id="bg">
+        <option value="none">Nothing — keep them transparent</option>
+        <option value="#ffffff" selected>White</option>
+        <option value="#000000">Black</option>
+        <option value="custom">Pick a colour</option>
+      </select>
+      <input type="color" id="bg-color" value="#ffffff" hidden style="width:64px;height:38px;padding:2px;margin-top:8px">
+      <div class="hint" id="bg-hint"></div>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="result" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Images</span></div>
+      <div class="stat"><span class="num" id="t-before" style="font-size:18px">0</span><span class="lbl">Original total</span></div>
+      <div class="stat"><span class="num" id="t-after" style="font-size:18px">0</span><span class="lbl">New total</span></div>
+      <div class="stat"><span class="num" id="t-diff" style="font-size:18px">0%</span><span class="lbl">Size change</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-all">Save all</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+    <label class="inline-check">
+      <input type="checkbox" id="as-zip" checked>
+      <span>Save as a single ZIP file</span>
+    </label>
+    <ul class="file-list" id="list"></ul>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To keep the format and <strong style="color:var(--text)">just make files smaller</strong>, use <a href="image-compress.html">Compress image</a>. To keep only part of a picture, use <a href="image-crop.html">Crop image</a>. To pull pages out of a PDF as pictures, there is <a href="pdf-to-image.html">PDF to image</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_IMAGECONVERT --></div>
+
+  <h2>Why "saved as WebP" keeps getting in the way</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Save an image from almost any website today and you get a <code>.webp</code> file. Then a job
+      application form, an older photo editor or a print shop rejects it as an unsupported format.
+      Converting it to JPG fixes that — but the usual converters upload your picture to their server first,
+      which is an odd trade for a screenshot of a document or a photo of your ID. Here the conversion is
+      done by your browser's own image decoder on your machine. Nothing is sent anywhere; load the page,
+      switch off Wi-Fi, and it still works.
+    </p>
+  </div>
+
+  <h2>Which format for what</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">WebP → JPG</strong> — when a site or program refuses WebP.<br>
+      <strong style="color:var(--text)">PNG → JPG</strong> — when a screenshot is too heavy to attach. Usually 5–10× smaller.<br>
+      <strong style="color:var(--text)">JPG → PNG</strong> — before editing, so repeated saves stop adding compression artefacts.<br>
+      <strong style="color:var(--text)">→ WebP</strong> — for images on your own website or shop, to make pages load faster.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my images uploaded anywhere?</summary>
+      <p>No. The conversion happens inside your browser and the files never leave your device. The page keeps working with the internet switched off, which is the easiest way to check.</p>
+    </details>
+    <details>
+      <summary>What happens to a transparent background when I convert PNG to JPG?</summary>
+      <p>JPG has no concept of transparency, so those areas must be filled with some colour. You choose which; the default is white. If a logo needs to stay transparent, convert to PNG or WebP instead. Without any fill, transparent areas would come out black.</p>
+    </details>
+    <details>
+      <summary>What is WebP?</summary>
+      <p>An image format made by Google that is typically 20–30% smaller than JPG at the same quality, which is why most websites now serve it. Older software and some upload forms still cannot open it, so convert to JPG when you need to hand an image to one of those.</p>
+    </details>
+    <details>
+      <summary>What quality should I use?</summary>
+      <p>If you only need a different format, leave it at 92% — the difference is hard to see. You can go down to 75–85% to save more space, but <a href="image-compress.html">Compress image</a> can hit an exact target size for you, which is easier.</p>
+    </details>
+    <details>
+      <summary>Does saving several images download them one at a time?</summary>
+      <p>No. They are bundled into a <strong>single ZIP file</strong> by default. Untick the box under "Save all" for separate files — the browser will then ask for confirmation, and phones often keep only the first one.</p>
+    </details>
+    <details>
+      <summary>Can it convert iPhone HEIC photos?</summary>
+      <p>Not in most browsers, because they cannot decode HEIC at all. On an iPhone, go to <strong>Settings → Camera → Formats</strong> and choose "Most Compatible" so new photos are taken as JPG. Existing HEIC photos are usually converted to JPG automatically when you share them from the phone.</p>
+    </details>
+    <details>
+      <summary>Is GIF animation kept?</summary>
+      <p>No. An animated GIF is saved as its first frame only, because the browser converts by drawing a single still picture.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="../image-convert.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script src="../assets/zip.js"></script>
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var toSel = document.getElementById('to');
+  var quality = document.getElementById('quality');
+  var qVal = document.getElementById('q-val');
+  var bgSel = document.getElementById('bg');
+  var bgColor = document.getElementById('bg-color');
+  var msg = document.getElementById('msg');
+  var resultBox = document.getElementById('result');
+  var list = document.getElementById('list');
+
+  var lastFiles = [];   // changing a setting re-converts the same images
+  var results = [];     // {name, blob, url, before, after, dim}
+
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function extOf(type) {
+    return type === 'image/jpeg' ? 'jpg' : (type === 'image/webp' ? 'webp' : 'png');
+  }
+
+  quality.addEventListener('input', function () { qVal.textContent = quality.value + '%'; });
+
+  // JPG cannot hold transparency. When the combination does not work, say so visibly
+  // instead of quietly changing the setting behind the user's back.
+  function syncOptions() {
+    var to = toSel.value;
+    var lossy = to !== 'image/png';
+    document.getElementById('q-field').hidden = !lossy;
+
+    var noneOpt = bgSel.querySelector('option[value="none"]');
+    if (to === 'image/jpeg') {
+      if (bgSel.value === 'none') bgSel.value = '#ffffff';
+      noneOpt.disabled = true;
+    } else {
+      noneOpt.disabled = false;
+    }
+    bgColor.hidden = bgSel.value !== 'custom';
+
+    document.getElementById('to-hint').textContent =
+      to === 'image/jpeg' ? 'JPG cannot hold transparency, so transparent areas are filled with the colour chosen below.'
+      : to === 'image/png' ? 'PNG loses no quality, but photos can become much larger.'
+      : 'WebP gives the smallest files, but older programs may not open it.';
+
+    document.getElementById('bg-hint').textContent =
+      bgSel.value === 'none' ? 'Transparent areas stay transparent. Only possible with PNG and WebP.'
+      : 'Only areas that were transparent are filled. Images without transparency are unaffected.';
+  }
+  toSel.addEventListener('change', function () { syncOptions(); reprocess(); });
+  bgSel.addEventListener('change', function () { syncOptions(); reprocess(); });
+  bgColor.addEventListener('change', reprocess);
+  quality.addEventListener('change', reprocess);
+
+  function reprocess() { if (lastFiles.length) process(lastFiles); }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // The file input is hidden, so it is out of the tab order. Without this, keyboard-only
+  // users have no way at all to pick a file.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  // Saving a screenshot to a file just to pick it again is tedious. Accept Ctrl+V directly.
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile();
+      if (!f) continue;
+      // Clipboard images arrive unnamed or all called image.png, so they collide. Stamp the time.
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], 'pasted-image-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    handle(picked);
+  });
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type.indexOf('image/') === 0;
+    });
+    if (!files.length) { setMsg('Please choose an image file.', 'err'); return; }
+    lastFiles = files;
+    process(files);
+  }
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('unreadable')); };
+      img.src = url;
+    });
+  }
+
+  function fillColor() {
+    if (bgSel.value === 'none') return null;
+    return bgSel.value === 'custom' ? bgColor.value : bgSel.value;
+  }
+
+  function convert(file) {
+    return loadImage(file).then(function (img) {
+      // Dimensions are left alone. This page only changes the format.
+      var w = img.naturalWidth, h = img.naturalHeight;
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      var type = toSel.value;
+      // JPG cannot hold transparency; without a fill it comes out black.
+      var bg = (type === 'image/jpeg') ? (fillColor() || '#ffffff') : fillColor();
+      if (bg) { ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h); }
+      ctx.drawImage(img, 0, 0);
+      var q = parseInt(quality.value, 10) / 100;
+      return new Promise(function (res, rej) {
+        canvas.toBlob(function (b) {
+          canvas.width = canvas.height = 1;   // give memory back when there are many large photos
+          if (b) res({ blob: b, w: w, h: h, type: type }); else rej(new Error('conversion failed'));
+        }, type, type === 'image/png' ? undefined : q);
+      });
+    });
+  }
+
+  // A new format means a new extension, so the name stays as it is. Only when saving to the
+  // same format again is a suffix added, so the original is not overwritten.
+  function newName(orig, type) {
+    var base = orig.replace(/\.[^.]+$/, '');
+    var oldExt = (orig.match(/\.([^.]+)$/) || [, ''])[1].toLowerCase();
+    var ext = extOf(type);
+    var same = oldExt === ext || (oldExt === 'jpeg' && ext === 'jpg');
+    return base + (same ? '_converted' : '') + '.' + ext;
+  }
+
+  function process(files) {
+    setMsg('Converting… (' + files.length + ')');
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = [];
+
+    var jobs = files.map(function (f) {
+      return convert(f).then(function (out) {
+        return {
+          name: newName(f.name, out.type),
+          blob: out.blob,
+          url: URL.createObjectURL(out.blob),
+          before: f.size,
+          after: out.blob.size,
+          dim: out.w + '×' + out.h,
+          fromExt: (f.name.match(/\.([^.]+)$/) || [, '?'])[1].toUpperCase()
+        };
+      }).catch(function () { return null; });
+    });
+
+    Promise.all(jobs).then(function (out) {
+      results = out.filter(Boolean);
+      if (!results.length) { setMsg('No image could be converted.', 'err'); return; }
+      setMsg('');
+      render();
+    });
+  }
+
+  function render() {
+    var before = results.reduce(function (s, r) { return s + r.before; }, 0);
+    var after = results.reduce(function (s, r) { return s + r.after; }, 0);
+    var pct = before ? Math.round((after / before - 1) * 100) : 0;
+
+    document.getElementById('t-count').textContent = results.length;
+    document.getElementById('t-before').textContent = humanSize(before);
+    document.getElementById('t-after').textContent = humanSize(after);
+    var d = document.getElementById('t-diff');
+    d.textContent = (pct > 0 ? '+' : '') + pct + '%';
+    d.style.color = pct > 0 ? 'var(--warn)' : 'var(--ok)';
+
+    var toExt = extOf(toSel.value).toUpperCase();
+    list.innerHTML = '';
+    results.forEach(function (r) {
+      var li = document.createElement('li');
+      // Without seeing the result there is no way to notice a wrong setting before saving
+      li.innerHTML =
+        '<a href="' + r.url + '" target="_blank" rel="noopener" title="' + r.name + '"><img src="' + r.url + '" alt="" class="thumb"></a>' +
+        '<span class="fname" title="' + r.name + '">' + r.name + '</span>' +
+        '<span class="fmeta">' + r.fromExt + ' → ' + toExt + ' · ' + r.dim + ' · ' +
+        humanSize(r.before) + ' → ' + humanSize(r.after) + '</span>';
+      var a = document.createElement('a');
+      a.className = 'btn small';
+      a.textContent = 'Save';
+      a.href = r.url;
+      a.download = r.name;
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+
+    if (after > before * 1.2) {
+      setMsg('The converted files are larger. That is normal when photos are saved as PNG — try JPG or WebP.', 'err');
+    }
+    resultBox.hidden = false;
+  }
+
+  // Downloading one file at a time makes the browser ask about multiple downloads, and on
+  // phones only the first image tends to survive. Two or more go into one ZIP by default.
+  document.getElementById('btn-all').addEventListener('click', function () {
+    if (!results.length) return;
+    var wantZip = results.length > 1 &&
+                  document.getElementById('as-zip').checked &&
+                  typeof makeZip === 'function';
+    if (!wantZip) {
+      var i = 0;
+      (function next() {
+        if (i >= results.length) return;
+        var r = results[i++];
+        var a = document.createElement('a');
+        a.href = r.url; a.download = r.name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(next, 300);      // avoid the multi-download block
+      })();
+      return;
+    }
+    setMsg('Bundling…');
+    Promise.all(results.map(function (r) {
+      return r.blob.arrayBuffer().then(function (buf) {
+        return { name: r.name, bytes: new Uint8Array(buf) };
+      });
+    })).then(function (entries) {
+      var blob = makeZip(entries);
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'converted-images.zip';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(results.length + ' images bundled into one ZIP.', 'ok');
+    }).catch(function (e) {
+      setMsg('Could not build the ZIP: ' + ((e && e.message) || e), 'err');
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = []; lastFiles = [];
+    list.innerHTML = '';
+    fileInput.value = '';
+    resultBox.hidden = true;
+    setMsg('');
+  });
+
+  syncOptions();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combine images into one without uploading — stitch photos free</title>
+<meta name="description" content="Stitch photos or screenshots into one image — vertically, side by side or in a grid — without uploading them. The preview is exactly what is saved.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-join.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-join.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-join.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-join.html">
+<meta property="og:title" content="Combine images into one without uploading">
+<meta property="og:description" content="Stitch photos and screenshots vertically, side by side or in a grid, inside your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Combine images","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/image-join.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-image-join.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Combine images into one without uploading — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Combine images into one without uploading">
+<meta name="twitter:description" content="Stitch photos and screenshots vertically, side by side or in a grid, inside your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-image-join.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Are my images uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. Everything happens inside your browser and nothing is sent anywhere. The page keeps working with the internet switched off, so it is safe for chat screenshots and ID documents."}},{"@type":"Question","name":"Can I change the order?","acceptedAnswer":{"@type":"Answer","text":"Yes. Use the ↑ ↓ buttons next to each image to move it and ✕ to remove it; the preview updates immediately. Choosing more images adds them to the end of the list."}},{"@type":"Question","name":"What if the images are different sizes?","acceptedAnswer":{"@type":"Answer","text":"By default everything is shrunk to match the smallest image, so nothing is enlarged and nothing gets blurry. \"Enlarge to the largest image\" scales small ones up, which can soften them slightly. \"Keep original sizes\" leaves every image untouched and fills the leftover space with the background colour."}},{"@type":"Question","name":"How many images can I combine?","acceptedAnswer":{"@type":"Answer","text":"There is no fixed limit. If the result would be too large for the browser to draw (around 100 megapixels), the whole image is scaled down to fit and a note appears above the preview saying so."}},{"@type":"Question","name":"The result is extremely tall.","acceptedAnswer":{"@type":"Answer","text":"Stacking many images vertically does that. Switch the layout to a grid with 2–3 images per row to get a shape that fits on a screen."}},{"@type":"Question","name":"What happens to transparent PNGs?","acceptedAnswer":{"@type":"Answer","text":"Saved as JPG, transparent areas are filled with the background colour. PNG output also fills gaps and leftover space with that colour."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Combine images into one without uploading","item":"https://toolmoa.github.io/en/image-join.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html" aria-current="page">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+    </nav>
+    <a class="lang-link" href="../image-join.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Combine images into one without uploading</h1>
+  <p class="lead">Stitch several photos or screenshots into a single picture — top to bottom, side by side, or in a grid.</p>
+  <span class="privacy-badge">🔒 Your images never leave your device</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🧩</span>
+    <span class="dz-main">Drop images here, or click to choose</span>
+    <span class="dz-sub">Pick several at once. They are joined in the order you choose them.</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <ul class="file-list" id="list"></ul>
+
+    <div class="card">
+      <div class="field">
+        <label for="dir">Layout</label>
+        <select id="dir">
+          <option value="v" selected>Vertical (top to bottom)</option>
+          <option value="h">Horizontal (left to right)</option>
+          <option value="g">Grid</option>
+        </select>
+      </div>
+      <div class="field" id="cols-field" hidden>
+        <label for="cols">Images per row</label>
+        <input type="number" id="cols" min="1" max="10" value="2">
+        <div class="hint">In a grid every cell is the same size, and each image is fitted inside its cell without distortion.</div>
+      </div>
+      <div class="field" id="align-field">
+        <label for="align">Size matching</label>
+        <select id="align">
+          <option value="fit" selected>Shrink to the smallest image (recommended)</option>
+          <option value="max">Enlarge to the largest image</option>
+          <option value="none">Keep original sizes (centred)</option>
+        </select>
+        <div class="hint" id="align-hint"></div>
+      </div>
+      <div class="field">
+        <label for="gap">Gap between images (px)</label>
+        <input type="number" id="gap" min="0" max="200" value="0">
+      </div>
+      <div class="field">
+        <label for="bgc">Background / gap colour</label>
+        <input type="color" id="bgc" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        <div class="hint">Fills the gaps, and any space left over when images differ in size.</div>
+      </div>
+      <div class="field">
+        <label for="fmt">Save as</label>
+        <select id="fmt">
+          <option value="image/jpeg" selected>JPG — small file</option>
+          <option value="image/png">PNG — lossless (larger file)</option>
+        </select>
+      </div>
+      <div class="field" id="q-field" style="margin-bottom:0">
+        <label for="quality">Quality <span id="q-val" style="color:var(--accent)">92%</span></label>
+        <input type="range" id="quality" min="50" max="100" value="92" step="2">
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Images</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl">Output size</span></div>
+    </div>
+
+    <p class="hint" id="cap-note" style="margin:0 0 6px"></p>
+    <div class="card" style="text-align:center;overflow:auto">
+      <canvas id="preview" style="max-width:100%;height:auto;border:1px solid var(--border)"></canvas>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-save">Save as one image</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To bundle pictures into <strong style="color:var(--text)">one document</strong> instead, <a href="img-to-pdf.html">Image to PDF</a> is a better fit. To make the joined image smaller, use <a href="image-compress.html">Compress image</a>; to trim it, use <a href="image-crop.html">Crop image</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_IMAGEJOIN --></div>
+
+  <h2>Why stitch screenshots on your own device</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      The things people most often stitch together are exactly the things they should not be uploading:
+      <strong style="color:var(--text)">a chat thread captured in five screenshots, the front and back of an ID card,
+      a long receipt or form photographed in parts.</strong> Sent separately they arrive out of order and have to be
+      opened one by one; joined, they read as one page. This page reads each image in your browser, draws them
+      onto a single canvas and saves that canvas. The preview <em>is</em> the output, so what you see is exactly
+      what you get — and none of it ever reaches a server.
+    </p>
+  </div>
+
+  <h2>Common uses</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Long conversations</strong> — join partial screenshots vertically into one tall image.<br>
+      <strong style="color:var(--text)">Before and after</strong> — place two photos side by side so the difference is obvious.<br>
+      <strong style="color:var(--text)">Listings and posts</strong> — put several angles of an item into one grid image.<br>
+      <strong style="color:var(--text)">Document uploads</strong> — combine the front and back of a card into a single file.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my images uploaded anywhere?</summary>
+      <p>No. Everything happens inside your browser and nothing is sent anywhere. The page keeps working with the internet switched off, so it is safe for chat screenshots and ID documents.</p>
+    </details>
+    <details>
+      <summary>Can I change the order?</summary>
+      <p>Yes. Use the <strong>↑ ↓</strong> buttons next to each image to move it and <strong>✕</strong> to remove it; the preview updates immediately. Choosing more images adds them to the end of the list.</p>
+    </details>
+    <details>
+      <summary>What if the images are different sizes?</summary>
+      <p>By default everything is <strong>shrunk to match the smallest image</strong>, so nothing is enlarged and nothing gets blurry. "Enlarge to the largest image" scales small ones up, which can soften them slightly. "Keep original sizes" leaves every image untouched and fills the leftover space with the background colour.</p>
+    </details>
+    <details>
+      <summary>How many images can I combine?</summary>
+      <p>There is no fixed limit. If the result would be too large for the browser to draw (around 100 megapixels), the whole image is scaled down to fit and a note appears above the preview saying so.</p>
+    </details>
+    <details>
+      <summary>The result is extremely tall.</summary>
+      <p>Stacking many images vertically does that. Switch the layout to a grid with 2–3 images per row to get a shape that fits on a screen.</p>
+    </details>
+    <details>
+      <summary>What happens to transparent PNGs?</summary>
+      <p>Saved as JPG, transparent areas are filled with the background colour. PNG output also fills gaps and leftover space with that colour.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="../image-join.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var list = document.getElementById('list');
+  var canvas = document.getElementById('preview');
+  var dirSel = document.getElementById('dir');
+  var colsInput = document.getElementById('cols');
+  var alignSel = document.getElementById('align');
+  var gapInput = document.getElementById('gap');
+  var bgcInput = document.getElementById('bgc');
+  var fmtSel = document.getElementById('fmt');
+  var qual = document.getElementById('quality');
+
+  // If the result gets too big the browser cannot create the canvas and hands back a blank
+  // image. Cap it, scale everything down past the cap, and say so on screen.
+  var MAX_PIXELS = 100e6;
+
+  var items = [];      // {img, url, name, w, h}
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // The file input is hidden, so it is out of the tab order. Without this, keyboard-only
+  // users have no way at all to pick a file.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  document.addEventListener('paste', function (e) {
+    var clip = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < clip.length; i++) {
+      if (clip[i].kind !== 'file' || clip[i].type.indexOf('image/') !== 0) continue;
+      var f = clip[i].getAsFile();
+      if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], 'pasted-image-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    handle(picked);
+  });
+
+  [dirSel, colsInput, alignSel, gapInput, bgcInput, fmtSel].forEach(function (el) {
+    el.addEventListener('change', function () { syncFields(); draw(); });
+  });
+  qual.addEventListener('input', function () {
+    document.getElementById('q-val').textContent = qual.value + '%';
+  });
+
+  function syncFields() {
+    var g = dirSel.value === 'g';
+    document.getElementById('cols-field').hidden = !g;
+    document.getElementById('q-field').hidden = fmtSel.value !== 'image/jpeg';
+    document.getElementById('align-hint').textContent =
+      g ? 'In a grid every cell is the same size and images keep their proportions inside it.'
+      : dirSel.value === 'v' ? 'Stacking vertically matches widths.'
+      : 'Placing side by side matches heights.';
+  }
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) {
+      return f.type.indexOf('image/') === 0;
+    });
+    if (!files.length) { setMsg('Please choose an image file.', 'err'); return; }
+    setMsg('Reading images…');
+    Promise.all(files.map(loadOne)).then(function (loaded) {
+      var ok = loaded.filter(Boolean);
+      if (!ok.length) { setMsg('None of the images could be opened.', 'err'); return; }
+      // Keep the chosen order and append to the list
+      items = items.concat(ok);
+      area.hidden = false;
+      setMsg(loaded.length > ok.length
+        ? (loaded.length - ok.length) + ' image(s) could not be opened and were skipped.'
+        : '', loaded.length > ok.length ? 'err' : '');
+      syncFields();
+      renderList();
+      draw();
+    });
+  }
+
+  function loadOne(file) {
+    return new Promise(function (res) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        // The same URL is reused for the thumbnail, so it is not released here.
+        // It is released on removal or reset.
+        res({ img: img, url: url, name: file.name, w: img.naturalWidth, h: img.naturalHeight });
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); res(null); };
+      img.src = url;
+    });
+  }
+
+  function renderList() {
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var li = document.createElement('li');
+      li.innerHTML =
+        '<img src="' + it.url + '" alt="" class="thumb">' +
+        '<span class="fname" title="' + it.name + '">' + (i + 1) + '. ' + it.name + '</span>' +
+        '<span class="fmeta">' + it.w + '×' + it.h + '</span>';
+      var ops = document.createElement('span');
+      ops.style.cssText = 'display:flex;gap:4px';
+      ops.appendChild(opBtn('↑', 'Move up', i === 0, function () { move(i, -1); }));
+      ops.appendChild(opBtn('↓', 'Move down', i === items.length - 1, function () { move(i, 1); }));
+      ops.appendChild(opBtn('✕', 'Remove', false, function () { remove(i); }));
+      li.appendChild(ops);
+      list.appendChild(li);
+    });
+    document.getElementById('t-count').textContent = items.length;
+  }
+
+  function opBtn(label, title, disabled, fn) {
+    var b = document.createElement('button');
+    b.className = 'btn small secondary';
+    b.textContent = label;
+    b.title = title;
+    b.setAttribute('aria-label', title);
+    b.disabled = !!disabled;
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  function move(i, d) {
+    var j = i + d;
+    if (j < 0 || j >= items.length) return;
+    var tmp = items[i]; items[i] = items[j]; items[j] = tmp;
+    renderList(); draw();
+  }
+
+  function remove(i) {
+    URL.revokeObjectURL(items[i].url);
+    items.splice(i, 1);
+    renderList();
+    if (!items.length) { area.hidden = true; setMsg(''); return; }
+    draw();
+  }
+
+  // Work out where and how big each image goes before drawing anything.
+  // Keeping layout and drawing apart means the preview and the saved file cannot disagree.
+  function layout() {
+    if (!items.length) return null;
+    var gap = Math.max(0, Math.min(200, parseInt(gapInput.value, 10) || 0));
+    var mode = dirSel.value, how = alignSel.value;
+    var boxes = [], W = 0, H = 0;
+    var i;
+
+    if (mode === 'v') {
+      var ws = items.map(function (it) { return it.w; });
+      var base = how === 'fit' ? Math.min.apply(null, ws)
+               : how === 'max' ? Math.max.apply(null, ws) : 0;
+      W = base || Math.max.apply(null, ws);
+      var y = 0;
+      for (i = 0; i < items.length; i++) {
+        var it = items[i];
+        var w = base ? base : it.w;
+        var h = base ? Math.round(it.h * (base / it.w)) : it.h;
+        boxes.push({ i: i, x: Math.round((W - w) / 2), y: y, w: w, h: h });
+        y += h + (i < items.length - 1 ? gap : 0);
+      }
+      H = y;
+    } else if (mode === 'h') {
+      var hs = items.map(function (it) { return it.h; });
+      var hbase = how === 'fit' ? Math.min.apply(null, hs)
+                : how === 'max' ? Math.max.apply(null, hs) : 0;
+      H = hbase || Math.max.apply(null, hs);
+      var x = 0;
+      for (i = 0; i < items.length; i++) {
+        var it2 = items[i];
+        var h2 = hbase ? hbase : it2.h;
+        var w2 = hbase ? Math.round(it2.w * (hbase / it2.h)) : it2.w;
+        boxes.push({ i: i, x: x, y: Math.round((H - h2) / 2), w: w2, h: h2 });
+        x += w2 + (i < items.length - 1 ? gap : 0);
+      }
+      W = x;
+    } else {
+      // Grid: one cell size for all, each image fitted inside its cell keeping proportions
+      var cols = Math.max(1, Math.min(10, parseInt(colsInput.value, 10) || 2));
+      var cw = how === 'max' ? Math.max.apply(null, items.map(function (it) { return it.w; }))
+                             : Math.min.apply(null, items.map(function (it) { return it.w; }));
+      var ch = how === 'max' ? Math.max.apply(null, items.map(function (it) { return it.h; }))
+                             : Math.min.apply(null, items.map(function (it) { return it.h; }));
+      var rows = Math.ceil(items.length / cols);
+      W = cols * cw + (cols - 1) * gap;
+      H = rows * ch + (rows - 1) * gap;
+      for (i = 0; i < items.length; i++) {
+        var it3 = items[i];
+        var c = i % cols, r = Math.floor(i / cols);
+        var k = Math.min(cw / it3.w, ch / it3.h);
+        if (how === 'none') k = Math.min(1, k);    // never enlarge past the original
+        var w3 = Math.round(it3.w * k), h3 = Math.round(it3.h * k);
+        boxes.push({
+          i: i,
+          x: c * (cw + gap) + Math.round((cw - w3) / 2),
+          y: r * (ch + gap) + Math.round((ch - h3) / 2),
+          w: w3, h: h3
+        });
+      }
+    }
+
+    W = Math.max(1, Math.round(W)); H = Math.max(1, Math.round(H));
+    // Too big: scale the whole thing down by one factor
+    var scale = 1;
+    if (W * H > MAX_PIXELS) scale = Math.sqrt(MAX_PIXELS / (W * H));
+    return { boxes: boxes, w: W, h: H, scale: scale, gap: gap };
+  }
+
+  function draw() {
+    var L = layout();
+    var note = document.getElementById('cap-note');
+    if (!L) { note.textContent = ''; return; }
+
+    var w = Math.max(1, Math.round(L.w * L.scale));
+    var h = Math.max(1, Math.round(L.h * L.scale));
+    canvas.width = w; canvas.height = h;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = bgcInput.value;
+    ctx.fillRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    L.boxes.forEach(function (b) {
+      ctx.drawImage(items[b.i].img,
+        Math.round(b.x * L.scale), Math.round(b.y * L.scale),
+        Math.max(1, Math.round(b.w * L.scale)), Math.max(1, Math.round(b.h * L.scale)));
+    });
+
+    document.getElementById('t-size').textContent = w + '×' + h;
+    note.textContent = L.scale < 1
+      ? 'The result was too large, so it was scaled to ' + Math.round(L.scale * 100) +
+        '%. At full size the browser cannot create the image.'
+      : '';
+  }
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!items.length) return;
+    var btn = this;
+    btn.disabled = true;
+    var type = fmtSel.value;
+    var q = parseInt(qual.value, 10) / 100;
+    // The preview canvas is the result. Nothing is redrawn, so what you see is what is saved.
+    canvas.toBlob(function (blob) {
+      btn.disabled = false;
+      if (!blob) { setMsg('Could not create the image. Try fewer images or a smaller gap.', 'err'); return; }
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'combined-image.' + (type === 'image/png' ? 'png' : 'jpg');
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(items.length + ' images saved as one. ' +
+             canvas.width + '×' + canvas.height + ' · ' + humanSize(blob.size), 'ok');
+    }, type, type === 'image/png' ? undefined : q);
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    items.forEach(function (it) { URL.revokeObjectURL(it.url); });
+    items = [];
+    list.innerHTML = '';
+    fileInput.value = '';
+    document.getElementById('cap-note').textContent = '';
+    area.hidden = true;
+    setMsg('');
+  });
+
+  syncFields();
+})();
+</script>
+</body>
+</html>

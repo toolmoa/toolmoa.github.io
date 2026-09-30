@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF to JPG without uploading — convert PDF pages to images free</title>
+<meta name="description" content="Save PDF pages as JPG or PNG without uploading the document. Pick the resolution and pages; several pages come as one ZIP. Runs in your browser.">
+<link rel="canonical" href="https://toolmoa.github.io/en/pdf-to-image.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-to-image.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-to-image.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-to-image.html">
+<meta property="og:title" content="PDF to JPG without uploading">
+<meta property="og:description" content="Turn PDF pages into JPG or PNG images inside your browser. Nothing is uploaded.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏞️</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"PDF to image","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/pdf-to-image.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-pdf-to-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PDF to JPG without uploading — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDF to JPG without uploading">
+<meta name="twitter:description" content="Turn PDF pages into JPG or PNG images inside your browser. Nothing is uploaded.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-pdf-to-image.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my PDF uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. It is processed inside your browser and nothing is sent anywhere. The page keeps working with the internet switched off, so it is safe for contracts and work documents."}},{"@type":"Question","name":"JPG or PNG?","acceptedAnswer":{"@type":"Answer","text":"For pages that are mostly photos, JPG is far smaller. For tables, drawings and small text, PNG is sharper — but it can be 3–10× the size of JPG for the same page. If unsure, try JPG first and switch to PNG only if the text looks smudged."}},{"@type":"Question","name":"Which resolution should I choose?","acceptedAnswer":{"@type":"Answer","text":"For viewing on screen or sending in a chat, 2× is plenty. For printing or zooming in, go to 3× or above. Higher resolution means sharper text but larger files and longer conversion. The exact pixel size is shown under the setting as you change it."}},{"@type":"Question","name":"Is there a page limit?","acceptedAnswer":{"@type":"Answer","text":"No fixed limit. Since all the work happens on your device, many pages at a high resolution take time and memory — selecting only the pages you need is faster than saving hundreds at 4×. If a single page would be too large, it is scaled down automatically and you are told."}},{"@type":"Question","name":"The text looks blurry.","acceptedAnswer":{"@type":"Answer","text":"Raise the resolution and switch to PNG. JPG leaves faint smudges around sharp edges, which shows on tables and small print. Setting JPG quality to 100% also helps."}},{"@type":"Question","name":"Does it work with password-protected PDFs?","acceptedAnswer":{"@type":"Answer","text":"Encrypted PDFs cannot be opened. Remove the password first, then try again."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"PDF to JPG without uploading","item":"https://toolmoa.github.io/en/pdf-to-image.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html" aria-current="page">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+    </nav>
+    <a class="lang-link" href="../pdf-to-image.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>PDF to JPG without uploading</h1>
+  <p class="lead">Save each page of a PDF as an image file. Pick the resolution and the pages; several pages are bundled into one ZIP.</p>
+  <span class="privacy-badge">🔒 Your document never leaves your device</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🏞️</span>
+    <span class="dz-main">Drop a PDF here, or click to choose</span>
+    <span class="dz-sub">One file at a time</span>
+    <input type="file" id="file" accept="application/pdf,.pdf">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl">Pages</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">0</span><span class="lbl">File size</span></div>
+      <div class="stat"><span class="num" id="t-pick" style="font-size:18px">-</span><span class="lbl">Pages to save</span></div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label for="fmt">Image format</label>
+        <select id="fmt">
+          <option value="jpg" selected>JPG — small files (photos, reports)</option>
+          <option value="png">PNG — crisp text (tables, drawings)</option>
+        </select>
+      </div>
+      <div class="field" id="q-field">
+        <label for="quality">JPG quality</label>
+        <input type="range" id="quality" min="50" max="100" step="5" value="85">
+        <div class="hint"><span id="q-val">85</span>%. Lower means smaller files, higher means sharper. Around 85% looks the same to the eye while staying small.</div>
+      </div>
+      <div class="field">
+        <label for="scale">Resolution</label>
+        <select id="scale">
+          <option value="1">1× — for screens (about 96 dpi)</option>
+          <option value="2" selected>2× — recommended (about 192 dpi)</option>
+          <option value="3">3× — for print and zooming (about 288 dpi)</option>
+          <option value="4">4× — maximum (large files)</option>
+        </select>
+        <div class="hint" id="s-hint"></div>
+      </div>
+      <div class="field" id="zip-field" style="margin-bottom:0">
+        <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="as-zip" checked style="width:auto;margin:0">
+          <span>Save as a single ZIP file</span>
+        </label>
+        <div class="hint">
+          Untick to get one download per page. The browser will ask for confirmation repeatedly and phones
+          may keep only the first image, so the ZIP is recommended.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="field" style="margin-bottom:0">
+        <label for="range">Pages to save</label>
+        <input type="text" id="range" placeholder="e.g. 1-3,7  (leave empty for all)">
+        <div class="hint">
+          Separate with commas and use a hyphen for runs, like <code>1-3</code>. <code>2-</code> means page 2 to the end. Leave it empty to save every page.
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" id="grid-hint" style="margin:0 0 6px">
+      You can also click pages below to select them, or type into the box above.
+    </p>
+    <div class="pgrid" id="grid"></div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-go">Save as images</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">Going the other way — <strong style="color:var(--text)">photos into a PDF</strong> — is <a href="img-to-pdf.html">Image to PDF</a>. To pull <strong style="color:var(--text)">certain pages out as a PDF</strong>, use <a href="pdf-split.html">Split PDF</a>. To shrink the resulting images further, there is <a href="image-compress.html">Compress image</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_PDFTOIMAGE --></div>
+
+  <h2>Why convert a PDF locally</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Plenty of places still will not take a PDF: <strong style="color:var(--text)">chat apps, social media, most
+      blog editors,</strong> slides where you want one page as a picture, a signed page you need to send as an image.
+      The documents involved — contracts, statements, internal reports — are the last things you want sitting on
+      a stranger's conversion server. This page opens the PDF inside your browser with Mozilla's pdf.js, draws each
+      page onto a canvas and saves that. The file never leaves your machine, and the page keeps working offline.
+    </p>
+  </div>
+
+  <h2>Common uses</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Posting online</strong> — PDFs cannot be posted most places, so post the pages as JPG.<br>
+      <strong style="color:var(--text)">Inserting into documents</strong> — as a picture in Word or PowerPoint, the page looks right even without the fonts.<br>
+      <strong style="color:var(--text)">Thumbnails</strong> — save just the first page as a cover image for a listing.<br>
+      <strong style="color:var(--text)">Printing</strong> — save at 3× so text stays sharp on paper.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my PDF uploaded anywhere?</summary>
+      <p>No. It is processed inside your browser and nothing is sent anywhere. The page keeps working with the internet switched off, so it is safe for contracts and work documents.</p>
+    </details>
+    <details>
+      <summary>JPG or PNG?</summary>
+      <p>For pages that are mostly photos, <strong>JPG</strong> is far smaller. For tables, drawings and small text, <strong>PNG</strong> is sharper — but it can be 3–10× the size of JPG for the same page. If unsure, try JPG first and switch to PNG only if the text looks smudged.</p>
+    </details>
+    <details>
+      <summary>Which resolution should I choose?</summary>
+      <p>For viewing on screen or sending in a chat, <strong>2×</strong> is plenty. For printing or zooming in, go to 3× or above. Higher resolution means sharper text but larger files and longer conversion. The exact pixel size is shown under the setting as you change it.</p>
+    </details>
+    <details>
+      <summary>Is there a page limit?</summary>
+      <p>No fixed limit. Since all the work happens on your device, many pages at a high resolution take time and memory — selecting only the pages you need is faster than saving hundreds at 4×. If a single page would be too large, it is scaled down automatically and you are told.</p>
+    </details>
+    <details>
+      <summary>The text looks blurry.</summary>
+      <p>Raise the resolution and switch to PNG. JPG leaves faint smudges around sharp edges, which shows on tables and small print. Setting JPG quality to 100% also helps.</p>
+    </details>
+    <details>
+      <summary>Does it work with password-protected PDFs?</summary>
+      <p>Encrypted PDFs cannot be opened. Remove the password first, then try again.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="../pdf-to-image.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<!-- pdf.js and its worker are over 2 MB. They are fetched after a file is chosen, not up front. -->
+<script src="../assets/zip.js"></script>
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var rangeInput = document.getElementById('range');
+  var fmtSel = document.getElementById('fmt');
+  var qual = document.getElementById('quality');
+  var scaleSel = document.getElementById('scale');
+  var grid = document.getElementById('grid');
+
+  // If one image gets too large the browser cannot create the canvas and silently returns a
+  // blank picture. Cap it, shrink to fit, and say so on screen.
+  var MAX_PIXELS = 30e6;
+
+  var pdfDoc = null, pageCount = 0, baseName = 'document', fileSize = 0;
+  var firstSize = null;          // page 1 size in pt, used for the resolution hint
+
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // Most visitors from search look around and leave. Fetch the library only once a file is chosen.
+  var libPromise = null;
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('pdfjsLib', '../assets/vendor/pdf.min.js').then(function () {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
+      }).catch(function (e) { libPromise = null; throw e; });   // allow a retry after failure
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof pdfjsLib !== 'undefined') { fn(); return; }
+    setMsg('Loading the PDF engine…');
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg('Could not load the PDF engine. Please reload the page.', 'err');
+    });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // The file input is hidden, so it is out of the tab order. Without this, keyboard-only
+  // users have no way at all to pick a file.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files.length) load(fileInput.files[0]);
+  });
+
+  fmtSel.addEventListener('change', syncFmt);
+  qual.addEventListener('input', syncFmt);
+  scaleSel.addEventListener('change', syncHint);
+  rangeInput.addEventListener('input', updatePick);
+
+  function syncFmt() {
+    document.getElementById('q-field').hidden = fmtSel.value !== 'jpg';
+    document.getElementById('q-val').textContent = qual.value;
+    syncHint();
+  }
+
+  // Show how many pixels the chosen scale produces. Without it "4×" means nothing,
+  // and you only find out it is too big after waiting for it.
+  function syncHint() {
+    var el = document.getElementById('s-hint');
+    if (!firstSize) { el.textContent = ''; return; }
+    var s = parseFloat(scaleSel.value);
+    var w = firstSize.w * s * 96 / 72, h = firstSize.h * s * 96 / 72;
+    var capped = '';
+    if (w * h > MAX_PIXELS) {
+      var k = Math.sqrt(MAX_PIXELS / (w * h));
+      w *= k; h *= k;
+      capped = ' — too large, so it will be scaled down to this';
+    }
+    el.textContent = 'Page 1 will be saved at ' + Math.ceil(w) + ' × ' + Math.ceil(h) + ' pixels' + capped;
+  }
+
+  function load(file) {
+    if (!(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) {
+      setMsg('Please choose a PDF file.', 'err'); return;
+    }
+    whenReady(function () {
+      baseName = file.name.replace(/\.[^.]+$/, '');
+      fileSize = file.size;
+      setMsg('Reading the file…');
+      file.arrayBuffer().then(function (buf) {
+        // pdf.js transfers the buffer to its worker and empties it. Hand over a copy.
+        return pdfjsLib.getDocument({ data: new Uint8Array(buf).slice() }).promise;
+      }).then(function (doc) {
+        pdfDoc = doc;
+        pageCount = doc.numPages;
+        document.getElementById('t-pages').textContent = pageCount;
+        document.getElementById('t-size').textContent = humanSize(fileSize);
+        rangeInput.value = '';
+        area.hidden = false;
+        setMsg('');
+        return doc.getPage(1).then(function (p) {
+          var v = p.getViewport({ scale: 1 });
+          firstSize = { w: v.width, h: v.height };
+          syncFmt();
+          updatePick();
+          return renderThumbs(doc);
+        });
+      }).catch(function (e) {
+        setMsg('This file cannot be opened. It may be password-protected or damaged. — ' +
+               ((e && e.message) || e), 'err');
+      });
+    });
+  }
+
+  // Turn "1-3,7,10-" into zero-based page indexes. Empty means all —
+  // most people come here to save every page.
+  function parseRange(str) {
+    if (!str.trim()) {
+      var all = [];
+      for (var k = 0; k < pageCount; k++) all.push(k);
+      return all;
+    }
+    var out = [], seen = {};
+    str.split(',').forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var m = part.match(/^(\d+)\s*-\s*(\d*)$/);
+      if (m) {
+        var a = parseInt(m[1], 10);
+        var b = m[2] ? parseInt(m[2], 10) : pageCount;
+        if (a > b) { var sw = a; a = b; b = sw; }
+        for (var i = a; i <= b; i++) {
+          if (i >= 1 && i <= pageCount && !seen[i]) { seen[i] = 1; out.push(i - 1); }
+        }
+      } else if (/^\d+$/.test(part)) {
+        var n = parseInt(part, 10);
+        if (n >= 1 && n <= pageCount && !seen[n]) { seen[n] = 1; out.push(n - 1); }
+      }
+    });
+    return out;
+  }
+
+  function updatePick() {
+    var picked = parseRange(rangeInput.value);
+    document.getElementById('t-pick').textContent =
+      picked.length ? picked.length + (picked.length === 1 ? ' page' : ' pages') : 'None';
+    // With a single page the ZIP option means nothing
+    document.getElementById('zip-field').hidden = picked.length < 2;
+    highlight(picked);
+  }
+
+  // Turn selected indexes back into a short form like "1-3,7"
+  function toRangeText(idxs) {
+    if (!idxs.length) return '';
+    var s = idxs.map(function (i) { return i + 1; }).sort(function (a, b) { return a - b; });
+    var out = [], start = s[0], prev = s[0];
+    for (var i = 1; i <= s.length; i++) {
+      if (i < s.length && s[i] === prev + 1) { prev = s[i]; continue; }
+      out.push(start === prev ? String(start) : start + '-' + prev);
+      start = prev = s[i];
+    }
+    return out.join(',');
+  }
+
+  function highlight(picked) {
+    var on = {};
+    picked.forEach(function (i) { on[i] = 1; });
+    Array.prototype.forEach.call(grid.children, function (card) {
+      card.classList.toggle('on', !!on[parseInt(card.dataset.page, 10)]);
+    });
+  }
+
+  function toggle(idx) {
+    var picked = parseRange(rangeInput.value);
+    var at = picked.indexOf(idx);
+    if (at >= 0) picked.splice(at, 1); else picked.push(idx);
+    // Everything selected again means back to the empty box (= all)
+    rangeInput.value = picked.length === pageCount ? '' : toRangeText(picked);
+    updatePick();
+  }
+
+  function renderThumbs(doc) {
+    grid.innerHTML = '';
+    for (var i = 0; i < doc.numPages; i++) {
+      var card = document.createElement('div');
+      card.className = 'pcard pick';
+      card.dataset.page = i;
+      card.innerHTML = '<div class="thumb" style="min-height:80px"></div>' +
+                       '<span class="pno">' + (i + 1) + '</span>';
+      (function (idx) { card.onclick = function () { toggle(idx); }; })(i);
+      grid.appendChild(card);
+    }
+    updatePick();
+
+    var n = 1;
+    function next() {
+      if (n > doc.numPages) return Promise.resolve();
+      return doc.getPage(n).then(function (page) {
+        var v0 = page.getViewport({ scale: 1 });
+        var v = page.getViewport({ scale: 140 / v0.width });
+        var c = document.createElement('canvas');
+        c.width = Math.ceil(v.width); c.height = Math.ceil(v.height);
+        return page.render({ canvasContext: c.getContext('2d'), viewport: v }).promise
+          .then(function () {
+            var holder = grid.children[n - 1] && grid.children[n - 1].querySelector('.thumb');
+            if (holder) { holder.innerHTML = ''; holder.appendChild(c); }
+            n++;
+            return next();
+          });
+      });
+    }
+    return next().catch(function (e) {
+      // Saving must still work if previews fail, but swallowing the error hides the cause.
+      document.getElementById('grid-hint').textContent =
+        'Page previews could not be created. Type the pages into the box above instead.' +
+        ' (' + ((e && e.message) || e) + ')';
+    });
+  }
+
+  // Render one page into an image Blob
+  function renderToBlob(pageNo, scale, fmt, q) {
+    return pdfDoc.getPage(pageNo).then(function (page) {
+      var v0 = page.getViewport({ scale: 1 });
+      // PDF units are 1/72 inch. Match a 96 dpi screen first, then apply the scale.
+      var s = scale * 96 / 72;
+      var w = v0.width * s, h = v0.height * s;
+      if (w * h > MAX_PIXELS) s *= Math.sqrt(MAX_PIXELS / (w * h));
+      var v = page.getViewport({ scale: s });
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.ceil(v.width));
+      c.height = Math.max(1, Math.ceil(v.height));
+      var ctx = c.getContext('2d');
+      // pdf.js does not paint a background. Without this JPG comes out black and PNG transparent.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, c.width, c.height);
+      return page.render({ canvasContext: ctx, viewport: v }).promise.then(function () {
+        return new Promise(function (res, rej) {
+          c.toBlob(function (b) {
+            // Empty the canvas straight away. With many pages, memory runs out without this.
+            c.width = c.height = 1;
+            if (b) res(b); else rej(new Error('could not create the image'));
+          }, fmt === 'png' ? 'image/png' : 'image/jpeg', fmt === 'png' ? undefined : q);
+        });
+      });
+    });
+  }
+
+  document.getElementById('btn-go').addEventListener('click', function () {
+    if (!pdfDoc) return;
+    var btn = this;
+    var picked = parseRange(rangeInput.value);
+    if (!picked.length) {
+      setMsg('Please enter valid pages, e.g. 1-3,7', 'err');
+      return;
+    }
+    var fmt = fmtSel.value;
+    var ext = fmt === 'png' ? '.png' : '.jpg';
+    var q = parseInt(qual.value, 10) / 100;
+    var scale = parseFloat(scaleSel.value);
+    var wantZip = picked.length > 1 &&
+                  document.getElementById('as-zip').checked &&
+                  typeof makeZip === 'function';
+    var made = [];
+
+    btn.disabled = true;
+    var chain = Promise.resolve();
+    picked.forEach(function (idx, i) {
+      chain = chain.then(function () {
+        setMsg('Converting… ' + (i + 1) + ' / ' + picked.length);
+        return renderToBlob(idx + 1, scale, fmt, q).then(function (blob) {
+          var name = baseName + '_' + (idx + 1) + ext;
+          if (wantZip || picked.length === 1) { made.push({ name: name, blob: blob }); return; }
+          saveBlob(blob, name);
+          return new Promise(function (r) { setTimeout(r, 300); });  // avoid the multi-download block
+        });
+      });
+    });
+
+    chain.then(function () {
+      if (picked.length === 1) {
+        saveBlob(made[0].blob, made[0].name);
+        setMsg('Saved 1 page as an image.', 'ok');
+        return;
+      }
+      if (!wantZip) {
+        setMsg('Saved ' + picked.length + ' images.', 'ok');
+        return;
+      }
+      setMsg('Bundling…');
+      // makeZip takes bytes only. Turn each Blob into a Uint8Array.
+      return Promise.all(made.map(function (m) {
+        return m.blob.arrayBuffer().then(function (buf) {
+          return { name: m.name, bytes: new Uint8Array(buf) };
+        });
+      })).then(function (entries) {
+        saveBlob(makeZip(entries), baseName + '_images.zip');
+        setMsg(picked.length + ' images bundled into one ZIP.', 'ok');
+      });
+    }).then(function () {
+      btn.disabled = false;
+    }).catch(function (e) {
+      setMsg('Something went wrong during conversion: ' + ((e && e.message) || e), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  function saveBlob(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    pdfDoc = null; pageCount = 0; firstSize = null; fileInput.value = '';
+    grid.innerHTML = ''; rangeInput.value = '';
+    document.getElementById('s-hint').textContent = '';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>
