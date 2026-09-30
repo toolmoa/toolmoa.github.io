@@ -22,7 +22,7 @@ missing=0
 # 툴을 늘리면 여기에도 반드시 추가할 것. 빠뜨리면 이 검사가 조용히 옛 목록만 본다.
 TOOLS="image-compress image-crop image-convert image-join img-to-pdf char-count text-clean
        pdf-merge pdf-split pdf-edit pdf-to-image file-convert qr-generate password-gen
-       random-pick unit-convert date-calc age-calc"
+       random-pick unit-convert date-calc age-calc image-mosaic text-diff"
 for t in $TOOLS; do
   echo "$home" | grep -q "$t.html" || { echo "  홈에 링크 없음: $t"; missing=$((missing+1)); }
 done

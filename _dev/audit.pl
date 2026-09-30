@@ -141,3 +141,22 @@ for my $p (@PAIRS) {
   }
 }
 print $gap ? "\n기능 격차 $gap 건\n" : "\n기능 격차 없음\n";
+
+# --- 홈과 404 가 모든 툴을 보여 주는지 ---
+# 툴을 늘릴 때 머리 메뉴는 navfix5.pl 이 채우지만, 홈 카드와 404 카드는 손으로 넣는다.
+# 2026-09-30 에 404 가 나흘 전 툴 4종을 빠뜨린 채 있었던 것을 발견해 상시 검사로 둔다.
+print "\n=== 홈 · 404 툴 카드 ===\n";
+{
+  my $home = do { open(my $h, '<:raw', 'index.html') or die $!; local $/; <$h> };
+  my $nf   = do { open(my $h, '<:raw', '404.html') or die $!; local $/; <$h> };
+  my ($nav) = $home =~ m{<nav class="site-nav">(.*?)</nav>}s;
+  my @tools = $nav =~ m{href="([^"]+\.html)"}g;
+  my (@missHome, @miss404);
+  for my $t (@tools) {
+    push @missHome, $t unless $home =~ m{class="tool-card" href="\Q$t\E"};
+    push @miss404,  $t unless $nf   =~ m{class="tool-card" href="/\Q$t\E"};
+  }
+  printf("메뉴의 툴 %d종\n", scalar @tools);
+  print @missHome ? "⚠ 홈 카드 없음: @missHome\n" : "홈 카드 전부 있음\n";
+  print @miss404  ? "⚠ 404 카드 없음: @miss404\n" : "404 카드 전부 있음\n";
+}

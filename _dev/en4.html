@@ -241,6 +241,7 @@ function run() {
           set(d, 'gap', '10'); got.hg = txt(d, 't-size'); // 간격 10: 210×50
           set(d, 'dir', 'g'); set(d, 'cols', '1'); got.g = txt(d, 't-size'); // 칸 100×50, 1열 2행 + 간격: 100×110
           set(d, 'gap', '0'); set(d, 'dir', 'v'); set(d, 'align', 'none'); got.none = txt(d, 't-size'); // 200×150
+          set(d, 'align', 'max'); got.max = txt(d, 't-size');   // 폭 200 에 맞춰 늘림: 200×(100+100)
           set(d, 'align', 'fit');
           var first = d.querySelector('#list .fname').textContent;
           d.querySelectorAll('#list li')[1].querySelectorAll('button')[0].click();   // b 를 앞으로
@@ -256,13 +257,13 @@ function run() {
               removeBtn.click();
               var after = txt(d, 't-count');
               var ok = got.v === '100×100' && got.h === '200×50' && got.hg === '210×50' &&
-                       got.g === '100×110' && got.none === '200×150' &&
+                       got.g === '100×110' && got.none === '200×150' && got.max === '200×200' &&
                        /^1\. a\.png/.test(first) && /^1\. b\.png/.test(firstAfter) &&
                        px.w === 100 && px.h === 100 && px.b > 200 && px.r < 80 &&
                        after === '1' && cap.names.indexOf('combined-image.png') >= 0 && !f.dataset.errs;
               log('이어붙이기 (영어)', ok,
                   '세로 ' + got.v + ' · 가로 ' + got.h + ' · 간격10 ' + got.hg + ' · 격자1열 ' + got.g +
-                  ' · 원본크기 ' + got.none + ' · 순서 ' + first + ' → ' + firstAfter +
+                  ' · 원본크기 ' + got.none + ' · 큰쪽맞춤 ' + got.max + ' · 순서 ' + first + ' → ' + firstAfter +
                   ' · 저장 ' + px.w + '×' + px.h + ' 위쪽 rgb(' + px.r + ',' + px.g + ',' + px.b + ')' +
                   ' · 빼기 후 ' + after + '장 · 이름 ' + cap.names.join(',') +
                   (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));

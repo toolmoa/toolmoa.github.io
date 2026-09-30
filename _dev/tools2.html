@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>텍스트 비교 · 사진 모자이크 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">텍스트 비교 · 사진 모자이크 점검 (2026-09-30)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  비교 결과는 화면의 표에서 두 글을 다시 복원해 원문과 맞는지, 그리고 편집 수가 최소인지를
+  페이지 코드와 무관한 LCS 동적 계획법으로 따로 계산해 대조한다(같은 알고리즘으로 검증하면 순환 논증).
+  모자이크는 저장한 파일을 다시 열어 픽셀을 읽는다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:220px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 10000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+
+/* ================= 텍스트 비교 도우미 ================= */
+
+// 값을 넣고 곧바로 비교하게 한다. 입력(input)은 200ms 뒤에 비교하므로 체크박스 change 로 즉시 돌린다.
+function setAB(d, a, b) {
+  d.getElementById('a').value = a;
+  d.getElementById('b').value = b;
+  d.getElementById('ignore-ws').dispatchEvent(new Event('change', { bubbles: true }));
+}
+function stat(d) {
+  return { chg: +txt(d, 't-chg'), del: +txt(d, 't-del'), add: +txt(d, 't-add'), same: +txt(d, 't-same') };
+}
+// "한 줄로" 보기, 전부 펼친 상태의 표에서 두 글을 되살린다
+function rebuild(d) {
+  var A = [], B = [];
+  Array.prototype.forEach.call(d.querySelectorAll('#diff-table tbody tr'), function (tr) {
+    if (tr.classList.contains('skip')) return;
+    var td = tr.children, sg = td[2].textContent, line = td[3].textContent;
+    if (sg === '') { A.push(line); B.push(line); }
+    else if (sg === '−') A.push(line);
+    else if (sg === '+') B.push(line);
+  });
+  return { A: A, B: B };
+}
+// 최소 편집 수 = n + m − 2·LCS. 페이지와 전혀 다른 방법(동적 계획법)으로 구한다.
+function minEdits(a, b) {
+  var n = a.length, m = b.length, i, j, prev = new Array(m + 1).fill(0), cur;
+  for (i = 1; i <= n; i++) {
+    cur = new Array(m + 1).fill(0);
+    for (j = 1; j <= m; j++) cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] + 1 : Math.max(prev[j], cur[j - 1]);
+    prev = cur;
+  }
+  return n + m - 2 * prev[m];
+}
+function seeded(seed) {
+  return function () { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+}
+
+/* ================= 모자이크 도우미 ================= */
+
+// 1px 마다 색이 바뀌는 줄무늬 — 모자이크·흐림이 걸리면 반드시 달라지는 그림
+function stripes(w, h, type) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  for (var i = 0; i < w; i++) {
+    x.fillStyle = i % 2 ? '#1040e0' : '#f0d020';
+    x.fillRect(i, 0, 1, h);
+  }
+  return new Promise(function (r) { c.toBlob(r, type || 'image/png', 0.95); });
+}
+function px(canvas, x, y) {
+  var d = canvas.getContext('2d').getImageData(x, y, 1, 1).data;
+  return [d[0], d[1], d[2], d[3]];
+}
+function same(p, q) { return p[0] === q[0] && p[1] === q[1] && p[2] === q[2] && p[3] === q[3]; }
+function dragOn(w, view, x0, y0, x1, y1) {
+  var r = view.getBoundingClientRect();
+  function cl(x, y) { return { clientX: r.left + x * r.width / view.width, clientY: r.top + y * r.height / view.height }; }
+  function ev(type, p) {
+    view.dispatchEvent(new w.PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, isPrimary: true,
+                                                  clientX: p.clientX, clientY: p.clientY }));
+  }
+  ev('pointerdown', cl(x0, y0));
+  ev('pointermove', cl((x0 + x1) / 2, (y0 + y1) / 2));
+  ev('pointermove', cl(x1, y1));
+  ev('pointerup', cl(x1, y1));
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 기본 비교: 고침·지움·더함 · 글자 단위 표시 · 접기 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument;
+      var A = [], B = [];
+      for (var i = 1; i <= 20; i++) A.push('line ' + i);
+      B = A.slice();
+      B[4] = 'line 5 changed';          // 고침
+      B.splice(9, 1);                   // line 10 지움
+      B.splice(14, 0, 'brand new');     // 더함
+      var vw = d.getElementById('view'); vw.value = 'side'; vw.dispatchEvent(new Event('change', { bubbles: true }));
+      var vw = d.getElementById('view'); vw.value = 'side'; vw.dispatchEvent(new Event('change', { bubbles: true }));
+      setAB(d, A.join('\n'), B.join('\n'));
+      var s = stat(d);
+      var ins = Array.prototype.map.call(d.querySelectorAll('#diff-table ins'), function (e) { return e.textContent; });
+      var skips = Array.prototype.map.call(d.querySelectorAll('#diff-table tr.skip'), function (e) { return e.textContent.trim(); });
+      var sideRows = d.querySelectorAll('#diff-table tbody tr').length;
+      var sideCols = d.querySelectorAll('#diff-table colgroup col').length === 4 && !!d.querySelector('#diff-table td.side-a');
+      // 전부 펼치기
+      var only = d.getElementById('only-chg'); only.checked = false; only.dispatchEvent(new Event('change', { bubbles: true }));
+      var fullRows = d.querySelectorAll('#diff-table tbody tr').length;
+      var noSkip = d.querySelectorAll('#diff-table tr.skip').length === 0;
+      var ok = s.chg === 1 && s.del === 1 && s.add === 1 && s.same === 18 &&
+               ins.join('|') === ' changed' && skips.length === 2 &&
+               skips[0] === '… 2줄 같음 …' && fullRows === 21 && noSkip && sideRows < fullRows && sideCols && !f.dataset.errs;
+      log('비교 기본', ok,
+          '고침 ' + s.chg + ' · 지움 ' + s.del + ' · 더함 ' + s.add + ' · 같음 ' + s.same + ' (기대 1·1·1·18)' +
+          ' · 글자 표시 [' + ins.join('|') + '] · 접힘 ' + skips.join(' / ') + ' · 접었을 때 ' + sideRows +
+          '줄 → 펼치면 ' + fullRows + '줄(기대 21)' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+      f.remove();
+    });
+  }).catch(function (e) { log('비교 기본', false, '오류: ' + e.message); });
+
+  // ===== 2. 무작위 400쌍: 표에서 두 글을 되살리면 원문과 같은가 · 편집 수가 최소인가 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument;
+      d.getElementById('view').value = 'unified';
+      d.getElementById('view').dispatchEvent(new Event('change', { bubbles: true }));
+      var only = d.getElementById('only-chg'); only.checked = false; only.dispatchEvent(new Event('change', { bubbles: true }));
+      var rnd = seeded(20260930), bad = [], checked = 0;
+      for (var n = 0; n < 400; n++) {
+        var la = Math.floor(rnd() * 13), lb = Math.floor(rnd() * 13), A = [], B = [];
+        for (var i = 0; i < la; i++) A.push('abc'.charAt(Math.floor(rnd() * 3)));
+        for (i = 0; i < lb; i++) B.push('abc'.charAt(Math.floor(rnd() * 3)));
+        setAB(d, A.join('\n'), B.join('\n'));
+        var got = rebuild(d), s = stat(d);
+        var edits = s.del + s.add + 2 * s.chg, want = minEdits(A, B);
+        var okA = got.A.join('\n') === A.join('\n'), okB = got.B.join('\n') === B.join('\n');
+        if (!(okA && okB && edits === want)) {
+          if (bad.length < 3) bad.push('[' + A.join('') + '→' + B.join('') + '] 복원 ' + okA + '/' + okB + ' 편집 ' + edits + ' 최소 ' + want);
+        }
+        checked++;
+      }
+      log('무작위 400쌍 (복원·최소성)', bad.length === 0 && checked === 400 && !f.dataset.errs,
+          checked + '쌍 검사' + (bad.length ? ' · 실패 예: ' + bad.join(' ; ') : ' · 전부 원문 복원, 편집 수가 LCS 로 구한 최솟값과 일치'));
+      f.remove();
+    });
+  }).catch(function (e) { log('무작위 400쌍 (복원·최소성)', false, '오류: ' + e.message); });
+
+  // ===== 3. 옵션: 공백·대소문자 무시, 줄바꿈 종류·끝 줄바꿈 무시, 좌우 바꾸기 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument, r = {};
+      setAB(d, 'a  b\nKeep', ' a b \nKeep');
+      r.wsOff = stat(d).chg;
+      var ws = d.getElementById('ignore-ws'); ws.checked = true; ws.dispatchEvent(new Event('change', { bubbles: true }));
+      r.wsOn = stat(d).chg; r.wsMsg = txt(d, 'msg');
+      ws.checked = false;
+      setAB(d, 'Hello World', 'hello world');
+      r.caseOff = stat(d).chg;
+      var cs = d.getElementById('ignore-case'); cs.checked = true; cs.dispatchEvent(new Event('change', { bubbles: true }));
+      r.caseOn = stat(d).chg;
+      cs.checked = false;
+      setAB(d, 'x\r\ny\r\n', 'x\ny');
+      r.eol = txt(d, 'msg');
+      setAB(d, 'p\nq', 'p\nq\nr\ns');
+      var before = stat(d);
+      d.getElementById('btn-swap').click();
+      var after = stat(d);
+      r.swapVals = d.getElementById('a').value === 'p\nq\nr\ns' && d.getElementById('b').value === 'p\nq';
+      var ok = r.wsOff === 1 && r.wsOn === 0 && /똑같습니다/.test(r.wsMsg) && /무시하도록/.test(r.wsMsg) &&
+               r.caseOff === 1 && r.caseOn === 0 && r.eol === '두 글이 똑같습니다.' &&
+               before.add === 2 && after.del === 2 && after.add === 0 && r.swapVals && !f.dataset.errs;
+      log('비교 옵션', ok,
+          '공백 무시 끔 ' + r.wsOff + '→켬 ' + r.wsOn + ' "' + r.wsMsg + '" · 대소문자 ' + r.caseOff + '→' + r.caseOn +
+          ' · CRLF·끝줄바꿈 "' + r.eol + '" · 바꾸기 더함 ' + before.add + '→지움 ' + after.del + ' 값 ' + r.swapVals +
+          (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+      f.remove();
+    });
+  }).catch(function (e) { log('비교 옵션', false, '오류: ' + e.message); });
+
+  // ===== 4. 글자 단위: 한글·이모지가 반쪽으로 잘리지 않는가 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument;
+      setAB(d, '계약 기간은 2년으로 한다 😀', '계약 기간은 3년으로 한다 😃');
+      var del = Array.prototype.map.call(d.querySelectorAll('#diff-table del'), function (e) { return e.textContent; });
+      var ins = Array.prototype.map.call(d.querySelectorAll('#diff-table ins'), function (e) { return e.textContent; });
+      var bad = (del.concat(ins)).some(function (s) { return /[\uD800-\uDBFF]$|^[\uDC00-\uDFFF]/.test(s); });
+      var ok = del.join('|') === '2|😀' && ins.join('|') === '3|😃' && !bad && !f.dataset.errs;
+      log('글자 단위 표시', ok, '지운 글자 [' + del.join('|') + '] 더한 글자 [' + ins.join('|') + '] · 잘린 이모지 ' + bad);
+      f.remove();
+    });
+  }).catch(function (e) { log('글자 단위 표시', false, '오류: ' + e.message); });
+
+  // ===== 5. 결과 복사 · 비우기 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, copied = null;
+      Object.defineProperty(w.navigator, 'clipboard', { configurable: true,
+        value: { writeText: function (s) { copied = s; return Promise.resolve(); } } });
+      d.getElementById('btn-copy').click();
+      var emptyMsg = txt(d, 'msg');
+      var A = [], B;
+      for (var i = 1; i <= 12; i++) A.push('row ' + i);
+      B = A.slice(); B[7] = 'row eight';
+      setAB(d, A.join('\n'), B.join('\n'));
+      d.getElementById('btn-copy').click();
+      return sleep(100).then(function () {
+        var want = '… 5줄 같음 …\n  row 6\n  row 7\n- row 8\n+ row eight\n  row 9\n  row 10\n… 2줄 같음 …';
+        var copyMsg = txt(d, 'msg');
+        d.getElementById('btn-clear').click();
+        var cleared = d.getElementById('a').value === '' && d.getElementById('b').value === '' &&
+                      txt(d, 't-same') === '0' && d.getElementById('out').innerHTML === '';
+        var ok = /복사할 차이가 없습니다/.test(emptyMsg) && copied === want && /복사했습니다/.test(copyMsg) && cleared && !f.dataset.errs;
+        log('결과 복사 · 비우기', ok,
+            '빈 상태 "' + emptyMsg + '" · 복사된 글 ' + JSON.stringify(copied) + ' · 비우기 ' + cleared);
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('결과 복사 · 비우기', false, '오류: ' + e.message); });
+
+  // ===== 6. 파일 불러오기: EUC-KR · BOM 붙은 UTF-8 · 한글 문서 거부 · 버튼 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow;
+      var clicked = [];
+      ['file-a', 'file-b'].forEach(function (id) {
+        d.getElementById(id).click = function () { clicked.push(id); };
+      });
+      d.getElementById('btn-file-a').click();
+      d.getElementById('btn-file-b').click();
+      // EUC-KR 로 "가나" = B0A1 B3AA
+      setFiles(d.getElementById('file-a'), [new File([new Uint8Array([0xB0, 0xA1, 0xB3, 0xAA])], 'old.txt', { type: 'text/plain' })]);
+      setFiles(d.getElementById('file-b'), [new File([new Uint8Array([0xEF, 0xBB, 0xBF]), '가나다'], 'new.txt', { type: 'text/plain' })]);
+      return waitFor(function () { return d.getElementById('b').value === '가나다' && d.getElementById('a').value === '가나'; }).then(function () {
+        var a = d.getElementById('a').value, b = d.getElementById('b').value;
+        var ins = Array.prototype.map.call(d.querySelectorAll('#diff-table ins'), function (e) { return e.textContent; }).join('|');
+        setFiles(d.getElementById('file-a'), [new File(['x'], '계약서.hwp')]);
+        return sleep(150).then(function () {
+          var hwp = txt(d, 'msg');
+          var kept = d.getElementById('a').value === '가나';
+          var ok = clicked.join(',') === 'file-a,file-b' && a === '가나' && b === '가나다' && ins === '다' &&
+                   /글자만 담긴 파일이 아닙니다/.test(hwp) && kept && !f.dataset.errs;
+          log('파일 불러오기', ok,
+              '버튼 ' + clicked.join(',') + ' · EUC-KR "' + a + '" · BOM UTF-8 "' + b + '" · 더한 글자 [' + ins + ']' +
+              ' · hwp 거부 "' + hwp + '" 기존 글 유지 ' + kept + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('파일 불러오기', false, '오류: ' + e.message); });
+
+  // ===== 7. 큰 글: 2만 줄에 3곳 고침은 빠르게 · 전부 다른 글은 멈추고 알림 =====
+  chain = chain.then(function () {
+    return loadFrame('../text-diff.html').then(function (f) {
+      var d = f.contentDocument;
+      var A = [], i;
+      for (i = 0; i < 20000; i++) A.push('문단 ' + i + ' — 같은 내용이 이어집니다');
+      var B = A.slice(); B[3000] = '고친 줄'; B[12000] = '또 고친 줄'; B.splice(18000, 1);
+      var t0 = performance.now();
+      setAB(d, A.join('\n'), B.join('\n'));
+      var ms = Math.round(performance.now() - t0);
+      var s = stat(d);
+      var C = [], D = [];
+      for (i = 0; i < 4000; i++) { C.push('a' + i); D.push('b' + i); }
+      var t1 = performance.now();
+      setAB(d, C.join('\n'), D.join('\n'));
+      var ms2 = Math.round(performance.now() - t1);
+      var stop = txt(d, 'msg');
+      var ok = s.chg === 2 && s.del === 1 && s.add === 0 && ms < 3000 &&
+               /비교를 멈췄습니다/.test(stop) && ms2 < 8000 && !f.dataset.errs;
+      log('큰 글', ok, '2만 줄·3곳: 고침 ' + s.chg + ' 지움 ' + s.del + ' · ' + ms + 'ms · 4천 줄 전부 다름: "' +
+          stop + '" ' + ms2 + 'ms' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+      f.remove();
+    });
+  }).catch(function (e) { log('큰 글', false, '오류: ' + e.message); });
+
+  // ===== 8. 모자이크: 끌어서 영역 · 세 방식 · 세기 · 바깥은 그대로 =====
+  chain = chain.then(function () {
+    return stripes(1200, 800).then(function (png) {
+      return loadFrame('../image-mosaic.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, view = d.getElementById('view');
+        setFiles(d.getElementById('file'), [new File([png], 'shot.png', { type: 'image/png' })]);
+        return waitFor(function () { return !d.getElementById('area').hidden && view.width === 1200; }).then(function () {
+          var r = {};
+          r.shown = Math.round(view.getBoundingClientRect().width);     // 화면에서는 줄어 보여야 좌표 변환이 검사된다
+          var o1 = px(view, 110, 110), o2 = px(view, 111, 110), out0 = px(view, 50, 50);
+          var md = d.getElementById('mode'); md.value = 'pixel'; md.dispatchEvent(new Event('change', { bubbles: true }));
+          dragOn(w, view, 100, 100, 500, 400);
+          r.count = txt(d, 't-count');
+          // 모자이크(세기 6 → 칸 24px): 한 칸 안은 같은 색, 원본의 줄무늬는 사라진다
+          var m1 = px(view, 101, 101), m2 = px(view, 123, 123), m3 = px(view, 125, 101);
+          r.pixel = same(m1, m2) && !same(o1, o2) && !(same(m1, o1) && same(m2, o2));
+          r.outside = same(px(view, 50, 50), out0) && same(px(view, 501, 200), (function () {
+            // 원본의 501열은 홀수 → 파랑
+            return [16, 64, 224, 255];
+          })());
+          // 세기 10 → 칸 40px
+          var st = d.getElementById('strength'); st.value = '10'; st.dispatchEvent(new Event('input', { bubbles: true }));
+          r.s10 = same(px(view, 101, 101), px(view, 139, 139)) && txt(d, 's-val') === '10';
+          // 칠하기
+          var mode = d.getElementById('mode');
+          mode.value = 'fill'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+          r.fillHidden = d.getElementById('strength-field').hidden && !d.getElementById('fill-field').hidden;
+          r.fill = same(px(view, 300, 250), [0, 0, 0, 255]) && same(px(view, 100, 100), [0, 0, 0, 255]) &&
+                   same(px(view, 499, 399), [0, 0, 0, 255]) && !same(px(view, 500, 400), [0, 0, 0, 255]);
+          var fc = d.getElementById('fillc'); fc.value = '#ff0000'; fc.dispatchEvent(new Event('input', { bubbles: true }));
+          r.fillRed = same(px(view, 300, 250), [255, 0, 0, 255]);
+          // 흐리게
+          mode.value = 'blur'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+          var b1 = px(view, 300, 250), b2 = px(view, 301, 250);
+          // 줄무늬가 흐려지면 이웃한 두 픽셀의 차이가 원본(노랑↔파랑)보다 훨씬 작아진다
+          var diff = Math.abs(b1[0] - b2[0]) + Math.abs(b1[1] - b2[1]) + Math.abs(b1[2] - b2[2]);
+          r.blur = diff < 60;
+          r.hint = txt(d, 'mode-hint');
+          var ok = r.shown < 1200 && r.count === '1' && r.pixel && r.outside && r.s10 && r.fillHidden &&
+                   r.fill && r.fillRed && r.blur && /윤곽/.test(r.hint) && !f.dataset.errs;
+          log('모자이크 방식 3종', ok,
+              '화면 폭 ' + r.shown + 'px(원본 1200) · 영역 ' + r.count + ' · 모자이크 ' + r.pixel + ' · 바깥 그대로 ' + r.outside +
+              ' · 세기10 ' + r.s10 + ' · 칠하기 ' + r.fill + ' 색 바꿈 ' + r.fillRed + ' · 칸 전환 ' + r.fillHidden +
+              ' · 흐림 이웃 차 ' + diff + ' · 안내 "' + r.hint + '"' + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('모자이크 방식 3종', false, '오류: ' + e.message); });
+
+  // ===== 9. 취소 · 전부 지우기 · 콕 누르기 무시 · 저장 파일 = 화면 · 형식 · 초기화 =====
+  chain = chain.then(function () {
+    return Promise.all([stripes(400, 300), stripes(420, 300, 'image/jpeg')]).then(function (imgs) {
+      return loadFrame('../image-mosaic.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, view = d.getElementById('view'), cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([imgs[0]], 'id-card.png', { type: 'image/png' })]);
+        return waitFor(function () { return view.width === 400; }).then(function () {
+          var r = {};
+          var orig = px(view, 60, 60);
+          d.getElementById('btn-save').click();
+          r.noRegion = txt(d, 'msg');
+          dragOn(w, view, 200, 200, 201, 201);          // 콕 누르기
+          r.tap = txt(d, 't-count');
+          dragOn(w, view, 50, 50, 150, 120);
+          dragOn(w, view, 380, 20, 250, 100);           // 거꾸로 끌어도 된다
+          r.two = txt(d, 't-count');
+          d.getElementById('btn-undo').click();
+          r.undo = txt(d, 't-count');
+          var mode = d.getElementById('mode');
+          mode.value = 'fill'; mode.dispatchEvent(new Event('change', { bubbles: true }));
+          r.covered = same(px(view, 60, 60), [0, 0, 0, 255]) && !same(px(view, 300, 50), [0, 0, 0, 255]);
+          var screen = [px(view, 60, 60), px(view, 10, 10), px(view, 151, 60)];
+          var mark = cap.blobs.length;
+          d.getElementById('btn-save').click();
+          return waitFor(function () { return cap.blobs.length > mark; }).then(function () {
+            var blob = cap.blobs[cap.blobs.length - 1];
+            return createImageBitmap(blob).then(function (bm) {
+              var c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height;
+              c.getContext('2d').drawImage(bm, 0, 0);
+              r.file = blob.type === 'image/png' && same(px(c, 60, 60), screen[0]) && same(px(c, 10, 10), screen[1]) &&
+                       same(px(c, 151, 60), screen[2]);
+              r.name = cap.names[cap.names.length - 1];
+              r.doneMsg = txt(d, 'msg');
+              d.getElementById('btn-clear-marks').click();
+              r.cleared = txt(d, 't-count') === '0' && same(px(view, 60, 60), orig);
+              // JPG 원본은 JPG 로, 형식을 고르면 그 형식으로
+              setFiles(d.getElementById('file'), [new File([imgs[1]], 'photo.jpg', { type: 'image/jpeg' })]);
+              return waitFor(function () { return view.width === 420; }).then(function () {
+                dragOn(w, view, 10, 10, 90, 90);
+                var m2 = cap.blobs.length;
+                d.getElementById('btn-save').click();
+                return waitFor(function () { return cap.blobs.length > m2; });
+              }).then(function () {
+                var jb = cap.blobs[cap.blobs.length - 1];
+                r.jpg = jb.type === 'image/jpeg' && /photo_가림\.jpg$/.test(cap.names[cap.names.length - 1]);
+                var fmt = d.getElementById('fmt'); fmt.value = 'image/png'; fmt.dispatchEvent(new Event('change', { bubbles: true }));
+                var m3 = cap.blobs.length;
+                d.getElementById('btn-save').click();
+                return waitFor(function () { return cap.blobs.length > m3; }).then(function () {
+                  r.forced = cap.blobs[cap.blobs.length - 1].type === 'image/png';
+                  return jb.arrayBuffer();
+                });
+              }).then(function (ab) {
+                // 저장한 JPG 에 EXIF(APP1 "Exif") 가 없어야 한다
+                var u8 = new Uint8Array(ab), exif = false;
+                for (var i = 0; i < Math.min(u8.length - 4, 4096); i++) {
+                  if (u8[i] === 0x45 && u8[i + 1] === 0x78 && u8[i + 2] === 0x69 && u8[i + 3] === 0x66) { exif = true; break; }
+                }
+                r.noExif = !exif;
+                d.getElementById('btn-reset').click();
+                r.reset = d.getElementById('area').hidden && txt(d, 't-size') === '-';
+                var ok = /아직 가린 곳이 없습니다/.test(r.noRegion) && r.tap === '0' && r.two === '2' && r.undo === '1' &&
+                         r.covered && r.file && r.name === 'id-card_가림.png' && /1곳을 가려 저장했습니다/.test(r.doneMsg) &&
+                         r.cleared && r.jpg && r.forced && r.noExif && r.reset && !f.dataset.errs;
+                log('모자이크 편집·저장', ok,
+                    '빈 저장 "' + r.noRegion + '" · 콕 ' + r.tap + ' · 두 곳 ' + r.two + ' · 취소 후 ' + r.undo +
+                    ' · 칠함 ' + r.covered + ' · 저장=화면 ' + r.file + ' 이름 ' + r.name + ' · "' + r.doneMsg + '"' +
+                    ' · 전부 지우기 원본 복귀 ' + r.cleared + ' · JPG→JPG ' + r.jpg + ' · PNG 지정 ' + r.forced +
+                    ' · EXIF 없음 ' + r.noExif + ' · 초기화 ' + r.reset + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+                f.remove();
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('모자이크 편집·저장', false, '오류: ' + e.message); });
+
+  // ===== 10. 모자이크: 키보드로 파일 고르기 · Ctrl+V 붙여넣기 · 그림 아닌 파일 거부 =====
+  chain = chain.then(function () {
+    return stripes(120, 90).then(function (png) {
+      return loadFrame('../image-mosaic.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        var dz = d.getElementById('dz');
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        var rejectMsg = txt(d, 'msg');
+        var dt = new DataTransfer();
+        dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return waitFor(function () { return txt(d, 't-size') === '120×90'; }).then(function () {
+          var ok = opened === 2 && /이미지 파일을 선택해/.test(rejectMsg) && txt(d, 't-size') === '120×90' && !f.dataset.errs;
+          log('모자이크 입력 경로', ok, '키보드 열기 ' + opened + '회 · 글자 파일 "' + rejectMsg + '" · 붙여넣기 ' + txt(d, 't-size'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('모자이크 입력 경로', false, '오류: ' + e.message); });
+
+  // ===== 11. 사진 이어붙이기(한국어): "가장 큰 사진에 맞춰 늘리기" — 어제부터 한 번도 안 골라 본 선택지 =====
+  chain = chain.then(function () {
+    return Promise.all([stripes(100, 50), stripes(200, 100)]).then(function (pngs) {
+      return loadFrame('../image-join.html').then(function (f) {
+        var d = f.contentDocument;
+        setFiles(d.getElementById('file'), [
+          new File([pngs[0]], 'a.png', { type: 'image/png' }),
+          new File([pngs[1]], 'b.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') === '2' && txt(d, 't-size') !== '-'; }).then(function () {
+          var al = d.getElementById('align');
+          al.value = 'max'; al.dispatchEvent(new Event('change', { bubbles: true }));
+          var v = txt(d, 't-size');
+          var dir = d.getElementById('dir');
+          dir.value = 'h'; dir.dispatchEvent(new Event('change', { bubbles: true }));
+          var h = txt(d, 't-size');
+          dir.value = 'g'; dir.dispatchEvent(new Event('change', { bubbles: true }));
+          var g = txt(d, 't-size');     // 칸 200×100, 2열 1행
+          var ok = v === '200×200' && h === '400×100' && g === '400×100' && !f.dataset.errs;
+          log('이어붙이기 큰쪽 맞춤', ok, '세로 ' + v + ' (기대 200×200) · 가로 ' + h + ' (기대 400×100) · 격자 ' + g + ' (기대 400×100)');
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('이어붙이기 큰쪽 맞춤', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'TOOLS2 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

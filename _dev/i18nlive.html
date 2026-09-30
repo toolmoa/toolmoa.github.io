@@ -147,6 +147,25 @@ var SETUP = {
     n.value = 'A\nB\nC\nD';
     n.dispatchEvent(new Event('input', { bubbles: true }));
     d.getElementById('btn-go').click();
+  },
+  // 비교 결과 표("n줄 같음" 접힘 줄까지)를 그려 둔 상태에서 본다. 입력은 한글이 아닌 것으로.
+  'text-diff.html': function (d) {
+    var a = d.getElementById('a'), b = d.getElementById('b');
+    a.value = 'one\ntwo\nthree\nfour\nfive\nsix\nseven\neight';
+    b.value = 'one\ntwo\nthree\nfour\nfive\nsix\nseven\nEIGHT';
+    b.dispatchEvent(new Event('input', { bubbles: true }));
+  },
+  // 사진을 넣어야 설정 칸과 안내문이 보인다
+  'image-mosaic.html': function (d) {
+    var c = document.createElement('canvas'); c.width = 80; c.height = 60;
+    c.getContext('2d').fillRect(0, 0, 80, 60);
+    c.toBlob(function (blob) {
+      var dt = new DataTransfer();
+      dt.items.add(new File([blob], 'x.png', { type: 'image/png' }));
+      var input = d.getElementById('file');
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 'image/png');
   }
 };
 
@@ -154,7 +173,8 @@ var PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf
              'char-count.html', 'text-clean.html', 'pdf-merge.html', 'pdf-split.html',
              'pdf-edit.html', 'file-convert.html', 'qr-generate.html', 'password-gen.html',
              'unit-convert.html', 'date-calc.html', 'age-calc.html',
-             'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html'];
+             'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html',
+             'text-diff.html', 'image-mosaic.html'];
 
 function run() {
   var seq = Promise.resolve();

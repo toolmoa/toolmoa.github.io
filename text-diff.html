@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>텍스트 비교 · 두 글의 차이 찾기 - 무료 온라인 | 툴모아</title>
+<meta name="description" content="두 글을 붙여넣으면 바뀐 줄과 바뀐 글자를 색으로 표시합니다. 계약서·보고서 초안의 수정 전후를 비교하세요. 입력한 글은 서버로 전송되지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/text-diff.html">
+<meta property="og:title" content="텍스트 비교 · 두 글의 차이 찾기">
+<meta property="og:description" content="수정 전후 두 글에서 바뀐 줄과 글자를 표시. 브라우저 안에서만 비교합니다.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"텍스트 비교","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/text-diff.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/text-diff.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="텍스트 비교 · 두 글의 차이 찾기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="텍스트 비교 · 두 글의 차이 찾기">
+<meta name="twitter:description" content="수정 전후 두 글에서 바뀐 줄과 글자를 표시. 브라우저 안에서만 비교합니다.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/text-diff.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"입력한 글이 서버로 전송되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 비교는 브라우저 안에서만 이뤄지고 글은 어디로도 전송되지 않습니다. 인터넷을 끊은 상태에서도 그대로 동작하는 것이 그 증거입니다. 기기에 저장하지도 않으므로 새로고침하면 사라집니다."}},{"@type":"Question","name":"한글(HWP)이나 워드 파일을 바로 비교할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"파일째로는 안 됩니다. 한글·워드 파일은 글자 외에 서식 정보가 섞인 형식이라, 문서를 열어 전체 선택 → 복사한 뒤 이곳에 붙여넣으세요. 메모장으로 저장한 txt 파일, CSV, 자막(srt) 같은 글자 파일은 \"파일 불러오기\"로 바로 열 수 있습니다."}},{"@type":"Question","name":"줄바꿈만 달라져도 전부 바뀐 것으로 나옵니다","acceptedAnswer":{"@type":"Answer","text":"이 비교는 줄 단위로 짝을 맞춥니다. 한쪽은 문단을 한 줄로 이어 쓰고 다른 쪽은 중간에서 줄을 바꿨다면 서로 다른 줄로 보입니다. 이럴 때는 양쪽을 같은 방식으로 붙여넣으세요. 다만 윈도·맥의 줄바꿈 문자 차이(CRLF·LF)나 마지막 줄 끝의 줄바꿈 유무는 알아서 무시합니다."}},{"@type":"Question","name":"띄어쓰기만 고친 것은 빼고 보고 싶어요","acceptedAnswer":{"@type":"Answer","text":"\"띄어쓰기·공백 차이 무시\"를 켜세요. 줄 앞뒤 공백을 무시하고, 중간에 여러 칸 띄운 것도 한 칸으로 봅니다. 다만 \"가나다\"와 \"가 나다\"처럼 띄어쓰기 자체가 생기거나 없어진 경우는 다른 줄로 봅니다. 내용이 바뀐 것일 수 있어서입니다."}},{"@type":"Question","name":"아주 긴 글도 비교되나요?","acceptedAnswer":{"@type":"Answer","text":"수만 줄까지 됩니다. 앞뒤로 같은 부분은 먼저 걸러 내고 달라진 가운데만 계산하기 때문입니다. 다만 두 글이 거의 전부 달라서 서로 다른 줄이 수천 개를 넘으면 계산을 멈추고 알려 드립니다. 그 경우는 사실상 다른 글이라 비교가 의미 없는 경우가 대부분입니다."}},{"@type":"Question","name":"비교 결과를 보고서에 붙이고 싶어요","acceptedAnswer":{"@type":"Answer","text":"\"결과 복사\"를 누르면 바뀐 곳과 그 앞뒤 두 줄을 -(지운 줄), +(더한 줄) 표시와 함께 글로 복사합니다. 메일이나 메신저에 그대로 붙여넣을 수 있습니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"텍스트 비교 · 두 글의 차이 찾기","item":"https://toolmoa.github.io/text-diff.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="dif.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" aria-current="page" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="dif.h1">텍스트 비교 · 두 글의 차이 찾기</h1>
+  <p class="lead" data-i18n="dif.lead">수정 전과 수정 후의 글을 붙여넣으면 바뀐 줄을 찾고, 그 줄 안에서 바뀐 글자까지 색으로 표시합니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 글은 어디로도 전송되지 않습니다</span>
+
+  <div class="card" style="margin-top:18px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+      <div class="field" style="margin-bottom:0">
+        <label for="a" data-i18n="dif.a">수정 전 (원본)</label>
+        <textarea id="a" style="min-height:190px" spellcheck="false" data-i18n-ph="dif.phA"
+          placeholder="원래 글을 붙여넣거나, 파일을 여기로 끌어다 놓으세요"></textarea>
+        <button class="btn small secondary" id="btn-file-a" type="button" style="margin-top:6px" data-i18n="dif.file">파일 불러오기</button>
+        <input type="file" id="file-a" accept=".txt,.csv,.tsv,.md,.json,.xml,.html,.htm,.css,.js,.log,.srt,text/*" hidden>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="b" data-i18n="dif.b">수정 후</label>
+        <textarea id="b" style="min-height:190px" spellcheck="false" data-i18n-ph="dif.phB"
+          placeholder="고친 글을 붙여넣거나, 파일을 여기로 끌어다 놓으세요"></textarea>
+        <button class="btn small secondary" id="btn-file-b" type="button" style="margin-top:6px" data-i18n="dif.file">파일 불러오기</button>
+        <input type="file" id="file-b" accept=".txt,.csv,.tsv,.md,.json,.xml,.html,.htm,.css,.js,.log,.srt,text/*" hidden>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:16px">
+      <label class="inline-check" style="margin:0">
+        <input type="checkbox" id="ignore-ws">
+        <span data-i18n="dif.ignoreWs">띄어쓰기·공백 차이 무시</span>
+      </label>
+      <label class="inline-check" style="margin:0">
+        <input type="checkbox" id="ignore-case">
+        <span data-i18n="dif.ignoreCase">영문 대소문자 무시</span>
+      </label>
+      <label class="inline-check" style="margin:0">
+        <input type="checkbox" id="only-chg" checked>
+        <span data-i18n="dif.onlyChg">바뀐 곳 주변만 보기</span>
+      </label>
+    </div>
+
+    <div class="field" style="margin:14px 0 0">
+      <label for="view" data-i18n="dif.view">보기 방식</label>
+      <select id="view">
+        <option value="side" selected data-i18n="dif.vSide">나란히 (왼쪽 수정 전 · 오른쪽 수정 후)</option>
+        <option value="unified" data-i18n="dif.vUni">한 줄로 (지운 줄 − · 더한 줄 +)</option>
+      </select>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:0">
+      <button class="btn secondary" id="btn-swap" type="button" data-i18n="dif.swap">좌우 바꾸기</button>
+      <button class="btn secondary" id="btn-copy" type="button" data-i18n="dif.copy">결과 복사</button>
+      <button class="btn secondary" id="btn-clear" type="button" data-i18n="dif.clear">비우기</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="t-chg" style="color:var(--warn)">0</span><span class="lbl" data-i18n="dif.sChg">바뀐 줄</span></div>
+    <div class="stat"><span class="num" id="t-del" style="color:var(--danger)">0</span><span class="lbl" data-i18n="dif.sDel">지운 줄</span></div>
+    <div class="stat"><span class="num" id="t-add" style="color:var(--ok)">0</span><span class="lbl" data-i18n="dif.sAdd">더한 줄</span></div>
+    <div class="stat"><span class="num" id="t-same">0</span><span class="lbl" data-i18n="dif.sSame">같은 줄</span></div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+  <div id="out"></div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="dif.cross">비교하기 전에 <strong style="color:var(--text)">빈 줄이나 중복 줄을 정리하려면</strong> <a href="text-clean.html">텍스트 정리</a>를, 고친 글의 분량을 확인하려면 <a href="char-count.html">글자수 세기</a>를 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:TEXTDIFF --></div>
+
+  <h2 data-ko-only>비교할 글을 왜 올리지 않아야 하나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      두 글을 비교하는 일은 대개 <strong style="color:var(--text)">계약서 수정본, 보고서 초안, 제안서, 자기소개서</strong>처럼
+      밖으로 나가면 곤란한 글에서 생깁니다. 상대가 보내 온 계약서가 지난번과 어디가 달라졌는지,
+      내가 고친 보고서에서 무엇이 빠졌는지를 확인하려는 것이지요. 그런데 흔한 비교 사이트는 두 글을
+      서버로 보내 비교합니다. 이 페이지는 글을 브라우저 안에서만 비교합니다. 인터넷을 끊어도 그대로 동작하고,
+      새로고침하면 입력한 글도 사라집니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>표시 읽는 법</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">붉은 줄</strong> — 수정 전에만 있던 줄(지운 줄)입니다.<br>
+      <strong style="color:var(--text)">초록 줄</strong> — 수정 후에만 있는 줄(더한 줄)입니다.<br>
+      <strong style="color:var(--text)">양쪽에 색이 있는 줄</strong> — 같은 자리의 줄을 고친 것입니다. 그 안에서 진하게 칠해진 글자가 실제로 바뀐 글자입니다.<br>
+      <strong style="color:var(--text)">"… n줄 같음 …"</strong> — 바뀌지 않은 부분을 접어 둔 곳입니다. "바뀐 곳 주변만 보기"를 끄면 전부 펼쳐집니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>입력한 글이 서버로 전송되나요?</summary>
+      <p>아니요. 비교는 브라우저 안에서만 이뤄지고 글은 어디로도 전송되지 않습니다. 인터넷을 끊은 상태에서도 그대로 동작하는 것이 그 증거입니다. 기기에 저장하지도 않으므로 새로고침하면 사라집니다.</p>
+    </details>
+    <details>
+      <summary>한글(HWP)이나 워드 파일을 바로 비교할 수 있나요?</summary>
+      <p>파일째로는 안 됩니다. 한글·워드 파일은 글자 외에 서식 정보가 섞인 형식이라, 문서를 열어 <strong>전체 선택 → 복사</strong>한 뒤 이곳에 붙여넣으세요. 메모장으로 저장한 txt 파일, CSV, 자막(srt) 같은 글자 파일은 "파일 불러오기"로 바로 열 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>줄바꿈만 달라져도 전부 바뀐 것으로 나옵니다</summary>
+      <p>이 비교는 줄 단위로 짝을 맞춥니다. 한쪽은 문단을 한 줄로 이어 쓰고 다른 쪽은 중간에서 줄을 바꿨다면 서로 다른 줄로 보입니다. 이럴 때는 양쪽을 같은 방식으로 붙여넣으세요. 다만 윈도·맥의 줄바꿈 문자 차이(CRLF·LF)나 마지막 줄 끝의 줄바꿈 유무는 알아서 무시합니다.</p>
+    </details>
+    <details>
+      <summary>띄어쓰기만 고친 것은 빼고 보고 싶어요</summary>
+      <p>"띄어쓰기·공백 차이 무시"를 켜세요. 줄 앞뒤 공백을 무시하고, 중간에 여러 칸 띄운 것도 한 칸으로 봅니다. 다만 "가나다"와 "가 나다"처럼 띄어쓰기 자체가 생기거나 없어진 경우는 다른 줄로 봅니다. 내용이 바뀐 것일 수 있어서입니다.</p>
+    </details>
+    <details>
+      <summary>아주 긴 글도 비교되나요?</summary>
+      <p>수만 줄까지 됩니다. 앞뒤로 같은 부분은 먼저 걸러 내고 달라진 가운데만 계산하기 때문입니다. 다만 두 글이 거의 전부 달라서 서로 다른 줄이 수천 개를 넘으면 계산을 멈추고 알려 드립니다. 그 경우는 사실상 다른 글이라 비교가 의미 없는 경우가 대부분입니다.</p>
+    </details>
+    <details>
+      <summary>비교 결과를 보고서에 붙이고 싶어요</summary>
+      <p>"결과 복사"를 누르면 바뀐 곳과 그 앞뒤 두 줄을 <code>-</code>(지운 줄), <code>+</code>(더한 줄) 표시와 함께 글로 복사합니다. 메일이나 메신저에 그대로 붙여넣을 수 있습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+        <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var aEl = document.getElementById('a');
+  var bEl = document.getElementById('b');
+  var wsChk = document.getElementById('ignore-ws');
+  var caseChk = document.getElementById('ignore-case');
+  var onlyChk = document.getElementById('only-chg');
+  var viewSel = document.getElementById('view');
+  var out = document.getElementById('out');
+  var msg = document.getElementById('msg');
+
+  // 두 글이 거의 전부 다르면 계산량이 제곱으로 늘어난다. 그 전에 멈추고 알린다.
+  var MAX_EDITS = 3000;
+  // 한 줄이 이보다 길면 글자 단위 비교는 건너뛰고 줄 전체만 칠한다.
+  var MAX_CHARS = 3000;
+  // 접어 둘 때 바뀐 곳 앞뒤로 남겨 둘 줄 수
+  var CONTEXT = 2;
+
+  var last = null;       // 마지막 비교 결과 { rows, A, B } — 언어를 바꾸면 다시 그리기만 한다
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // 줄 나누기. 윈도(CRLF)·옛 맥(CR) 줄바꿈을 맞추고, 마지막 줄 끝의 줄바꿈 하나는 없는 것으로 본다.
+  // 이게 없으면 파일 끝에 엔터가 있느냐 없느냐만으로 "빈 줄이 추가됨"이 나온다.
+  function splitLines(s) {
+    s = s.replace(/\r\n?/g, '\n');
+    if (s === '') return [];
+    if (s.charAt(s.length - 1) === '\n') s = s.slice(0, -1);
+    return s.split('\n');
+  }
+
+  function keyOf(line) {
+    var k = line;
+    if (wsChk.checked) k = k.replace(/\s+/g, ' ').trim();
+    if (caseChk.checked) k = k.toLowerCase();
+    return k;
+  }
+
+  // Myers 차이 알고리즘. 두 배열을 받아 { t:'='|'-'|'+', a, b } 목록을 돌려준다.
+  // 줄 비교가 문자열 비교가 되지 않도록 호출하는 쪽에서 줄을 번호로 바꿔 넘긴다.
+  // 편집 수가 limit 을 넘으면 null 을 돌려준다.
+  function diff(A, B, limit) {
+    var n = A.length, m = B.length, pre = 0, suf = 0;
+    // 앞뒤로 같은 부분은 계산할 필요가 없다. 긴 글에서 고친 곳이 몇 군데뿐일 때 이게 대부분을 걸러 낸다.
+    while (pre < n && pre < m && A[pre] === B[pre]) pre++;
+    while (suf < n - pre && suf < m - pre && A[n - 1 - suf] === B[m - 1 - suf]) suf++;
+    var core = myers(A.slice(pre, n - suf), B.slice(pre, m - suf), limit);
+    if (core === null) return null;
+    var ops = [], i;
+    for (i = 0; i < pre; i++) ops.push({ t: '=', a: i, b: i });
+    core.forEach(function (o) {
+      ops.push({ t: o.t, a: o.a === undefined ? undefined : o.a + pre, b: o.b === undefined ? undefined : o.b + pre });
+    });
+    for (i = 0; i < suf; i++) ops.push({ t: '=', a: n - suf + i, b: m - suf + i });
+    return ops;
+  }
+
+  function myers(a, b, limit) {
+    var N = a.length, M = b.length, i;
+    if (!N) { var ins = []; for (i = 0; i < M; i++) ins.push({ t: '+', b: i }); return ins; }
+    if (!M) { var dels = []; for (i = 0; i < N; i++) dels.push({ t: '-', a: i }); return dels; }
+    var MAX = N + M, off = MAX + 1;
+    var V = new Int32Array(2 * MAX + 3);
+    var trace = [];
+    for (var d = 0; d <= MAX; d++) {
+      if (d > limit) return null;
+      // 되짚을 때 필요한 것은 -d..d 구간뿐이다. 전체를 복사하면 긴 글에서 메모리가 터진다.
+      trace.push(V.slice(off - d, off + d + 1));
+      for (var k = -d; k <= d; k += 2) {
+        var x = (k === -d || (k !== d && V[off + k - 1] < V[off + k + 1])) ? V[off + k + 1] : V[off + k - 1] + 1;
+        var y = x - k;
+        while (x < N && y < M && a[x] === b[y]) { x++; y++; }
+        V[off + k] = x;
+        if (x >= N && y >= M) return backtrack(trace, N, M, d);
+      }
+    }
+    return null;
+  }
+
+  function backtrack(trace, N, M, D) {
+    var ops = [], x = N, y = M;
+    for (var d = D; d > 0; d--) {
+      var v = trace[d], k = x - y;
+      var get = function (kk) { return v[kk + d]; };
+      var prevK = (k === -d || (k !== d && get(k - 1) < get(k + 1))) ? k + 1 : k - 1;
+      var prevX = get(prevK), prevY = prevX - prevK;
+      while (x > prevX && y > prevY) { x--; y--; ops.push({ t: '=', a: x, b: y }); }
+      if (x === prevX) { y--; ops.push({ t: '+', b: y }); }
+      else { x--; ops.push({ t: '-', a: x }); }
+    }
+    while (x > 0 && y > 0) { x--; y--; ops.push({ t: '=', a: x, b: y }); }
+    return ops.reverse();
+  }
+
+  // 줄 → 번호. 같은 내용(비교 기준으로)의 줄은 같은 번호가 된다.
+  // 일반 객체를 쓰면 "__proto__" 같은 줄이 사전을 망가뜨린다. Map 을 쓴다.
+  function toIds(lines, dict) {
+    return lines.map(function (l) {
+      var k = keyOf(l);
+      if (!dict.has(k)) dict.set(k, dict.size);
+      return dict.get(k);
+    });
+  }
+
+  // 연속된 지움·더함 묶음에서 앞에서부터 짝을 지어 "고친 줄"로 본다.
+  // 짝이 남는 쪽은 순수하게 지운 줄 또는 더한 줄이다.
+  function toRows(ops) {
+    var rows = [], dels = [], adds = [];
+    function flush() {
+      var n = Math.min(dels.length, adds.length), i;
+      for (i = 0; i < n; i++) rows.push({ t: 'chg', a: dels[i], b: adds[i] });
+      for (i = n; i < dels.length; i++) rows.push({ t: 'del', a: dels[i] });
+      for (i = n; i < adds.length; i++) rows.push({ t: 'add', b: adds[i] });
+      dels = []; adds = [];
+    }
+    ops.forEach(function (o) {
+      if (o.t === '=') { flush(); rows.push({ t: 'same', a: o.a, b: o.b }); }
+      else if (o.t === '-') dels.push(o.a);
+      else adds.push(o.b);
+    });
+    flush();
+    return rows;
+  }
+
+  // 고친 줄 안에서 바뀐 글자만 표시한다. 한글 조합이나 이모지가 반쪽으로 잘리지 않게 코드포인트 단위로 나눈다.
+  function charMarks(sa, sb) {
+    var ca = Array.from(sa), cb = Array.from(sb);
+    if (ca.length > MAX_CHARS || cb.length > MAX_CHARS) {
+      return { a: '<del>' + esc(sa) + '</del>', b: '<ins>' + esc(sb) + '</ins>' };
+    }
+    var ops = diff(ca, cb, 2000);
+    if (!ops) return { a: '<del>' + esc(sa) + '</del>', b: '<ins>' + esc(sb) + '</ins>' };
+    var ha = '', hb = '', runA = '', runB = '';
+    function endA() { if (runA) { ha += '<del>' + esc(runA) + '</del>'; runA = ''; } }
+    function endB() { if (runB) { hb += '<ins>' + esc(runB) + '</ins>'; runB = ''; } }
+    ops.forEach(function (o) {
+      if (o.t === '=') { endA(); endB(); ha += esc(ca[o.a]); hb += esc(cb[o.b]); }
+      else if (o.t === '-') runA += ca[o.a];
+      else runB += cb[o.b];
+    });
+    endA(); endB();
+    return { a: ha, b: hb };
+  }
+
+  // 바뀐 곳에서 CONTEXT 줄 넘게 떨어진 같은 줄 묶음은 접는다
+  function visibleMask(rows, collapse) {
+    var keep = rows.map(function () { return !collapse; });
+    if (!collapse) return keep;
+    rows.forEach(function (r, i) {
+      if (r.t === 'same') return;
+      for (var j = Math.max(0, i - CONTEXT); j <= Math.min(rows.length - 1, i + CONTEXT); j++) keep[j] = true;
+    });
+    // 한 줄만 접으면 "1줄 같음" 표시가 그 줄보다 자리를 더 차지한다. 그런 곳은 펼쳐 둔다.
+    for (var i = 0; i < rows.length; i++) {
+      if (!keep[i] && (i === 0 || keep[i - 1]) && (i === rows.length - 1 || keep[i + 1])) keep[i] = true;
+    }
+    return keep;
+  }
+
+  function skipRow(n, cols) {
+    return '<tr class="skip"><td colspan="' + cols + '">… ' +
+           t('dif.skip', '{n}줄 같음').replace('{n}', n) + ' …</td></tr>';
+  }
+
+  function render() {
+    if (!last) { out.innerHTML = ''; return; }
+    var rows = last.rows, A = last.A, B = last.B;
+    var keep = visibleMask(rows, onlyChk.checked);
+    var side = viewSel.value === 'side';
+    var cols = 4;
+    var html = [], skipped = 0;
+
+    rows.forEach(function (r, i) {
+      if (!keep[i]) { skipped++; return; }
+      if (skipped) { html.push(skipRow(skipped, cols)); skipped = 0; }
+      var la = r.a === undefined ? '' : r.a + 1;
+      var lb = r.b === undefined ? '' : r.b + 1;
+      if (r.t === 'same') {
+        if (side) {
+          html.push('<tr><td class="ln">' + la + '</td><td class="side-a">' + esc(A[r.a]) + '</td>' +
+                    '<td class="ln">' + lb + '</td><td>' + esc(B[r.b]) + '</td></tr>');
+        } else {
+          html.push('<tr><td class="ln">' + la + '</td><td class="ln">' + lb + '</td><td class="sg"></td><td>' + esc(A[r.a]) + '</td></tr>');
+        }
+        return;
+      }
+      if (r.t === 'chg') {
+        var mk = charMarks(A[r.a], B[r.b]);
+        if (side) {
+          html.push('<tr><td class="ln del">' + la + '</td><td class="del side-a">' + mk.a + '</td>' +
+                    '<td class="ln add">' + lb + '</td><td class="add">' + mk.b + '</td></tr>');
+        } else {
+          html.push('<tr><td class="ln del">' + la + '</td><td class="ln del"></td><td class="sg del">−</td><td class="del">' + mk.a + '</td></tr>');
+          html.push('<tr><td class="ln add"></td><td class="ln add">' + lb + '</td><td class="sg add">+</td><td class="add">' + mk.b + '</td></tr>');
+        }
+        return;
+      }
+      if (r.t === 'del') {
+        html.push(side
+          ? '<tr><td class="ln del">' + la + '</td><td class="del side-a">' + esc(A[r.a]) + '</td><td class="ln nil"></td><td class="nil"></td></tr>'
+          : '<tr><td class="ln del">' + la + '</td><td class="ln del"></td><td class="sg del">−</td><td class="del">' + esc(A[r.a]) + '</td></tr>');
+        return;
+      }
+      html.push(side
+        ? '<tr><td class="ln nil"></td><td class="nil side-a"></td><td class="ln add">' + lb + '</td><td class="add">' + esc(B[r.b]) + '</td></tr>'
+        : '<tr><td class="ln add"></td><td class="ln add">' + lb + '</td><td class="sg add">+</td><td class="add">' + esc(B[r.b]) + '</td></tr>');
+    });
+    if (skipped) html.push(skipRow(skipped, cols));
+
+    var colgroup = side
+      ? '<colgroup><col style="width:46px"><col><col style="width:46px"><col></colgroup>'
+      : '<colgroup><col style="width:46px"><col style="width:46px"><col style="width:18px"><col></colgroup>';
+    out.innerHTML = '<div class="diff-wrap"><table class="diff" id="diff-table">' + colgroup +
+                    '<tbody>' + html.join('') + '</tbody></table></div>';
+  }
+
+  function stats(rows) {
+    var s = { chg: 0, del: 0, add: 0, same: 0 };
+    rows.forEach(function (r) { s[r.t]++; });
+    document.getElementById('t-chg').textContent = s.chg;
+    document.getElementById('t-del').textContent = s.del;
+    document.getElementById('t-add').textContent = s.add;
+    document.getElementById('t-same').textContent = s.same;
+    return s;
+  }
+
+  function compare() {
+    var A = splitLines(aEl.value), B = splitLines(bEl.value);
+    if (!A.length && !B.length) {
+      last = null; out.innerHTML = ''; stats([]);
+      setMsg(t('dif.empty', '양쪽에 비교할 글을 붙여넣으세요. 붙여넣는 즉시 비교합니다.'));
+      return;
+    }
+    var dict = new Map();
+    var ops = diff(toIds(A, dict), toIds(B, dict), MAX_EDITS);
+    if (!ops) {
+      last = null; out.innerHTML = ''; stats([]);
+      setMsg(t('dif.tooMany', '두 글이 거의 전부 달라 비교를 멈췄습니다. 서로 다른 글을 넣지 않았는지 확인해 주세요.'), 'err');
+      return;
+    }
+    var rows = toRows(ops);
+    last = { rows: rows, A: A, B: B };
+    var s = stats(rows);
+    if (!s.chg && !s.del && !s.add) {
+      setMsg(t('dif.same', '두 글이 똑같습니다.') +
+             ((wsChk.checked || caseChk.checked) && aEl.value !== bEl.value
+               ? ' ' + t('dif.sameOpt', '(무시하도록 고른 공백·대소문자 차이만 있습니다)') : ''), 'ok');
+    } else {
+      setMsg('');
+    }
+    render();
+  }
+
+  var timer = null;
+  function later() { clearTimeout(timer); timer = setTimeout(compare, 200); }
+  aEl.addEventListener('input', later);
+  bEl.addEventListener('input', later);
+  wsChk.addEventListener('change', compare);
+  caseChk.addEventListener('change', compare);
+  onlyChk.addEventListener('change', render);
+  viewSel.addEventListener('change', render);
+  // 언어를 바꾸면 스크립트가 쓴 안내문("n줄 같음" 등)도 다시 만들어야 한다
+  document.addEventListener('langchange', compare);
+
+  // 결과를 글로 복사한다. 화면과 같은 기준(바뀐 곳 앞뒤 CONTEXT 줄)으로 접는다.
+  function asText() {
+    if (!last) return '';
+    var rows = last.rows, A = last.A, B = last.B;
+    var keep = visibleMask(rows, true);
+    var lines = [], skipped = 0;
+    rows.forEach(function (r, i) {
+      if (!keep[i]) { skipped++; return; }
+      if (skipped) { lines.push('… ' + t('dif.skip', '{n}줄 같음').replace('{n}', skipped) + ' …'); skipped = 0; }
+      if (r.t === 'same') lines.push('  ' + A[r.a]);
+      else if (r.t === 'chg') { lines.push('- ' + A[r.a]); lines.push('+ ' + B[r.b]); }
+      else if (r.t === 'del') lines.push('- ' + A[r.a]);
+      else lines.push('+ ' + B[r.b]);
+    });
+    if (skipped) lines.push('… ' + t('dif.skip', '{n}줄 같음').replace('{n}', skipped) + ' …');
+    return lines.join('\n');
+  }
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var text = asText();
+    if (!text) { setMsg(t('dif.nothing', '복사할 차이가 없습니다.'), 'err'); return; }
+    var done = function () { setMsg(t('dif.copied', '바뀐 곳을 글로 복사했습니다.'), 'ok'); };
+    var fail = function () { setMsg(t('dif.copyFail', '복사하지 못했습니다. 결과를 직접 선택해 복사해 주세요.'), 'err'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fail);
+      return;
+    }
+    // 예전 브라우저나 보안 맥락이 아닐 때를 위한 대체 경로
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      ta.remove();
+      ok ? done() : fail();
+    } catch (e) { fail(); }
+  });
+
+  document.getElementById('btn-swap').addEventListener('click', function () {
+    var tmp = aEl.value; aEl.value = bEl.value; bEl.value = tmp;
+    compare();
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    aEl.value = ''; bEl.value = '';
+    compare();
+  });
+
+  // 메모장에서 저장한 옛 한글 파일은 EUC-KR 인 경우가 많다. UTF-8 로 읽어 보고 깨지면 EUC-KR 로 읽는다.
+  function decodeText(u8) {
+    if (u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF) return new TextDecoder('utf-8').decode(u8.subarray(3));
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); }
+    catch (e) { return new TextDecoder('euc-kr').decode(u8); }
+  }
+
+  function loadInto(file, target) {
+    if (!file) return;
+    // 한글·워드·PDF 는 글자 파일이 아니다. 열어 봐야 깨진 글자만 나오니 미리 막는다.
+    if (/\.(hwp|hwpx|docx?|pdf|xlsx?|pptx?|zip)$/i.test(file.name)) {
+      setMsg(t('dif.notText', '이 파일은 글자만 담긴 파일이 아닙니다. 문서를 열어 전체 선택 → 복사한 뒤 붙여넣어 주세요.'), 'err');
+      return;
+    }
+    file.arrayBuffer().then(function (buf) {
+      target.value = decodeText(new Uint8Array(buf));
+      compare();
+    }).catch(function () {
+      setMsg(t('dif.readFail', '파일을 읽지 못했습니다.'), 'err');
+    });
+  }
+
+  [['a', aEl], ['b', bEl]].forEach(function (p) {
+    var input = document.getElementById('file-' + p[0]);
+    document.getElementById('btn-file-' + p[0]).addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () { loadInto(input.files[0], p[1]); input.value = ''; });
+    // 글상자에 파일을 끌어다 놓으면 그 파일의 내용을 넣는다
+    p[1].addEventListener('dragover', function (e) {
+      if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) e.preventDefault();
+    });
+    p[1].addEventListener('drop', function (e) {
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      e.preventDefault();
+      loadInto(e.dataTransfer.files[0], p[1]);
+    });
+  });
+
+  compare();
+})();
+</script>
+</body>
+</html>

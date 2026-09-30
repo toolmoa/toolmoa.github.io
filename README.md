@@ -30,9 +30,11 @@ image-compress.html   이미지 용량 줄이기      ← 키워드: 이미지 �
 image-crop.html       이미지 자르기           ← 키워드: 사진 자르기, 이미지 크롭
 image-convert.html    이미지 형식 변환        ← 키워드: png jpg 변환, webp jpg 변환
 image-join.html       사진 이어붙이기         ← 키워드: 사진 이어붙이기, 이미지 합치기
+image-mosaic.html     사진 모자이크           ← 키워드: 사진 모자이크, 개인정보 가리기, 모자이크 처리
 img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변환
 char-count.html       글자수 세기·원고지 계산  ← 키워드: 글자수 세기, 원고지 매수
 text-clean.html       텍스트 정리             ← 키워드: 중복 줄 제거, 명단 정리
+text-diff.html        텍스트 비교             ← 키워드: 텍스트 비교, 문서 비교, 두 글 차이
 pdf-merge.html        PDF 합치기             ← 키워드: PDF 합치기, PDF 병합
 pdf-split.html        PDF 나누기             ← 키워드: PDF 나누기, 페이지 추출
 pdf-edit.html         PDF 회전·삭제·순서 변경  ← 키워드: PDF 회전, PDF 페이지 삭제
@@ -59,7 +61,7 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 18종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 20종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
@@ -90,7 +92,7 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2
 ```
 
 에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.
