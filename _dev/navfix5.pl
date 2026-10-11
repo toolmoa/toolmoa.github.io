@@ -8,6 +8,7 @@ my @T = (
   ['image-convert.html','형식 변환','이미지 형식 변환 (PNG·JPG·WebP)','nav.icv'],
   ['image-join.html','사진 붙이기','사진 이어붙이기','nav.ijn'],
   ['image-mosaic.html','모자이크','사진 모자이크·가리기','nav.mos'],
+  ['image-exif.html','위치정보 삭제','사진 위치정보·EXIF 삭제','nav.exif'],
   ['img-to-pdf.html','이미지→PDF','이미지 PDF 변환','nav.i2p'],
   ['char-count.html','글자수 세기','글자수 세기','nav.char'],
   ['text-clean.html','텍스트 정리','텍스트 정리·중복 제거','nav.txt'],
@@ -43,7 +44,8 @@ for my $f (@ARGV) {
 
   # 비어 있는 <nav class="site-nav"></nav> 도 함께 처리한다
   my $n = ($c =~ s{[ \t]*<nav class="site-nav">.*?</nav>\n}{$hdr}s);
-  my $m = ($c =~ s{(<footer class="site-footer">\s*<div class="wrap">\s*)[ \t]*<nav>.*?</nav>\n}{$1$ftr}s);
+  # 들여쓰기는 $1 에 넣지 않는다. 넣으면 돌릴 때마다 $ftr 의 4칸이 덧붙어 계속 깊어진다.
+  my $m = ($c =~ s{(<footer class="site-footer">\s*<div class="wrap">\n)\s*<nav>.*?</nav>\n}{$1$ftr}s);
 
   utf8::encode($c);
   open(my $o, '>:raw', $f) or die; print $o $c; close $o;

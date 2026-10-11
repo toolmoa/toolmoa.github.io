@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>사진 위치정보 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">사진 위치정보 삭제 점검 (2026-10-11)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  저장된 결과물을 <strong>페이지 코드와 무관한</strong> 해석기로 다시 읽는다 — JPG 세그먼트, PNG 덩어리(CRC 는 표 없이 다시 계산),
+  WebP RIFF 를 이 파일 안에서 따로 훑는다. 화질 보존은 원본과 결과를 각각 그려 화소를 하나하나 비교한다.
+  PNG·WebP 는 정보가 든 파일을 여기서 직접 조립해 넣는다(브라우저가 저장한 그림에는 정보가 없으므로).
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:240px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: !!ok, detail: d }); }
+
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 15000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function loadFrame(src) {
+  return new Promise(function (res) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    document.body.appendChild(f);
+  });
+}
+function grab(p) { return fetch(p).then(function (r) { return r.arrayBuffer(); }).then(function (b) { return new Uint8Array(b); }); }
+
+// 페이지가 만든 Blob 을 가로챈다. 입력 File 도 Blob 이므로 name 이 있는 것은 뺀다.
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { if (typeof b.name !== 'string') out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+function feed(f, files) {
+  var d = f.contentDocument, dt = new DataTransfer();
+  files.forEach(function (x) { dt.items.add(x); });
+  var input = d.getElementById('file');
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function bytesOf(blob) { return blob.arrayBuffer().then(function (b) { return new Uint8Array(b); }); }
+function asc(u8, at, s) { for (var i = 0; i < s.length; i++) if (u8[at + i] !== s.charCodeAt(i)) return false; return true; }
+function cat(list) {
+  var n = 0; list.forEach(function (x) { n += x.length; });
+  var o = new Uint8Array(n), p = 0; list.forEach(function (x) { o.set(x, p); p += x.length; }); return o;
+}
+function str(s) { var o = new Uint8Array(s.length); for (var i = 0; i < s.length; i++) o[i] = s.charCodeAt(i) & 255; return o; }
+
+/* ---------- 독립 해석기 ---------- */
+
+// JPG: SOS 전까지의 세그먼트 목록 [{m, body(Uint8Array)}]
+function jpegSegs(u8) {
+  var out = [], p = 2;
+  while (p + 4 <= u8.length && u8[p] === 0xFF) {
+    var m = u8[p + 1];
+    if (m === 0xDA) break;
+    var L = u8[p + 2] * 256 + u8[p + 3];
+    out.push({ m: m, body: u8.subarray(p + 4, p + 2 + L) });
+    p += 2 + L;
+  }
+  return out;
+}
+// TIFF 안에서 태그 하나를 IFD0 / 하위 IFD 에서 찾는다 (있는지만)
+function tiffTags(t) {
+  var le = t[0] === 0x49, dv = new DataView(t.buffer, t.byteOffset, t.byteLength);
+  function u16(o) { return dv.getUint16(o, le); } function u32(o) { return dv.getUint32(o, le); }
+  var tags = {}, n = u16(u32(4)), base = u32(4) + 2;
+  for (var i = 0; i < n; i++) { var e = base + i * 12; tags[u16(e)] = { type: u16(e + 2), v16: u16(e + 8) }; }
+  return tags;
+}
+// 표 없이 비트 단위로 계산하는 CRC-32 (zip.js·페이지와 다른 구현)
+function crcSlow(u8) {
+  var c = 0xFFFFFFFF;
+  for (var i = 0; i < u8.length; i++) {
+    c ^= u8[i];
+    for (var k = 0; k < 8; k++) c = (c >>> 1) ^ (0xEDB88320 & -(c & 1));
+  }
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function be(v) { return new Uint8Array([v >>> 24, (v >>> 16) & 255, (v >>> 8) & 255, v & 255]); }
+function le32(v) { return new Uint8Array([v & 255, (v >>> 8) & 255, (v >>> 16) & 255, v >>> 24]); }
+function pngChunk(type, data) { var td = cat([str(type), data]); return cat([be(data.length), td, be(crcSlow(td))]); }
+function pngChunks(u8) {
+  var out = [], p = 8;
+  while (p + 12 <= u8.length) {
+    var L = ((u8[p] << 24) | (u8[p + 1] << 16) | (u8[p + 2] << 8) | u8[p + 3]) >>> 0;
+    var type = String.fromCharCode.apply(null, u8.subarray(p + 4, p + 8));
+    var crc = ((u8[p + 8 + L] << 24) | (u8[p + 9 + L] << 16) | (u8[p + 10 + L] << 8) | u8[p + 11 + L]) >>> 0;
+    out.push({ type: type, data: u8.subarray(p + 8, p + 8 + L), crcOk: crc === crcSlow(u8.subarray(p + 4, p + 8 + L)) });
+    p += 12 + L;
+  }
+  out.tail = u8.length - p;
+  return out;
+}
+function riffChunks(u8) {
+  var out = [], p = 12;
+  while (p + 8 <= u8.length) {
+    var L = (u8[p + 4] | (u8[p + 5] << 8) | (u8[p + 6] << 16) | (u8[p + 7] << 24)) >>> 0;
+    out.push({ id: String.fromCharCode.apply(null, u8.subarray(p, p + 4)), data: u8.subarray(p + 8, p + 8 + L) });
+    p += 8 + L + (L & 1);
+  }
+  out.riffSize = (u8[4] | (u8[5] << 8) | (u8[6] << 16) | (u8[7] << 24)) >>> 0;
+  return out;
+}
+// GPS 를 담은 EXIF (리틀엔디언, IFD0: Make · Orientation · GPS 포인터, GPS IFD: 위도·경도)
+function fakeExif(orient) {
+  var b = new Uint8Array(200), dv = new DataView(b.buffer);
+  b.set(str('II*\0'), 0); dv.setUint32(4, 8, true);
+  dv.setUint16(8, 3, true);
+  function ent(at, tag, type, cnt, val) { dv.setUint16(at, tag, true); dv.setUint16(at + 2, type, true); dv.setUint32(at + 4, cnt, true); dv.setUint32(at + 8, val, true); }
+  ent(10, 0x010F, 2, 4, 0x00475354);              // "TSG\0" 를 바로 담는다
+  b.set(str('TSG\0'), 18);
+  ent(22, 0x0112, 3, 1, orient || 1);
+  ent(34, 0x8825, 4, 1, 50);
+  dv.setUint32(46, 0, true);
+  dv.setUint16(50, 2, true);                        // GPS IFD: 2 항목
+  ent(52, 2, 5, 3, 80); ent(64, 4, 5, 3, 104);
+  dv.setUint32(76, 0, true);
+  [37, 1, 33, 1, 0, 1, 126, 1, 58, 1, 0, 1].forEach(function (v, i) { dv.setUint32(80 + i * 4, v, true); });
+  return b.subarray(0, 128);
+}
+
+function pixels(blob) {
+  return createImageBitmap(blob).then(function (bm) {
+    var c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height;
+    var x = c.getContext('2d'); x.drawImage(bm, 0, 0);
+    return { w: bm.width, h: bm.height, d: x.getImageData(0, 0, bm.width, bm.height).data };
+  });
+}
+function samePixels(a, b) {
+  return Promise.all([pixels(a), pixels(b)]).then(function (r) {
+    if (r[0].w !== r[1].w || r[0].h !== r[1].h) return { ok: false, why: r[0].w + '×' + r[0].h + ' vs ' + r[1].w + '×' + r[1].h };
+    var d1 = r[0].d, d2 = r[1].d, diff = 0;
+    for (var i = 0; i < d1.length; i++) if (d1[i] !== d2[i]) diff++;
+    return { ok: diff === 0, why: r[0].w + '×' + r[0].h + ' 다른 값 ' + diff + '개', w: r[0].w, h: r[0].h };
+  });
+}
+function canvasBlob(w, h, type) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d');
+  for (var i = 0; i < w; i += 4) { x.fillStyle = 'hsl(' + (i * 7 % 360) + ',80%,50%)'; x.fillRect(i, 0, 4, h); }
+  x.fillStyle = 'rgba(255,255,255,0.5)'; x.fillRect(0, 0, w / 2, h / 2);
+  return new Promise(function (r) { c.toBlob(r, type, 0.9); });
+}
+
+/* ---------- 검사 ---------- */
+
+function runPage(page, tag) {
+  var P = tag + ' ';
+  var chain = Promise.resolve();
+
+  // 1. 실제 휴대전화 사진: GPS 가 있어야 하고, 결과에는 없어야 하며, 화소는 같아야 한다
+  chain = chain.then(function () {
+    return Promise.all([grab('fixtures/photo-exif.jpg'), loadFrame(page)]).then(function (a) {
+      var f = a[1], d = f.contentDocument, cap = capture(f);
+      // 실제 사진에 GPS EXIF · XMP · 주석 · 꼬리 데이터를 직접 심는다 (픽스처에는 GPS 가 없다)
+      function seg(m, body) { var L = body.length + 2; return cat([new Uint8Array([0xFF, m, L >> 8, L & 255]), body]); }
+      var src = cat([a[0].subarray(0, 2), seg(0xE1, cat([str("Exif\0\0"), fakeExif(1)])),
+        seg(0xE1, str("http://ns.adobe.com/xap/1.0/\0<x:xmpmeta>home</x:xmpmeta>")), seg(0xFE, str("taken at home")),
+        a[0].subarray(2), str("SAMSUNG-TRAILER-37.5665")]);
+      var orig = jpegSegs(src).filter(function (s) { return s.m === 0xE1 && asc(s.body, 0, 'Exif\0\0'); })[0];
+      var origGps = orig && tiffTags(orig.body.subarray(6))[0x8825];
+      feed(f, [new File([src], 'phone.jpg', { type: 'image/jpeg' })]);
+      return waitFor(function () { return cap.blobs.length && !d.getElementById('result').hidden; }).then(function () {
+        var out = cap.blobs[0];
+        return bytesOf(out).then(function (u8) {
+          var segs = jpegSegs(u8);
+          var app1 = segs.filter(function (s) { return s.m === 0xE1; });
+          var leftover = segs.filter(function (s) { return s.m === 0xE1 || s.m === 0xED || s.m === 0xFE || (s.m > 0xE2 && s.m <= 0xEF && s.m !== 0xEE); });
+          var gpsLeft = app1.some(function (s) { return asc(s.body, 0, 'Exif') && tiffTags(s.body.subarray(6))[0x8825]; });
+          var ui = d.getElementById('t-gps').textContent.trim();
+          var shown = /📍/.test(d.getElementById('list').textContent);
+          log(P + '실제 사진 GPS 제거', origGps && !gpsLeft && u8[0] === 0xFF && u8[1] === 0xD8 && u8[u8.length - 2] === 0xFF && u8[u8.length - 1] === 0xD9,
+            '원본 GPS ' + (origGps ? '있음' : '없음 ⚠') + ' → 결과 ' + (gpsLeft ? '남음 ⚠' : '없음') +
+            ' · 결과 APP1 ' + app1.length + '개 · 끝 FFD9 ' + (u8[u8.length - 1] === 0xD9) + ' · ' + src.length + '→' + u8.length + 'B');
+          log(P + '정보 칸 전부 제거', leftover.length === 0 || (leftover.length === 1 && app1.length === 1 && app1[0].body.length === 6 + 26),
+            '남은 정보성 세그먼트 ' + leftover.length + '개' + (app1.length ? ' (방향 전용 EXIF ' + app1[0].body.length + 'B)' : ''));
+          log(P + '화면 표시', ui === '1' && shown, '위치정보 사진 수 "' + ui + '" · 📍 표시 ' + shown);
+          return samePixels(new Blob([src], { type: 'image/jpeg' }), out).then(function (r) {
+            log(P + '실제 사진 화소 동일', r.ok, r.why);
+          });
+        });
+      }).then(function () {
+        // 결과를 다시 넣으면 "지울 정보 없음" 이어야 한다 (방향 칸도 끈다)
+        d.getElementById('keep-orient').checked = false;
+        var first = cap.blobs[0]; cap.blobs.length = 0;
+        return bytesOf(first).then(function (u8) {
+          feed(f, [new File([u8], 'again.jpg', { type: 'image/jpeg' })]);
+          return waitFor(function () { return cap.blobs.length; }).then(function () {
+            return bytesOf(cap.blobs[0]).then(function (u2) {
+              var segs = jpegSegs(u2).filter(function (s) { return s.m === 0xE1; });
+              var txt = d.getElementById('list').textContent;
+              // 원본에 방향 표시가 없었다면 다시 넣었을 때 지울 것이 없다
+              log(P + '다시 넣으면 깨끗', segs.length === 0 && /지울 정보 없음|Nothing to remove/.test(txt),
+                'APP1 ' + segs.length + '개 · 목록: ' + txt.replace(/\s+/g, ' ').slice(0, 90) + ' · JS오류 ' + (f.dataset.errs || '없음'));
+              f.remove();
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log(P + '실제 사진', false, '오류: ' + e.message); });
+
+  // 2. 방향 표시(6 = 90° 회전): 남기면 세로로 보이고, 끄면 원래 저장 방향 그대로
+  chain = chain.then(function () {
+    return Promise.all([grab('fixtures/photo-rot90.jpg'), loadFrame(page)]).then(function (a) {
+      var src = a[0], f = a[1], d = f.contentDocument, cap = capture(f);
+      feed(f, [new File([src], 'rot.jpg', { type: 'image/jpeg' })]);
+      return waitFor(function () { return cap.blobs.length; }).then(function () {
+        var keepOn = cap.blobs[0]; cap.blobs.length = 0;
+        var cb = d.getElementById('keep-orient');
+        cb.checked = false; cb.dispatchEvent(new Event('change', { bubbles: true }));
+        return waitFor(function () { return cap.blobs.length; }).then(function () {
+          var keepOff = cap.blobs[0];
+          return Promise.all([bytesOf(keepOn), pixels(new Blob([src])), pixels(keepOn), pixels(keepOff)]).then(function (r) {
+            var e = jpegSegs(r[0]).filter(function (s) { return s.m === 0xE1; });
+            var o = e.length === 1 && asc(e[0].body, 0, 'Exif\0\0') ? tiffTags(e[0].body.subarray(6)) : {};
+            var tagCount = Object.keys(o).length;
+            var ok = o[0x0112] && o[0x0112].v16 === 6 && tagCount === 1 &&
+                     r[1].w === r[2].w && r[1].h === r[2].h && r[3].w === r[1].h && r[3].h === r[1].w;
+            log(P + '방향 표시 보존/삭제', ok, '원본 ' + r[1].w + '×' + r[1].h + ' · 남김 ' + r[2].w + '×' + r[2].h +
+              ' (EXIF 태그 ' + tagCount + '개, 방향 ' + (o[0x0112] ? o[0x0112].v16 : '-') + ') · 지움 ' + r[3].w + '×' + r[3].h);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log(P + '방향 표시', false, '오류: ' + e.message); });
+
+  // 3. PNG: 글자·시각·EXIF 덩어리를 직접 심는다
+  chain = chain.then(function () {
+    return Promise.all([canvasBlob(64, 48, 'image/png').then(bytesOf), loadFrame(page)]).then(function (a) {
+      var png = a[0], f = a[1], d = f.contentDocument, cap = capture(f);
+      var ch = pngChunks(png), ihdr = ch[0];
+      var built = cat([png.subarray(0, 8), pngChunk('IHDR', ihdr.data),
+        pngChunk('tEXt', str('Comment\0Seoul home')), pngChunk('eXIf', fakeExif(1)), pngChunk('tIME', new Uint8Array([7, 234, 10, 11, 9, 0, 0]))]
+        .concat(ch.slice(1).map(function (c) { return pngChunk(c.type, c.data); })).concat([str('TRAILER-SECRET')]));
+      feed(f, [new File([built], 'shot.png', { type: 'image/png' })]);
+      return waitFor(function () { return cap.blobs.length; }).then(function () {
+        return bytesOf(cap.blobs[0]).then(function (u8) {
+          var oc = pngChunks(u8), types = oc.map(function (c) { return c.type; });
+          var bad = types.filter(function (x) { return /tEXt|zTXt|iTXt|eXIf|tIME/.test(x); });
+          var crcAll = oc.every(function (c) { return c.crcOk; });
+          var gpsUi = d.getElementById('t-gps').textContent.trim();
+          return samePixels(new Blob([built], { type: 'image/png' }), cap.blobs[0]).then(function (r) {
+            log(P + 'PNG 정보 덩어리 제거', bad.length === 0 && crcAll && oc.tail === 0 && types[types.length - 1] === 'IEND' && r.ok && gpsUi === '1',
+              '덩어리 ' + types.join(',') + ' · CRC ' + (crcAll ? '전부 맞음' : '틀림 ⚠') + ' · 뒤 찌꺼기 ' + oc.tail + 'B · 화소 ' + r.why + ' · GPS 표시 ' + gpsUi);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log(P + 'PNG', false, '오류: ' + e.message); });
+
+  // 4. WebP: VP8X 머리말 + EXIF + XMP 를 직접 조립한다
+  chain = chain.then(function () {
+    return Promise.all([canvasBlob(64, 48, 'image/webp').then(bytesOf), loadFrame(page)]).then(function (a) {
+      var wp = a[0], f = a[1], d = f.contentDocument, cap = capture(f);
+      var img = riffChunks(wp).filter(function (c) { return c.id === 'VP8 ' || c.id === 'VP8L'; })[0];
+      function rc(id, data) { return cat([str(id), le32(data.length), data, data.length & 1 ? new Uint8Array(1) : new Uint8Array(0)]); }
+      var x = new Uint8Array(10); x[0] = 0x08 | 0x04; x[4] = 63; x[7] = 47;
+      var exif = fakeExif(1), xmp = str('<x:xmpmeta>GPS 37.5665,126.978</x:xmpmeta>');
+      var body = cat([str('WEBP'), rc('VP8X', x), rc(img.id, img.data), rc('EXIF', exif), rc('XMP ', xmp)]);
+      var built = cat([str('RIFF'), le32(body.length), body]);
+      feed(f, [new File([built], 'pic.webp', { type: 'image/webp' })]);
+      return waitFor(function () { return cap.blobs.length; }).then(function () {
+        return bytesOf(cap.blobs[0]).then(function (u8) {
+          var rc2 = riffChunks(u8), ids = rc2.map(function (c) { return c.id; });
+          var vx = rc2.filter(function (c) { return c.id === 'VP8X'; })[0];
+          var flagsOk = vx && (vx.data[0] & 0x0C) === 0;
+          var sizeOk = rc2.riffSize === u8.length - 8;
+          return samePixels(new Blob([built], { type: 'image/webp' }), cap.blobs[0]).then(function (r) {
+            log(P + 'WebP EXIF·XMP 제거', ids.indexOf('EXIF') < 0 && ids.indexOf('XMP ') < 0 && flagsOk && sizeOk && r.ok,
+              '덩어리 ' + ids.join(',') + ' · 표시 비트 꺼짐 ' + flagsOk + ' · RIFF 크기 맞음 ' + sizeOk + ' · 화소 ' + r.why);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log(P + 'WebP', false, '오류: ' + e.message); });
+
+  // 5. 섞어 넣기: 사진이 아닌 파일·잘린 JPG 는 이유를 보이고, 나머지는 처리되고, ZIP 한 개로 받는다
+  chain = chain.then(function () {
+    return Promise.all([grab('fixtures/photo-exif.jpg'), canvasBlob(30, 20, 'image/jpeg'), loadFrame(page)]).then(function (a) {
+      var src = a[0], f = a[2], d = f.contentDocument, cap = capture(f);
+      feed(f, [new File([src.subarray(0, 20000)], 'cut.jpg', { type: 'image/jpeg' }), new File(['hello'], 'note.txt', { type: 'text/plain' }),
+               new File([a[1]], 'plain.jpg', { type: 'image/jpeg' }), new File([src], 'phone.jpeg', { type: 'image/jpeg' })]);
+      return waitFor(function () { return !d.getElementById('result').hidden; }).then(function () {
+        var items = d.querySelectorAll('#list li').length;
+        var count = d.getElementById('t-count').textContent.trim();
+        var msg = d.getElementById('msg').textContent;
+        var saveNames = Array.prototype.map.call(d.querySelectorAll('#list a[download]'), function (x) { return x.download; });
+        d.getElementById('btn-all').click();
+        return waitFor(function () { return cap.names.some(function (n) { return /\.zip$/.test(n); }); }, 5000).then(function () {
+          var zip = cap.names.filter(function (n) { return /\.zip$/.test(n); });
+          var keepsExt = saveNames.every(function (n) { return /\.(jpe?g)$/.test(n); });
+          log(P + '섞어 넣기 · ZIP', items === 4 && +count >= 2 && msg.length > 0 && zip.length === 1 && keepsExt && !f.dataset.errs,
+            '목록 ' + items + '줄 · 처리 ' + count + '장 · 안내 "' + msg.slice(0, 40) + '" · 저장 이름 ' + saveNames.join(', ') +
+            ' · ZIP ' + zip.join(',') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log(P + '섞어 넣기', false, '오류: ' + e.message); });
+
+  return chain;
+}
+
+function run() {
+  runPage('../image-exif.html', 'ko')
+    .then(function () { return fetch('../en/image-exif.html').then(function (r) { return r.ok; }, function () { return false; }); })
+    .then(function (hasEn) { return hasEn ? runPage('../en/image-exif.html', 'en') : null; })
+    .then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') + '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'META ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

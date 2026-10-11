@@ -120,6 +120,9 @@ my @PAIRS = (
                            "ctx.fillStyle = '#ffffff'", 'c.width = c.height = 1', 'makeZip(entries)']],
   ['random-pick.html',    ['crypto.getRandomValues', 'while (v >= limit)', 'function shuffled',
                            'teams[idx % g]', 'execCommand']],
+  ['image-mosaic.html',   ['function cover', 'setPointerCapture', 'function toImage', "addEventListener('paste'"]],
+  ['image-exif.html',     ['function stripJpeg', 'function stripPng', 'function stripWebp', 'function orientTiff',
+                           'makeZip(entries)', 'info[k] === undefined']],
 );
 
 my $gap = 0;

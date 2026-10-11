@@ -14,6 +14,8 @@ my @TOOLS = (   # 파일, 머리 메뉴 이름, 바닥 이름
   ['pdf-split.html',      'Split PDF',      'Split PDF'],
   ['pdf-to-image.html',   'PDF → image',    'PDF to image'],
   ['file-convert.html',   'Convert file',   'Convert file'],
+  ['image-mosaic.html',   'Blur / redact',  'Blur or redact a photo'],
+  ['image-exif.html',     'Remove location', 'Remove photo location'],
   ['qr-generate.html',    'QR code',        'QR code'],
   ['random-pick.html',    'Random picker',  'Random picker'],
 );

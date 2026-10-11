@@ -122,14 +122,15 @@ function hangulLeft(d) {
   return m ? m.slice(0, 5).join(',') : '';
 }
 
-var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html'];
+var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
+           'image-mosaic.html', 'image-exif.html'];
 var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
               'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
 
 function run() {
   var chain = Promise.resolve();
 
-  // ===== 1. 영어판 12쪽: 메뉴 11개 · 현재 표시 · 한글 잔존 · JS 오류 =====
+  // ===== 1. 영어판 12쪽: 메뉴 13개 · 현재 표시 · 한글 잔존 · JS 오류 =====
   chain = chain.then(function () {
     var bad = [], seq = Promise.resolve();
     ALL_EN.forEach(function (p) {
@@ -141,7 +142,7 @@ function run() {
           var foot = d.querySelectorAll('.site-footer nav:first-child a');
           var han = hangulLeft(d);
           var probs = [];
-          if (nav.length !== 11) probs.push('메뉴 ' + nav.length + '개');
+          if (nav.length !== 13) probs.push('메뉴 ' + nav.length + '개');
           if (p !== 'index.html' && (!cur || cur.getAttribute('href') !== p)) probs.push('현재표시 틀림');
           if (han) probs.push('한글: ' + han);
           if (f.dataset.errs) probs.push('JS오류 ' + f.dataset.errs);
@@ -156,9 +157,9 @@ function run() {
       });
     });
     return seq.then(function () {
-      log('영어판 12쪽 공통', bad.length === 0, bad.length ? bad.join(' ;; ') : '메뉴 11개 · 현재 표시 · 한글 0 · JS 오류 0 · 바닥 링크 정상');
+      log('영어판 14쪽 공통', bad.length === 0, bad.length ? bad.join(' ;; ') : '메뉴 13개 · 현재 표시 · 한글 0 · JS 오류 0 · 바닥 링크 정상');
     });
-  }).catch(function (e) { log('영어판 12쪽 공통', false, '오류: ' + e.message); });
+  }).catch(function (e) { log('영어판 14쪽 공통', false, '오류: ' + e.message); });
 
   // ===== 2. 영어 홈 카드가 12종 전부를 가리키는지 =====
   chain = chain.then(function () {
@@ -166,8 +167,8 @@ function run() {
       var hrefs = Array.prototype.map.call(f.contentDocument.querySelectorAll('.tool-card'),
         function (a) { return a.getAttribute('href'); });
       var miss = ALL_EN.filter(function (p) { return p !== 'index.html' && hrefs.indexOf(p) < 0; });
-      log('영어 홈 카드', miss.length === 0 && hrefs.length === 11,
-          '카드 ' + hrefs.length + '개' + (miss.length ? ' · 빠짐: ' + miss.join(',') : ' · 11종 전부'));
+      log('영어 홈 카드', miss.length === 0 && hrefs.length === 13,
+          '카드 ' + hrefs.length + '개' + (miss.length ? ' · 빠짐: ' + miss.join(',') : ' · 13종 전부'));
       f.remove();
     });
   }).catch(function (e) { log('영어 홈 카드', false, '오류: ' + e.message); });
@@ -403,9 +404,46 @@ function run() {
     });
     return seq.then(function () {
       try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
-      log('한국어 → English 이동', bad.length === 0, bad.length ? bad.join(' ;; ') : '4쪽 전부 /en/ 같은 이름으로 이동 · 되돌아가는 hreflang 정상');
+      log('한국어 → English 이동', bad.length === 0, bad.length ? bad.join(' ;; ') : NEW.length + '쪽 전부 /en/ 같은 이름으로 이동 · 되돌아가는 hreflang 정상');
     });
   }).catch(function (e) { log('한국어 → English 이동', false, '오류: ' + e.message); });
+
+  // ===== 8. 모자이크 (영어): 끌어서 가리고, 저장한 그림을 다시 읽어 가린 곳만 바뀌었는지 =====
+  // 영어판에는 i18n.js 가 없다. 한국어판에서 옮긴 스크립트가 t() 를 부르면 여기서 죽는다.
+  chain = chain.then(function () {
+    var c = document.createElement('canvas'); c.width = 200; c.height = 100;
+    var x = c.getContext('2d');
+    for (var i = 0; i < 200; i++) { x.fillStyle = i % 2 ? '#1040e0' : '#f0d020'; x.fillRect(i, 0, 1, 100); }
+    return Promise.all([new Promise(function (r) { c.toBlob(r, 'image/png'); }), loadFrame('../en/image-mosaic.html')]).then(function (a) {
+      var f = a[1], d = f.contentDocument, w = f.contentWindow, cap = capture(f);
+      setFiles(d.getElementById('file'), [new File([a[0]], 'stripes.png', { type: 'image/png' })]);
+      return waitFor(function () { return !d.getElementById('area').hidden; }).then(function () {
+        var view = d.getElementById('view'), r = view.getBoundingClientRect();
+        function at(px, py) { return { clientX: r.left + px * r.width / view.width, clientY: r.top + py * r.height / view.height }; }
+        function ev(type, p) { view.dispatchEvent(new w.PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1, isPrimary: true, clientX: p.clientX, clientY: p.clientY })); }
+        ev('pointerdown', at(10, 10)); ev('pointermove', at(50, 40)); ev('pointermove', at(90, 80)); ev('pointerup', at(90, 80));
+        var count = txt(d, 't-count');
+        var hint = txt(d, 'mode-hint');
+        d.getElementById('btn-save').click();
+        return waitFor(function () { return outputs(cap, /^image\//).length; }).then(function () {
+          return createImageBitmap(outputs(cap, /^image\//)[0]).then(function (bm) {
+            var o = document.createElement('canvas'); o.width = bm.width; o.height = bm.height;
+            var ox = o.getContext('2d'); ox.drawImage(bm, 0, 0);
+            var inA = ox.getImageData(40, 40, 1, 1).data, inB = ox.getImageData(41, 40, 1, 1).data;
+            var out = ox.getImageData(150, 50, 1, 1).data, out2 = ox.getImageData(151, 50, 1, 1).data;
+            var covered = inA[0] === inB[0] && inA[2] === inB[2];          // 줄무늬가 뭉개졌다
+            var untouched = out[0] !== out2[0];                            // 바깥 줄무늬는 그대로
+            var msg = txt(d, 'msg');
+            var han = /[가-힣]/.test(d.body.innerText.replace(/한국어/g, ''));
+            log('모자이크 (영어)', count === '1' && covered && untouched && /^stripes.*\.png$/.test(cap.names[0] || '') && !han && !f.dataset.errs && /covered/.test(msg),
+              '가린 곳 ' + count + ' · 안쪽 뭉개짐 ' + covered + ' · 바깥 그대로 ' + untouched + ' · 이름 ' + cap.names.join(',') +
+              ' · 안내 "' + msg.slice(0, 50) + '" · 방식 안내 "' + hint.slice(0, 30) + '" · 한글 ' + han + ' · JS오류 ' + (f.dataset.errs || '없음'));
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('모자이크 (영어)', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

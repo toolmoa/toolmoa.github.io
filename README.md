@@ -31,6 +31,7 @@ image-crop.html       이미지 자르기           ← 키워드: 사진 자르
 image-convert.html    이미지 형식 변환        ← 키워드: png jpg 변환, webp jpg 변환
 image-join.html       사진 이어붙이기         ← 키워드: 사진 이어붙이기, 이미지 합치기
 image-mosaic.html     사진 모자이크           ← 키워드: 사진 모자이크, 개인정보 가리기, 모자이크 처리
+image-exif.html       사진 위치정보 삭제       ← 키워드: 사진 위치정보 삭제, exif 제거, 사진 gps 지우기
 img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변환
 char-count.html       글자수 세기·원고지 계산  ← 키워드: 글자수 세기, 원고지 매수
 text-clean.html       텍스트 정리             ← 키워드: 중복 줄 제거, 명단 정리
@@ -46,7 +47,7 @@ random-pick.html      랜덤 뽑기·추첨기        ← 키워드: 랜덤 뽑�
 unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 계산, 인치 cm 변환
 date-calc.html        날짜 계산기·디데이       ← 키워드: 디데이 계산, 근무일수
 age-calc.html         만 나이 계산기          ← 키워드: 만 나이 계산기, 세는 나이
-en/                   영어 SEO 페이지 12종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
+en/                   영어 SEO 페이지 14종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
 assets/style.css      공통 스타일 (다크모드 포함)
 assets/i18n.js        다국어 엔진 겸 사전 (ko/en/ja)
 assets/og/            공유용 이미지 1200×630 (페이지마다 1장, 생성물)
@@ -61,7 +62,7 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 20종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 21종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
@@ -92,7 +93,7 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 meta exif
 ```
 
 에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.
@@ -171,4 +172,4 @@ FAQ 구조화 데이터는 페이지에 이미 적힌 `<details>` 문답을 **�
   `{n}` 자리를 두고 치환한다.
 - 결과를 스크립트로 그리는 페이지는 `langchange` 에서 **결과까지 다시 그린다**.
   안내문구만 다시 그리면 이미 나온 결과가 한국어로 남는다 (`_dev/i18nlive.html` 이 잡는다)
-- 마지막에 생성기 4개를 다시 돌리고, 정적 4종 + 브라우저 12종을 전부 통과시킨다
+- 마지막에 생성기 4개를 다시 돌리고, 정적 4종 + 브라우저 15종을 전부 통과시킨다

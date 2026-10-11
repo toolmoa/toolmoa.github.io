@@ -166,6 +166,19 @@ var SETUP = {
       input.files = dt.files;
       input.dispatchEvent(new Event('change', { bubbles: true }));
     }, 'image/png');
+  },
+  // 결과 목록(지운 항목·"지울 정보 없음"·처리 못 한 이유)이 그려진 상태에서 본다. 파일 이름은 한글이 아닌 것으로.
+  'image-exif.html': function (d) {
+    var c = document.createElement('canvas'); c.width = 40; c.height = 30;
+    c.getContext('2d').fillRect(0, 0, 40, 30);
+    c.toBlob(function (blob) {
+      var dt = new DataTransfer();
+      dt.items.add(new File([blob], 'x.jpg', { type: 'image/jpeg' }));
+      dt.items.add(new File(['abc'], 'y.txt', { type: 'text/plain' }));
+      var input = d.getElementById('file');
+      input.files = dt.files;
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 'image/jpeg');
   }
 };
 
@@ -174,7 +187,7 @@ var PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf
              'pdf-edit.html', 'file-convert.html', 'qr-generate.html', 'password-gen.html',
              'unit-convert.html', 'date-calc.html', 'age-calc.html',
              'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html',
-             'text-diff.html', 'image-mosaic.html'];
+             'text-diff.html', 'image-mosaic.html', 'image-exif.html'];
 
 function run() {
   var seq = Promise.resolve();

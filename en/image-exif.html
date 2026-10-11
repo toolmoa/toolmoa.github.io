@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remove EXIF &amp; GPS location from photos without uploading — free</title>
+<meta name="description" content="Strip the GPS location, camera model and date from JPG, PNG and WebP photos without uploading them. No re-compression, so quality is untouched. Batch, in your browser.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-exif.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-exif.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-exif.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-exif.html">
+<meta property="og:title" content="Remove photo location data without uploading">
+<meta property="og:description" content="Strip GPS and EXIF from photos inside your browser. No upload, no quality loss.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Remove photo location data","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/image-exif.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-image-exif.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Remove photo location data without uploading — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Remove photo location data without uploading">
+<meta name="twitter:description" content="Strip GPS and EXIF from photos inside your browser. No upload, no quality loss.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-image-exif.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Are my photos uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. Everything happens inside your browser and the files never leave your device. Load the page, switch off the internet, and it still works. Uploading a photo that contains your location to someone's server in order to remove that location would defeat the purpose."}},{"@type":"Question","name":"What exactly gets removed?","acceptedAnswer":{"@type":"Answer","text":"The whole EXIF block — GPS position, device make and model, date taken, camera settings, editing software and the embedded thumbnail — plus XMP and IPTC data, comments, and any extra data appended after the end of the image. For each photo the page shows what it found before removing it."}},{"@type":"Question","name":"How can I check that it worked?","acceptedAnswer":{"@type":"Answer","text":"Drop the saved photo back onto this page. If it says \"Nothing to remove\", it is clean. On Windows you can also right-click the file → Properties → Details and confirm that the GPS section is gone."}},{"@type":"Question","name":"Don't apps like WhatsApp remove location anyway?","acceptedAnswer":{"@type":"Answer","text":"Ordinary photo messages are usually re-compressed, which drops most metadata. But sending a photo \"as a document\" or \"in original quality\" can deliver the file untouched, and each service handles this differently and changes over time. Removing it yourself before sending is the only way to be sure."}},{"@type":"Question","name":"Can I stop my phone adding location in the first place?","acceptedAnswer":{"@type":"Answer","text":"Yes. On an iPhone go to Settings → Privacy & Security → Location Services → Camera and choose \"Never\". On Android, open the Camera app's settings and turn off \"Location tags\" (the wording varies by brand). Photos you have already taken still carry it, so clean those here."}},{"@type":"Question","name":"Does it work with iPhone HEIC photos?","acceptedAnswer":{"@type":"Answer","text":"Not yet — JPG, PNG and WebP only. iPhones usually convert photos to JPG when you share them, so use that JPG. Choosing \"Most Compatible\" under Settings → Camera → Formats makes the phone shoot JPG from the start."}},{"@type":"Question","name":"Why keep the orientation flag?","acceptedAnswer":{"@type":"Answer","text":"Phones often store a portrait photo as a landscape image plus a note saying \"rotate this 90°\". Remove that note and the photo appears on its side. The note reveals nothing about place or device, so it is kept by default; untick the box to remove it too."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Remove photo location data without uploading","item":"https://toolmoa.github.io/en/image-exif.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html" aria-current="page">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+    </nav>
+    <a class="lang-link" href="../image-exif.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Remove photo location data without uploading</h1>
+  <p class="lead">Phone photos quietly carry the GPS coordinates of where they were taken, the device name and the exact time. This strips that information and leaves every pixel exactly as it was.</p>
+  <span class="privacy-badge">🔒 Your photos never leave your device</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">📍</span>
+    <span class="dz-main">Drop photos here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · multiple files supported</span>
+    <input type="file" id="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <label class="inline-check" style="margin:0">
+      <input type="checkbox" id="keep-orient" checked>
+      <span>Keep the orientation (portrait / landscape) flag</span>
+    </label>
+    <div class="hint">Removing it can make portrait photos appear sideways. Orientation reveals nothing about place or device, so it is kept by default.</div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="result" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Photos processed</span></div>
+      <div class="stat"><span class="num" id="t-gps">0</span><span class="lbl">Had a location</span></div>
+      <div class="stat"><span class="num" id="t-removed" style="font-size:18px">0</span><span class="lbl">Data removed</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-all">Save all</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+    <label class="inline-check">
+      <input type="checkbox" id="as-zip" checked>
+      <span>Save as a single ZIP file</span>
+    </label>
+    <ul class="file-list" id="list"></ul>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">If <strong style="color:var(--text)">faces or number plates</strong> also need hiding, use <a href="image-mosaic.html">Blur / redact</a>. To make files smaller as well, <a href="image-compress.html">Compress image</a> drops the location while it shrinks them.</p>
+
+  <div class="ad-slot"><!-- AD:EN_IMAGEEXIF --></div>
+
+  <h2>What one photo gives away</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      When a phone saves a picture it attaches an <strong style="color:var(--text)">EXIF</strong> block: latitude and longitude accurate to a few
+      metres, the phone model, and the date and time to the second. A listing photo for a second-hand sale taken in your living room,
+      a picture of your kids, a snap of your new flat — sent as an original file, any of them can lead a stranger to your front door.
+      Some social networks strip this on upload, but <strong style="color:var(--text)">email attachments, cloud share links, "send original"
+      in messengers, forums and many blogs</strong> pass it straight through. Clean the file once before it leaves your hands and it no longer matters where it goes.
+    </p>
+  </div>
+
+  <h2>Why the quality does not change</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Most metadata removers redraw the image and save it again. That does drop the metadata, but it also re-compresses the JPG, so every pass costs a little quality.
+      This page instead <strong style="color:var(--text)">cuts out only the blocks that hold metadata</strong> and copies the image data across byte for byte.
+      The file shrinks by exactly the size of what was removed, and a pixel-by-pixel comparison with the original comes out identical.
+      The colour profile (ICC) is kept, because removing it can shift colours and it says nothing about where you were.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my photos uploaded anywhere?</summary>
+      <p>No. Everything happens inside your browser and the files never leave your device. Load the page, switch off the internet, and it still works. Uploading a photo that contains your location to someone's server in order to remove that location would defeat the purpose.</p>
+    </details>
+    <details>
+      <summary>What exactly gets removed?</summary>
+      <p>The whole EXIF block — GPS position, device make and model, date taken, camera settings, editing software and the embedded thumbnail — plus XMP and IPTC data, comments, and any extra data appended after the end of the image. For each photo the page shows what it found before removing it.</p>
+    </details>
+    <details>
+      <summary>How can I check that it worked?</summary>
+      <p>Drop the saved photo back onto this page. If it says "Nothing to remove", it is clean. On Windows you can also right-click the file → Properties → Details and confirm that the GPS section is gone.</p>
+    </details>
+    <details>
+      <summary>Don't apps like WhatsApp remove location anyway?</summary>
+      <p>Ordinary photo messages are usually re-compressed, which drops most metadata. But sending a photo "as a document" or "in original quality" can deliver the file untouched, and each service handles this differently and changes over time. Removing it yourself before sending is the only way to be sure.</p>
+    </details>
+    <details>
+      <summary>Can I stop my phone adding location in the first place?</summary>
+      <p>Yes. On an iPhone go to Settings → Privacy &amp; Security → Location Services → Camera and choose "Never". On Android, open the Camera app's settings and turn off "Location tags" (the wording varies by brand). Photos you have already taken still carry it, so clean those here.</p>
+    </details>
+    <details>
+      <summary>Does it work with iPhone HEIC photos?</summary>
+      <p>Not yet — JPG, PNG and WebP only. iPhones usually convert photos to JPG when you share them, so use that JPG. Choosing "Most Compatible" under Settings → Camera → Formats makes the phone shoot JPG from the start.</p>
+    </details>
+    <details>
+      <summary>Why keep the orientation flag?</summary>
+      <p>Phones often store a portrait photo as a landscape image plus a note saying "rotate this 90°". Remove that note and the photo appears on its side. The note reveals nothing about place or device, so it is kept by default; untick the box to remove it too.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="../image-exif.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script src="../assets/zip.js"></script>
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var keepOrient = document.getElementById('keep-orient');
+  var msg = document.getElementById('msg');
+  var resultBox = document.getElementById('result');
+  var list = document.getElementById('list');
+
+  var lastFiles = [];
+  var results = [];     // {name, blob, url, before, after, info, removed, kind}
+
+  function tr(k, ko) { return typeof t === 'function' ? t(k, ko) : ko; }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+
+  /* ===== EXIF(TIFF) 읽기 — 보여 주기 위해서만 읽는다. 어떤 값이 깨져 있어도 지우는 일은 계속된다 ===== */
+  function readTiff(u8, start, len) {
+    var info = {};
+    if (len < 8) return info;
+    var dv = new DataView(u8.buffer, u8.byteOffset + start, len);
+    var le = dv.getUint16(0) === 0x4949;
+    if (!le && dv.getUint16(0) !== 0x4D4D) return info;
+    function u16(o) { return dv.getUint16(o, le); }
+    function u32(o) { return dv.getUint32(o, le); }
+    var SIZE = { 1: 1, 2: 1, 3: 2, 4: 4, 5: 8, 7: 1, 9: 4, 10: 8 };
+    function entries(off) {
+      var out = {};
+      if (off + 2 > len) return out;
+      var n = u16(off);
+      for (var i = 0; i < n && i < 500; i++) {
+        var e = off + 2 + i * 12;
+        if (e + 12 > len) break;
+        var type = u16(e + 2), cnt = u32(e + 4), sz = (SIZE[type] || 1) * cnt;
+        var at = sz <= 4 ? e + 8 : u32(e + 8);
+        if (at + sz > len) continue;
+        out[u16(e)] = { type: type, cnt: cnt, at: at };
+      }
+      return out;
+    }
+    function str(x) {
+      if (!x) return '';
+      var s = '';
+      for (var i = 0; i < x.cnt && i < 200; i++) {
+        var c = dv.getUint8(x.at + i);
+        if (!c) break;
+        s += String.fromCharCode(c);
+      }
+      return s.trim();
+    }
+    function rat(x, i) { var d = u32(x.at + i * 8 + 4); return d ? u32(x.at + i * 8) / d : 0; }
+    function dms(x) { return x && x.type === 5 && x.cnt >= 3 ? rat(x, 0) + rat(x, 1) / 60 + rat(x, 2) / 3600 : null; }
+
+    var ifd0 = entries(u32(4));
+    if (ifd0[0x0112] && ifd0[0x0112].type === 3) info.orient = u16(ifd0[0x0112].at);
+    info.make = str(ifd0[0x010F]);
+    info.model = str(ifd0[0x0110]);
+    info.date = str(ifd0[0x0132]);
+    if (ifd0[0x8769]) {
+      var ex = entries(u32(ifd0[0x8769].at));
+      info.date = str(ex[0x9003]) || info.date;
+    }
+    if (ifd0[0x8825]) {
+      var g = entries(u32(ifd0[0x8825].at));
+      var lat = dms(g[2]), lon = dms(g[4]);
+      if (lat !== null && lon !== null && (lat || lon)) {
+        if (str(g[1]) === 'S') lat = -lat;
+        if (str(g[3]) === 'W') lon = -lon;
+        info.lat = lat; info.lon = lon;
+      } else if (Object.keys(g).length) {
+        info.gpsOther = true;   // 좌표는 없지만 GPS 칸(시각·고도 등)은 있다
+      }
+    }
+    return info;
+  }
+
+  // 방향 표시 하나만 담은 가장 작은 EXIF (빅엔디언 TIFF, 항목 1개)
+  function orientTiff(o) {
+    return new Uint8Array([0x4D,0x4D,0,0x2A, 0,0,0,8, 0,1, 0x01,0x12, 0,3, 0,0,0,1, 0,o, 0,0, 0,0,0,0]);
+  }
+  function asc(u8, at, s) {
+    for (var i = 0; i < s.length; i++) if (u8[at + i] !== s.charCodeAt(i)) return false;
+    return true;
+  }
+  function concat(parts) {
+    var n = 0, i;
+    for (i = 0; i < parts.length; i++) n += parts[i].length;
+    var out = new Uint8Array(n), o = 0;
+    for (i = 0; i < parts.length; i++) { out.set(parts[i], o); o += parts[i].length; }
+    return out;
+  }
+
+  /* ===== JPG: 세그먼트를 따라가며 정보 칸만 빼고 그림 데이터는 그대로 옮긴다 ===== */
+  function stripJpeg(u8, keep) {
+    var parts = [u8.subarray(0, 2)], removed = [], info = {}, cut = 0;
+    var pos = 2, end = u8.length, insertAt = 1;
+    while (pos + 2 <= end) {
+      if (u8[pos] !== 0xFF) throw new Error('bad');
+      var m = u8[pos + 1];
+      if (m === 0xFF) { pos++; continue; }                    // 채움 바이트
+      if (m === 0xD9) { parts.push(u8.subarray(pos, pos + 2)); pos += 2; break; }
+      if ((m >= 0xD0 && m <= 0xD7) || m === 0x01) { parts.push(u8.subarray(pos, pos + 2)); pos += 2; continue; }
+      if (pos + 4 > end) throw new Error('bad');
+      var len = (u8[pos + 2] << 8) | u8[pos + 3];
+      if (len < 2 || pos + 2 + len > end) throw new Error('bad');
+      var seg = u8.subarray(pos, pos + 2 + len), body = pos + 4, drop = null;
+      if (m === 0xE1) {
+        if (asc(u8, body, 'Exif\0\0')) {
+          drop = 'EXIF';
+          // EXIF 칸이 둘 이상인 사진도 있다(편집 프로그램이 하나 더 붙인다). 뒤의 칸이 앞의 GPS 를 가리지 않게 합친다.
+          try {
+            var got = readTiff(u8, body + 6, len - 8);
+            for (var k in got) if (info[k] === undefined || info[k] === '') info[k] = got[k];
+          } catch (e) {}
+        } else drop = asc(u8, body, 'http://ns.adobe.com/') ? 'XMP' : 'APP1';
+      } else if (m === 0xED) drop = 'IPTC';
+      else if (m === 0xFE) drop = tr('exf.kComment', 'comment');
+      else if (m === 0xE2) { if (!asc(u8, body, 'ICC_PROFILE\0')) drop = asc(u8, body, 'MPF\0') ? 'MPF' : 'APP2'; }
+      else if (m >= 0xE3 && m <= 0xEF && m !== 0xEE) drop = 'APP' + (m - 0xE0);
+      if (drop) {
+        if (removed.indexOf(drop) < 0) removed.push(drop);
+        cut += seg.length;
+      } else {
+        parts.push(seg);
+        if (m === 0xE0 && parts.length === 2) insertAt = 2;   // JFIF 바로 뒤에 넣는다
+      }
+      pos += 2 + len;
+      if (m === 0xDA) {
+        // 압축된 그림 데이터: FF00(이스케이프)·FFD0~D7(재시작)이 아닌 FF 가 나올 때까지 그대로 옮긴다
+        var s = pos;
+        while (pos + 1 < end && !(u8[pos] === 0xFF && u8[pos + 1] !== 0 && !(u8[pos + 1] >= 0xD0 && u8[pos + 1] <= 0xD7))) pos++;
+        parts.push(u8.subarray(s, pos));
+      }
+    }
+    if (pos < end) {
+      // 그림이 끝난 뒤에 덧붙은 데이터 — 추가 사진·미리보기·기기별 정보가 여기 숨는다
+      removed.push(tr('exf.kTrail', 'trailing data'));
+      cut += end - pos;
+    }
+    if (keep && info.orient > 1 && info.orient <= 8) {
+      var tiff = orientTiff(info.orient), n = 2 + 6 + tiff.length;
+      parts.splice(insertAt, 0, concat([new Uint8Array([0xFF, 0xE1, n >> 8, n & 255]), new Uint8Array([0x45,0x78,0x69,0x66,0,0]), tiff]));
+    }
+    return { bytes: concat(parts), removed: removed, info: info, cut: cut };
+  }
+
+  /* ===== PNG: 글자·시각·EXIF 덩어리만 뺀다 ===== */
+  var CRC = null;
+  function crc32(u8) {
+    if (!CRC) {
+      CRC = [];
+      for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC[n] = c >>> 0; }
+    }
+    var x = 0xFFFFFFFF;
+    for (var i = 0; i < u8.length; i++) x = CRC[(x ^ u8[i]) & 255] ^ (x >>> 8);
+    return (x ^ 0xFFFFFFFF) >>> 0;
+  }
+  function be32(v) { return new Uint8Array([v >>> 24, (v >>> 16) & 255, (v >>> 8) & 255, v & 255]); }
+  function stripPng(u8, keep) {
+    var parts = [u8.subarray(0, 8)], removed = [], info = {}, cut = 0, pos = 8, oriented = false;
+    var DROP = { tEXt: 'tEXt', zTXt: 'zTXt', iTXt: 'XMP/iTXt', eXIf: 'EXIF', tIME: tr('exf.kTime', 'modified time') };
+    while (pos + 12 <= u8.length) {
+      var len = ((u8[pos] << 24) | (u8[pos + 1] << 16) | (u8[pos + 2] << 8) | u8[pos + 3]) >>> 0;
+      var type = String.fromCharCode(u8[pos + 4], u8[pos + 5], u8[pos + 6], u8[pos + 7]);
+      if (pos + 12 + len > u8.length) throw new Error('bad');
+      var chunk = u8.subarray(pos, pos + 12 + len);
+      if (DROP[type]) {
+        if (type === 'eXIf') { try { info = readTiff(u8, pos + 8, len); } catch (e) {} }
+        if (removed.indexOf(DROP[type]) < 0) removed.push(DROP[type]);
+        cut += chunk.length;
+      } else {
+        if (type === 'IDAT' && keep && info.orient > 1 && info.orient <= 8 && !oriented) {
+          var body = concat([new Uint8Array([0x65, 0x58, 0x49, 0x66]), orientTiff(info.orient)]);
+          parts.push(concat([be32(body.length - 4), body, be32(crc32(body))]));
+          oriented = true;
+        }
+        parts.push(chunk);
+      }
+      pos += 12 + len;
+      if (type === 'IEND') break;
+    }
+    if (pos < u8.length) { removed.push(tr('exf.kTrail', 'trailing data')); cut += u8.length - pos; }
+    return { bytes: concat(parts), removed: removed, info: info, cut: cut };
+  }
+
+  /* ===== WebP: EXIF·XMP 덩어리를 빼고 머리말의 표시 비트도 끈다 ===== */
+  function stripWebp(u8, keep) {
+    var parts = [], removed = [], info = {}, cut = 0, pos = 12, vp8x = null;
+    var riffEnd = Math.min(u8.length, 8 + (u8[4] | (u8[5] << 8) | (u8[6] << 16) | (u8[7] << 24)) >>> 0);
+    while (pos + 8 <= riffEnd) {
+      var id = String.fromCharCode(u8[pos], u8[pos + 1], u8[pos + 2], u8[pos + 3]);
+      var len = (u8[pos + 4] | (u8[pos + 5] << 8) | (u8[pos + 6] << 16) | (u8[pos + 7] << 24)) >>> 0;
+      var full = 8 + len + (len & 1);
+      if (pos + 8 + len > riffEnd) throw new Error('bad');
+      var chunk = u8.subarray(pos, Math.min(pos + full, riffEnd));
+      if (id === 'EXIF' || id === 'XMP ') {
+        if (id === 'EXIF') {
+          // 어떤 프로그램은 앞에 "Exif\0\0" 을 붙여 저장한다
+          var s = asc(u8, pos + 8, 'Exif\0\0') ? 6 : 0;
+          try { info = readTiff(u8, pos + 8 + s, len - s); } catch (e) {}
+        }
+        removed.push(id === 'EXIF' ? 'EXIF' : 'XMP');
+        cut += chunk.length;
+      } else {
+        if (id === 'VP8X') { chunk = chunk.slice(); chunk[8] &= ~(0x08 | 0x04); vp8x = chunk; }
+        parts.push(chunk);
+      }
+      pos += full;
+    }
+    // EXIF 덩어리는 VP8X 머리말이 있어야 붙일 수 있다. 방향 표시 하나만 담아 다시 붙인다.
+    if (keep && vp8x && info.orient > 1 && info.orient <= 8) {
+      var tf = orientTiff(info.orient);
+      vp8x[8] |= 0x08;
+      parts.push(concat([new Uint8Array([0x45, 0x58, 0x49, 0x46, tf.length, 0, 0, 0]), tf]));
+    }
+    var bodyLen = 4;
+    parts.forEach(function (p) { bodyLen += p.length; });
+    var head = new Uint8Array([0x52,0x49,0x46,0x46, bodyLen & 255, (bodyLen >> 8) & 255, (bodyLen >> 16) & 255, (bodyLen >>> 24) & 255, 0x57,0x45,0x42,0x50]);
+    if (riffEnd < u8.length) { removed.push(tr('exf.kTrail', 'trailing data')); cut += u8.length - riffEnd; }
+    return { bytes: concat([head].concat(parts)), removed: removed, info: info, cut: cut };
+  }
+
+  function kindOf(u8) {
+    if (u8.length > 3 && u8[0] === 0xFF && u8[1] === 0xD8 && u8[2] === 0xFF) return 'jpg';
+    if (u8.length > 8 && u8[0] === 0x89 && asc(u8, 1, 'PNG')) return 'png';
+    if (u8.length > 12 && asc(u8, 0, 'RIFF') && asc(u8, 8, 'WEBP')) return 'webp';
+    return null;
+  }
+
+  function clean(file) {
+    return file.arrayBuffer().then(function (buf) {
+      var u8 = new Uint8Array(buf), kind = kindOf(u8);
+      if (!kind) return { name: file.name, error: tr('exf.unsupported', 'Not a JPG, PNG or WebP image') };
+      var out;
+      try {
+        out = kind === 'jpg' ? stripJpeg(u8, keepOrient.checked)
+            : kind === 'png' ? stripPng(u8, keepOrient.checked) : stripWebp(u8, keepOrient.checked);
+      } catch (e) {
+        return { name: file.name, error: tr('exf.broken', 'The file is damaged and cannot be read') };
+      }
+      var mime = kind === 'jpg' ? 'image/jpeg' : 'image/' + kind;
+      var blob = new Blob([out.bytes], { type: mime });
+      return {
+        name: newName(file.name), blob: blob, url: URL.createObjectURL(blob),
+        before: file.size, after: blob.size, info: out.info, removed: out.removed, cut: out.cut
+      };
+    });
+  }
+
+  // 원본을 덮어쓰지 않게 표시를 붙인다
+  function newName(orig) {
+    var m = orig.match(/^(.*?)(\.[^.]+)?$/);
+    return m[1] + tr('exf.suffix', '_clean') + (m[2] || '');
+  }
+
+  keepOrient.addEventListener('change', function () { if (lastFiles.length) process(lastFiles); });
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 키보드로도 고를 수 있게 한다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList);
+    if (!files.length) return;
+    lastFiles = files;
+    process(files);
+  }
+
+  function process(files) {
+    setMsg(tr('exf.working', 'Removing metadata…') + ' (' + files.length + ')');
+    results.forEach(function (r) { if (r.url) URL.revokeObjectURL(r.url); });
+    results = [];
+    Promise.all(files.map(function (f) {
+      return clean(f).catch(function () { return { name: f.name, error: tr('exf.broken', 'The file is damaged and cannot be read') }; });
+    })).then(function (out) {
+      results = out;
+      if (!out.some(function (r) { return !r.error; })) {
+        setMsg(tr('exf.none', 'Nothing could be processed. Please add JPG, PNG or WebP files.'), 'err');
+        resultBox.hidden = true;
+        return;
+      }
+      setMsg('');
+      render();
+    });
+  }
+
+  function fmtDate(s) {
+    // EXIF 날짜는 "2024:05:01 13:22:10" 형태다
+    var m = /^(\d{4}):(\d\d):(\d\d) (\d\d):(\d\d)/.exec(s || '');
+    return m ? m[1] + '-' + m[2] + '-' + m[3] + ' ' + m[4] + ':' + m[5] : (s || '');
+  }
+
+  function describe(r) {
+    var bits = [], i = r.info || {};
+    if (i.lat !== undefined) {
+      bits.push('<strong style="color:var(--danger)">📍 ' + tr('exf.hadGps', 'Location') + ' ' +
+        i.lat.toFixed(5) + ', ' + i.lon.toFixed(5) + '</strong>');
+    } else if (i.gpsOther) {
+      bits.push('<strong style="color:var(--danger)">📍 ' + tr('exf.hadGpsPart', 'GPS record') + '</strong>');
+    }
+    var dev = [i.make, i.model].filter(Boolean).join(' ');
+    // 모델명에 제조사 이름이 이미 들어 있으면 두 번 쓰지 않는다
+    if (i.make && i.model && i.model.toLowerCase().indexOf(i.make.toLowerCase()) === 0) dev = i.model;
+    if (dev) bits.push(tr('exf.hadDevice', 'Device') + ' ' + esc(dev));
+    if (i.date) bits.push(tr('exf.hadDate', 'Taken') + ' ' + esc(fmtDate(i.date)));
+    return bits;
+  }
+
+  function render() {
+    var ok = results.filter(function (r) { return !r.error; });
+    var gps = ok.filter(function (r) { return r.info && (r.info.lat !== undefined || r.info.gpsOther); }).length;
+    var cut = ok.reduce(function (s, r) { return s + r.cut; }, 0);
+    document.getElementById('t-count').textContent = ok.length;
+    var g = document.getElementById('t-gps');
+    g.textContent = gps;
+    g.style.color = gps ? 'var(--danger)' : 'var(--ok)';
+    document.getElementById('t-removed').textContent = humanSize(cut);
+
+    list.innerHTML = '';
+    results.forEach(function (r) {
+      var li = document.createElement('li');
+      if (r.error) {
+        li.innerHTML = '<span class="fname" title="' + esc(r.name) + '">' + esc(r.name) + '</span>' +
+          '<span class="fmeta" style="color:var(--danger)">' + esc(r.error) + '</span>';
+        list.appendChild(li);
+        return;
+      }
+      var found = describe(r);
+      var what = r.removed.length
+        ? tr('exf.did', 'Removed') + ': ' + esc(r.removed.join(', ')) + ' (−' + humanSize(r.cut) + ')'
+        : tr('exf.clean', 'Nothing to remove — already clean');
+      li.innerHTML =
+        '<a href="' + r.url + '" target="_blank" rel="noopener"><img src="' + r.url + '" alt="" class="thumb"></a>' +
+        '<span class="fname" title="' + esc(r.name) + '">' + esc(r.name) + '</span>' +
+        '<span class="fmeta">' + (found.length ? found.join(' · ') + '<br>' : '') + what + '</span>';
+      var a = document.createElement('a');
+      a.className = 'btn small';
+      a.textContent = tr('exf.save', 'Save');
+      a.href = r.url;
+      a.download = r.name;
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+    var bad = results.length - ok.length;
+    if (bad) setMsg(bad + tr('exf.skipped', ' file(s) could not be processed. See the list for the reason.'), 'err');
+    resultBox.hidden = false;
+  }
+  // 언어를 바꾸면 결과 목록의 글자도 다시 그린다
+  document.addEventListener('langchange', function () { if (results.length && !resultBox.hidden) render(); });
+
+  // 2장 이상이면 ZIP 한 개가 기본이다. 연달아 내려받게 하면 휴대전화에서 첫 장만 남는다.
+  document.getElementById('btn-all').addEventListener('click', function () {
+    var ok = results.filter(function (r) { return !r.error; });
+    if (!ok.length) return;
+    var wantZip = ok.length > 1 && document.getElementById('as-zip').checked && typeof makeZip === 'function';
+    if (!wantZip) {
+      var i = 0;
+      (function next() {
+        if (i >= ok.length) return;
+        var r = ok[i++];
+        var a = document.createElement('a');
+        a.href = r.url; a.download = r.name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(next, 300);
+      })();
+      return;
+    }
+    setMsg(tr('exf.zipping', 'Building the ZIP…'));
+    Promise.all(ok.map(function (r) {
+      return r.blob.arrayBuffer().then(function (buf) { return { name: r.name, bytes: new Uint8Array(buf) }; });
+    })).then(function (entries) {
+      var blob = makeZip(entries);
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = tr('exf.zipName', 'photos-without-metadata') + '.zip';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(ok.length + tr('exf.doneZip', ' photo(s) bundled into one ZIP.'), 'ok');
+    }).catch(function (e) {
+      setMsg(tr('exf.zipFail', 'Could not build the ZIP: ') + esc((e && e.message) || e), 'err');
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    results.forEach(function (r) { if (r.url) URL.revokeObjectURL(r.url); });
+    results = []; lastFiles = [];
+    list.innerHTML = '';
+    fileInput.value = '';
+    resultBox.hidden = true;
+    setMsg('');
+  });
+})();
+</script>
+</body>
+</html>
