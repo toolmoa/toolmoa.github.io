@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이름 로마자 변환 · 시간 계산기 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">이름 로마자 변환 · 시간 계산기 점검 (2026-10-19)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  로마자는 국립국어원 표기법 용례(신라 Silla · 종로 Jongno · 독립 Dongnip · 같이 gachi · 좋고 joko …)와 대조한다.
+  시간 계산은 손으로 구한 값과 대조한다. 두 페이지 모두 결과를 화면에서 읽는다.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:220px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 10000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function setVal(d, id, v, ev) { var e = d.getElementById(id); e.value = v; e.dispatchEvent(new Event(ev || 'change', { bubbles: true })); }
+
+// 결과 표를 {한글: [영문, 다른표기]} 로 읽는다
+function table(d) {
+  var out = {};
+  Array.prototype.forEach.call(d.querySelectorAll('#rows tr'), function (tr) {
+    var td = tr.children;
+    out[td[0].textContent.trim()] = [td[1].textContent.trim(), td[2] ? td[2].textContent.trim() : ''];
+  });
+  return out;
+}
+function romanize(d, lines, opts) {
+  opts = opts || {};
+  setVal(d, 'mode', opts.mode || 'name');
+  setVal(d, 'surname', opts.surname || 'common');
+  setVal(d, 'order', opts.order || 'ko');
+  setVal(d, 'caps', opts.caps || 'title');
+  d.getElementById('hyphen').checked = !!opts.hyphen;
+  d.getElementById('hyphen').dispatchEvent(new Event('change', { bubbles: true }));
+  setVal(d, 'names', lines.join('\n'), 'input');
+  return waitFor(function () { return d.querySelectorAll('#rows tr').length === lines.length; }).then(function () { return table(d); });
+}
+function check(got, expect) {
+  var bad = [];
+  Object.keys(expect).forEach(function (k) {
+    var g = got[k] ? got[k][0] : '(없음)';
+    if (g !== expect[k]) bad.push(k + ' → ' + g + ' (기대 ' + expect[k] + ')');
+  });
+  return bad;
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 사람 이름: 통용 성씨 · 글자대로 =====
+  chain = chain.then(function () {
+    return loadFrame('../romanize.html').then(function (f) {
+      var d = f.contentDocument;
+      var expect = { '홍길동': 'Hong Gildong', '김민수': 'Kim Minsu', '이서연': 'Lee Seoyeon', '박빛나': 'Park Bitna', '최설리': 'Choi Seolli',
+                     '정은우': 'Jung Eunu', '남궁민': 'Namkoong Min', '선우 재덕': 'Sunwoo Jaedeok', '강 하늘': 'Kang Haneul', '윤': 'Yoon',
+                     '임꺽정': 'Lim Kkeokjeong', '황보 혜정': 'Hwangbo Hyejeong', '노형석': 'Noh Hyeongseok', '현빈': 'Hyun Bin' };
+      return romanize(d, Object.keys(expect), { caps: 'title' }).then(function (got) {
+        var bad = check(got, expect);
+        var alt = got['이서연'][1], alt2 = got['홍길동'][1];
+        log('이름 통용 표기 14건', bad.length === 0 && alt === 'I Seoyeon' && alt2 === '' && !f.dataset.errs,
+            (bad.length ? bad.join(' · ') : '전부 일치') + ' · 이서연의 다른 표기 "' + alt + '" (기대 I Seoyeon) · 홍길동 다른 표기 "' + alt2 + '" (통용=표준이라 비어야 함)');
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('이름 통용 표기 14건', false, '오류: ' + e.message); });
+
+  // ===== 2. 사람 이름: 표준 성씨 · 대문자 · 순서 · 붙임표 · 소문자 =====
+  chain = chain.then(function () {
+    return loadFrame('../romanize.html').then(function (f) {
+      var d = f.contentDocument;
+      return romanize(d, ['김민수', '이서연', '박빛나'], { surname: 'standard', caps: 'upper' }).then(function (got) {
+        var std = [got['김민수'][0], got['이서연'][0], got['박빛나'][0], got['김민수'][1]];
+        return romanize(d, ['홍길동'], { order: 'en', caps: 'upper', hyphen: true }).then(function (g2) {
+          var en = g2['홍길동'][0];
+          return romanize(d, ['홍길동'], { caps: 'lower', hyphen: true }).then(function (g3) {
+            var lo = g3['홍길동'][0];
+            var ok = std.join('|') === 'GIM MINSU|I SEOYEON|BAK BITNA|KIM MINSU' && en === 'GIL-DONG HONG' && lo === 'hong gil-dong' && !f.dataset.errs;
+            log('표준 성씨 · 대문자 · 순서 · 붙임표', ok, '표준 대문자 ' + std.join(' / ') + ' (기대 GIM MINSU / I SEOYEON / BAK BITNA / 다른 표기 KIM MINSU) · 이름 먼저+붙임표 "' + en + '" (기대 GIL-DONG HONG) · 소문자 "' + lo + '" (기대 hong gil-dong)');
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('표준 성씨 · 대문자 · 순서 · 붙임표', false, '오류: ' + e.message); });
+
+  // ===== 3. 지명·단어: 음운 변화 반영 (국립국어원 용례) =====
+  chain = chain.then(function () {
+    return loadFrame('../romanize.html').then(function (f) {
+      var d = f.contentDocument;
+      var expect = { '신라': 'silla', '종로': 'jongno', '독립': 'dongnip', '백마': 'baengma', '왕십리': 'wangsimni', '칼날': 'kallal', '대관령': 'daegwallyeong',
+                     '같이': 'gachi', '굳이': 'guji', '좋고': 'joko', '좋아': 'joa', '음악': 'eumak', '한글': 'hangeul', '서울': 'seoul', '부산': 'busan',
+                     '울릉': 'ulleung', '묵호': 'mukho', '집현전': 'jiphyeonjeon', '낙동강': 'nakdonggang', '옷': 'ot', '꽃': 'kkot', '값': 'gap', '닭': 'dak',
+                     '삶': 'sam', '넓다': 'neolda', '읊다': 'eupda', '벚꽃': 'beotkkot', '합정': 'hapjeong', '월곡': 'wolgok', '않아': 'ana', '싫어': 'sireo',
+                     '닭이': 'dalgi', '압력': 'amnyeok', '협력': 'hyeomnyeok', '속리산': 'songnisan', '별내': 'byeollae', '경복궁': 'gyeongbokgung', '한밭': 'hanbat' };
+      return romanize(d, Object.keys(expect), { mode: 'word', caps: 'lower' }).then(function (got) {
+        var bad = check(got, expect);
+        var surHidden = d.getElementById('surname-field').hidden && d.getElementById('order-field').hidden && d.getElementById('hyphen-field').hidden;
+        return romanize(d, ['서울 종로구 세종대로'], { mode: 'word', caps: 'title' }).then(function (g2) {
+          var sent = g2['서울 종로구 세종대로'][0];
+          log('지명·단어 ' + Object.keys(expect).length + '건 (음운 변화)', bad.length === 0 && surHidden && sent === 'Seoul Jongno-gu Sejong-daero'.replace(/-gu|-daero/g, function (m) { return m === '-gu' ? 'gu' : 'daero'; }) && !f.dataset.errs,
+              (bad.length ? bad.join(' · ') : '전부 일치') + ' · 성씨·순서·붙임표 칸 숨김 ' + surHidden + ' · 문장 "' + sent + '"');
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('지명·단어 (음운 변화)', false, '오류: ' + e.message); });
+
+  // ===== 4. 복사 · 한글 없는 줄 · 지우기 =====
+  chain = chain.then(function () {
+    return loadFrame('../romanize.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, copied = [];
+      w.navigator.clipboard.writeText = function (s) { copied.push(s); return Promise.resolve(); };
+      return romanize(d, ['홍길동', 'John', '김민수'], { caps: 'upper' }).then(function (got) {
+        var warn = txt(d, 'msg');
+        d.getElementById('btn-copy').click();
+        return waitFor(function () { return copied.length === 1; }).then(function () {
+          d.getElementById('btn-copy-both').click();
+          return waitFor(function () { return copied.length === 2; });
+        }).then(function () {
+          var note = txt(d, 'copy-msg');
+          d.getElementById('btn-clear').click();
+          return waitFor(function () { return d.getElementById('area').hidden; }).then(function () {
+            var ok = got['John'][0] === 'John' && /1줄에는 한글이 없어/.test(warn) && copied[0] === 'HONG GILDONG\nJohn\nKIM MINSU' &&
+                     copied[1] === '홍길동\tHONG GILDONG\nJohn\tJohn\n김민수\tKIM MINSU' && /탭으로 나눠/.test(note) && d.getElementById('names').value === '' && !f.dataset.errs;
+            log('복사 · 한글 없는 줄 · 지우기', ok, 'John → "' + got['John'][0] + '" · 안내 "' + warn + '" · 영문만 "' + copied[0].replace(/\n/g, '/') + '" · 함께 "' + copied[1].replace(/\n/g, '/').replace(/\t/g, '⇥') + '" · 지우기 후 숨김 ' + d.getElementById('area').hidden);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('복사 · 한글 없는 줄 · 지우기', false, '오류: ' + e.message); });
+
+  // ===== 5. 시간 계산기: 더하기·빼기 (날짜 넘김) =====
+  chain = chain.then(function () {
+    return loadFrame('../time-calc.html').then(function (f) {
+      var d = f.contentDocument, got = [];
+      function go(base, op, h, m) {
+        setVal(d, 'base', base, 'input'); setVal(d, 'op', op); setVal(d, 'dh', h, 'input'); setVal(d, 'dm', m, 'input');
+        got.push(txt(d, 'r1') + ' ' + txt(d, 'r1-sub'));
+      }
+      go('09:00', 'add', '8', '30');     // 17:30 같은 날
+      go('22:00', 'add', '5', '0');      // 03:00 1일 뒤
+      go('01:00', 'sub', '2', '15');     // 22:45 1일 전
+      go('10:00', 'add', '49', '0');     // 11:00 2일 뒤
+      go('10:00', 'sub', '0', '0');      // 10:00 같은 날
+      var exp = ['17:30 같은 날', '03:00 1일 뒤', '22:45 1일 전', '11:00 2일 뒤', '10:00 같은 날'];
+      log('시각 더하기·빼기 5건', got.join('|') === exp.join('|') && !f.dataset.errs, got.join(' · ') + ' (기대 ' + exp.join(' · ') + ')');
+      f.remove();
+    });
+  }).catch(function (e) { log('시각 더하기·빼기 5건', false, '오류: ' + e.message); });
+
+  // ===== 6. 두 시각 사이: 휴게 · 밤샘 · 휴게 초과 =====
+  chain = chain.then(function () {
+    return loadFrame('../time-calc.html').then(function (f) {
+      var d = f.contentDocument, got = [];
+      function go(a, b, brk) { setVal(d, 'from', a, 'input'); setVal(d, 'to', b, 'input'); setVal(d, 'brk', brk, 'input'); got.push(txt(d, 'r2') + ' [' + txt(d, 'r2-sub') + ']'); }
+      go('09:00', '18:30', '60');     // 8시간 30분 · 8:30 · 8.5
+      go('22:00', '06:00', '0');      // 8시간 다음 날
+      go('09:00', '09:30', '45');     // 휴게 초과
+      go('13:00', '13:00', '0');      // 0시간
+      var ok = /^8시간 30분 \[8:30 · 8\.5시간 · 510분 · 휴게 60분 뺌\]$/.test(got[0]) && /^8시간 \[8:00 · 8시간 · 480분 · 다음 날까지\]$/.test(got[1]) &&
+               /휴게시간이 근무시간보다/.test(got[2]) && /^0시간 \[0:00 · 0시간 · 0분\]$/.test(got[3]) && !f.dataset.errs;
+      log('두 시각 사이 4건', ok, got.join(' · '));
+      f.remove();
+    });
+  }).catch(function (e) { log('두 시각 사이 4건', false, '오류: ' + e.message); });
+
+  // ===== 7. 합계: 섞인 형식 · 줄 휴게 · 기준 비교 · 못 읽는 줄 · 복사 · 지우기 =====
+  chain = chain.then(function () {
+    return loadFrame('../time-calc.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, copied = null;
+      w.navigator.clipboard.writeText = function (s) { copied = s; return Promise.resolve(); };
+      setVal(d, 'list', '월 09:00-18:00\n화 8:30\n수 8시간 15분\n목 90분\n금 7.5\n토 22:00-06:00 -60분\n일 2h 20m\n???', 'input');
+      setVal(d, 'list-brk', '0', 'input'); setVal(d, 'target', '', 'input');
+      // 9:00 + 8:30 + 8:15 + 1:30 + 7:30 + 7:00 + 2:20 = 44:05
+      var a = txt(d, 'r3') + ' [' + txt(d, 'r3-sub') + ']';
+      setVal(d, 'list-brk', '60', 'input');            // 시작-끝 2줄에서 60분씩 → 42:05
+      setVal(d, 'target', '40', 'input');              // +2시간 5분
+      var b = txt(d, 'r3') + ' [' + txt(d, 'r3-sub') + ']';
+      d.getElementById('btn-copy').click();
+      return waitFor(function () { return copied !== null; }).then(function () {
+        d.getElementById('btn-clear').click();
+        var cleared = d.getElementById('list').value === '' && txt(d, 'r3') === '-';
+        var ok = /^44시간 5분 \[44:05 · 44\.08시간 · 2645분 · 7줄 · 평균 6시간 18분 · 읽지 못한 줄: \?\?\?\]$/.test(a) &&
+                 /^42시간 5분 \[42:05 · 42\.08시간 · 2525분 · 7줄 · 평균 6시간 1분 · 시작-끝 2줄에서 휴게 60분씩 뺌 · 기준 40시간 대비 \+2시간 5분 · 읽지 못한 줄: \?\?\?\]$/.test(b) &&
+                 /^42시간 5분 \(/.test(copied) && cleared && !f.dataset.errs;
+        log('합계 섞인 형식 · 휴게 · 기준 · 복사', ok, a + ' ;; ' + b + ' ;; 복사 "' + copied.slice(0, 20) + '…" · 지우기 ' + cleared);
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('합계 섞인 형식 · 휴게 · 기준 · 복사', false, '오류: ' + e.message); });
+
+  // ===== 8. 시:분 ↔ 소수 =====
+  chain = chain.then(function () {
+    return loadFrame('../time-calc.html').then(function (f) {
+      var d = f.contentDocument, got = [];
+      setVal(d, 'hm', '7:45', 'input'); got.push(txt(d, 'hm-out'));
+      setVal(d, 'hm', '7:20', 'input'); got.push(txt(d, 'hm-out'));
+      setVal(d, 'hm', '100:00', 'input'); got.push(txt(d, 'hm-out'));
+      setVal(d, 'hm', 'abc', 'input'); got.push(txt(d, 'hm-out'));
+      setVal(d, 'dec', '7.75', 'input'); got.push(txt(d, 'dec-out'));
+      setVal(d, 'dec', '0.1', 'input'); got.push(txt(d, 'dec-out'));
+      setVal(d, 'dec', '30', 'input'); got.push(txt(d, 'dec-out'));
+      var exp = ['= 7.75시간', '= 7.33시간', '= 100시간', '7:45 형식으로 적어 주세요.', '= 7:45 (7시간 45분)', '= 0:06 (0시간 6분)', '= 30:00 (30시간)'];
+      log('시:분 ↔ 소수 7건', got.join('|') === exp.join('|') && !f.dataset.errs, got.join(' · ') + (got.join('|') === exp.join('|') ? '' : ' (기대 ' + exp.join(' · ') + ')'));
+      f.remove();
+    });
+  }).catch(function (e) { log('시:분 ↔ 소수 7건', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'TOOLS4 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

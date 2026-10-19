@@ -15,6 +15,7 @@ my @T = (
   ['char-count.html','글자수 세기','글자수 세기','nav.char'],
   ['text-clean.html','텍스트 정리','텍스트 정리·중복 제거','nav.txt'],
   ['text-diff.html','텍스트 비교','텍스트 비교·차이 찾기','nav.diff'],
+  ['romanize.html','이름 영문 변환','이름 영문 변환·로마자 표기','nav.rom'],
   ['pdf-merge.html','PDF 합치기','PDF 합치기','nav.merge'],
   ['pdf-split.html','PDF 나누기','PDF 나누기','nav.split'],
   ['pdf-edit.html','PDF 회전·삭제','PDF 페이지 회전·삭제','nav.edit'],
@@ -27,6 +28,7 @@ my @T = (
   ['random-pick.html','랜덤 뽑기','랜덤 뽑기·추첨','nav.rnd'],
   ['unit-convert.html','단위 변환','단위 변환기','nav.unit'],
   ['date-calc.html','날짜 계산','날짜 계산기','nav.date'],
+  ['time-calc.html','시간 계산','시간 계산기·근무시간 합계','nav.tc'],
   ['age-calc.html','만 나이','만 나이 계산기','nav.age'],
 );
 

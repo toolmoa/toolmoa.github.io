@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시간 계산기 - 시간 더하기·빼기, 근무시간 합계, 시:분 변환 | 툴모아</title>
+<meta name="description" content="시각에 시간·분을 더하거나 빼고, 두 시각 사이가 몇 시간 몇 분인지 구하고, 여러 날의 근무시간을 한 번에 합산합니다. 8:30 같은 시:분과 8.5 같은 소수 시간을 서로 바꿔 줍니다.">
+<link rel="canonical" href="https://toolmoa.github.io/time-calc.html">
+<meta property="og:title" content="시간 계산기 · 시간 더하기·빼기, 근무시간 합계">
+<meta property="og:description" content="시각 더하기·빼기, 두 시각 사이, 근무시간 합산, 시:분↔소수 변환을 한 곳에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"시간 계산기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .tc-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; align-items:end; }
+  .tc-result { font-size:22px; font-weight:700; letter-spacing:-.02em; margin:12px 0 4px; font-variant-numeric:tabular-nums; }
+  .tc-sub { color:var(--muted); font-size:14px; }
+  input[type=time] { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text); font-size:15px; font-family:inherit; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/time-calc.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/time-calc.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="시간 계산기 · 시간 더하기·빼기, 근무시간 합계 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="시간 계산기 · 시간 더하기·빼기, 근무시간 합계">
+<meta name="twitter:description" content="시각 더하기·빼기, 두 시각 사이, 근무시간 합산, 시:분↔소수 변환을 한 곳에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/time-calc.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"입력한 내용이 어디로 보내지나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 계산은 브라우저 안에서만 이뤄지고 어디로도 보내지 않습니다. 인터넷을 끊어도 동작합니다."}},{"@type":"Question","name":"밤을 넘기는 근무는 어떻게 계산하나요?","acceptedAnswer":{"@type":"Answer","text":"끝 시각이 시작 시각보다 이르면 다음 날로 넘어간 것으로 봅니다. 22:00에서 06:00은 8시간입니다. 합계 칸에서도 \"22:00-06:00\"처럼 적으면 같은 방식으로 계산합니다."}},{"@type":"Question","name":"휴게시간은 어떻게 빼나요?","acceptedAnswer":{"@type":"Answer","text":"\"두 시각 사이\"에는 휴게시간 칸이 따로 있습니다. 합계 칸에서는 \"줄마다 뺄 휴게시간\"에 하루치를 적으면 시작-끝으로 적은 줄마다 그만큼 빼고, 이미 순수 근무시간만 적은 줄(\"8:30\")에서는 빼지 않습니다. 줄 끝에 \"-60분\"처럼 적어 그 줄만 빼는 것도 됩니다."}},{"@type":"Question","name":"소수 시간이 뭔가요?","acceptedAnswer":{"@type":"Answer","text":"분을 60으로 나눠 시간에 더한 값입니다. 7시간 45분은 7.75시간, 7시간 30분은 7.5시간, 7시간 20분은 7.33시간입니다. 근태·급여 시스템이 이 형식을 쓰는 경우가 많아 변환 칸을 두었습니다."}},{"@type":"Question","name":"시간이 아니라 날짜 차이를 구하고 싶어요","acceptedAnswer":{"@type":"Answer","text":"날짜 계산기를 쓰세요. 두 날짜 사이 일수, 근무일수, 디데이, 날짜 더하기·빼기를 합니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"시간 계산기 · 시간 더하기·빼기, 근무시간 합계","item":"https://toolmoa.github.io/time-calc.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="tc.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" aria-current="page" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="tc.h1">시간 계산기 · 시간 더하기·빼기, 근무시간 합계</h1>
+  <p class="lead" data-i18n="tc.lead">시각에 시간을 더하거나 빼고, 두 시각 사이가 얼마인지 구하고, 여러 날의 근무시간을 한 번에 합산합니다. 8:30 같은 시:분과 8.5 같은 소수 시간도 서로 바꿔 줍니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 내용이 서버로 전송되지 않습니다</span>
+
+  <h2 style="margin-top:8px" data-i18n="tc.s1">시각에 더하기 · 빼기</h2>
+  <div class="card">
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="base" data-i18n="tc.base">기준 시각</label>
+        <input type="time" id="base" value="09:00">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="op" data-i18n="tc.op">연산</label>
+        <select id="op">
+          <option value="add" selected data-i18n="tc.opAdd">더하기 (+)</option>
+          <option value="sub" data-i18n="tc.opSub">빼기 (−)</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="dh" data-i18n="tc.hours">시간</label>
+        <input type="number" id="dh" min="0" max="9999" value="8" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="dm" data-i18n="tc.minutes">분</label>
+        <input type="number" id="dm" min="0" max="59" value="30" inputmode="numeric">
+      </div>
+    </div>
+    <div class="tc-result" id="r1">-</div>
+    <div class="tc-sub" id="r1-sub"></div>
+  </div>
+
+  <h2 data-i18n="tc.s2">두 시각 사이</h2>
+  <div class="card">
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="from" data-i18n="tc.from">시작</label>
+        <input type="time" id="from" value="09:00">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="to" data-i18n="tc.to">끝</label>
+        <input type="time" id="to" value="18:30">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="brk" data-i18n="tc.break">뺄 휴게시간 (분)</label>
+        <input type="number" id="brk" min="0" max="1440" value="60" inputmode="numeric">
+      </div>
+    </div>
+    <div class="tc-result" id="r2">-</div>
+    <div class="tc-sub" id="r2-sub"></div>
+  </div>
+
+  <h2 data-i18n="tc.s3">시간 합계 (근무시간 합산)</h2>
+  <div class="card">
+    <div class="field">
+      <label for="list" data-i18n="tc.list">한 줄에 하나씩 — 8:30 · 8시간 30분 · 90분 · 2.5 · 09:00-18:00 처럼 섞어 써도 됩니다</label>
+      <textarea id="list" style="min-height:140px" placeholder="월 09:00-18:00&#10;화 8:30&#10;수 8시간 15분&#10;목 90분&#10;금 7.5" data-i18n-ph="tc.listPh"></textarea>
+      <div class="hint" data-i18n="tc.listHint">"09:00-18:00"처럼 시작-끝으로 적은 줄은 그 사이 시간으로 계산합니다. 앞에 요일이나 날짜를 적어도 됩니다. 휴게시간은 각 줄에서 "-60분"으로 빼거나 아래 칸에 하루치를 적으세요.</div>
+    </div>
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="list-brk" data-i18n="tc.listBreak">줄마다 뺄 휴게시간 (분)</label>
+        <input type="number" id="list-brk" min="0" max="1440" value="0" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="target" data-i18n="tc.target">비교할 기준 시간 (예: 주 40)</label>
+        <input type="number" id="target" min="0" max="9999" step="0.5" placeholder="40" inputmode="decimal">
+      </div>
+    </div>
+    <div class="tc-result" id="r3">-</div>
+    <div class="tc-sub" id="r3-sub"></div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn secondary small" id="btn-copy" data-i18n="tc.copy">합계 복사</button>
+      <button class="btn secondary small" id="btn-clear" data-i18n="tc.clear">지우기</button>
+    </div>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+  </div>
+
+  <h2 data-i18n="tc.s4">시:분 ↔ 소수 시간</h2>
+  <div class="card">
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="hm" data-i18n="tc.hm">시:분 → 소수</label>
+        <input type="text" id="hm" value="7:45" placeholder="7:45" inputmode="numeric">
+        <div class="hint" id="hm-out" style="font-weight:600;color:var(--text)"></div>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="dec" data-i18n="tc.dec">소수 → 시:분</label>
+        <input type="number" id="dec" value="7.75" step="0.01" min="0" inputmode="decimal">
+        <div class="hint" id="dec-out" style="font-weight:600;color:var(--text)"></div>
+      </div>
+    </div>
+    <p class="hint" data-i18n="tc.decHint">근태 시스템이 소수 시간(7.75)을 쓰면 분을 60으로 나눈 값입니다. 7시간 45분 = 7.75시간, 7시간 30분 = 7.5시간.</p>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="tc.cross">날짜 단위 계산(근무일수·디데이)은 <a href="date-calc.html">날짜 계산기</a>에, 길이·무게 같은 단위 변환은 <a href="unit-convert.html">단위 변환기</a>에 있습니다.</p>
+
+  <div class="ad-slot"><!-- AD:TIMECALC --></div>
+
+  <h2 data-ko-only>근무시간을 손으로 더하면 틀리는 이유</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      시간은 60진법이라 8:30과 7:45를 더하면 15:75가 아니라 16:15입니다. 하루 이틀은 괜찮지만 한 달치를 더하다 보면 어딘가에서 한 번은 틀립니다.
+      엑셀에서는 셀 서식을 <strong style="color:var(--text)">[h]:mm</strong>으로 바꿔야 24시간을 넘는 합계가 제대로 보이는데, 그걸 모르면 합계가 작게 나옵니다.
+      이 페이지는 줄마다 형식이 달라도("8:30", "8시간 30분", "90분", "09:00-18:00") 전부 분으로 바꿔 더하므로 그런 실수가 없고,
+      결과를 시:분과 소수 시간 양쪽으로 보여 주어 근태 시스템 어느 쪽에도 그대로 옮길 수 있습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>입력한 내용이 어디로 보내지나요?</summary>
+      <p>아니요. 계산은 브라우저 안에서만 이뤄지고 어디로도 보내지 않습니다. 인터넷을 끊어도 동작합니다.</p>
+    </details>
+    <details>
+      <summary>밤을 넘기는 근무는 어떻게 계산하나요?</summary>
+      <p>끝 시각이 시작 시각보다 이르면 다음 날로 넘어간 것으로 봅니다. 22:00에서 06:00은 8시간입니다. 합계 칸에서도 "22:00-06:00"처럼 적으면 같은 방식으로 계산합니다.</p>
+    </details>
+    <details>
+      <summary>휴게시간은 어떻게 빼나요?</summary>
+      <p>"두 시각 사이"에는 휴게시간 칸이 따로 있습니다. 합계 칸에서는 "줄마다 뺄 휴게시간"에 하루치를 적으면 시작-끝으로 적은 줄마다 그만큼 빼고, 이미 순수 근무시간만 적은 줄("8:30")에서는 빼지 않습니다. 줄 끝에 "-60분"처럼 적어 그 줄만 빼는 것도 됩니다.</p>
+    </details>
+    <details>
+      <summary>소수 시간이 뭔가요?</summary>
+      <p>분을 60으로 나눠 시간에 더한 값입니다. 7시간 45분은 7.75시간, 7시간 30분은 7.5시간, 7시간 20분은 7.33시간입니다. 근태·급여 시스템이 이 형식을 쓰는 경우가 많아 변환 칸을 두었습니다.</p>
+    </details>
+    <details>
+      <summary>시간이 아니라 날짜 차이를 구하고 싶어요</summary>
+      <p><a href="date-calc.html">날짜 계산기</a>를 쓰세요. 두 날짜 사이 일수, 근무일수, 디데이, 날짜 더하기·빼기를 합니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function parseTime(v) {               // "HH:MM" → 분. 비어 있으면 null
+    var m = /^(\d{1,2}):(\d{2})$/.exec(v || '');
+    if (!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+  function hm(mins) {                    // 분 → "H시간 M분"
+    var neg = mins < 0; mins = Math.abs(Math.round(mins));
+    var h = Math.floor(mins / 60), m = mins % 60;
+    var s = h + t('tc.hUnit', '시간') + (m ? ' ' + m + t('tc.mUnit', '분') : '');
+    return (neg ? '−' : '') + s;
+  }
+  function clock(mins) {                 // 분 → "HH:MM" (하루 안으로)
+    mins = ((Math.round(mins) % 1440) + 1440) % 1440;
+    return pad(Math.floor(mins / 60)) + ':' + pad(mins % 60);
+  }
+  function dec(mins) { return (Math.round(mins / 60 * 100) / 100).toFixed(2).replace(/\.?0+$/, ''); }
+  function colon(mins) {                 // 분 → "H:MM" (24시간 넘어도 그대로)
+    var neg = mins < 0; mins = Math.abs(Math.round(mins));
+    return (neg ? '−' : '') + Math.floor(mins / 60) + ':' + pad(mins % 60);
+  }
+
+  /* 1. 시각에 더하기·빼기 */
+  function calc1() {
+    var base = parseTime(el('base').value);
+    var d = (parseInt(el('dh').value, 10) || 0) * 60 + (parseInt(el('dm').value, 10) || 0);
+    if (base === null) { el('r1').textContent = '-'; el('r1-sub').textContent = ''; return; }
+    var total = el('op').value === 'add' ? base + d : base - d;
+    var days = Math.floor(total / 1440);
+    el('r1').textContent = clock(total);
+    el('r1-sub').textContent = days === 0 ? t('tc.sameDay', '같은 날')
+      : days > 0 ? days + t('tc.daysLater', '일 뒤') : (-days) + t('tc.daysBefore', '일 전');
+  }
+
+  /* 2. 두 시각 사이 */
+  function calc2() {
+    var a = parseTime(el('from').value), b = parseTime(el('to').value), brk = parseInt(el('brk').value, 10) || 0;
+    if (a === null || b === null) { el('r2').textContent = '-'; el('r2-sub').textContent = ''; return; }
+    var span = b - a; if (span < 0) span += 1440;        // 밤을 넘기면 다음 날
+    var net = span - brk;
+    if (net < 0) { el('r2').textContent = '-'; el('r2-sub').textContent = t('tc.breakTooLong', '휴게시간이 근무시간보다 깁니다.'); return; }
+    el('r2').textContent = hm(net);
+    el('r2-sub').textContent = colon(net) + ' · ' + dec(net) + t('tc.hUnit', '시간') + ' · ' + net + t('tc.mUnit', '분') +
+      (b < a ? ' · ' + t('tc.overnight', '다음 날까지') : '') + (brk ? ' · ' + t('tc.breakNote', '휴게 {n}분 뺌').replace('{n}', brk) : '');
+  }
+
+  /* 3. 합계: 줄마다 형식이 달라도 전부 분으로 바꾼다 */
+  function parseLine(line, lineBreak) {
+    var s = line.replace(/\s+/g, ' ').trim();
+    if (!s) return null;
+    // 끝에 "-60분" / "-1:00" 처럼 뺄 것이 붙어 있으면 따로 뗀다
+    var minus = 0, mm;
+    while ((mm = /\s-\s*(\d+)\s*분\s*$/.exec(s) || /\s-\s*(\d{1,2}):(\d{2})\s*$/.exec(s))) {
+      minus += mm[2] !== undefined ? parseInt(mm[1], 10) * 60 + parseInt(mm[2], 10) : parseInt(mm[1], 10);
+      s = s.slice(0, mm.index);
+    }
+    var m;
+    // 시작-끝 (09:00-18:00, 9:00~18:00, 22:00 - 06:00)
+    if ((m = /(\d{1,2}):(\d{2})\s*[-~–]\s*(\d{1,2}):(\d{2})/.exec(s))) {
+      var a = parseInt(m[1], 10) * 60 + parseInt(m[2], 10), b = parseInt(m[3], 10) * 60 + parseInt(m[4], 10);
+      var span = b - a; if (span < 0) span += 1440;
+      return { mins: span - lineBreak - minus, range: true };
+    }
+    // 8시간 30분 / 8h 30m / 8 hours 30 min
+    if ((m = /(\d+(?:\.\d+)?)\s*(?:시간|h|hr|hrs|hours?)(?:\s*(\d+)\s*(?:분|m|min|mins|minutes?))?/i.exec(s))) {
+      return { mins: Math.round(parseFloat(m[1]) * 60) + (m[2] ? parseInt(m[2], 10) : 0) - minus, range: false };
+    }
+    // 90분 / 90m
+    // \b 는 영숫자 경계라 '분' 뒤에서는 성립하지 않는다 (실제로 "90분" 이 90시간으로 읽혔다). 뒤에 영문자가 없으면 된다.
+    if ((m = /(\d+)\s*(?:분|m|min|mins|minutes?)(?![a-z])/i.exec(s))) return { mins: parseInt(m[1], 10) - minus, range: false };
+    // 8:30
+    if ((m = /(\d{1,3}):(\d{2})/.exec(s))) return { mins: parseInt(m[1], 10) * 60 + parseInt(m[2], 10) - minus, range: false };
+    // 7.5 / 8 (시간)
+    if ((m = /(\d+(?:\.\d+)?)/.exec(s))) return { mins: Math.round(parseFloat(m[1]) * 60) - minus, range: false };
+    return { mins: null };
+  }
+  function calc3() {
+    var lines = el('list').value.split('\n'), lineBreak = parseInt(el('list-brk').value, 10) || 0;
+    var total = 0, n = 0, bad = [], ranges = 0;
+    lines.forEach(function (l) {
+      var r = parseLine(l, lineBreak);
+      if (!r) return;
+      if (r.mins === null) { bad.push(l.trim()); return; }
+      total += r.mins; n++; if (r.range) ranges++;
+    });
+    if (!n && !bad.length) { el('r3').textContent = '-'; el('r3-sub').textContent = ''; return; }
+    el('r3').textContent = hm(total);
+    var sub = colon(total) + ' · ' + dec(total) + t('tc.hUnit', '시간') + ' · ' + total + t('tc.mUnit', '분') + ' · ' + n + t('tc.lines', '줄');
+    if (n) sub += ' · ' + t('tc.avg', '평균') + ' ' + hm(total / n);
+    if (ranges && lineBreak) sub += ' · ' + t('tc.rangeBreak', '시작-끝 {n}줄에서 휴게 {m}분씩 뺌').replace('{n}', ranges).replace('{m}', lineBreak);
+    var target = parseFloat(el('target').value);
+    if (target > 0) {
+      var diff = total - target * 60;
+      sub += ' · ' + t('tc.vsTarget', '기준 {t}시간 대비').replace('{t}', target) + ' ' + (diff >= 0 ? '+' : '−') + hm(Math.abs(diff));
+    }
+    if (bad.length) sub += ' · ' + t('tc.badLines', '읽지 못한 줄: ') + bad.slice(0, 3).join(', ');
+    el('r3-sub').textContent = sub;
+  }
+
+  /* 4. 시:분 ↔ 소수 */
+  function calc4() {
+    var m = /^(\d{1,4}):(\d{1,2})$/.exec(el('hm').value.trim());
+    el('hm-out').textContent = m ? '= ' + dec(parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) + t('tc.hUnit', '시간') : ((el('hm').value.trim()) ? t('tc.hmBad', '7:45 형식으로 적어 주세요.') : '');
+    var d = parseFloat(el('dec').value);
+    el('dec-out').textContent = isNaN(d) ? '' : '= ' + colon(Math.round(d * 60)) + ' (' + hm(Math.round(d * 60)) + ')';
+  }
+
+  function all() { calc1(); calc2(); calc3(); calc4(); }
+  ['base', 'op', 'dh', 'dm', 'from', 'to', 'brk', 'list', 'list-brk', 'target', 'hm', 'dec'].forEach(function (id) {
+    el(id).addEventListener('input', all);
+    el(id).addEventListener('change', all);
+  });
+  // 언어를 바꾸면 스크립트가 쓴 결과 문구도 다시 만들어야 한다
+  document.addEventListener('langchange', all);
+
+  el('btn-copy').addEventListener('click', function () {
+    var text = el('r3').textContent;
+    if (!text || text === '-') return;
+    var note = el('copy-msg');
+    var done = function () { note.textContent = t('tc.copied', '복사했습니다.'); };
+    var full = text + ' (' + el('r3-sub').textContent + ')';
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(full).then(done, done);
+    else done();
+  });
+  el('btn-clear').addEventListener('click', function () { el('list').value = ''; el('copy-msg').textContent = ''; calc3(); el('list').focus(); });
+
+  all();
+})();
+</script>
+</body>
+</html>

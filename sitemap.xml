@@ -333,6 +333,11 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/random-pick.html"/>
   </url>
   <url>
+    <loc>https://toolmoa.github.io/romanize.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://toolmoa.github.io/terms.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.9</priority>
@@ -344,6 +349,11 @@
   </url>
   <url>
     <loc>https://toolmoa.github.io/text-diff.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/time-calc.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.9</priority>
   </url>

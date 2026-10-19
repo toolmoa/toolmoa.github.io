@@ -231,6 +231,13 @@ var SETUP = {
     };
     document.head.appendChild(sc);
   },
+  // 결과 표가 그려진 상태에서 본다. 입력은 사용자 데이터라 번역 대상이 아니므로 한글이 아닌 것으로.
+  'romanize.html': function (d) {
+    var n = d.getElementById('names'); n.value = 'ABC'; n.dispatchEvent(new Event('input', { bubbles: true }));
+  },
+  'time-calc.html': function (d) {
+    var l = d.getElementById('list'); l.value = '8:30\n90m'; l.dispatchEvent(new Event('input', { bubbles: true }));
+  },
   // 결과 목록(지운 항목·"지울 정보 없음"·처리 못 한 이유)이 그려진 상태에서 본다. 파일 이름은 한글이 아닌 것으로.
   'image-exif.html': function (d) {
     var c = document.createElement('canvas'); c.width = 40; c.height = 30;
@@ -252,7 +259,7 @@ var PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf
              'unit-convert.html', 'date-calc.html', 'age-calc.html',
              'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html',
              'text-diff.html', 'image-mosaic.html', 'image-exif.html',
-             'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html'];
+             'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'time-calc.html'];
 
 function run() {
   var seq = Promise.resolve();

@@ -23,7 +23,7 @@ missing=0
 TOOLS="image-compress image-crop image-convert image-join img-to-pdf char-count text-clean
        pdf-merge pdf-split pdf-edit pdf-to-image file-convert qr-generate password-gen
        random-pick unit-convert date-calc age-calc image-mosaic text-diff image-exif
-       image-watermark image-split pdf-watermark qr-scan"
+       image-watermark image-split pdf-watermark qr-scan romanize time-calc"
 for t in $TOOLS; do
   echo "$home" | grep -q "$t.html" || { echo "  홈에 링크 없음: $t"; missing=$((missing+1)); }
 done

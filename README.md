@@ -38,6 +38,7 @@ img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변
 char-count.html       글자수 세기·원고지 계산  ← 키워드: 글자수 세기, 원고지 매수
 text-clean.html       텍스트 정리             ← 키워드: 중복 줄 제거, 명단 정리
 text-diff.html        텍스트 비교             ← 키워드: 텍스트 비교, 문서 비교, 두 글 차이
+romanize.html         이름 영문 변환·로마자    ← 키워드: 이름 영문 변환, 여권 영문이름, 로마자 표기 변환기
 pdf-merge.html        PDF 합치기             ← 키워드: PDF 합치기, PDF 병합
 pdf-split.html        PDF 나누기             ← 키워드: PDF 나누기, 페이지 추출
 pdf-edit.html         PDF 회전·삭제·순서 변경  ← 키워드: PDF 회전, PDF 페이지 삭제
@@ -50,6 +51,7 @@ password-gen.html     비밀번호 생성기         ← 키워드: 비밀번호
 random-pick.html      랜덤 뽑기·추첨기        ← 키워드: 랜덤 뽑기, 추첨기, 조 나누기
 unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 계산, 인치 cm 변환
 date-calc.html        날짜 계산기·디데이       ← 키워드: 디데이 계산, 근무일수
+time-calc.html        시간 계산기             ← 키워드: 시간 계산기, 근무시간 계산, 시간 더하기
 age-calc.html         만 나이 계산기          ← 키워드: 만 나이 계산기, 세는 나이
 en/                   영어 SEO 페이지 18종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
 assets/style.css      공통 스타일 (다크모드 포함)
@@ -66,7 +68,7 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 25종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 27종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
@@ -97,7 +99,7 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 meta exif
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 tools4 meta exif
 ```
 
 에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.
