@@ -22,6 +22,7 @@ my @TOOLS = (   # 파일, 머리 메뉴 이름, 바닥 이름
   ['image-split.html',    'Split image',    'Split image into a grid'],
   ['pdf-watermark.html',  'PDF watermark',  'PDF watermark'],
   ['qr-scan.html',        'Read QR',        'Read a QR code from an image'],
+  ['romanize.html',       'Romanize name',  'Romanize a Korean name'],
 );
 
 for my $path (glob('en/*.html')) {

@@ -124,7 +124,7 @@ function hangulLeft(d) {
 }
 
 var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
-           'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html'];
+           'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html'];
 var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
               'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
 var MENU_N = ALL_EN.length - 1;   // 홈을 뺀 툴 수 = 머리 메뉴 개수 = 영어 홈 카드 수
@@ -142,7 +142,8 @@ function run() {
           var nav = d.querySelectorAll('.site-nav a');
           var cur = d.querySelector('.site-nav a[aria-current="page"]');
           var foot = d.querySelectorAll('.site-footer nav:first-child a');
-          var han = hangulLeft(d);
+          // romanize 영어판은 한국어 이름·지명을 예시로 보여 주는 페이지라 한글이 있는 것이 맞다. 기능 검사가 따로 본다.
+          var han = p === 'romanize.html' ? '' : hangulLeft(d);
           var probs = [];
           if (nav.length !== MENU_N) probs.push('메뉴 ' + nav.length + '개');
           if (p !== 'index.html' && (!cur || cur.getAttribute('href') !== p)) probs.push('현재표시 틀림');
@@ -561,6 +562,28 @@ function run() {
       });
     });
   }).catch(function (e) { log('QR 스캔 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return loadFrame('../en/romanize.html').then(function (f) {
+      var d = f.contentDocument;
+      var n = d.getElementById('names'); n.value = '홍길동\n이서연\nJohn'; n.dispatchEvent(new Event('input', { bubbles: true }));
+      var sel = d.getElementById('caps'); sel.value = 'title'; sel.dispatchEvent(new Event('change', { bubbles: true }));
+      return waitFor(function () { return d.querySelectorAll('#rows tr').length === 3; }).then(function () {
+        var rows = Array.prototype.map.call(d.querySelectorAll('#rows tr'), function (tr) { return tr.children[1].textContent.trim() + '|' + tr.children[2].textContent.trim(); });
+        var warn = txt(d, 'msg'), note = txt(d, 'note');
+        var md = d.getElementById('mode'); md.value = 'word'; md.dispatchEvent(new Event('change', { bubbles: true }));
+        n.value = '신라 종로'; n.dispatchEvent(new Event('input', { bubbles: true }));
+        return waitFor(function () { return d.querySelectorAll('#rows tr').length === 1; }).then(function () {
+          var word = d.querySelector('#rows tr').children[1].textContent.trim();
+          // 입력한 한글(사용자 데이터)은 표에 그대로 보이므로 본문에서 입력 칸·표의 한글 열은 빼고 한글 잔존을 본다
+          var han = /[가-힣]/.test(Array.prototype.map.call(d.querySelectorAll('main label, main h1, main h2, main option, th, #msg, #note, #copy-msg, .btn'), function (e) { return e.textContent; }).join(' ').replace(/한국어/g, ''));
+          log('로마자 (영어)', rows[0] === 'Hong Gildong|' && rows[1] === 'Lee Seoyeon|I Seoyeon' && rows[2] === 'John|' && /1 line\(s\) contain no Korean/.test(warn) && /syllable by syllable/.test(note) && word === 'Silla Jongno' && !han && !f.dataset.errs,
+              rows.join(' · ') + ' · 안내 "' + warn.slice(0, 40) + '" · 설명 "' + note.slice(0, 30) + '" · 단어 모드 "' + word + '" (기대 Silla Jongno) · 한글 ' + han + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('로마자 (영어)', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

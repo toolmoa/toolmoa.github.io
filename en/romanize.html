@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Romanize a Korean name — Revised Romanization converter, free</title>
+<meta name="description" content="Convert Korean names to the Latin alphabet: official Revised Romanization plus the common Kim, Lee and Park spellings, whole lists at once. Runs in your browser.">
+<link rel="canonical" href="https://toolmoa.github.io/en/romanize.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/romanize.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/romanize.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/romanize.html">
+<meta property="og:title" content="Romanize a Korean name in your browser">
+<meta property="og:description" content="Official Revised Romanization and common surname spellings, side by side. Lists convert at once.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔤</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Korean romanizer","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<style>
+  .rom-table { width:100%; border-collapse:collapse; font-size:15px; }
+  .rom-table th, .rom-table td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .rom-table th { font-size:13px; color:var(--muted); font-weight:600; }
+  .rom-table td.ko { white-space:nowrap; }
+  .rom-table td.out { font-weight:600; font-variant-numeric: tabular-nums; }
+  .rom-table td.alt { color:var(--muted); font-size:14px; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/romanize.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-romanize.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Korean name in English · romanizer — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Romanize a Korean name in your browser">
+<meta name="twitter:description" content="Official Revised Romanization and common surname spellings, side by side. Lists convert at once.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-romanize.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Are the names I type sent anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. The conversion runs inside your browser and nothing is transmitted. The page keeps working with the internet switched off, so it is fine to paste an entire class list or staff roster."}},{"@type":"Question","name":"What is the difference between \"Person's name\" and \"Place names · words\"?","acceptedAnswer":{"@type":"Answer","text":"The official system spells words the way they are pronounced: 신라 is Silla because it is pronounced [실라], and 종로 is Jongno. Personal names are the exception — they are spelled syllable by syllable without those sound changes, so 빛나 is Bitna even though it is pronounced [빈나]. Choose \"Person's name\" for people and \"Place names · words\" for everything else; the second mode applies consonant assimilation, palatalization, ㅎ contraction and liaison."}},{"@type":"Question","name":"Does it handle two-syllable surnames?","acceptedAnswer":{"@type":"Answer","text":"Yes — 남궁, 황보, 제갈, 선우, 독고, 사공, 서문 and 동방 are recognized automatically. If you put a space between surname and given name (\"남궁 민\") that split is used as-is, which also works for any unusual name."}},{"@type":"Question","name":"Why eo and eu instead of u?","acceptedAnswer":{"@type":"Answer","text":"Those are the official spellings of ㅓ and ㅡ: 서 is Seo and 은 is Eun. Many Koreans prefer u (Sun, Jung) because it reads more naturally in English — that is a customary spelling, not an official one. Copy the result and change the syllables you want."}},{"@type":"Question","name":"Can I get the output into a spreadsheet?","acceptedAnswer":{"@type":"Answer","text":"\"Copy Korean + English\" copies each line as Korean, a tab, then the romanization. Pasting into Excel or Google Sheets puts them in two columns."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Korean name in English · romanizer","item":"https://toolmoa.github.io/en/romanize.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html" aria-current="page">Romanize name</a>
+    </nav>
+    <a class="lang-link" href="../romanize.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Korean name in English · romanizer</h1>
+  <p class="lead">Converts Korean names to the Latin alphabet. Shows the official Revised Romanization alongside the common surname spellings (Kim · Lee · Park). One name per line converts a whole list at once.</p>
+  <span class="privacy-badge">🔒 What you type is never sent anywhere</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="names">Korean names (one per line)</label>
+      <textarea id="names" style="min-height:120px" placeholder="Korean names, one per line"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+      <div class="field">
+        <label for="mode">What to convert</label>
+        <select id="mode">
+          <option value="name" selected>Person's name (surname + given name)</option>
+          <option value="word">Place names · words · sentences (by pronunciation)</option>
+        </select>
+      </div>
+      <div class="field" id="surname-field">
+        <label for="surname">Surname spelling</label>
+        <select id="surname">
+          <option value="common" selected>Common (Kim · Lee · Park)</option>
+          <option value="standard">Standard (Gim · I · Bak)</option>
+        </select>
+      </div>
+      <div class="field" id="order-field">
+        <label for="order">Order</label>
+        <select id="order">
+          <option value="ko" selected>Surname first (HONG GILDONG)</option>
+          <option value="en">Given name first (GILDONG HONG)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="caps">Letter case</label>
+        <select id="caps">
+          <option value="upper" selected>ALL CAPITALS (passport)</option>
+          <option value="title">Capitalize first letter</option>
+          <option value="lower">all lower case</option>
+        </select>
+      </div>
+      <div class="field" id="hyphen-field">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600">
+          <input type="checkbox" id="hyphen" style="width:auto;margin:0">
+          <span>Hyphen between syllables of the given name (GIL-DONG)</span>
+        </label>
+        <div class="hint">Passports write the given name as one word by default; the hyphen is optional.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card" style="padding:0;overflow:auto">
+      <table class="rom-table" id="table" aria-label="Results">
+        <thead><tr><th>Korean</th><th>English</th><th id="th-alt">Other spelling</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-copy">Copy English only</button>
+      <button class="btn secondary" id="btn-copy-both">Copy Korean + English</button>
+      <button class="btn secondary" id="btn-clear">Clear</button>
+    </div>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+    <p class="hint" id="note"></p>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">Once the English name is settled, put it in a business-card QR with the <a href="qr-generate.html">QR code generator</a>, or clean duplicates out of a list first with <a href="../text-clean.html">text clean-up</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_ROMANIZE --></div>
+
+  <h2>Which spelling should you use</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      South Korea's official system is the <strong style="color:var(--text)">Revised Romanization of Korean (2000)</strong>: 김 is Gim, 이 is I, 박 is Bak. Road signs,
+      textbooks and government documents follow it. Real people mostly do not: the overwhelming majority of Kims spell it Kim, and Lee and Park are far more common
+      than I and Bak. Passports accept either. The converter shows both — the <strong style="color:var(--text)">"Other spelling"</strong> column is the surname in the opposite system —
+      so you can match a family member's passport or an existing document instead of guessing. Given names follow the official rules in both modes.
+      For a passport, write the given name as one word in capitals (GILDONG); a hyphen (GIL-DONG) is allowed but sometimes gets mangled into a middle name abroad.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are the names I type sent anywhere?</summary>
+      <p>No. The conversion runs inside your browser and nothing is transmitted. The page keeps working with the internet switched off, so it is fine to paste an entire class list or staff roster.</p>
+    </details>
+    <details>
+      <summary>What is the difference between "Person's name" and "Place names · words"?</summary>
+      <p>The official system spells words the way they are pronounced: 신라 is Silla because it is pronounced [실라], and 종로 is Jongno. Personal names are the exception — they are spelled syllable by syllable without those sound changes, so 빛나 is Bitna even though it is pronounced [빈나]. Choose "Person's name" for people and "Place names · words" for everything else; the second mode applies consonant assimilation, palatalization, ㅎ contraction and liaison.</p>
+    </details>
+    <details>
+      <summary>Does it handle two-syllable surnames?</summary>
+      <p>Yes — 남궁, 황보, 제갈, 선우, 독고, 사공, 서문 and 동방 are recognized automatically. If you put a space between surname and given name ("남궁 민") that split is used as-is, which also works for any unusual name.</p>
+    </details>
+    <details>
+      <summary>Why eo and eu instead of u?</summary>
+      <p>Those are the official spellings of ㅓ and ㅡ: 서 is Seo and 은 is Eun. Many Koreans prefer u (Sun, Jung) because it reads more naturally in English — that is a customary spelling, not an official one. Copy the result and change the syllables you want.</p>
+    </details>
+    <details>
+      <summary>Can I get the output into a spreadsheet?</summary>
+      <p>"Copy Korean + English" copies each line as Korean, a tab, then the romanization. Pasting into Excel or Google Sheets puts them in two columns.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="../romanize.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var namesIn = document.getElementById('names');
+  var modeSel = document.getElementById('mode');
+  var surSel = document.getElementById('surname');
+  var orderSel = document.getElementById('order');
+  var capsSel = document.getElementById('caps');
+  var hyphenCb = document.getElementById('hyphen');
+  var rows = document.getElementById('rows');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var lastRows = [];
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+
+  /* ===== 국어의 로마자 표기법 (문화체육관광부 고시 제2000-8호) ===== */
+  var INIT = ['g', 'kk', 'n', 'd', 'tt', 'r', 'm', 'b', 'pp', 's', 'ss', '', 'j', 'jj', 'ch', 'k', 't', 'p', 'h'];
+  var MED = ['a', 'ae', 'ya', 'yae', 'eo', 'e', 'yeo', 'ye', 'o', 'wa', 'wae', 'oe', 'yo', 'u', 'wo', 'we', 'wi', 'yu', 'eu', 'ui', 'i'];
+  // 받침 28가지 → 자음 앞·어말에서 나는 소리 (대표음)
+  var FIN = ['', 'k', 'k', 'k', 'n', 'n', 'n', 't', 'l', 'k', 'm', 'l', 'l', 'l', 'p', 'l', 'm', 'p', 'p', 't', 't', 'ng', 't', 't', 'k', 't', 'p', 't'];
+  // 받침이 모음 앞으로 넘어갈 때(연음) 초성으로 가는 자음의 초성 번호. 겹받침은 [남는 받침, 넘어가는 초성]
+  // ㄶ·ㅀ 은 모음 앞에서 ㅎ이 떨어진다 (않아 → ana, 싫어 → sireo)
+  var FIN_INIT = [null, 0, 1, [1, 9], 2, [4, 12], [0, 2], 3, 5, [8, 0], [8, 6], [8, 7], [8, 9], [8, 16], [8, 17], [0, 5], 6, 7, [17, 9], 9, 10, 11, 12, 14, 15, 16, 17, 18];
+  // 받침을 다시 "소리 종류"로 나눈다 (비음화·축약 규칙용)
+  function finClass(f) {           // 'k' 'n' 't' 'l' 'm' 'p' 'ng' '' 'h'
+    if (f === 27) return 'h';
+    return FIN[f];
+  }
+  var NASAL = { k: 21, t: 4, p: 16 };   // ㄱ→ㅇ, ㄷ→ㄴ, ㅂ→ㅁ (받침 번호)
+
+  function decompose(ch) {
+    var code = ch.charCodeAt(0) - 0xAC00;
+    if (code < 0 || code > 11171) return null;
+    return { i: Math.floor(code / 588), m: Math.floor((code % 588) / 28), f: code % 28 };
+  }
+
+  // 한 어절(공백 없는 덩어리)을 로마자로. assimilate=true 면 발음 변화를 반영한다 (지명·단어).
+  // 사람 이름은 표기법 제3장 4항 "이름에서 일어나는 음운 변화는 표기에 반영하지 않는다"에 따라 글자대로 적는다.
+  function romanizeWord(word, assimilate) {
+    var syl = [], out = '', i;
+    for (i = 0; i < word.length; i++) {
+      var d = decompose(word[i]);
+      syl.push(d ? d : { raw: word[i] });
+    }
+    if (assimilate) {
+      for (i = 0; i < syl.length; i++) {
+        var cur = syl[i], nxt = syl[i + 1];
+        if (!cur.f || cur.raw || !nxt || nxt.raw) continue;
+        var cls = finClass(cur.f), ni = nxt.i;
+        // 구개음화: 받침 ㄷ·ㅌ + '이' → 지·치
+        if (ni === 11 && nxt.m === 20 && (cur.f === 7 || cur.f === 25)) { nxt.i = cur.f === 7 ? 12 : 14; cur.f = 0; continue; }
+        // 연음: 받침 + ㅇ(모음) → 받침이 초성으로 (겹받침은 둘째가 넘어감). ㅇ 받침은 그대로.
+        if (ni === 11 && cur.f !== 21) {
+          var mv = FIN_INIT[cur.f];
+          if (cur.f === 27) { cur.f = 0; continue; }          // ㅎ 받침 + 모음: ㅎ 탈락 (좋아 → joa)
+          if (typeof mv === 'number') { nxt.i = mv; cur.f = 0; }
+          else { nxt.i = mv[1]; cur.f = mv[0]; }
+          continue;
+        }
+        // ㅎ 축약: 받침 ㅎ + ㄱ·ㄷ·ㅈ → 거센소리 (좋고 → joko). 체언의 ㄱ·ㄷ·ㅂ 뒤 ㅎ(묵호 Mukho)는 그대로 둔다.
+        if (cur.f === 27) {
+          if (ni === 0) { nxt.i = 15; cur.f = 0; continue; }
+          if (ni === 3) { nxt.i = 16; cur.f = 0; continue; }
+          if (ni === 12) { nxt.i = 14; cur.f = 0; continue; }
+          cur.f = 0; if (ni === 9) { nxt.i = 9; } continue;   // 좋소 → 조소 (ㅎ 탈락)
+        }
+        // ㄹ 동화: ㄴ+ㄹ → ㄹㄹ (신라 Silla), ㄹ+ㄴ → ㄹㄹ (칼날 kallal)
+        if (cls === 'n' && ni === 5) { cur.f = 8; continue; }
+        if (cls === 'l' && ni === 2) { nxt.i = 5; continue; }
+        // 비음화: ㄱ·ㄷ·ㅂ + ㄴ·ㅁ → ㅇ·ㄴ·ㅁ (백마 Baengma, 옷맵시 onmaepsi, 압력 amnyeok)
+        if (NASAL[cls] && (ni === 2 || ni === 6)) { cur.f = NASAL[cls]; continue; }
+        // ㄹ 비음화: ㅁ·ㅇ + ㄹ → ㄴ (심리 simni, 종로 Jongno); ㄱ·ㅂ + ㄹ → ㅇ·ㅁ + ㄴ (백리 baengni, 협력 hyeomnyeok)
+        if ((cls === 'm' || cls === 'ng') && ni === 5) { nxt.i = 2; continue; }
+        if ((cls === 'k' || cls === 'p') && ni === 5) { cur.f = NASAL[cls]; nxt.i = 2; continue; }
+      }
+    }
+    for (i = 0; i < syl.length; i++) {
+      var s = syl[i];
+      if (s.raw) { out += s.raw; continue; }
+      var prev = syl[i - 1];
+      var init = INIT[s.i];
+      // ㄹ 받침 뒤의 ㄹ 초성은 ll (설리 Seolli, 울릉 Ulleung)
+      if (s.i === 5 && prev && !prev.raw && FIN[prev.f] === 'l') init = 'l';
+      out += init + MED[s.m] + FIN[s.f];
+    }
+    return out;
+  }
+
+  /* ===== 성씨 ===== */
+  var TWO = ['남궁', '황보', '제갈', '선우', '독고', '사공', '서문', '동방', '어금', '망절', '소봉', '장곡', '강전'];
+  var COMMON = {
+    '김': 'Kim', '이': 'Lee', '박': 'Park', '최': 'Choi', '정': 'Jung', '강': 'Kang', '조': 'Cho', '윤': 'Yoon', '장': 'Jang', '임': 'Lim',
+    '한': 'Han', '오': 'Oh', '서': 'Seo', '신': 'Shin', '권': 'Kwon', '황': 'Hwang', '안': 'Ahn', '송': 'Song', '유': 'Yoo', '홍': 'Hong',
+    '전': 'Jeon', '문': 'Moon', '양': 'Yang', '배': 'Bae', '백': 'Baek', '허': 'Heo', '남': 'Nam', '심': 'Shim', '노': 'Noh', '하': 'Ha',
+    '곽': 'Kwak', '성': 'Sung', '차': 'Cha', '주': 'Joo', '우': 'Woo', '구': 'Koo', '민': 'Min', '류': 'Ryu', '나': 'Na', '진': 'Jin',
+    '지': 'Ji', '천': 'Chun', '엄': 'Uhm', '원': 'Won', '변': 'Byun', '표': 'Pyo', '방': 'Bang', '고': 'Ko', '손': 'Son', '채': 'Chae',
+    '공': 'Kong', '현': 'Hyun', '함': 'Ham', '석': 'Suk', '도': 'Do', '여': 'Yeo', '추': 'Choo', '소': 'So', '탁': 'Tak', '마': 'Ma',
+    '길': 'Gil', '연': 'Yeon', '위': 'Wee', '반': 'Ban', '명': 'Myung', '기': 'Ki', '금': 'Keum', '왕': 'Wang', '봉': 'Bong', '선': 'Sun',
+    '피': 'Pi', '육': 'Yook', '설': 'Seol', '맹': 'Maeng', '제': 'Je', '모': 'Mo', '빈': 'Bin', '복': 'Bok', '인': 'In', '편': 'Pyun',
+    '감': 'Kam', '국': 'Kook', '태': 'Tae', '옥': 'Ok', '경': 'Kyung', '사': 'Sa', '부': 'Boo', '음': 'Eum', '예': 'Ye', '좌': 'Jwa',
+    '남궁': 'Namkoong', '황보': 'Hwangbo', '제갈': 'Jegal', '선우': 'Sunwoo', '독고': 'Dokgo', '사공': 'Sagong', '서문': 'Seomun', '동방': 'Dongbang'
+  };
+  function romanSurname(s, how) {
+    var std = romanizeWord(s, false);
+    if (how === 'standard') return std;
+    return COMMON[s] || std;
+  }
+
+  // 성과 이름을 나눈다. 띄어 쓴 것은 그대로, 아니면 두 글자 성 → 한 글자 성 순으로 본다.
+  function splitName(raw) {
+    var parts = raw.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return { sur: parts[0], given: parts.slice(1).join('') };
+    var s = parts[0] || '';
+    if (s.length >= 3 && TWO.indexOf(s.slice(0, 2)) >= 0) return { sur: s.slice(0, 2), given: s.slice(2) };
+    if (s.length >= 2) return { sur: s.slice(0, 1), given: s.slice(1) };
+    return { sur: s, given: '' };
+  }
+
+  function caps(str, how) {
+    if (how === 'upper') return str.toUpperCase();
+    if (how === 'lower') return str.toLowerCase();
+    return str.split(/(\s+)/).map(function (w) { return w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w; }).join('');
+  }
+  function givenRoman(given, hyphen) {
+    if (!hyphen) return romanizeWord(given, false);
+    var parts = [];
+    for (var i = 0; i < given.length; i++) parts.push(romanizeWord(given[i], false));
+    return parts.join('-');
+  }
+
+  function convertLine(line) {
+    var mode = modeSel.value, how = capsSel.value;
+    // 한글이 없는 줄(이미 영문인 이름 등)은 손대지 않는다
+    if (!/[가-힣]/.test(line)) return { out: line, alt: '' };
+    if (mode === 'word') {
+      // 어절마다 발음 변화를 반영한다. 어절 첫 글자만 대문자로 하는 것이 지명 표기 관행이다.
+      var words = line.split(/(\s+)/).map(function (w) { return /^\s+$/.test(w) ? w : romanizeWord(w, true); }).join('');
+      return { out: caps(words, how), alt: '' };
+    }
+    var n = splitName(line);
+    var sur = romanSurname(n.sur, surSel.value), surAlt = romanSurname(n.sur, surSel.value === 'standard' ? 'common' : 'standard');
+    var given = givenRoman(n.given, hyphenCb.checked);
+    var full = orderSel.value === 'en' && given ? given + ' ' + sur : (given ? sur + ' ' + given : sur);
+    var alt = surAlt.toLowerCase() !== sur.toLowerCase() ? caps(orderSel.value === 'en' && given ? given + ' ' + surAlt : (given ? surAlt + ' ' + given : surAlt), how) : '';
+    return { out: caps(full, how), alt: alt };
+  }
+
+  function render() {
+    var lines = namesIn.value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+    var isName = modeSel.value === 'name';
+    document.getElementById('surname-field').hidden = !isName;
+    document.getElementById('order-field').hidden = !isName;
+    document.getElementById('hyphen-field').hidden = !isName;
+    document.getElementById('th-alt').hidden = !isName;
+    if (!lines.length) { area.hidden = true; lastRows = []; setMsg(''); return; }
+    lastRows = lines.map(function (l) {
+      var r = convertLine(l);
+      return { ko: l, out: r.out, alt: r.alt, hangul: /[가-힣]/.test(l) };
+    });
+    rows.innerHTML = lastRows.map(function (r) {
+      return '<tr><td class="ko">' + esc(r.ko) + '</td><td class="out">' + esc(r.out) + '</td>' +
+             (isName ? '<td class="alt">' + esc(r.alt) + '</td>' : '') + '</tr>';
+    }).join('');
+    var noHangul = lastRows.filter(function (r) { return !r.hangul; }).length;
+    setMsg(noHangul ? noHangul + ' line(s) contain no Korean and were left as they are.' : '', noHangul ? 'err' : '');
+    document.getElementById('note').textContent = isName
+      ? 'Names are written syllable by syllable (sound changes are not applied). "Other spelling" shows the surname in the opposite system.'
+      : 'Pronunciation spelling with assimilation, palatalization, ㅎ contraction and liaison applied. Tensification is not written.';
+    document.getElementById('copy-msg').textContent = '';
+    area.hidden = false;
+  }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  var timer = null;
+  namesIn.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(render, 120); });
+  [modeSel, surSel, orderSel, capsSel, hyphenCb].forEach(function (el) { el.addEventListener('change', render); });
+  // 언어를 바꾸면 스크립트가 쓴 안내문도 다시 만들어야 한다
+
+  function copyText(text, note) {
+    var done = function () { document.getElementById('copy-msg').textContent = note; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+    } else { fallback(text); done(); }
+  }
+  function fallback(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* 무시 */ }
+    ta.remove();
+  }
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    if (!lastRows.length) return;
+    copyText(lastRows.map(function (r) { return r.out; }).join('\n'), 'Copied.');
+  });
+  document.getElementById('btn-copy-both').addEventListener('click', function () {
+    if (!lastRows.length) return;
+    copyText(lastRows.map(function (r) { return r.ko + '\t' + r.out; }).join('\n'), 'Copied Korean and English separated by a tab — paste into a spreadsheet for two columns.');
+  });
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    namesIn.value = ''; render(); namesIn.focus();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

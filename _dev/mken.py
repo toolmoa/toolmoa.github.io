@@ -12,7 +12,7 @@
 
 영어판은 번역본이 아니라 "업로드하지 않는다"를 축으로 다시 쓴 글이어야 하므로, 본문·FAQ 는 여기 표에 직접 적는다.
 """
-import io, re, sys, json
+import io, re, sys, json, os
 
 ROOT = __file__.replace('\\', '/').rsplit('/_dev/', 1)[0]
 
@@ -209,6 +209,49 @@ PAGES = {
     </details>
   </div>
 '''),
+ 'romanize': dict(
+   title="Romanize a Korean name — Revised Romanization converter, free",
+   desc="Convert Korean names to the Latin alphabet: official Revised Romanization plus the common Kim, Lee and Park spellings, whole lists at once. Runs in your browser.",
+   og_t="Romanize a Korean name in your browser",
+   og_d="Official Revised Romanization and common surname spellings, side by side. Lists convert at once.",
+   name="Korean romanizer", cat="UtilitiesApplication",
+   aria={"변환 결과": "Results"},
+   attrs=[],
+   body='''  <h2>Which spelling should you use</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      South Korea's official system is the <strong style="color:var(--text)">Revised Romanization of Korean (2000)</strong>: 김 is Gim, 이 is I, 박 is Bak. Road signs,
+      textbooks and government documents follow it. Real people mostly do not: the overwhelming majority of Kims spell it Kim, and Lee and Park are far more common
+      than I and Bak. Passports accept either. The converter shows both — the <strong style="color:var(--text)">"Other spelling"</strong> column is the surname in the opposite system —
+      so you can match a family member's passport or an existing document instead of guessing. Given names follow the official rules in both modes.
+      For a passport, write the given name as one word in capitals (GILDONG); a hyphen (GIL-DONG) is allowed but sometimes gets mangled into a middle name abroad.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are the names I type sent anywhere?</summary>
+      <p>No. The conversion runs inside your browser and nothing is transmitted. The page keeps working with the internet switched off, so it is fine to paste an entire class list or staff roster.</p>
+    </details>
+    <details>
+      <summary>What is the difference between "Person's name" and "Place names · words"?</summary>
+      <p>The official system spells words the way they are pronounced: 신라 is Silla because it is pronounced [실라], and 종로 is Jongno. Personal names are the exception — they are spelled syllable by syllable without those sound changes, so 빛나 is Bitna even though it is pronounced [빈나]. Choose "Person's name" for people and "Place names · words" for everything else; the second mode applies consonant assimilation, palatalization, ㅎ contraction and liaison.</p>
+    </details>
+    <details>
+      <summary>Does it handle two-syllable surnames?</summary>
+      <p>Yes — 남궁, 황보, 제갈, 선우, 독고, 사공, 서문 and 동방 are recognized automatically. If you put a space between surname and given name ("남궁 민") that split is used as-is, which also works for any unusual name.</p>
+    </details>
+    <details>
+      <summary>Why eo and eu instead of u?</summary>
+      <p>Those are the official spellings of ㅓ and ㅡ: 서 is Seo and 은 is Eun. Many Koreans prefer u (Sun, Jung) because it reads more naturally in English — that is a customary spelling, not an official one. Copy the result and change the syllables you want.</p>
+    </details>
+    <details>
+      <summary>Can I get the output into a spreadsheet?</summary>
+      <p>"Copy Korean + English" copies each line as Korean, a tab, then the romanization. Pasting into Excel or Google Sheets puts them in two columns.</p>
+    </details>
+  </div>
+'''),
 }
 
 def convert(slug):
@@ -266,6 +309,12 @@ def convert(slug):
     end = h.index('</main>')
     h = h[:start] + cfg['body'] + h[end:]
     h = h.replace('<!-- AD:', '<!-- AD:EN_')
+    # 영어판이 없는 툴로 가는 링크는 한국어판으로 보낸다 (audit 가 깨진 링크로 잡는다)
+    def fix_link(m):
+        name = m.group(1)
+        if os.path.exists(ROOT + '/en/' + name) or not os.path.exists(ROOT + '/' + name): return m.group(0)
+        return 'href="../' + name + '"'
+    h = re.sub(r'href="([a-z0-9-]+\.html)"', fix_link, h)
 
     # ---- aria-label · 고정 속성 ----
     for k, v in cfg['aria'].items():

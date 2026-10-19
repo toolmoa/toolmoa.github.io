@@ -55,7 +55,7 @@ unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 �
 date-calc.html        날짜 계산기·디데이       ← 키워드: 디데이 계산, 근무일수
 time-calc.html        시간 계산기             ← 키워드: 시간 계산기, 근무시간 계산, 시간 더하기
 age-calc.html         만 나이 계산기          ← 키워드: 만 나이 계산기, 세는 나이
-en/                   영어 SEO 페이지 18종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
+en/                   영어 SEO 페이지 19종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
 assets/style.css      공통 스타일 (다크모드 포함)
 assets/i18n.js        다국어 엔진 겸 사전 (ko/en/ja)
 assets/og/            공유용 이미지 1200×630 (페이지마다 1장, 생성물)

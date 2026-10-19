@@ -130,6 +130,7 @@ my @PAIRS = (
                             'function clearValidate', 'data-fill']],
   ['qr-scan.html',        ['function decodeImage', 'inversionAttempts', 'function analyze', 'getUserMedia', 'function stopCam',
                             "addEventListener('paste'", 'pagehide']],
+  ['romanize.html',       ['function romanizeWord', 'function splitName', 'var COMMON', 'var TWO', 'function givenRoman', 'FIN_INIT']],
 );
 
 my $gap = 0;

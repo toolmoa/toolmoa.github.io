@@ -32,7 +32,7 @@ done
 echo
 echo "=== 10. hreflang 이 서로를 가리키는가 ==="
 bad=0
-PAIRS="index image-compress image-crop img-to-pdf pdf-merge pdf-split file-convert qr-generate image-convert image-join pdf-to-image random-pick image-mosaic image-exif image-watermark image-split pdf-watermark qr-scan"
+PAIRS="index image-compress image-crop img-to-pdf pdf-merge pdf-split file-convert qr-generate image-convert image-join pdf-to-image random-pick image-mosaic image-exif image-watermark image-split pdf-watermark qr-scan romanize"
 for p in $PAIRS; do
   # index 는 canonical 과 맞춰 디렉터리 형태(/ · /en/)를 쓴다
   ko="$BASE/$p.html"; en="$BASE/en/$p.html"
