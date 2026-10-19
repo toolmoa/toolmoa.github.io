@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>색상 코드 변환기 - HEX RGB HSL 변환, 명도 대비 검사 | 툴모아</title>
+<meta name="description" content="HEX·RGB·HSL·HSV·CMYK 색상 코드를 서로 바꾸고, 색 이름(tomato)도 코드로 바꿉니다. 두 색의 명도 대비(WCAG)를 검사하고, 밝은·어두운 변형과 보색·유사색 팔레트를 만들어 줍니다.">
+<link rel="canonical" href="https://toolmoa.github.io/color-convert.html">
+<meta property="og:title" content="색상 코드 변환기 · HEX RGB HSL 변환, 명도 대비 검사">
+<meta property="og:description" content="HEX·RGB·HSL·CMYK 변환, WCAG 대비 검사, 팔레트 생성. 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"색상 코드 변환기","applicationCategory":"DesignApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .cc-top { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:end; }
+  .cc-pick { width:64px; height:44px; padding:2px; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--bg); cursor:pointer; }
+  .cc-swatch { height:120px; border-radius:var(--radius-sm); border:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; font-weight:700; font-size:15px; margin:14px 0; }
+  .cc-table { width:100%; border-collapse:collapse; font-size:15px; }
+  .cc-table td { padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .cc-table td:first-child { color:var(--muted); font-size:13px; font-weight:600; width:70px; }
+  .cc-table td.v { font-family: ui-monospace, Consolas, "Courier New", monospace; font-variant-numeric: tabular-nums; }
+  .cc-table td:last-child { width:72px; text-align:right; }
+  .cc-pal { display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:8px; margin:10px 0 4px; }
+  .cc-pal button { border:1px solid var(--border); border-radius:8px; padding:0; height:64px; cursor:pointer; display:flex; align-items:flex-end; justify-content:center; font-size:11px; font-family:ui-monospace, Consolas, monospace; }
+  .cc-pal button span { background:rgba(255,255,255,.85); color:#111; border-radius:4px; padding:1px 4px; margin-bottom:4px; }
+  .cc-contrast { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .cc-sample { border-radius:var(--radius-sm); padding:14px; font-size:15px; border:1px solid var(--border); }
+  .cc-ratio { font-size:28px; font-weight:700; letter-spacing:-.02em; margin:10px 0 2px; }
+  .cc-badge { display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 10px; margin-right:6px; }
+  .cc-badge.ok { background:var(--add-bg); color:var(--ok); }
+  .cc-badge.no { background:var(--del-bg); color:var(--danger); }
+  @media (max-width: 640px) { .cc-contrast { grid-template-columns:1fr; } }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/color-convert.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/color-convert.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="색상 코드 변환기 · HEX RGB HSL 변환, 명도 대비 검사 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="색상 코드 변환기 · HEX RGB HSL 변환, 명도 대비 검사">
+<meta name="twitter:description" content="HEX·RGB·HSL·CMYK 변환, WCAG 대비 검사, 팔레트 생성. 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/color-convert.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"입력한 내용이 어디로 보내지나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 변환과 대비 계산은 브라우저 안에서만 이뤄집니다. 인터넷을 끊어도 동작합니다."}},{"@type":"Question","name":"어떤 형식을 넣을 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"#fff, #ffffff, #ffffff80 같은 HEX, rgb(255,0,0)·rgba(255,0,0,.5), hsl(120,100%,50%), 그리고 red·tomato·steelblue 같은 CSS 색 이름 148가지를 알아봅니다. # 없이 2f6df6만 넣어도 됩니다."}},{"@type":"Question","name":"명도 대비 4.5:1은 무슨 뜻인가요?","acceptedAnswer":{"@type":"Answer","text":"글자 색과 배경 색의 밝기 차이를 비율로 나타낸 값입니다. 검정과 흰색이 21:1로 가장 크고, 같은 색끼리는 1:1입니다. 웹 접근성 지침(WCAG)은 본문 글자에 4.5:1 이상, 큰 글자와 아이콘에 3:1 이상을 요구합니다. 회색 글자가 읽기 힘든 사이트는 대개 이 값이 3:1에도 못 미칩니다."}},{"@type":"Question","name":"CMYK 값이 인쇄소 값과 다른데요","acceptedAnswer":{"@type":"Answer","text":"화면(RGB)과 잉크(CMYK)는 표현할 수 있는 색 범위가 달라서 정확한 변환은 없습니다. 여기 값은 널리 쓰는 단순 변환식의 결과이고, 프로그램마다 색 프로필에 따라 몇 %씩 다릅니다. 인쇄물은 꼭 색 견본으로 확인하세요."}},{"@type":"Question","name":"팔레트는 어떻게 만드나요?","acceptedAnswer":{"@type":"Answer","text":"밝기 변형은 HSL의 밝기만 10% 간격으로 바꾼 것입니다. 보색은 색상환에서 반대편(180°), 유사색은 양옆(±30°), 삼원색은 120° 간격의 색입니다. 버튼 색의 호버·눌림 색을 정하거나 차트 색을 고를 때 출발점으로 쓰세요."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"색상 코드 변환기 · HEX RGB HSL 변환, 명도 대비 검사","item":"https://toolmoa.github.io/color-convert.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="cc.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" aria-current="page" data-i18n="nav.cc">색상 코드</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="cc.h1">색상 코드 변환기 · HEX RGB HSL 변환, 명도 대비 검사</h1>
+  <p class="lead" data-i18n="cc.lead">색상 코드를 어떤 형식으로 넣어도 HEX·RGB·HSL·HSV·CMYK로 한꺼번에 바꿔 줍니다. 두 색의 명도 대비가 접근성 기준(WCAG)을 넘는지 확인하고, 밝기 변형과 팔레트도 만듭니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 내용이 서버로 전송되지 않습니다</span>
+
+  <div class="card">
+    <div class="cc-top">
+      <div class="field" style="margin:0">
+        <label for="cin" data-i18n="cc.input">색상 코드 또는 색 이름</label>
+        <input type="text" id="cin" value="#2f6df6" placeholder="#2f6df6 · rgb(47,109,246) · hsl(216,92%,57%) · tomato" spellcheck="false" autocomplete="off" data-i18n-ph="cc.ph">
+      </div>
+      <input type="color" id="picker" class="cc-pick" value="#2f6df6" aria-label="색 고르기">
+    </div>
+    <div class="hint" id="parse-msg" role="status" aria-live="polite"></div>
+    <div class="cc-swatch" id="swatch">
+      <span id="sw-black" style="color:#000">Aa 가나다</span>
+      <span id="sw-white" style="color:#fff">Aa 가나다</span>
+    </div>
+    <table class="cc-table" id="out-table" aria-label="변환 결과">
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+  </div>
+
+  <h2 data-i18n="cc.s2">밝기 변형 · 팔레트</h2>
+  <div class="card">
+    <div class="hint" data-i18n="cc.palHint">칸을 누르면 그 색의 HEX가 복사되고 위 입력칸에 들어갑니다.</div>
+    <h3 style="margin-top:12px" data-i18n="cc.tints">밝게 → 어둡게</h3>
+    <div class="cc-pal" id="pal-shade"></div>
+    <h3 data-i18n="cc.harmony">보색 · 유사색 · 삼원색</h3>
+    <div class="cc-pal" id="pal-harmony"></div>
+  </div>
+
+  <h2 data-i18n="cc.s3">두 색의 명도 대비 (WCAG)</h2>
+  <div class="card">
+    <div class="cc-contrast">
+      <div class="field" style="margin:0">
+        <label for="cin2" data-i18n="cc.fg">글자 색</label>
+        <div style="display:flex;gap:8px"><input type="text" id="cin2" value="#ffffff" spellcheck="false" autocomplete="off"><input type="color" id="picker2" class="cc-pick" value="#ffffff" aria-label="글자 색 고르기"></div>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="cin3" data-i18n="cc.bg">배경 색</label>
+        <div style="display:flex;gap:8px"><input type="text" id="cin3" value="#2f6df6" spellcheck="false" autocomplete="off"><input type="color" id="picker3" class="cc-pick" value="#2f6df6" aria-label="배경 색 고르기"></div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:10px">
+      <button class="btn secondary small" id="btn-swap" data-i18n="cc.swap">글자·배경 바꾸기</button>
+      <button class="btn secondary small" id="btn-use" data-i18n="cc.useAbove">위에서 고른 색을 배경으로</button>
+    </div>
+    <div class="cc-ratio" id="ratio">-</div>
+    <div id="badges"></div>
+    <div class="cc-sample" id="sample" style="margin-top:12px">
+      <strong data-i18n="cc.sampleBig">큰 글자 (18pt 이상 또는 14pt 굵게)</strong><br>
+      <span data-i18n="cc.sampleSmall">본문 글자는 4.5:1, 큰 글자와 아이콘·테두리는 3:1 이상이어야 읽기 쉽습니다.</span>
+    </div>
+    <p class="hint" data-i18n="cc.wcagHint">AA는 일반 기준(본문 4.5:1 · 큰 글자 3:1), AAA는 강화 기준(본문 7:1 · 큰 글자 4.5:1)입니다.</p>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="cc.cross">정한 색으로 <a href="qr-generate.html">QR코드</a>의 전경·배경을 꾸미거나, 사진에서 쓸 색을 뽑았다면 <a href="image-crop.html">이미지 자르기</a>로 그 부분만 남길 수 있습니다.</p>
+
+  <div class="ad-slot"><!-- AD:COLORCONVERT --></div>
+
+  <h2 data-ko-only>어떤 형식이 어디에 쓰이나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">HEX(#2f6df6)</strong> — 웹·앱 디자인, CSS, 피그마. 가장 흔한 형식입니다. 끝에 두 자리를 더 붙이면(#2f6df680) 투명도입니다.<br>
+      <strong style="color:var(--text)">RGB(47, 109, 246)</strong> — 포토샵·파워포인트·한글(HWP)의 "사용자 지정 색"이 이 값을 받습니다.<br>
+      <strong style="color:var(--text)">HSL(216°, 92%, 57%)</strong> — 색상·채도·밝기라서 "같은 색을 조금 밝게"처럼 사람이 조절하기 쉬운 형식입니다.<br>
+      <strong style="color:var(--text)">HSV/HSB</strong> — 포토샵 색상 피커의 H·S·B 칸입니다. HSL과 비슷하지만 밝기 정의가 다릅니다.<br>
+      <strong style="color:var(--text)">CMYK</strong> — 인쇄용입니다. 화면 색과 잉크 색은 원리가 달라 여기 값은 근삿값이고, 실제 인쇄는 인쇄소의 색 견본으로 확인해야 합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>입력한 내용이 어디로 보내지나요?</summary>
+      <p>아니요. 변환과 대비 계산은 브라우저 안에서만 이뤄집니다. 인터넷을 끊어도 동작합니다.</p>
+    </details>
+    <details>
+      <summary>어떤 형식을 넣을 수 있나요?</summary>
+      <p>#fff, #ffffff, #ffffff80 같은 HEX, rgb(255,0,0)·rgba(255,0,0,.5), hsl(120,100%,50%), 그리고 red·tomato·steelblue 같은 CSS 색 이름 148가지를 알아봅니다. # 없이 2f6df6만 넣어도 됩니다.</p>
+    </details>
+    <details>
+      <summary>명도 대비 4.5:1은 무슨 뜻인가요?</summary>
+      <p>글자 색과 배경 색의 밝기 차이를 비율로 나타낸 값입니다. 검정과 흰색이 21:1로 가장 크고, 같은 색끼리는 1:1입니다. 웹 접근성 지침(WCAG)은 본문 글자에 4.5:1 이상, 큰 글자와 아이콘에 3:1 이상을 요구합니다. 회색 글자가 읽기 힘든 사이트는 대개 이 값이 3:1에도 못 미칩니다.</p>
+    </details>
+    <details>
+      <summary>CMYK 값이 인쇄소 값과 다른데요</summary>
+      <p>화면(RGB)과 잉크(CMYK)는 표현할 수 있는 색 범위가 달라서 정확한 변환은 없습니다. 여기 값은 널리 쓰는 단순 변환식의 결과이고, 프로그램마다 색 프로필에 따라 몇 %씩 다릅니다. 인쇄물은 꼭 색 견본으로 확인하세요.</p>
+    </details>
+    <details>
+      <summary>팔레트는 어떻게 만드나요?</summary>
+      <p>밝기 변형은 HSL의 밝기만 10% 간격으로 바꾼 것입니다. 보색은 색상환에서 반대편(180°), 유사색은 양옆(±30°), 삼원색은 120° 간격의 색입니다. 버튼 색의 호버·눌림 색을 정하거나 차트 색을 고를 때 출발점으로 쓰세요.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var cin = el('cin'), picker = el('picker'), cin2 = el('cin2'), cin3 = el('cin3'), picker2 = el('picker2'), picker3 = el('picker3');
+  var current = null;   // {r,g,b,a}
+
+  /* ===== 파싱: HEX · rgb() · hsl() · 색 이름 ===== */
+  var nameCanvas = document.createElement('canvas').getContext('2d');
+  function parse(str) {
+    var s = (str || '').trim().toLowerCase();
+    if (!s) return null;
+    var m;
+    if ((m = /^#?([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/.exec(s))) {
+      var h = m[1];
+      if (h.length <= 4) h = h.split('').map(function (c) { return c + c; }).join('');
+      return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), a: h.length === 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1 };
+    }
+    if ((m = /^rgba?\(\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*[, ]\s*([\d.]+)\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/.exec(s))) {
+      return { r: clamp(+m[1], 255), g: clamp(+m[2], 255), b: clamp(+m[3], 255), a: m[4] === undefined ? 1 : alpha(m[4]) };
+    }
+    if ((m = /^hsla?\(\s*([\d.]+)(?:deg)?\s*[, ]\s*([\d.]+)%?\s*[, ]\s*([\d.]+)%?\s*(?:[,/]\s*([\d.]+%?)\s*)?\)$/.exec(s))) {
+      var rgb = hslToRgb(+m[1], +m[2], +m[3]);
+      rgb.a = m[4] === undefined ? 1 : alpha(m[4]);
+      return rgb;
+    }
+    // 색 이름: 브라우저가 아는지 캔버스로 물어본다. 모르는 이름은 fillStyle 이 바뀌지 않는다.
+    if (/^[a-z]+$/.test(s)) {
+      nameCanvas.fillStyle = '#010203';
+      nameCanvas.fillStyle = s;
+      var v = nameCanvas.fillStyle;
+      if (v !== '#010203' || s === 'transparent') { var p = parse(v); if (p) return p; }
+    }
+    return null;
+  }
+  function clamp(v, max) { return Math.max(0, Math.min(max, Math.round(v))); }
+  function alpha(s) { return /%$/.test(s) ? Math.max(0, Math.min(1, parseFloat(s) / 100)) : Math.max(0, Math.min(1, parseFloat(s))); }
+
+  /* ===== 변환 ===== */
+  function hex2(n) { var h = clamp(n, 255).toString(16); return h.length < 2 ? '0' + h : h; }
+  function toHex(c) { return '#' + hex2(c.r) + hex2(c.g) + hex2(c.b); }
+  function rgbToHsl(c) {
+    var r = c.r / 255, g = c.g / 255, b = c.b / 255, max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h = 0, s = 0, l = (max + min) / 2, d = max - min;
+    if (d) {
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+      else if (max === g) h = (b - r) / d + 2;
+      else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: h, s: s * 100, l: l * 100 };
+  }
+  function hslToRgb(h, s, l) {
+    h = ((h % 360) + 360) % 360 / 360; s = Math.max(0, Math.min(100, s)) / 100; l = Math.max(0, Math.min(100, l)) / 100;
+    var r, g, b;
+    if (!s) { r = g = b = l; }
+    else {
+      var q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+      var f = function (u) { if (u < 0) u += 1; if (u > 1) u -= 1; if (u < 1 / 6) return p + (q - p) * 6 * u; if (u < 1 / 2) return q; if (u < 2 / 3) return p + (q - p) * (2 / 3 - u) * 6; return p; };
+      r = f(h + 1 / 3); g = f(h); b = f(h - 1 / 3);
+    }
+    return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255), a: 1 };
+  }
+  function rgbToHsv(c) {
+    var r = c.r / 255, g = c.g / 255, b = c.b / 255, max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min, h = 0;
+    if (d) {
+      if (max === r) h = (g - b) / d + (g < b ? 6 : 0); else if (max === g) h = (b - r) / d + 2; else h = (r - g) / d + 4;
+      h *= 60;
+    }
+    return { h: h, s: max ? d / max * 100 : 0, v: max * 100 };
+  }
+  function rgbToCmyk(c) {
+    var r = c.r / 255, g = c.g / 255, b = c.b / 255, k = 1 - Math.max(r, g, b);
+    if (k === 1) return { c: 0, m: 0, y: 0, k: 100 };
+    return { c: (1 - r - k) / (1 - k) * 100, m: (1 - g - k) / (1 - k) * 100, y: (1 - b - k) / (1 - k) * 100, k: k * 100 };
+  }
+  // WCAG 상대 휘도 · 대비
+  function lum(c) {
+    var f = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+  }
+  function contrast(a, b) { var la = lum(a), lb = lum(b); return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05); }
+  function r0(n) { return Math.round(n); }
+  function r1(n) { return Math.round(n * 10) / 10; }
+
+  /* ===== 화면 ===== */
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function row(label, value) {
+    return '<tr><td>' + label + '</td><td class="v">' + esc(value) + '</td><td><button class="btn secondary small" type="button" data-copy="' + esc(value) + '">' + t('cc.copy', '복사') + '</button></td></tr>';
+  }
+  function renderMain() {
+    var c = parse(cin.value);
+    var pm = el('parse-msg');
+    if (!c) { pm.textContent = cin.value.trim() ? t('cc.bad', '알 수 없는 형식입니다. #2f6df6, rgb(47,109,246), hsl(216,92%,57%), tomato 처럼 적어 주세요.') : ''; return; }
+    pm.textContent = '';
+    current = c;
+    var hex = toHex(c), hsl = rgbToHsl(c), hsv = rgbToHsv(c), cmyk = rgbToCmyk(c);
+    picker.value = hex;
+    el('swatch').style.background = c.a < 1 ? 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')' : hex;
+    el('sw-black').textContent = 'Aa ' + r1(contrast(c, { r: 0, g: 0, b: 0 })) + ':1';
+    el('sw-white').textContent = 'Aa ' + r1(contrast(c, { r: 255, g: 255, b: 255 })) + ':1';
+    var rows = row('HEX', hex) +
+      (c.a < 1 ? row('HEX+α', hex + hex2(Math.round(c.a * 255))) : '') +
+      row('RGB', 'rgb(' + c.r + ', ' + c.g + ', ' + c.b + ')') +
+      (c.a < 1 ? row('RGBA', 'rgba(' + c.r + ', ' + c.g + ', ' + c.b + ', ' + r1(c.a) + ')') : '') +
+      row('HSL', 'hsl(' + r0(hsl.h) + ', ' + r0(hsl.s) + '%, ' + r0(hsl.l) + '%)') +
+      row('HSV/HSB', 'hsv(' + r0(hsv.h) + ', ' + r0(hsv.s) + '%, ' + r0(hsv.v) + '%)') +
+      row('CMYK', 'cmyk(' + r0(cmyk.c) + '%, ' + r0(cmyk.m) + '%, ' + r0(cmyk.y) + '%, ' + r0(cmyk.k) + '%)') +
+      row(t('cc.lum', '휘도'), r1(lum(c) * 100) + '%') +
+      row(t('cc.dec', '10진수'), String(c.r * 65536 + c.g * 256 + c.b));
+    el('rows').innerHTML = rows;
+    renderPalettes(c, hsl);
+  }
+  function swatchBtn(hex, label) {
+    return '<button type="button" style="background:' + hex + '" data-hex="' + hex + '" title="' + hex + '"><span>' + (label || hex) + '</span></button>';
+  }
+  function renderPalettes(c, hsl) {
+    var sh = '';
+    for (var l = 95; l >= 5; l -= 10) sh += swatchBtn(toHex(hslToRgb(hsl.h, hsl.s, l)), r0(l) + '%');
+    el('pal-shade').innerHTML = sh;
+    var H = hsl.h, S = hsl.s, L = hsl.l;
+    var items = [[H, t('cc.base', '기준')], [H + 180, t('cc.comp', '보색')], [H - 30, t('cc.ana', '유사')], [H + 30, t('cc.ana', '유사')],
+                 [H + 120, t('cc.tri', '삼원')], [H + 240, t('cc.tri', '삼원')], [H + 150, t('cc.split', '분열보색')], [H + 210, t('cc.split', '분열보색')]];
+    el('pal-harmony').innerHTML = items.map(function (it) { return swatchBtn(toHex(hslToRgb(it[0], S, L)), it[1]); }).join('');
+  }
+  function renderContrast() {
+    var a = parse(cin2.value), b = parse(cin3.value);
+    if (!a || !b) { el('ratio').textContent = '-'; el('badges').innerHTML = ''; return; }
+    picker2.value = toHex(a); picker3.value = toHex(b);
+    var r = contrast(a, b);
+    el('ratio').textContent = (Math.round(r * 100) / 100).toFixed(2) + ':1';
+    var badge = function (ok, label) { return '<span class="cc-badge ' + (ok ? 'ok' : 'no') + '">' + label + ' ' + (ok ? t('cc.pass', '통과') : t('cc.fail', '미달')) + '</span>'; };
+    el('badges').innerHTML = badge(r >= 4.5, 'AA ' + t('cc.body', '본문')) + badge(r >= 3, 'AA ' + t('cc.large', '큰 글자')) + badge(r >= 7, 'AAA ' + t('cc.body', '본문')) + badge(r >= 4.5, 'AAA ' + t('cc.large', '큰 글자'));
+    var s = el('sample'); s.style.color = toHex(a); s.style.background = toHex(b);
+  }
+  function renderAll() { renderMain(); renderContrast(); }
+
+  cin.addEventListener('input', renderMain);
+  picker.addEventListener('input', function () { cin.value = picker.value; renderMain(); });
+  cin2.addEventListener('input', renderContrast); cin3.addEventListener('input', renderContrast);
+  picker2.addEventListener('input', function () { cin2.value = picker2.value; renderContrast(); });
+  picker3.addEventListener('input', function () { cin3.value = picker3.value; renderContrast(); });
+  el('btn-swap').addEventListener('click', function () { var v = cin2.value; cin2.value = cin3.value; cin3.value = v; renderContrast(); });
+  el('btn-use').addEventListener('click', function () { if (current) { cin3.value = toHex(current); renderContrast(); } });
+  // 언어를 바꾸면 스크립트가 쓴 표의 이름표도 다시 만들어야 한다
+  document.addEventListener('langchange', renderAll);
+
+  function copyText(text) {
+    var done = function () { el('copy-msg').textContent = text + ' ' + t('cc.copied', '복사했습니다.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]');
+    if (b) { copyText(b.getAttribute('data-copy')); return; }
+    var sw = e.target.closest('[data-hex]');
+    if (sw) { cin.value = sw.getAttribute('data-hex'); copyText(sw.getAttribute('data-hex')); renderMain(); }
+  });
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

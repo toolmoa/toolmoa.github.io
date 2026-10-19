@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바코드 생성기 - EAN-13 · Code 128 바코드 만들기 무료 | 툴모아</title>
+<meta name="description" content="상품 바코드(EAN-13·EAN-8)와 문자·숫자 바코드(Code 128)를 만들어 PNG로 저장합니다. 체크 숫자를 자동으로 계산·검증하고, 크기와 높이를 고를 수 있습니다. 입력 내용은 서버로 가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/barcode.html">
+<meta property="og:title" content="바코드 생성기 · EAN-13 · Code 128">
+<meta property="og:description" content="상품 바코드와 문자 바코드를 만들어 PNG로. 체크 숫자 자동 계산. 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▥</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"바코드 생성기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .bc-stage { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center; overflow:auto; }
+  .bc-stage canvas { max-width:100%; height:auto; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/barcode.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/barcode.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="바코드 생성기 · EAN-13 · Code 128 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="바코드 생성기 · EAN-13 · Code 128">
+<meta name="twitter:description" content="상품 바코드와 문자 바코드를 만들어 PNG로. 체크 숫자 자동 계산. 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/barcode.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"입력한 내용이 어디로 보내지나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 바코드는 브라우저 안에서 그려지고 어디로도 보내지 않습니다. 인터넷을 끊어도 동작합니다."}},{"@type":"Question","name":"체크 숫자가 뭔가요?","acceptedAnswer":{"@type":"Answer","text":"EAN 바코드의 마지막 한 자리는 앞자리들로 계산한 검증용 숫자입니다. 스캐너가 잘못 읽으면 이 숫자가 맞지 않아 걸러집니다. 12자리만 넣으면 자동으로 계산해 붙이고, 13자리를 넣으면 마지막 자리가 맞는지 확인해서 틀리면 알려 드립니다."}},{"@type":"Question","name":"스캔이 안 돼요","acceptedAnswer":{"@type":"Answer","text":"세 가지를 확인하세요. 첫째, 바코드 양옆의 흰 여백을 잘라내지 않았는지(여백이 없으면 못 읽습니다). 둘째, 인쇄가 너무 작지 않은지 — 굵기를 \"인쇄용\"으로 두고 실제 크기 3cm 이상으로 인쇄하세요. 셋째, 흐린 잉크젯 출력이나 반짝이는 코팅지는 읽기 어렵습니다."}},{"@type":"Question","name":"상품 바코드 번호는 어떻게 받나요?","acceptedAnswer":{"@type":"Answer","text":"대한상공회의소 유통물류진흥원에 회원 가입을 하면 업체 코드를 받고, 그 뒤에 상품별 번호를 붙여 13자리를 만듭니다. 이 페이지는 번호를 발급하지 않고, 발급받은 번호를 바코드 그림으로 만들어 줍니다."}},{"@type":"Question","name":"Code 128에 한글을 넣고 싶어요","acceptedAnswer":{"@type":"Answer","text":"Code 128은 영문·숫자·기본 기호(ASCII)만 담는 규격이라 한글은 들어가지 않습니다. 한글이나 긴 내용이 필요하면 QR코드를 쓰세요."}},{"@type":"Question","name":"인쇄할 때 크기는요?","acceptedAnswer":{"@type":"Answer","text":"EAN-13의 표준 크기는 가로 37.3mm × 세로 25.9mm이고, 80%~200%까지 줄이거나 키울 수 있습니다. 굵기 6px로 저장한 PNG를 가로 4cm 정도로 인쇄하면 대부분의 스캐너가 읽습니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"바코드 생성기 · EAN-13 · Code 128","item":"https://toolmoa.github.io/barcode.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="bc.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" aria-current="page" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="bc.h1">바코드 생성기 · EAN-13 · Code 128</h1>
+  <p class="lead" data-i18n="bc.lead">상품에 붙이는 EAN-13·EAN-8 바코드와, 영문·숫자를 담는 Code 128 바코드를 만들어 PNG로 저장합니다. 체크 숫자는 자동으로 계산하고, 이미 있는 번호는 맞는지 검증합니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 내용이 서버로 전송되지 않습니다</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="type" data-i18n="bc.type">바코드 종류</label>
+      <select id="type">
+        <option value="ean13" selected data-i18n="bc.tEan13">EAN-13 — 상품 바코드 (13자리, 880으로 시작하면 한국)</option>
+        <option value="ean8" data-i18n="bc.tEan8">EAN-8 — 작은 상품용 (8자리)</option>
+        <option value="code128" data-i18n="bc.tCode128">Code 128 — 영문·숫자·기호 (송장·자산 번호·회원 번호)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="text" data-i18n="bc.text">내용</label>
+      <input type="text" id="text" value="880123456789" spellcheck="false" autocomplete="off" data-i18n-ph="bc.ph" placeholder="EAN-13: 12자리(체크 숫자 자동) 또는 13자리">
+      <div class="hint" id="type-hint"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+      <div class="field" style="margin:0">
+        <label for="scale" data-i18n="bc.scale">굵기 (한 칸의 픽셀)</label>
+        <select id="scale">
+          <option value="2" data-i18n="bc.s2">2px — 작게</option>
+          <option value="3" selected data-i18n="bc.s3">3px — 보통</option>
+          <option value="4" data-i18n="bc.s4">4px — 크게</option>
+          <option value="6" data-i18n="bc.s6">6px — 인쇄용</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="height" data-i18n="bc.height">막대 높이 (px)</label>
+        <input type="number" id="height" min="30" max="300" value="90" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0;align-self:end">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;margin:0">
+          <input type="checkbox" id="showtext" checked style="width:auto;margin:0">
+          <span data-i18n="bc.showText">아래에 숫자·글자 표시</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div class="card">
+    <div class="bc-stage">
+      <canvas id="canvas" aria-label="바코드"></canvas>
+    </div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn" id="btn-png" data-i18n="bc.savePng">PNG로 저장</button>
+      <button class="btn secondary" id="btn-copy" data-i18n="bc.copyImg">이미지 복사</button>
+    </div>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+    <div class="hint" id="info"></div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="bc.cross">주소·와이파이·연락처를 담으려면 바코드가 아니라 <a href="qr-generate.html">QR코드 만들기</a>가 맞습니다. 만든 바코드 그림을 라벨에 넣기 전에 <a href="image-crop.html">이미지 자르기</a>로 여백을 맞출 수 있습니다.</p>
+
+  <div class="ad-slot"><!-- AD:BARCODE --></div>
+
+  <h2 data-ko-only>어느 바코드를 써야 하나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">EAN-13</strong> — 마트·편의점·온라인몰에 납품하는 상품 바코드입니다. 숫자 13자리이고, 앞 3자리 880은 한국 상품을 뜻합니다.
+      번호는 대한상공회의소 유통물류진흥원(GS1 Korea)에 업체 등록을 해야 발급받습니다. 아무 숫자나 만들어 붙이면 스캔은 되지만 다른 회사 상품으로 잡힙니다.
+      여기서는 발급받은 번호를 그림으로 만드는 용도로 쓰세요.<br>
+      <strong style="color:var(--text)">EAN-8</strong> — 껌·초콜릿처럼 포장이 작은 상품용 8자리입니다.<br>
+      <strong style="color:var(--text)">Code 128</strong> — 숫자뿐 아니라 영문·기호도 담을 수 있어 택배 송장, 자산 관리 스티커, 회원증, 도서관 대출증, 창고 위치 표시에 씁니다.
+      사내에서만 쓰는 번호라면 등록 없이 마음대로 정하면 됩니다. 한글은 담을 수 없습니다(한글이 필요하면 QR코드).
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>입력한 내용이 어디로 보내지나요?</summary>
+      <p>아니요. 바코드는 브라우저 안에서 그려지고 어디로도 보내지 않습니다. 인터넷을 끊어도 동작합니다.</p>
+    </details>
+    <details>
+      <summary>체크 숫자가 뭔가요?</summary>
+      <p>EAN 바코드의 마지막 한 자리는 앞자리들로 계산한 검증용 숫자입니다. 스캐너가 잘못 읽으면 이 숫자가 맞지 않아 걸러집니다. 12자리만 넣으면 자동으로 계산해 붙이고, 13자리를 넣으면 마지막 자리가 맞는지 확인해서 틀리면 알려 드립니다.</p>
+    </details>
+    <details>
+      <summary>스캔이 안 돼요</summary>
+      <p>세 가지를 확인하세요. 첫째, 바코드 양옆의 흰 여백을 잘라내지 않았는지(여백이 없으면 못 읽습니다). 둘째, 인쇄가 너무 작지 않은지 — 굵기를 "인쇄용"으로 두고 실제 크기 3cm 이상으로 인쇄하세요. 셋째, 흐린 잉크젯 출력이나 반짝이는 코팅지는 읽기 어렵습니다.</p>
+    </details>
+    <details>
+      <summary>상품 바코드 번호는 어떻게 받나요?</summary>
+      <p>대한상공회의소 유통물류진흥원에 회원 가입을 하면 업체 코드를 받고, 그 뒤에 상품별 번호를 붙여 13자리를 만듭니다. 이 페이지는 번호를 발급하지 않고, 발급받은 번호를 바코드 그림으로 만들어 줍니다.</p>
+    </details>
+    <details>
+      <summary>Code 128에 한글을 넣고 싶어요</summary>
+      <p>Code 128은 영문·숫자·기본 기호(ASCII)만 담는 규격이라 한글은 들어가지 않습니다. 한글이나 긴 내용이 필요하면 <a href="qr-generate.html">QR코드</a>를 쓰세요.</p>
+    </details>
+    <details>
+      <summary>인쇄할 때 크기는요?</summary>
+      <p>EAN-13의 표준 크기는 가로 37.3mm × 세로 25.9mm이고, 80%~200%까지 줄이거나 키울 수 있습니다. 굵기 6px로 저장한 PNG를 가로 4cm 정도로 인쇄하면 대부분의 스캐너가 읽습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var textIn = el('text'), typeSel = el('type'), scaleSel = el('scale'), heightIn = el('height'), showCb = el('showtext'), canvas = el('canvas'), msg = el('msg');
+  var lastModules = null, lastLabel = '';
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+
+  /* ===== EAN-13 / EAN-8 ===== */
+  // 숫자 0~9 의 L 패턴 (7칸). G 는 L 을 뒤집은 것, R 은 L 의 흑백을 바꾼 것.
+  var L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+  var G = L.map(function (p) { return p.split('').reverse().join(''); });
+  var R = L.map(function (p) { return p.replace(/[01]/g, function (c) { return c === '0' ? '1' : '0'; }); });
+  // EAN-13 첫 숫자에 따른 왼쪽 6자리의 L/G 배열
+  var PARITY = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+
+  function eanCheck(digits) {       // 체크 숫자를 뺀 앞자리들로 계산
+    var sum = 0;
+    for (var i = 0; i < digits.length; i++) {
+      var w = (digits.length - i) % 2 === 1 ? 3 : 1;   // 오른쪽 끝(체크 바로 앞)부터 3,1,3,1…
+      sum += parseInt(digits[i], 10) * w;
+    }
+    return (10 - sum % 10) % 10;
+  }
+  function ean(digits, len) {       // 반환 { modules: '0101…', label, note } 또는 { error }
+    var s = digits.replace(/\s+/g, '');
+    if (!/^\d+$/.test(s)) return { error: t('bc.onlyDigits', '숫자만 넣을 수 있습니다.') };
+    if (s.length !== len && s.length !== len - 1) return { error: t('bc.lenEan', '{a}자리(체크 숫자 자동) 또는 {b}자리를 넣어 주세요.').replace('{a}', len - 1).replace('{b}', len) };
+    var note = '';
+    if (s.length === len - 1) { s += eanCheck(s); note = t('bc.checkAdded', '체크 숫자 {d}를 붙였습니다.').replace('{d}', s[s.length - 1]); }
+    else {
+      var want = eanCheck(s.slice(0, -1));
+      if (want !== parseInt(s[s.length - 1], 10)) return { error: t('bc.checkWrong', '마지막 체크 숫자가 맞지 않습니다. 이 번호라면 마지막 자리는 {d}여야 합니다.').replace('{d}', want) };
+      note = t('bc.checkOk', '체크 숫자가 맞습니다.');
+    }
+    var m = '101';
+    if (len === 13) {
+      var par = PARITY[parseInt(s[0], 10)];
+      for (var i = 1; i <= 6; i++) m += (par[i - 1] === 'L' ? L : G)[parseInt(s[i], 10)];
+      m += '01010';
+      for (i = 7; i <= 12; i++) m += R[parseInt(s[i], 10)];
+    } else {
+      for (i = 0; i < 4; i++) m += L[parseInt(s[i], 10)];
+      m += '01010';
+      for (i = 4; i < 8; i++) m += R[parseInt(s[i], 10)];
+    }
+    m += '101';
+    return { modules: m, label: s, note: note };
+  }
+
+  /* ===== Code 128 ===== */
+  // 값 0~106 의 막대·공백 폭. 여섯 폭의 합은 항상 11 (정지 기호는 7개, 합 13).
+  var C128 = ['212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213', '221312', '231212', '112232', '122132', '122231', '113222', '123122', '123221', '223211', '221132', '221231', '213212', '223112', '312131', '311222', '321122', '321221', '312212', '322112', '322211', '212123', '212321', '232121', '111323', '131123', '131321', '112313', '132113', '132311', '211313', '231113', '231311', '112133', '112331', '132131', '113123', '113321', '133121', '313121', '211331', '231131', '213113', '213311', '213131', '311123', '311321', '331121', '312113', '312311', '332111', '314111', '221411', '431111', '111224', '111422', '121124', '121421', '141122', '141221', '112214', '112412', '122114', '122411', '142112', '142211', '241211', '221114', '413111', '241112', '134111', '111242', '121142', '121241', '114212', '124112', '124211', '411212', '421112', '421211', '212141', '214121', '412121', '111143', '111341', '131141', '114113', '114311', '411113', '411311', '113141', '114131', '311141', '411131', '211412', '211214', '211232', '2331112'];
+  var START_B = 104, START_C = 105, CODE_B = 100, CODE_C = 99, STOP = 106;
+
+  // 숫자가 4자리 이상 이어지면 C(두 자리씩)로, 나머지는 B로. 값 목록을 만든다.
+  function code128Values(s) {
+    var vals = [], i = 0, mode = null;
+    function digitsAhead(k) { var n = 0; while (k + n < s.length && /\d/.test(s[k + n])) n++; return n; }
+    while (i < s.length) {
+      var run = digitsAhead(i);
+      if (run >= 4 || (run >= 2 && i + run === s.length && mode === 'C')) {
+        if (run % 2 === 1) {                       // 홀수면 첫 숫자는 B 로
+          if (mode !== 'B') { vals.push(mode === null ? START_B : CODE_B); mode = 'B'; }
+          vals.push(s.charCodeAt(i) - 32); i++; run--;
+        }
+        if (mode !== 'C') { vals.push(mode === null ? START_C : CODE_C); mode = 'C'; }
+        while (run >= 2) { vals.push(parseInt(s.substr(i, 2), 10)); i += 2; run -= 2; }
+      } else {
+        if (mode !== 'B') { vals.push(mode === null ? START_B : CODE_B); mode = 'B'; }
+        vals.push(s.charCodeAt(i) - 32); i++;
+      }
+    }
+    return vals;
+  }
+  function code128(s) {
+    if (!s.length) return { error: t('bc.empty', '내용을 입력하세요.') };
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 32 || c > 126) return { error: t('bc.ascii', 'Code 128에는 영문·숫자·기본 기호만 넣을 수 있습니다. 한글이 필요하면 QR코드를 쓰세요.') };
+    }
+    if (s.length > 80) return { error: t('bc.tooLong', '너무 깁니다. 80자 이하로 줄여 주세요.') };
+    var vals = code128Values(s);
+    var sum = vals[0];
+    for (i = 1; i < vals.length; i++) sum += vals[i] * i;
+    vals.push(sum % 103);
+    vals.push(STOP);
+    var m = '';
+    vals.forEach(function (v) {
+      var p = C128[v];
+      for (var k = 0; k < p.length; k++) m += (k % 2 === 0 ? '1' : '0').repeat(parseInt(p[k], 10));
+    });
+    return { modules: m, label: s, note: t('bc.c128note', '기호 {n}개 · 검사 기호 {c}').replace('{n}', vals.length).replace('{c}', vals[vals.length - 2]) };
+  }
+
+  /* ===== 그리기 ===== */
+  function build() {
+    var type = typeSel.value, s = textIn.value.trim();
+    var r = type === 'ean13' ? ean(s, 13) : type === 'ean8' ? ean(s, 8) : code128(s);
+    if (r.error) { setMsg(r.error, 'err'); lastModules = null; canvas.width = canvas.height = 1; el('info').textContent = ''; return; }
+    setMsg('');
+    lastModules = r.modules; lastLabel = r.label;
+    draw();
+    el('info').textContent = r.note + ' · ' + r.modules.length + t('bc.modules', '칸') + ' · ' + canvas.width + '×' + canvas.height + 'px';
+  }
+  function draw() {
+    if (!lastModules) return;
+    var scale = parseInt(scaleSel.value, 10) || 3, h = Math.max(30, Math.min(300, parseInt(heightIn.value, 10) || 90));
+    var quiet = 10 * scale;                           // 양옆 여백 10칸 — 없으면 스캐너가 못 읽는다
+    var font = Math.max(12, Math.round(scale * 5));
+    var textH = showCb.checked ? font + 8 : 0;
+    canvas.width = lastModules.length * scale + quiet * 2;
+    canvas.height = h + textH + 10;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000000';
+    for (var i = 0; i < lastModules.length; i++) {
+      if (lastModules[i] === '1') ctx.fillRect(quiet + i * scale, 5, scale, h);
+    }
+    if (showCb.checked) {
+      ctx.font = font + 'px ui-monospace, Consolas, "Courier New", monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var label = lastLabel;
+      if (typeSel.value === 'ean13') label = label[0] + '  ' + label.slice(1, 7) + '  ' + label.slice(7);
+      else if (typeSel.value === 'ean8') label = label.slice(0, 4) + '  ' + label.slice(4);
+      ctx.fillText(label, canvas.width / 2, h + 9);
+    }
+  }
+  function syncHint() {
+    var tp = typeSel.value;
+    el('type-hint').textContent = tp === 'ean13' ? t('bc.hEan13', '숫자 12자리를 넣으면 체크 숫자를 계산해 붙입니다. 13자리를 넣으면 맞는지 검증합니다.')
+      : tp === 'ean8' ? t('bc.hEan8', '숫자 7자리(체크 숫자 자동) 또는 8자리.')
+      : t('bc.hCode128', '영문 대소문자·숫자·기호 80자까지. 숫자가 이어지면 자동으로 촘촘한 방식(C)으로 묶습니다.');
+  }
+  typeSel.addEventListener('change', function () { syncHint(); build(); });
+  textIn.addEventListener('input', build);
+  [scaleSel, heightIn, showCb].forEach(function (e) { e.addEventListener('change', function () { draw(); build(); }); e.addEventListener('input', function () { draw(); }); });
+  // 언어를 바꾸면 스크립트가 쓴 안내문도 다시 만들어야 한다
+  document.addEventListener('langchange', function () { syncHint(); build(); });
+
+  el('btn-png').addEventListener('click', function () {
+    if (!lastModules) return;
+    canvas.toBlob(function (blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = t('bc.fileName', '바코드') + '_' + lastLabel.replace(/[^\w-]+/g, '_').slice(0, 30) + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      el('copy-msg').textContent = t('bc.saved', 'PNG로 저장했습니다.');
+    }, 'image/png');
+  });
+  el('btn-copy').addEventListener('click', function () {
+    if (!lastModules) return;
+    var note = el('copy-msg');
+    if (!navigator.clipboard || !window.ClipboardItem) { note.textContent = t('bc.copyNo', '이 브라우저는 이미지 복사를 지원하지 않습니다. PNG로 저장해 주세요.'); return; }
+    canvas.toBlob(function (blob) {
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function () {
+        note.textContent = t('bc.copied', '클립보드에 복사했습니다.');
+      }, function () { note.textContent = t('bc.copyNo', '이 브라우저는 이미지 복사를 지원하지 않습니다. PNG로 저장해 주세요.'); });
+    }, 'image/png');
+  });
+
+  syncHint();
+  build();
+})();
+</script>
+</body>
+</html>
