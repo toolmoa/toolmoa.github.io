@@ -189,7 +189,8 @@ label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
 .field { margin-bottom: 16px; }
 .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
 
-input[type=text], input[type=number], select, textarea {
+input[type=text], input[type=number], input[type=date], input[type=time], input[type=email],
+input[type=url], input[type=search], input[type=password], input[type=tel], select, textarea {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -353,6 +354,13 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   main { padding: 24px 0 48px; }
   .card { padding: 16px; }
   .site-header .wrap { gap: 12px; }
+  /* iOS 사파리는 글자 16px 미만인 입력칸에 초점이 가면 화면을 확대해 버리고, 그 뒤로 돌아오지 않는다.
+     2026-10-19 모바일 점검에서 전 페이지의 입력칸이 15px 이었다. 휴대전화에서만 16px 로 올린다. */
+  input[type=text], input[type=number], input[type=date], input[type=time], input[type=email],
+  input[type=url], input[type=search], input[type=password], input[type=tel], select, textarea { font-size: 16px; }
+  /* 파일 목록은 한 줄에 썸네일·이름·크기·버튼이 다 들어가지 않는다. 줄바꿈을 허용하고 크기 표기도 접히게 한다. */
+  .file-list li { flex-wrap: wrap; }
+  .file-list .fmeta { white-space: normal; }
 }
 
 /* ===== 언어 선택기 ===== */
@@ -371,7 +379,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 }
 .lang-select:hover { color: var(--text); border-color: var(--muted); }
 @media (max-width: 640px) {
-  .lang-select { padding: 5px 6px; font-size: 12px; margin-left: 6px; }
+  .lang-select { padding: 4px 4px; font-size: 16px; margin-left: 6px; }   /* 12px 이면 iOS 가 초점 시 확대한다 */
 }
 
 /* ===== 영어 페이지의 언어 전환 링크 ===== */

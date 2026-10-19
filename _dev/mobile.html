@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>모바일 폭 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:390px; height:844px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">모바일 폭 점검 — 390px(iPhone 14) 에서 가로로 넘치는 요소가 있는가 (2026-10-19)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  지금까지의 layout 검사는 1100px 창에서만 봤다. 휴대전화에서는 표·긴 단어·고정 폭 요소가 화면 밖으로 튀어나와 가로 스크롤이 생기는데,
+  눈으로는 안 보인다. 페이지 목록은 sitemap.xml 에서 읽으므로 툴이 늘어도 따로 고칠 것이 없다.
+  (1) 문서 전체 폭이 뷰포트를 넘는가 (2) 보이는 요소 중 오른쪽 끝이 뷰포트 밖인 것이 있는가 (3) 글자 크기 16px 미만 입력칸(iOS 가 확대해 버린다) (4) 탭 대상 24px 미만 버튼.
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:240px">페이지</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () { setTimeout(function () { res(f); }, 400); };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+// 결과 영역이 숨겨진 페이지는 파일을 넣어 봐야 표·목록이 나타난다. 가벼운 입력으로 펼친다.
+function open(d) {
+  try {
+    var ta = d.getElementById('names') || d.getElementById('src') || d.getElementById('a') || d.getElementById('ta') || d.getElementById('text') || d.getElementById('list');
+    if (ta && ta.tagName === 'TEXTAREA') { ta.value = ta.value || 'sample\nsample two'; ta.dispatchEvent(new Event('input', { bubbles: true })); }
+    var f = d.getElementById('file');
+    if (f && /image/.test(f.getAttribute('accept') || '')) {
+      var c = document.createElement('canvas'); c.width = 1600; c.height = 900;
+      c.getContext('2d').fillRect(0, 0, 1600, 900);
+      return new Promise(function (r) {
+        c.toBlob(function (b) {
+          var dt = new DataTransfer(); dt.items.add(new File([b], 'a-very-long-file-name-that-could-overflow-the-screen-width.png', { type: 'image/png' }));
+          if (f.multiple) dt.items.add(new File([b], 'second.png', { type: 'image/png' }));
+          f.files = dt.files; f.dispatchEvent(new Event('change', { bubbles: true }));
+          setTimeout(r, 700);
+        }, 'image/png');
+      });
+    }
+  } catch (e) {}
+  return new Promise(function (r) { setTimeout(r, 200); });
+}
+function check(f, name) {
+  var d = f.contentDocument, w = f.contentWindow, probs = [];
+  var vw = w.innerWidth;
+  var sw = d.documentElement.scrollWidth;
+  if (sw > vw + 1) probs.push('문서 폭 ' + sw + ' > ' + vw);
+  var over = [], small = [], tiny = [];
+  Array.prototype.forEach.call(d.querySelectorAll('body *'), function (el) {
+    var cs = w.getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden') return;
+    var r = el.getBoundingClientRect();
+    if (!r.width && !r.height) return;
+    // 가로 스크롤이 허용된 메뉴(site-nav)와 그 자식, 표 안의 내용(card 가 overflow:auto)은 제외한다
+    if (el.closest('.site-nav') || el.closest('[style*="overflow:auto"]') || el.closest('[style*="overflow: auto"]')) return;
+    if (r.right > vw + 1 && over.length < 4) over.push((el.id ? '#' + el.id : el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : '')) + ' 우측 ' + Math.round(r.right));
+    if (/^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName) && el.type !== 'checkbox' && el.type !== 'range' && el.type !== 'color' && el.type !== 'file') {
+      if (parseFloat(cs.fontSize) < 16 && small.length < 3) small.push((el.id ? '#' + el.id : el.tagName.toLowerCase()) + ' ' + cs.fontSize);
+    }
+    // 문장 속 링크(display:inline)는 WCAG 2.5.8 의 예외다. 버튼과 블록형 링크만 24px 을 요구한다.
+    if (/^(BUTTON|A)$/.test(el.tagName) && el.closest('main') && cs.display !== 'inline' && r.height > 0 && r.height < 24 && tiny.length < 3) tiny.push((el.id ? '#' + el.id : el.textContent.trim().slice(0, 12)) + ' ' + Math.round(r.height) + 'px');
+  });
+  if (over.length) probs.push('넘침: ' + over.join(', '));
+  if (small.length) probs.push('입력칸 16px 미만(iOS 확대): ' + small.join(', '));
+  if (tiny.length) probs.push('너무 작은 버튼·링크: ' + tiny.join(', '));
+  log(name, probs.length === 0, probs.length ? probs.join(' · ') : '폭 ' + sw + '/' + vw + ' · 넘침 없음 · 입력칸 16px 이상 · 버튼 24px 이상');
+}
+
+function run() {
+  fetch('../sitemap.xml').then(function (r) { return r.text(); }).then(function (xml) {
+    var pages = (xml.match(/<loc>[^<]+<\/loc>/g) || []).map(function (s) {
+      var u = s.replace(/<\/?loc>/g, '').replace('https://toolmoa.github.io/', '');
+      if (u === '' ) return 'index.html';
+      if (u === 'en/') return 'en/index.html';
+      return u;
+    });
+    pages.push('404.html');
+    var seq = Promise.resolve();
+    pages.forEach(function (p) {
+      seq = seq.then(function () {
+        return loadFrame('../' + p).then(function (f) {
+          return open(f.contentDocument).then(function () { check(f, p); f.remove(); });
+        }).catch(function (e) { log(p, false, '오류: ' + e.message); });
+      });
+    });
+    return seq;
+  }).then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  var fails = results.filter(function (r) { return !r.ok; });
+  document.title = 'MOBILE ' + pass + '/' + results.length + ' :: ' +
+    (fails.length ? fails.map(function (r) { return r.name + ' [FAIL] ' + r.detail; }).join(' ;; ') : results.length + '쪽 전부 390px 에서 넘침 없음');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>
