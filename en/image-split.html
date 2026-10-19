@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split an image into a grid — Instagram 3×3 and carousel, free</title>
+<meta name="description" content="Cut one picture into a 3×3 Instagram grid, a 1×3 carousel or any grid and save the pieces as one ZIP. Runs in your browser; nothing is uploaded.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-split.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-split.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-split.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-split.html">
+<meta property="og:title" content="Split an image into a grid without uploading">
+<meta property="og:description" content="Instagram 3×3 grid, carousel strips or custom grids. Pieces saved as one ZIP, inside your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▦</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Image splitter","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/image-split.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-image-split.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Split image · Instagram grid — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Split an image into a grid without uploading">
+<meta name="twitter:description" content="Instagram 3×3 grid, carousel strips or custom grids. Pieces saved as one ZIP, inside your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-image-split.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my photo uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. The photo is cut and saved inside your browser. The page keeps working with the internet switched off."}},{"@type":"Question","name":"What is the difference between \"Square\" and \"As is\"?","acceptedAnswer":{"@type":"Answer","text":"\"Square\" first trims the edges around the centre so every piece is a perfect square, which is what an Instagram profile grid needs. \"As is\" discards nothing and simply divides the photo into equal parts — right for carousels and printing."}},{"@type":"Question","name":"How are the files named?","acceptedAnswer":{"@type":"Answer","text":"The original name plus a number. Number 1 is the top-left piece, counting left to right and then down: in a 3×3 grid the first row is 1·2·3 and the second row 4·5·6. For an Instagram grid, post 9 first and 1 last so the profile shows the original picture."}},{"@type":"Question","name":"What if the size does not divide evenly?","acceptedAnswer":{"@type":"Answer","text":"The few leftover pixels are dropped at the edges. 1000 pixels into three columns gives three 333-pixel pieces with one pixel spare — not something you can see."}},{"@type":"Question","name":"Is quality reduced?","acceptedAnswer":{"@type":"Answer","text":"Each piece is a straight copy of that part of the original — no scaling. With \"Same as the original\", JPG stays JPG at 92% quality and PNG stays PNG. For images full of text, PNG is sharper."}},{"@type":"Question","name":"Does it work on a phone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pieces come as one ZIP by default; unzip it in your files app and the pieces appear as photos. Untick \"One ZIP file\" to save them individually — your browser may then ask permission for multiple downloads."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Split image · Instagram grid","item":"https://toolmoa.github.io/en/image-split.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html" aria-current="page">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+    </nav>
+    <a class="lang-link" href="../image-split.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Split image · Instagram grid</h1>
+  <p class="lead">Cut one picture into a grid and save the pieces: a 3×3 grid to fill an Instagram profile with one big image, a 1×3 carousel, or tiles for printing a large picture on several sheets.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">▦</span>
+    <span class="dz-main">Drop a photo here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · one photo at a time</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="preset">How to split</label>
+        <select id="preset">
+          <option value="3x3" selected>9 pieces — 3×3 (Instagram grid)</option>
+          <option value="1x3">3 pieces — 3 across (carousel)</option>
+          <option value="2x3">6 pieces — 2 rows × 3</option>
+          <option value="1x2">2 pieces — side by side</option>
+          <option value="2x1">2 pieces — top and bottom</option>
+          <option value="2x2">4 pieces — 2×2</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div id="custom-field" hidden style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field">
+          <label for="rows">Rows</label>
+          <input type="number" id="rows" min="1" max="12" value="3" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="cols">Columns</label>
+          <input type="number" id="cols" min="1" max="12" value="3" inputmode="numeric">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+        <div class="field">
+          <label for="fit">Piece shape</label>
+          <select id="fit">
+            <option value="square" selected>Square — trims the edges around the centre</option>
+            <option value="keep">As is — divides the whole photo equally</option>
+          </select>
+          <div class="hint" id="fit-hint"></div>
+        </div>
+        <div class="field">
+          <label for="fmt">Save as</label>
+          <select id="fmt">
+            <option value="auto" selected>Same as the original</option>
+            <option value="image/jpeg">JPG — small file</option>
+            <option value="image/png">PNG — lossless</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Pieces</span></div>
+      <div class="stat"><span class="num" id="t-piece" style="font-size:18px">-</span><span class="lbl">Piece size</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl">Original size</span></div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px">The photo is cut along the lines. Files are numbered from the top left, left to right.</p>
+    <div class="card" style="padding:10px;text-align:center">
+      <canvas id="preview" style="max-width:100%;height:auto;border:1px solid var(--border)" aria-label="Split preview"></canvas>
+    </div>
+
+    <div class="btn-row" style="align-items:center">
+      <button class="btn" id="btn-save">Cut and save</button>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:400;font-size:14px">
+        <input type="checkbox" id="as-zip" checked style="width:auto;margin:0">
+        <span>One ZIP file</span>
+      </label>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+    <p class="hint">For an Instagram grid, post the pieces <strong>in reverse order</strong> (9 → 8 → … → 1) so the profile shows the original picture.</p>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">Frame the shot first with <a href="image-crop.html">crop image</a>, or shrink the pieces with <a href="image-compress.html">compress image</a>. To combine several photos into one, use <a href="image-join.html">join images</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_IMAGESPLIT --></div>
+
+  <h2>Which split to choose</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Instagram profile grid</strong> — 9 pieces (3×3). The profile shows three squares per row, so pieces must be square. Post them in reverse order, 9 first.<br>
+      <strong style="color:var(--text)">Swipeable panorama (carousel)</strong> — 3 pieces (1×3). A wide photo cut into three posted in one carousel looks continuous when swiped. Pick "As is" so nothing is trimmed top and bottom.<br>
+      <strong style="color:var(--text)">Printing a large picture</strong> — Custom. Split "As is" across several sheets, then print each sheet borderless and tape them together.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my photo uploaded anywhere?</summary>
+      <p>No. The photo is cut and saved inside your browser. The page keeps working with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>What is the difference between "Square" and "As is"?</summary>
+      <p>"Square" first trims the edges around the centre so every piece is a perfect square, which is what an Instagram profile grid needs. "As is" discards nothing and simply divides the photo into equal parts — right for carousels and printing.</p>
+    </details>
+    <details>
+      <summary>How are the files named?</summary>
+      <p>The original name plus a number. Number 1 is the top-left piece, counting left to right and then down: in a 3×3 grid the first row is 1·2·3 and the second row 4·5·6. For an Instagram grid, post 9 first and 1 last so the profile shows the original picture.</p>
+    </details>
+    <details>
+      <summary>What if the size does not divide evenly?</summary>
+      <p>The few leftover pixels are dropped at the edges. 1000 pixels into three columns gives three 333-pixel pieces with one pixel spare — not something you can see.</p>
+    </details>
+    <details>
+      <summary>Is quality reduced?</summary>
+      <p>Each piece is a straight copy of that part of the original — no scaling. With "Same as the original", JPG stays JPG at 92% quality and PNG stays PNG. For images full of text, PNG is sharper.</p>
+    </details>
+    <details>
+      <summary>Does it work on a phone?</summary>
+      <p>Yes. Pieces come as one ZIP by default; unzip it in your files app and the pieces appear as photos. Untick "One ZIP file" to save them individually — your browser may then ask permission for multiple downloads.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="../image-split.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var preview = document.getElementById('preview');
+  var presetSel = document.getElementById('preset');
+  var rowsIn = document.getElementById('rows');
+  var colsIn = document.getElementById('cols');
+  var fitSel = document.getElementById('fit');
+  var fmtSel = document.getElementById('fmt');
+
+  // 너무 큰 사진은 브라우저가 캔버스를 만들지 못한다. 넘으면 줄이고 알린다.
+  var MAX_PIXELS = 40e6;
+
+  var src = null, srcType = 'image/png', baseName = 'photo';
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  // 캡처한 화면을 파일로 저장한 뒤 다시 고르는 과정이 번거롭다. Ctrl+V로 바로 받는다.
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile();
+      if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      e.preventDefault();
+      load(new File([f], 'pasted-image-' + stamp + '.' + ext, { type: f.type }));
+      return;
+    }
+  });
+
+  function load(file) {
+    if (file.type.indexOf('image/') !== 0) { setMsg('Please choose an image file.', 'err'); return; }
+    var url = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.naturalWidth, h = img.naturalHeight, k = 1;
+      if (w * h > MAX_PIXELS) k = Math.sqrt(MAX_PIXELS / (w * h));
+      w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+      src = document.createElement('canvas');
+      src.width = w; src.height = h;
+      src.getContext('2d').drawImage(img, 0, 0, w, h);
+      srcType = file.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+      baseName = file.name.replace(/\.[^.]+$/, '');
+      area.hidden = false;
+      setMsg(k < 1 ? 'The photo was too large, so it was reduced to a size the browser can handle.' : '', k < 1 ? 'err' : '');
+      document.getElementById('t-size').textContent = w + '×' + h;
+      render();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg('This photo cannot be opened.', 'err'); };
+    img.src = url;
+  }
+
+  function gridSize() {
+    var p = presetSel.value, r, c;
+    if (p === 'custom') { r = parseInt(rowsIn.value, 10); c = parseInt(colsIn.value, 10); }
+    else { var m = p.split('x'); r = parseInt(m[0], 10); c = parseInt(m[1], 10); }
+    r = Math.min(12, Math.max(1, r || 1)); c = Math.min(12, Math.max(1, c || 1));
+    return { rows: r, cols: c };
+  }
+
+  // 잘라낼 전체 영역과 조각 크기를 정한다. 정사각형 모드는 가운데를 기준으로 남는 가장자리를 버린다.
+  function layout() {
+    var g = gridSize();
+    var W = src.width, H = src.height, pw, ph, x0 = 0, y0 = 0;
+    if (fitSel.value === 'square') {
+      var side = Math.floor(Math.min(W / g.cols, H / g.rows));
+      pw = ph = side;
+      x0 = Math.floor((W - side * g.cols) / 2);
+      y0 = Math.floor((H - side * g.rows) / 2);
+    } else {
+      pw = Math.floor(W / g.cols); ph = Math.floor(H / g.rows);
+      x0 = Math.floor((W - pw * g.cols) / 2);
+      y0 = Math.floor((H - ph * g.rows) / 2);
+    }
+    return { rows: g.rows, cols: g.cols, pw: pw, ph: ph, x0: x0, y0: y0 };
+  }
+
+  function render() {
+    if (!src) return;
+    var L = layout();
+    // 미리보기는 긴 쪽 1000px 로 줄여 그린다. 원본 그대로 그리면 큰 사진에서 느리다.
+    var k = Math.min(1, 1000 / Math.max(src.width, src.height));
+    preview.width = Math.round(src.width * k); preview.height = Math.round(src.height * k);
+    var ctx = preview.getContext('2d');
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(src, 0, 0, preview.width, preview.height);
+    // 버려지는 가장자리는 어둡게
+    ctx.fillStyle = 'rgba(0,0,0,.55)';
+    var gx = L.x0 * k, gy = L.y0 * k, gw = L.pw * L.cols * k, gh = L.ph * L.rows * k;
+    ctx.fillRect(0, 0, preview.width, gy);
+    ctx.fillRect(0, gy + gh, preview.width, preview.height - gy - gh);
+    ctx.fillRect(0, gy, gx, gh);
+    ctx.fillRect(gx + gw, gy, preview.width - gx - gw, gh);
+    // 분할선과 번호
+    ctx.lineWidth = Math.max(1, preview.width / 400);
+    var fontPx = Math.max(12, Math.round(Math.min(L.pw, L.ph) * k * 0.22));
+    ctx.font = 'bold ' + fontPx + 'px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    var n = 1;
+    for (var r = 0; r < L.rows; r++) {
+      for (var c = 0; c < L.cols; c++, n++) {
+        var x = gx + c * L.pw * k, y = gy + r * L.ph * k, w = L.pw * k, h = L.ph * k;
+        ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.strokeRect(x + .5, y + .5, w, h);
+        ctx.strokeStyle = 'rgba(47,109,246,.9)'; ctx.setLineDash([6, 4]); ctx.strokeRect(x + .5, y + .5, w, h); ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(0,0,0,.45)';
+        ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, fontPx * 0.9, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillText(String(n), x + w / 2, y + h / 2);
+      }
+    }
+    document.getElementById('t-count').textContent = L.rows * L.cols;
+    document.getElementById('t-piece').textContent = L.pw + '×' + L.ph;
+    document.getElementById('fit-hint').textContent = fitSel.value === 'square'
+      ? 'The darkened edges are discarded.'
+      : 'Nothing is discarded. Pieces keep the photo\'s aspect ratio.';
+  }
+
+  function syncPreset() {
+    document.getElementById('custom-field').hidden = presetSel.value !== 'custom';
+  }
+  presetSel.addEventListener('change', function () { syncPreset(); render(); });
+  [fitSel, fmtSel].forEach(function (el) { el.addEventListener('change', render); });
+  [rowsIn, colsIn].forEach(function (el) { el.addEventListener('input', render); });
+
+  function toBlob(canvas, type) {
+    return new Promise(function (r) { canvas.toBlob(r, type, type === 'image/jpeg' ? 0.92 : undefined); });
+  }
+  function saveBlob(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!src) return;
+    var L = layout();
+    if (L.pw < 1 || L.ph < 1) { setMsg('The pieces would be too small. Use fewer rows or columns.', 'err'); return; }
+    var type = fmtSel.value === 'auto' ? srcType : fmtSel.value;
+    var ext = type === 'image/jpeg' ? '.jpg' : '.png';
+    var btn = this;
+    btn.disabled = true;
+    setMsg('Cutting…');
+    var c = document.createElement('canvas');
+    c.width = L.pw; c.height = L.ph;
+    var ctx = c.getContext('2d');
+    var chain = Promise.resolve(), outs = [], n = 1;
+    for (var r = 0; r < L.rows; r++) {
+      for (var col = 0; col < L.cols; col++, n++) {
+        (function (r, col, n) {
+          chain = chain.then(function () {
+            ctx.clearRect(0, 0, L.pw, L.ph);
+            if (type === 'image/jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, L.pw, L.ph); }
+            // 조각은 원본의 그 부분을 그대로 복사한다. 확대·축소가 없어 화질이 그대로다.
+            ctx.drawImage(src, L.x0 + col * L.pw, L.y0 + r * L.ph, L.pw, L.ph, 0, 0, L.pw, L.ph);
+            return toBlob(c, type).then(function (b) { if (b) outs.push({ blob: b, name: baseName + '_' + n + ext }); });
+          });
+        })(r, col, n);
+      }
+    }
+    chain.then(function () {
+      c.width = c.height = 1;
+      if (!outs.length) { setMsg('Could not create the pieces.', 'err'); btn.disabled = false; return; }
+      // 파일을 하나씩 내려받게 하면 브라우저가 "여러 파일 다운로드"를 묻고,
+      // 휴대전화에서는 첫 장만 저장되는 일이 잦다. 기본적으로 ZIP 한 개로 묶는다.
+      var wantZip = document.getElementById('as-zip').checked && typeof makeZip === 'function' && outs.length > 1;
+      if (!wantZip) {
+        outs.forEach(function (o, i) { setTimeout(function () { saveBlob(o.blob, o.name); }, i * 350); });
+        setMsg(outs.length + ' pieces cut and saved.', 'ok');
+        btn.disabled = false;
+        return;
+      }
+      // makeZip 은 바이트만 받는다. Blob 을 Uint8Array 로 바꿔 넘긴다.
+      return Promise.all(outs.map(function (o) {
+        return o.blob.arrayBuffer().then(function (buf) { return { name: o.name, bytes: new Uint8Array(buf) }; });
+      })).then(function (entries) {
+        var zip = makeZip(entries);
+        saveBlob(zip, baseName + '_' + 'split' + '.zip');
+        setMsg(outs.length + ' pieces saved in one ZIP. ' + humanSize(zip.size), 'ok');
+        btn.disabled = false;
+      });
+    }).catch(function (e) {
+      setMsg('Could not create the pieces.' + ' ' + (e && e.message || ''), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    src = null; fileInput.value = '';
+    preview.width = preview.height = 1;
+    document.getElementById('t-count').textContent = '0';
+    document.getElementById('t-piece').textContent = '-';
+    document.getElementById('t-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  });
+
+  syncPreset();
+})();
+</script>
+</body>
+</html>

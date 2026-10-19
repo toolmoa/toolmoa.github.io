@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add a watermark to a PDF without uploading — every page, free</title>
+<meta name="description" content="Stamp "Confidential", a name or a logo on every page of a PDF inside your browser. Any language, chosen pages, diagonal or tiled. Contracts never reach a server.">
+<link rel="canonical" href="https://toolmoa.github.io/en/pdf-watermark.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-watermark.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-watermark.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-watermark.html">
+<meta property="og:title" content="Add a watermark to a PDF without uploading it">
+<meta property="og:description" content="Text or logo on every page, any language, in your browser. Nothing is uploaded.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔏</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<!-- pdf-lib 은 여기서 미리 받지 않는다. 아래 loadLib() 이 파일을 고른 뒤에 받는다. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"PDF watermark","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/pdf-watermark.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-pdf-watermark.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Add watermark to PDF — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Add a watermark to a PDF without uploading it">
+<meta name="twitter:description" content="Text or logo on every page, any language, in your browser. Nothing is uploaded.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-pdf-watermark.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my PDF uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. The PDF is opened, stamped and saved inside your browser. The page keeps working with the internet switched off. It was built for contracts and ID scans, the files that must not leave your computer."}},{"@type":"Question","name":"Does it support my language?","acceptedAnswer":{"@type":"Answer","text":"Yes, any script — Korean, Japanese, Arabic, emoji. Instead of embedding a PDF font, the text is drawn exactly as your screen shows it and stamped as an image, so no font files are needed. The one trade-off is that the watermark text cannot be selected or copied in the PDF, which for a watermark is usually what you want."}},{"@type":"Question","name":"Can the watermark be removed?","acceptedAnswer":{"@type":"Answer","text":"It is a separate image layered on each page, so a PDF editor could pick it out and delete it. For a mark that cannot be separated, convert the pages to images with PDF to image and rebuild the file with image to PDF. Text selection is lost, but the mark becomes part of the page."}},{"@type":"Question","name":"What opacity should I use?","acceptedAnswer":{"@type":"Answer","text":"15–30% if the document still has to be read. 100% hides whatever is underneath. The preview shows the mark on a blank page, so open the saved file once to check it over the real content."}},{"@type":"Question","name":"What about password-protected PDFs?","acceptedAnswer":{"@type":"Answer","text":"They cannot be opened. Remove the password and save a copy first. PDFs that merely restrict editing usually work."}},{"@type":"Question","name":"Will the file get much bigger?","acceptedAnswer":{"@type":"Answer","text":"No. One watermark image is added and every page shares it, so even long documents grow by only tens or hundreds of kilobytes."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Add watermark to PDF","item":"https://toolmoa.github.io/en/pdf-watermark.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html" aria-current="page">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+    </nav>
+    <a class="lang-link" href="../pdf-watermark.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Add watermark to PDF</h1>
+  <p class="lead">Stamp text or a logo on every page (or the pages you choose). "Confidential", "Copy", a company name — any language goes in as-is.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🔏</span>
+    <span class="dz-main">Drop a PDF here, or click to choose</span>
+    <span class="dz-sub">One file at a time · password-protected PDFs cannot be opened</span>
+    <input type="file" id="file" accept="application/pdf,.pdf">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl">Pages</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl">File size</span></div>
+      <div class="stat"><span class="num" id="t-page-size" style="font-size:18px">-</span><span class="lbl">First page</span></div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label for="wtype">Watermark type</label>
+        <select id="wtype">
+          <option value="text" selected>Text</option>
+          <option value="logo">Logo image (PNG recommended)</option>
+        </select>
+      </div>
+      <div class="field" id="text-field">
+        <label for="wtext">Text to stamp</label>
+        <input type="text" id="wtext" value="Confidential" maxlength="80" placeholder="e.g. Confidential · Copy · Company name">
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn secondary small" type="button" data-fill="Confidential">Confidential</button>
+          <button class="btn secondary small" type="button" data-fill="Copy">Copy</button>
+          <button class="btn secondary small" type="button" data-fill="Draft — do not distribute">Draft — do not distribute</button>
+          <button class="btn secondary small" type="button" data-fill="Sample">Sample</button>
+        </div>
+      </div>
+      <div class="field" id="logo-field" hidden>
+        <label for="logo">Logo file</label>
+        <input type="file" id="logo" accept="image/*" style="display:block">
+        <div class="hint">A PNG with a transparent background looks natural over text.</div>
+        <div class="btn-row" id="logo-row" hidden>
+          <button class="btn secondary small" id="logo-clear">Remove logo</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+        <div class="field">
+          <label for="wpos">Position</label>
+          <select id="wpos">
+            <option value="c" selected>Centre (once)</option>
+            <option value="tile">Tile across the page</option>
+            <option value="tl">Top left</option>
+            <option value="tr">Top right</option>
+            <option value="bl">Bottom left</option>
+            <option value="br">Bottom right</option>
+            <option value="bc">Bottom centre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wrot">Angle</label>
+          <select id="wrot">
+            <option value="45" selected>45° diagonal</option>
+            <option value="30">Tilted 30°</option>
+            <option value="0">Horizontal</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wsize"><span>Size</span> <span id="size-val" style="color:var(--accent)">60%</span></label>
+          <input type="range" id="wsize" min="5" max="100" value="60" step="1">
+          <div class="hint">As a share of the page width.</div>
+        </div>
+        <div class="field">
+          <label for="wopacity"><span>Opacity</span> <span id="op-val" style="color:var(--accent)">20%</span></label>
+          <input type="range" id="wopacity" min="5" max="100" value="20" step="5">
+          <div class="hint">15–30% keeps the body text readable.</div>
+        </div>
+        <div class="field" id="color-field">
+          <label for="wcolor">Text colour</label>
+          <input type="color" id="wcolor" value="#c62828" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field">
+          <label for="range">Pages to stamp (blank = all)</label>
+          <input type="text" id="range" placeholder="e.g. 1-3, 5" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px">Previewed on the shape of the first page. Check the real content in the saved file.</p>
+    <div class="card" style="padding:10px;text-align:center;background:var(--surface-2)">
+      <canvas id="preview" style="max-width:100%;max-height:480px;height:auto;border:1px solid var(--border);background:#fff" aria-label="Watermark preview"></canvas>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-save">Add watermark and save</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To send only certain pages, first use <a href="pdf-split.html">split PDF</a>; to make one file from several, use <a href="pdf-merge.html">merge PDF</a>. For photos there is <a href="image-watermark.html">photo watermark</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_PDFWATERMARK --></div>
+
+  <h2>When a watermark is worth it</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Contracts, quotes, proposals, course hand-outs — <strong style="color:var(--text)">documents meant for a specific recipient</strong>.
+      A faint "Confidential" or the recipient's own name across every page tells you where a leaked copy came from and makes people think twice before forwarding it.
+      Writing "for XYZ application only" across a scan of your passport or a bank statement works the same way. Those are exactly the files you should not
+      upload to a random website, which is why this page does the stamping inside your browser and sends nothing anywhere.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my PDF uploaded anywhere?</summary>
+      <p>No. The PDF is opened, stamped and saved inside your browser. The page keeps working with the internet switched off. It was built for contracts and ID scans, the files that must not leave your computer.</p>
+    </details>
+    <details>
+      <summary>Does it support my language?</summary>
+      <p>Yes, any script — Korean, Japanese, Arabic, emoji. Instead of embedding a PDF font, the text is drawn exactly as your screen shows it and stamped as an image, so no font files are needed. The one trade-off is that the watermark text cannot be selected or copied in the PDF, which for a watermark is usually what you want.</p>
+    </details>
+    <details>
+      <summary>Can the watermark be removed?</summary>
+      <p>It is a separate image layered on each page, so a PDF editor could pick it out and delete it. For a mark that cannot be separated, convert the pages to images with <a href="pdf-to-image.html">PDF to image</a> and rebuild the file with <a href="img-to-pdf.html">image to PDF</a>. Text selection is lost, but the mark becomes part of the page.</p>
+    </details>
+    <details>
+      <summary>What opacity should I use?</summary>
+      <p>15–30% if the document still has to be read. 100% hides whatever is underneath. The preview shows the mark on a blank page, so open the saved file once to check it over the real content.</p>
+    </details>
+    <details>
+      <summary>What about password-protected PDFs?</summary>
+      <p>They cannot be opened. Remove the password and save a copy first. PDFs that merely restrict editing usually work.</p>
+    </details>
+    <details>
+      <summary>Will the file get much bigger?</summary>
+      <p>No. One watermark image is added and every page shares it, so even long documents grow by only tens or hundreds of kilobytes.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="../pdf-watermark.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var preview = document.getElementById('preview');
+  var typeSel = document.getElementById('wtype');
+  var textIn = document.getElementById('wtext');
+  var logoIn = document.getElementById('logo');
+  var posSel = document.getElementById('wpos');
+  var rotSel = document.getElementById('wrot');
+  var sizeIn = document.getElementById('wsize');
+  var opIn = document.getElementById('wopacity');
+  var colorIn = document.getElementById('wcolor');
+  var rangeIn = document.getElementById('range');
+
+  var doc = null, bytes = null, baseName = 'document', pageCount = 0, firstSize = null;
+  var logoImg = null, timer = null;
+
+  var msgKind = '';     // 'validate' = 미리보기가 띄운 입력 검증 안내. 이것만 미리보기가 지울 수 있다.
+  function setMsg(text, cls, kind) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+    msgKind = text ? (kind || '') : '';
+  }
+  // 미리보기가 띄운 검증 안내만 지운다. 저장 완료·크기 축소 같은 안내는 사용자가 읽어야 하므로 남긴다.
+  function clearValidate() { if (msgKind === 'validate') setMsg(''); }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  // pdf-lib 은 500KB 다. 파일을 고른 뒤에 받아서 첫 화면을 가볍게 한다.
+  var libPromise = null;
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('PDFLib', '../assets/vendor/pdf-lib.min.js')
+        .catch(function (e) { libPromise = null; throw e; });   // 실패하면 다음에 다시 시도할 수 있게
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof PDFLib !== 'undefined') { fn(); return; }
+    setMsg('Loading the processing engine…');
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg('The processing engine could not be loaded. Please refresh and try again.', 'err');
+    });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+
+  function load(file) {
+    if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+      setMsg('Please choose a PDF file.', 'err'); return;
+    }
+    whenReady(function () {
+      setMsg('Reading the file…');
+      file.arrayBuffer().then(function (buf) {
+        bytes = new Uint8Array(buf);
+        // Fastest 가 아니면 큰 파일에서 수십 초가 걸린다 (880KB 에서 15초 → 0.2초)
+        return PDFLib.PDFDocument.load(bytes, { parseSpeed: PDFLib.ParseSpeeds.Fastest, ignoreEncryption: false });
+      }).then(function (d) {
+        doc = d;
+        pageCount = d.getPageCount();
+        var p0 = d.getPage(0), s = p0.getSize();
+        // 회전된 쪽은 보이는 가로세로가 바뀐다. 미리보기만 그 모양을 따른다.
+        var rot = (p0.getRotation().angle % 180) !== 0;
+        firstSize = rot ? { w: s.height, h: s.width } : { w: s.width, h: s.height };
+        baseName = file.name.replace(/\.pdf$/i, '');
+        document.getElementById('t-pages').textContent = pageCount;
+        document.getElementById('t-size').textContent = humanSize(file.size);
+        document.getElementById('t-page-size').textContent = Math.round(s.width) + '×' + Math.round(s.height) + 'pt';
+        area.hidden = false;
+        setMsg('');
+        schedule();
+      }).catch(function (e) {
+        doc = null; bytes = null;
+        var detail = e && e.message ? ' — ' + e.message : '';
+        setMsg('The file could not be opened. It may be password-protected or damaged.' + detail, 'err');
+      });
+    });
+  }
+
+  function opts() {
+    return {
+      type: typeSel.value,
+      text: textIn.value.trim(),
+      pos: posSel.value,
+      rot: parseInt(rotSel.value, 10) || 0,
+      size: parseInt(sizeIn.value, 10) / 100,
+      alpha: parseInt(opIn.value, 10) / 100,
+      color: colorIn.value
+    };
+  }
+
+  // 워터마크 그림을 투명 캔버스에 만든다. 글자는 쪽 폭의 비율로 폭을 맞춘다.
+  // 그림으로 새기기 때문에 한글·이모지가 글꼴 없이도 그대로 들어간다.
+  // PDF 의 pt 보다 촘촘하게(3배) 그려야 확대해도 흐리지 않다.
+  var SCALE = 3;
+  function makeStamp(pageW, o) {
+    var targetW = Math.max(8, pageW * o.size) * SCALE;
+    var c = document.createElement('canvas');
+    if (o.type === 'logo') {
+      if (!logoImg) return null;
+      var k = targetW / logoImg.naturalWidth;
+      c.width = Math.round(targetW); c.height = Math.max(1, Math.round(logoImg.naturalHeight * k));
+      c.getContext('2d').drawImage(logoImg, 0, 0, c.width, c.height);
+      return c;
+    }
+    if (!o.text) return null;
+    var probe = c.getContext('2d');
+    var family = '-apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+    probe.font = 'bold 100px ' + family;
+    var w100 = probe.measureText(o.text).width || 1;
+    var px = Math.max(6, Math.floor(100 * targetW / w100));
+    var font = 'bold ' + px + 'px ' + family;
+    probe.font = font;
+    var m = probe.measureText(o.text);
+    var pad = Math.ceil(px * 0.15);
+    c.width = Math.ceil(m.width) + pad * 2;
+    c.height = Math.ceil(px * 1.25) + pad * 2;
+    var ctx = c.getContext('2d');
+    ctx.font = font;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = o.color;
+    ctx.fillText(o.text, c.width / 2, c.height / 2);
+    return c;
+  }
+
+  // 쪽 크기(pt)와 도장 크기(pt)로 도장 중심 좌표들을 낸다. 원점은 왼쪽 아래(PDF 좌표계).
+  // 미리보기와 실제 저장이 같은 함수를 쓰므로 둘이 어긋날 수 없다.
+  function centers(W, H, sw, sh, o) {
+    var rad = o.rot * Math.PI / 180;
+    var out = [];
+    if (o.pos === 'tile') {
+      var diag = Math.sqrt(sw * sw + sh * sh);
+      var stepX = Math.max(diag * 1.15, 8), stepY = Math.max(sh * 2.6, 8);
+      var row = 0;
+      for (var y = stepY / 2; y < H + stepY; y += stepY, row++) {
+        var shift = (row % 2) ? stepX / 2 : 0;
+        for (var x = -stepX + shift; x < W + stepX; x += stepX) out.push([x, y]);
+      }
+      return out;
+    }
+    var cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+    var bw = sw * cos + sh * sin, bh = sw * sin + sh * cos;
+    var margin = Math.min(W, H) * 0.04;
+    if (o.pos === 'c') return [[W / 2, H / 2]];
+    var cx = /l/.test(o.pos) ? margin + bw / 2 : (/r/.test(o.pos) ? W - margin - bw / 2 : W / 2);
+    var cy = /t/.test(o.pos) ? H - margin - bh / 2 : margin + bh / 2;
+    return [[cx, cy]];
+  }
+
+  function renderPreview() {
+    if (!firstSize) return;
+    var o = opts();
+    var W = firstSize.w, H = firstSize.h;
+    // 화면용 배율: 긴 쪽이 900px 정도
+    var k = 900 / Math.max(W, H);
+    preview.width = Math.round(W * k); preview.height = Math.round(H * k);
+    var ctx = preview.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, preview.width, preview.height);
+    // 본문이 있는 자리를 흐린 줄로 흉내 내서 진하기를 가늠할 수 있게 한다
+    ctx.fillStyle = '#d9dde3';
+    var lineH = preview.height / 40;
+    for (var i = 3; i < 36; i++) {
+      if (i % 9 === 0) continue;
+      ctx.fillRect(preview.width * 0.1, lineH * i, preview.width * (i % 7 === 0 ? 0.55 : 0.8), lineH * 0.45);
+    }
+    var s = makeStamp(W, o);
+    if (!s) {
+      setMsg(o.type === 'logo' ? 'Please choose a logo file.' : 'Please enter the text to stamp.', 'err', 'validate');
+      return;
+    }
+    clearValidate();
+    var sw = s.width / SCALE, sh = s.height / SCALE;     // pt 단위
+    var rad = o.rot * Math.PI / 180;
+    ctx.save();
+    ctx.globalAlpha = o.alpha;
+    centers(W, H, sw, sh, o).forEach(function (c) {
+      ctx.save();
+      // PDF 는 y 가 위로 자라고 캔버스는 아래로 자란다. 뒤집어 그린다.
+      ctx.translate(c[0] * k, (H - c[1]) * k);
+      ctx.rotate(-rad);
+      ctx.drawImage(s, -sw * k / 2, -sh * k / 2, sw * k, sh * k);
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(renderPreview, 60); }
+
+  function syncType() {
+    var logo = typeSel.value === 'logo';
+    document.getElementById('text-field').hidden = logo;
+    document.getElementById('logo-field').hidden = !logo;
+    document.getElementById('color-field').hidden = logo;
+    document.getElementById('size-val').textContent = sizeIn.value + '%';
+    document.getElementById('op-val').textContent = opIn.value + '%';
+  }
+  [typeSel, posSel, rotSel].forEach(function (el) { el.addEventListener('change', function () { syncType(); schedule(); }); });
+  [textIn, sizeIn, opIn, colorIn].forEach(function (el) { el.addEventListener('input', function () { syncType(); schedule(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-fill]'), function (b) {
+    b.addEventListener('click', function () {
+      // 화면에 보이는(번역된) 글자를 그대로 넣는다. 일본어 사용자는 일본어 문구를 원한다.
+      textIn.value = b.textContent.trim() || b.getAttribute('data-fill');
+      syncType(); schedule();
+    });
+  });
+
+  logoIn.addEventListener('change', function () {
+    var f = logoIn.files && logoIn.files[0];
+    if (!f) return;
+    if (f.type.indexOf('image/') !== 0) { setMsg('Please choose an image file.', 'err'); return; }
+    var url = URL.createObjectURL(f);
+    var img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); logoImg = img; document.getElementById('logo-row').hidden = false; schedule(); };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg('The logo image could not be opened.', 'err'); };
+    img.src = url;
+  });
+  document.getElementById('logo-clear').addEventListener('click', function () {
+    logoImg = null; logoIn.value = '';
+    document.getElementById('logo-row').hidden = true;
+    schedule();
+  });
+
+  function parseRange(str) {
+    var out = [], seen = {};
+    str.split(',').forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var m = part.match(/^(\d+)\s*[-~]\s*(\d*)$/);
+      if (m) {
+        var a = parseInt(m[1], 10);
+        var b = m[2] ? parseInt(m[2], 10) : pageCount;
+        if (a > b) { var sw = a; a = b; b = sw; }
+        for (var i = a; i <= b; i++) {
+          if (i >= 1 && i <= pageCount && !seen[i]) { seen[i] = 1; out.push(i - 1); }
+        }
+      } else if (/^\d+$/.test(part)) {
+        var n = parseInt(part, 10);
+        if (n >= 1 && n <= pageCount && !seen[n]) { seen[n] = 1; out.push(n - 1); }
+      }
+    });
+    return out;
+  }
+
+  function canvasPng(c) {
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (b) { return b.arrayBuffer(); })
+      .then(function (buf) { return new Uint8Array(buf); });
+  }
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!doc) return;
+    var o = opts();
+    var s = makeStamp(firstSize.w, o);
+    if (!s) { setMsg(o.type === 'logo' ? 'Please choose a logo file.' : 'Please enter the text to stamp.', 'err'); return; }
+    var idxs = rangeIn.value.trim() ? parseRange(rangeIn.value) : null;
+    if (idxs && !idxs.length) { setMsg('No matching pages. Example: 1-3, 5', 'err'); return; }
+    var btn = this;
+    btn.disabled = true;
+    setMsg('Adding the watermark…');
+
+    // 원본 바이트를 다시 읽어 깨끗한 문서에 넣는다. 그래야 두 번 저장해도 겹치지 않는다.
+    var targets = [];     // 완료 안내에서 쪽수를 세야 하므로 바깥에 둔다
+    PDFLib.PDFDocument.load(bytes, { parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (pdf) {
+      return canvasPng(s).then(function (png) { return pdf.embedPng(png); }).then(function (img) {
+        var pages = pdf.getPages();
+        targets = idxs ? idxs.map(function (i) { return pages[i]; }) : pages;
+        var deg = PDFLib.degrees;
+        targets.forEach(function (page) {
+          var size = page.getSize();
+          var rotated = (page.getRotation().angle % 180) !== 0;
+          // 쪽이 90° 돌아가 있으면 보는 사람 기준의 가로세로가 바뀐다. 보이는 모양에 맞춰 넣는다.
+          var W = rotated ? size.height : size.width, H = rotated ? size.width : size.height;
+          var sw = W * o.size, sh = sw * s.height / s.width;
+          var rad = o.rot * Math.PI / 180;
+          centers(W, H, sw, sh, o).forEach(function (c) {
+            // drawImage 는 왼쪽 아래 모서리를 기준으로 돌린다. 중심이 c 에 오도록 모서리를 되계산한다.
+            var x = c[0] - (sw / 2) * Math.cos(rad) + (sh / 2) * Math.sin(rad);
+            var y = c[1] - (sw / 2) * Math.sin(rad) - (sh / 2) * Math.cos(rad);
+            var pos = { x: x, y: y, width: sw, height: sh, opacity: o.alpha, rotate: deg(o.rot) };
+            if (rotated) {
+              // 쪽 자체가 돌아가 있으면 좌표계도 함께 돌려 준다 (90° 기준, 보이는 그대로 들어가게)
+              var pr = page.getRotation().angle % 360; if (pr < 0) pr += 360;
+              if (pr === 90) { pos.x = size.width - y; pos.y = x; pos.rotate = deg(o.rot + 90); }
+              else if (pr === 270) { pos.x = y; pos.y = size.height - x; pos.rotate = deg(o.rot - 90); }
+            }
+            page.drawImage(img, pos);
+          });
+        });
+        return pdf.save();
+      }).then(function (out) {
+        var blob = new Blob([out], { type: 'application/pdf' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = baseName + '_' + 'watermarked' + '.pdf';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+        setMsg(targets.length + ' page(s) watermarked and saved. ' + humanSize(blob.size), 'ok');
+        btn.disabled = false;
+      });
+    }).catch(function (e) {
+      setMsg('Could not create the PDF.' + (e && e.message ? ' — ' + e.message : ''), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    doc = null; bytes = null; firstSize = null; pageCount = 0; logoImg = null;
+    fileInput.value = ''; logoIn.value = ''; rangeIn.value = '';
+    document.getElementById('logo-row').hidden = true;
+    preview.width = preview.height = 1;
+    ['t-pages'].forEach(function (id) { document.getElementById(id).textContent = '0'; });
+    document.getElementById('t-size').textContent = '-';
+    document.getElementById('t-page-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  });
+
+  syncType();
+})();
+</script>
+</body>
+</html>

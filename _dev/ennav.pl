@@ -18,6 +18,10 @@ my @TOOLS = (   # 파일, 머리 메뉴 이름, 바닥 이름
   ['image-exif.html',     'Remove location', 'Remove photo location'],
   ['qr-generate.html',    'QR code',        'QR code'],
   ['random-pick.html',    'Random picker',  'Random picker'],
+  ['image-watermark.html', 'Watermark',     'Photo watermark'],
+  ['image-split.html',    'Split image',    'Split image into a grid'],
+  ['pdf-watermark.html',  'PDF watermark',  'PDF watermark'],
+  ['qr-scan.html',        'Read QR',        'Read a QR code from an image'],
 );
 
 for my $path (glob('en/*.html')) {

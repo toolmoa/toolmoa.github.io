@@ -79,6 +79,22 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-mosaic.html"/>
   </url>
   <url>
+    <loc>https://toolmoa.github.io/en/image-split.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-split.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-split.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-split.html"/>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/en/image-watermark.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-watermark.html"/>
+  </url>
+  <url>
     <loc>https://toolmoa.github.io/en/img-to-pdf.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
@@ -119,12 +135,28 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-to-image.html"/>
   </url>
   <url>
+    <loc>https://toolmoa.github.io/en/pdf-watermark.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-watermark.html"/>
+  </url>
+  <url>
     <loc>https://toolmoa.github.io/en/qr-generate.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/qr-generate.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/qr-generate.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/qr-generate.html"/>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/en/qr-scan.html</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/qr-scan.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/qr-scan.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/qr-scan.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/en/random-pick.html</loc>
@@ -196,11 +228,17 @@
     <loc>https://toolmoa.github.io/image-split.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-split.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-split.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-split.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/image-watermark.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-watermark.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/img-to-pdf.html</loc>
@@ -261,6 +299,9 @@
     <loc>https://toolmoa.github.io/pdf-watermark.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-watermark.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-watermark.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/privacy.html</loc>
@@ -279,6 +320,9 @@
     <loc>https://toolmoa.github.io/qr-scan.html</loc>
     <lastmod>2026-10-19</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/qr-scan.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/qr-scan.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/qr-scan.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/random-pick.html</loc>

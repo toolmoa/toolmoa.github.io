@@ -2375,7 +2375,8 @@
   var EN_PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html',
                   'pdf-merge.html', 'pdf-split.html', 'file-convert.html', 'qr-generate.html',
                   'image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
-                  'image-mosaic.html', 'image-exif.html'];
+                  'image-mosaic.html', 'image-exif.html',
+                  'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html'];
 
   function currentFile() {
     return location.pathname.split('/').pop() || 'index.html';

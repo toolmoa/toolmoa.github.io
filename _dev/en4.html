@@ -26,6 +26,7 @@
 <tbody id="rows"></tbody></table>
 
 <script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/qrcode.min.js"></script>
 <script>
 try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
 var results = [];
@@ -123,9 +124,10 @@ function hangulLeft(d) {
 }
 
 var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
-           'image-mosaic.html', 'image-exif.html'];
+           'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html'];
 var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
               'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
+var MENU_N = ALL_EN.length - 1;   // 홈을 뺀 툴 수 = 머리 메뉴 개수 = 영어 홈 카드 수
 
 function run() {
   var chain = Promise.resolve();
@@ -142,7 +144,7 @@ function run() {
           var foot = d.querySelectorAll('.site-footer nav:first-child a');
           var han = hangulLeft(d);
           var probs = [];
-          if (nav.length !== 13) probs.push('메뉴 ' + nav.length + '개');
+          if (nav.length !== MENU_N) probs.push('메뉴 ' + nav.length + '개');
           if (p !== 'index.html' && (!cur || cur.getAttribute('href') !== p)) probs.push('현재표시 틀림');
           if (han) probs.push('한글: ' + han);
           if (f.dataset.errs) probs.push('JS오류 ' + f.dataset.errs);
@@ -157,9 +159,9 @@ function run() {
       });
     });
     return seq.then(function () {
-      log('영어판 14쪽 공통', bad.length === 0, bad.length ? bad.join(' ;; ') : '메뉴 13개 · 현재 표시 · 한글 0 · JS 오류 0 · 바닥 링크 정상');
+      log('영어판 ' + ALL_EN.length + '쪽 공통', bad.length === 0, bad.length ? bad.join(' ;; ') : '메뉴 ' + MENU_N + '개 · 현재 표시 · 한글 0 · JS 오류 0 · 바닥 링크 정상');
     });
-  }).catch(function (e) { log('영어판 14쪽 공통', false, '오류: ' + e.message); });
+  }).catch(function (e) { log('영어판 ' + ALL_EN.length + '쪽 공통', false, '오류: ' + e.message); });
 
   // ===== 2. 영어 홈 카드가 12종 전부를 가리키는지 =====
   chain = chain.then(function () {
@@ -167,8 +169,8 @@ function run() {
       var hrefs = Array.prototype.map.call(f.contentDocument.querySelectorAll('.tool-card'),
         function (a) { return a.getAttribute('href'); });
       var miss = ALL_EN.filter(function (p) { return p !== 'index.html' && hrefs.indexOf(p) < 0; });
-      log('영어 홈 카드', miss.length === 0 && hrefs.length === 13,
-          '카드 ' + hrefs.length + '개' + (miss.length ? ' · 빠짐: ' + miss.join(',') : ' · 13종 전부'));
+      log('영어 홈 카드', miss.length === 0 && hrefs.length === MENU_N,
+          '카드 ' + hrefs.length + '개' + (miss.length ? ' · 빠짐: ' + miss.join(',') : ' · ' + MENU_N + '종 전부'));
       f.remove();
     });
   }).catch(function (e) { log('영어 홈 카드', false, '오류: ' + e.message); });
@@ -444,6 +446,121 @@ function run() {
       });
     });
   }).catch(function (e) { log('모자이크 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 9~12. 2026-10-19 영어판 4쪽: 저장 결과물을 다시 읽는다 =====
+  // 영어판에는 i18n.js 가 없다. 한국어판에서 옮긴 스크립트가 t() 를 부르면 여기서 죽는다.
+  function solid3(w, h, color) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var x = c.getContext('2d'); x.fillStyle = color; x.fillRect(0, 0, w, h);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+  }
+  function changed3(bm, x0, y0, w, h, base) {
+    var o = document.createElement('canvas'); o.width = bm.width; o.height = bm.height;
+    var ox = o.getContext('2d'); ox.drawImage(bm, 0, 0);
+    var d = ox.getImageData(x0, y0, w, h).data, n = 0;
+    for (var i = 0; i < d.length; i += 4) if (Math.abs(d[i] - base[0]) > 24 || Math.abs(d[i + 1] - base[1]) > 24 || Math.abs(d[i + 2] - base[2]) > 24) n++;
+    return n;
+  }
+  function zipNames3(buf) {
+    var v = new DataView(buf), out = [], off = 0;
+    while (off + 30 <= buf.byteLength && v.getUint32(off, true) === 0x04034B50) {
+      var nameLen = v.getUint16(off + 26, true), extra = v.getUint16(off + 28, true), size = v.getUint32(off + 18, true);
+      out.push(new TextDecoder().decode(new Uint8Array(buf, off + 30, nameLen)));
+      off += 30 + nameLen + extra + size;
+    }
+    return out;
+  }
+  function han3(d) { return /[가-힣]/.test(d.body.innerText.replace(/한국어/g, '')); }
+
+  chain = chain.then(function () {
+    return Promise.all([solid3(400, 300, '#2040c0'), loadFrame('../en/image-watermark.html')]).then(function (a) {
+      var f = a[1], d = f.contentDocument, cap = capture(f);
+      setFiles(d.getElementById('file'), [new File([a[0]], 'blue.png', { type: 'image/png' })]);
+      return waitFor(function () { return txt(d, 't-count') === '1' && d.getElementById('preview').width === 400; }).then(function () {
+        var tx = d.getElementById('wtext'); tx.value = 'SAMPLE'; tx.dispatchEvent(new Event('input', { bubbles: true }));
+        var op = d.getElementById('wopacity'); op.value = '100'; op.dispatchEvent(new Event('input', { bubbles: true }));
+        var pos = d.getElementById('wpos'); pos.value = 'br'; pos.dispatchEvent(new Event('change', { bubbles: true }));
+        var fmt = d.getElementById('fmt'); fmt.value = 'image/png'; fmt.dispatchEvent(new Event('change', { bubbles: true }));
+        return new Promise(function (r) { setTimeout(r, 250); });
+      }).then(function () {
+        d.getElementById('btn-all').click();
+        return waitFor(function () { return outputs(cap, /^image\//).length; });
+      }).then(function () {
+        return createImageBitmap(outputs(cap, /^image\//)[0]);
+      }).then(function (bm) {
+        var br = changed3(bm, 240, 220, 160, 80, [32, 64, 192]), tl = changed3(bm, 0, 0, 200, 150, [32, 64, 192]);
+        var msg = txt(d, 'msg'), han = han3(d);
+        log('워터마크 (영어)', bm.width === 400 && br > 200 && tl === 0 && /blue_watermarked\.png$/.test(cap.names[0] || '') && /watermarked and saved/.test(msg) && !han && !f.dataset.errs,
+            '저장 ' + bm.width + '×' + bm.height + ' · 오른쪽 아래 바뀐 픽셀 ' + br + ' (>200) · 왼쪽 위 ' + tl + ' (0) · 이름 ' + cap.names[0] + ' · 안내 "' + msg.slice(0, 50) + '" · 한글 ' + han + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('워터마크 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return Promise.all([solid3(300, 200, '#808080'), loadFrame('../en/image-split.html')]).then(function (a) {
+      var f = a[1], d = f.contentDocument, cap = capture(f);
+      setFiles(d.getElementById('file'), [new File([a[0]], 'g.png', { type: 'image/png' })]);
+      return waitFor(function () { return txt(d, 't-count') === '9'; }).then(function () {
+        var pr = d.getElementById('preset'); pr.value = '1x3'; pr.dispatchEvent(new Event('change', { bubbles: true }));
+        var fit = d.getElementById('fit'); fit.value = 'keep'; fit.dispatchEvent(new Event('change', { bubbles: true }));
+        var piece = txt(d, 't-piece'), hint = txt(d, 'fit-hint');
+        d.getElementById('btn-save').click();
+        return waitFor(function () { return outputs(cap, /zip/).length; }).then(function () {
+          return outputs(cap, /zip/)[0].arrayBuffer();
+        }).then(function (buf) {
+          var names = zipNames3(buf), msg = txt(d, 'msg'), han = han3(d);
+          log('사진 분할 (영어)', piece === '100×200' && names.length === 3 && names[0] === 'g_1.png' && names[2] === 'g_3.png' && /g_split\.zip$/.test(cap.names[0] || '') && /pieces saved/.test(msg) && /Nothing is discarded/.test(hint) && !han && !f.dataset.errs,
+              '조각 ' + piece + ' (기대 100×200) · ZIP [' + names.join(', ') + '] ' + cap.names[0] + ' · 안내 "' + msg.slice(0, 40) + '" · 모양 안내 "' + hint.slice(0, 30) + '" · 한글 ' + han + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('사진 분할 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (pdf) { pdf.addPage([400, 300]); pdf.addPage([400, 300]); return pdf.save(); }).then(function (bytes) {
+      return loadFrame('../en/pdf-watermark.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 'two.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '2'; }, 15000).then(function () {
+          var quick = d.querySelector('[data-fill="Copy"]'); quick.click();
+          var val = d.getElementById('wtext').value;
+          var rg = d.getElementById('range'); rg.value = '2'; rg.dispatchEvent(new Event('input', { bubbles: true }));
+          return new Promise(function (r) { setTimeout(r, 250); }).then(function () {
+            d.getElementById('btn-save').click();
+            return waitFor(function () { return outputs(cap, /pdf/).length; }, 15000);
+          }).then(function () { return outputs(cap, /pdf/)[0].arrayBuffer(); }).then(function (buf) {
+            return PDFLib.PDFDocument.load(new Uint8Array(buf)).then(function (out) {
+              var xobj = out.getPages().map(function (p) { var r = p.node.Resources(); var xo = r && r.lookup(PDFLib.PDFName.of('XObject')); return xo ? xo.keys().length : 0; });
+              var msg = txt(d, 'msg'), han = han3(d);
+              log('PDF 워터마크 (영어)', val === 'Copy' && xobj.join('') === '01' && /two_watermarked\.pdf$/.test(cap.names[0] || '') && /1 page\(s\) watermarked/.test(msg) && !han && !f.dataset.errs,
+                  '빠른 문구 "' + val + '" · 범위 2 → 쪽별 그림 ' + xobj.join('') + ' (기대 01) · 이름 ' + cap.names[0] + ' · 안내 "' + msg.slice(0, 50) + '" · 한글 ' + han + ' · JS오류 ' + (f.dataset.errs || '없음'));
+              f.remove();
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 워터마크 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    var q = qrcode(0, 'M'); q.addData('WIFI:T:WPA;S:Cafe Toolmoa;P:hello123;;', 'Byte'); q.make();
+    var n = q.getModuleCount(), cell = 6, c = document.createElement('canvas'); c.width = c.height = (n + 8) * cell;
+    var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.fillStyle = '#000';
+    for (var r = 0; r < n; r++) for (var k = 0; k < n; k++) if (q.isDark(r, k)) x.fillRect((k + 4) * cell, (r + 4) * cell, cell, cell);
+    return Promise.all([new Promise(function (r) { c.toBlob(r, 'image/png'); }), loadFrame('../en/qr-scan.html')]).then(function (a) {
+      var f = a[1], d = f.contentDocument;
+      setFiles(d.getElementById('file'), [new File([a[0]], 'wifi.png', { type: 'image/png' })]);
+      return waitFor(function () { return !d.getElementById('area').hidden && txt(d, 'out') !== ''; }, 15000).then(function () {
+        var kind = txt(d, 'kind'), fields = txt(d, 'fields'), msg = txt(d, 'msg'), han = han3(d);
+        var openHidden = d.getElementById('btn-open').hidden;
+        log('QR 스캔 (영어)', kind === 'Wi-Fi' && /Network name/.test(fields) && /Cafe Toolmoa/.test(fields) && /hello123/.test(fields) && openHidden && /QR code read/.test(msg) && !han && !f.dataset.errs,
+            '종류 "' + kind + '" · 항목 "' + fields.replace(/\s+/g, ' ').slice(0, 70) + '" · 열기 버튼 숨김 ' + openHidden + ' · 안내 "' + msg.slice(0, 30) + '" · 한글 ' + han + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('QR 스캔 (영어)', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

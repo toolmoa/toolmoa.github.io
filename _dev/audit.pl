@@ -123,6 +123,13 @@ my @PAIRS = (
   ['image-mosaic.html',   ['function cover', 'setPointerCapture', 'function toImage', "addEventListener('paste'"]],
   ['image-exif.html',     ['function stripJpeg', 'function stripPng', 'function stripWebp', 'function orientTiff',
                            'makeZip(entries)', 'info[k] === undefined']],
+  ['image-watermark.html', ['function makeStamp', 'function stamp', "o.pos === 'tile'", 'makeZip(entries)',
+                            "addEventListener('paste'", 'function clearValidate', 'data-remove']],
+  ['image-split.html',    ['function layout', "fitSel.value === 'square'", 'makeZip(entries)', "addEventListener('paste'", 'MAX_PIXELS']],
+  ['pdf-watermark.html',  ['ParseSpeeds.Fastest', 'function centers', 'embedPng', 'function parseRange', 'rotated',
+                            'function clearValidate', 'data-fill']],
+  ['qr-scan.html',        ['function decodeImage', 'inversionAttempts', 'function analyze', 'getUserMedia', 'function stopCam',
+                            "addEventListener('paste'", 'pagehide']],
 );
 
 my $gap = 0;

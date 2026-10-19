@@ -17,6 +17,10 @@ my %PAIR = (
   'random-pick.html'    => 'random-pick.html',
   'image-mosaic.html'   => 'image-mosaic.html',
   'image-exif.html'     => 'image-exif.html',
+  'image-watermark.html' => 'image-watermark.html',
+  'image-split.html'    => 'image-split.html',
+  'pdf-watermark.html'  => 'pdf-watermark.html',
+  'qr-scan.html'        => 'qr-scan.html',
 );
 
 my $BASE = 'https://toolmoa.github.io/';
