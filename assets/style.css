@@ -46,6 +46,11 @@
 
 * { box-sizing: border-box; }
 
+/* hidden 속성은 브라우저 기본값(display:none)이라 .btn / .btn-row 처럼 display 를 지정한
+   클래스에 진다. 그러면 숨긴 버튼이 그대로 그려진다 — 실제로 QR 페이지의 "로고 빼기" 줄이
+   로고를 넣기 전부터 보이고 있었다 (2026-10-19 발견). 속성이 항상 이기게 한다. */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
