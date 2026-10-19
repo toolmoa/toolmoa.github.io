@@ -32,6 +32,8 @@ image-convert.html    이미지 형식 변환        ← 키워드: png jpg 변�
 image-join.html       사진 이어붙이기         ← 키워드: 사진 이어붙이기, 이미지 합치기
 image-mosaic.html     사진 모자이크           ← 키워드: 사진 모자이크, 개인정보 가리기, 모자이크 처리
 image-exif.html       사진 위치정보 삭제       ← 키워드: 사진 위치정보 삭제, exif 제거, 사진 gps 지우기
+image-watermark.html  사진 워터마크 넣기       ← 키워드: 사진 워터마크, 이미지 워터마크 넣기, 로고 삽입
+image-split.html      사진 분할               ← 키워드: 사진 분할, 인스타 그리드 나누기, 이미지 9분할
 img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변환
 char-count.html       글자수 세기·원고지 계산  ← 키워드: 글자수 세기, 원고지 매수
 text-clean.html       텍스트 정리             ← 키워드: 중복 줄 제거, 명단 정리
@@ -40,8 +42,10 @@ pdf-merge.html        PDF 합치기             ← 키워드: PDF 합치기, PD
 pdf-split.html        PDF 나누기             ← 키워드: PDF 나누기, 페이지 추출
 pdf-edit.html         PDF 회전·삭제·순서 변경  ← 키워드: PDF 회전, PDF 페이지 삭제
 pdf-to-image.html     PDF 이미지 변환         ← 키워드: pdf 이미지 변환, pdf jpg 변환
+pdf-watermark.html    PDF 워터마크 넣기        ← 키워드: pdf 워터마크, pdf 워터마크 넣기, 대외비 표시
 file-convert.html     CSV·JSON·엑셀 변환     ← 키워드: csv json 변환, 엑셀 변환
 qr-generate.html      QR코드 만들기           ← 키워드: QR코드 만들기, QR 생성
+qr-scan.html          QR코드 스캔·읽기        ← 키워드: QR코드 스캔 PC, QR코드 이미지 읽기, QR 해독
 password-gen.html     비밀번호 생성기         ← 키워드: 비밀번호 생성기
 random-pick.html      랜덤 뽑기·추첨기        ← 키워드: 랜덤 뽑기, 추첨기, 조 나누기
 unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 계산, 인치 cm 변환
@@ -62,7 +66,7 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 21종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 25종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
@@ -70,7 +74,7 @@ sitemap.xml           사이트맵 (생성물)
 
 외부 라이브러리는 `assets/vendor/`에 **직접 포함**되어 있다 (CDN을 쓰지 않는다).
 `pdf-lib`(PDF 편집·생성), `pdf.js`(PDF 읽기·미리보기·이미지 변환), `xlsx`(파일 변환),
-`qrcode-generator`(QR 생성). 전부 MIT 또는 Apache-2.0 이다.
+`qrcode-generator`(QR 생성), `jsQR`(QR 판독). 전부 MIT 또는 Apache-2.0 이다.
 CDN을 안 쓰는 이유는 주소가 바뀌거나 CDN이 죽으면 사이트가 통째로 망가지기 때문이다.
 실제로 처음에 쓰려던 `qrcode` 패키지의 CDN 경로가 404여서 QR이 동작하지 않았다.
 
@@ -93,7 +97,7 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 meta exif
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 meta exif
 ```
 
 에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.

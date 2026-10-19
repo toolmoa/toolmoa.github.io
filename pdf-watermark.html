@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF 워터마크 넣기 - 글자·로고 삽입 무료 | 툴모아</title>
+<meta name="description" content="PDF 모든 페이지에 글자나 로고 워터마크를 넣습니다. 한글 글자도 되고, 기울기·투명도·위치를 고르거나 바둑판처럼 반복할 수 있습니다. 파일은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/pdf-watermark.html">
+<meta property="og:title" content="PDF 워터마크 넣기 · 글자·로고 삽입">
+<meta property="og:description" content="PDF 모든 페이지에 글자·로고 워터마크를. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔏</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<!-- pdf-lib 은 여기서 미리 받지 않는다. 아래 loadLib() 이 파일을 고른 뒤에 받는다. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"PDF 워터마크 넣기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/pdf-watermark.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/pdf-watermark.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PDF 워터마크 넣기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDF 워터마크 넣기 · 글자·로고 삽입">
+<meta name="twitter:description" content="PDF 모든 페이지에 글자·로고 워터마크를. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/pdf-watermark.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"파일이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. PDF는 브라우저 안에서만 열고 고치고 저장합니다. 인터넷을 끊어도 동작합니다. 계약서나 신분증 사본처럼 민감한 문서에 쓰라고 만든 도구입니다."}},{"@type":"Question","name":"한글이 깨지지 않나요?","acceptedAnswer":{"@type":"Answer","text":"깨지지 않습니다. 글자를 PDF 글꼴로 넣는 대신 화면에 그린 그대로 그림으로 새깁니다. 그래서 한글·한자·이모지 모두 보이는 그대로 들어가고, 글꼴 파일을 따로 받을 필요도 없습니다. 대신 글자를 PDF에서 선택·복사할 수는 없는데, 워터마크는 복사되지 않는 쪽이 오히려 낫습니다."}},{"@type":"Question","name":"워터마크를 다시 지울 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"워터마크는 페이지 위에 겹쳐 그린 별도 그림이라, PDF 편집 프로그램으로 그 그림만 골라 지울 수는 있습니다. 완전히 지울 수 없게 하려면 PDF 이미지 변환으로 각 쪽을 그림으로 바꾼 뒤 이미지 PDF 변환으로 다시 묶으세요. 글자 선택은 안 되지만 워터마크가 본문과 한 장의 그림이 됩니다."}},{"@type":"Question","name":"진하기는 얼마가 좋나요?","acceptedAnswer":{"@type":"Answer","text":"본문을 읽어야 하는 문서라면 15~30%로 두세요. 100%는 아래 글자를 완전히 가립니다. 미리보기는 빈 쪽 위에 보여 주므로, 저장한 뒤 실제 본문 위에서 한 번 확인하는 것이 좋습니다."}},{"@type":"Question","name":"비밀번호가 걸린 PDF는요?","acceptedAnswer":{"@type":"Answer","text":"열 수 없습니다. 비밀번호를 푼 상태로 다시 저장한 파일을 넣어 주세요. 열기는 되는데 편집이 제한된 PDF는 대부분 처리됩니다."}},{"@type":"Question","name":"용량이 커지나요?","acceptedAnswer":{"@type":"Answer","text":"워터마크 그림 한 장만 PDF에 추가되고 모든 쪽이 그것을 공유하므로, 쪽수가 많아도 보통 수십~수백 KB 정도만 늘어납니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"PDF 워터마크 넣기","item":"https://toolmoa.github.io/pdf-watermark.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="pwm.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" aria-current="page" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="pwm.h1">PDF 워터마크 넣기</h1>
+  <p class="lead" data-i18n="pwm.lead">PDF의 모든 페이지(또는 고른 페이지)에 글자나 로고를 새깁니다. "대외비", "사본", 회사 이름처럼 한글도 그대로 들어갑니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 파일이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🔏</span>
+    <span class="dz-main" data-i18n="pwm.drop">PDF 파일을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="pwm.drop2">한 번에 한 파일 · 비밀번호가 걸린 PDF는 열 수 없습니다</span>
+    <input type="file" id="file" accept="application/pdf,.pdf">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl" data-i18n="pwm.pages">전체 쪽수</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl" data-i18n="pwm.fileSize">파일 크기</span></div>
+      <div class="stat"><span class="num" id="t-page-size" style="font-size:18px">-</span><span class="lbl" data-i18n="pwm.pageSize">첫 쪽 크기</span></div>
+    </div>
+
+    <div class="card">
+      <div class="field">
+        <label for="wtype" data-i18n="pwm.type">워터마크 종류</label>
+        <select id="wtype">
+          <option value="text" selected data-i18n="pwm.tText">글자</option>
+          <option value="logo" data-i18n="pwm.tLogo">로고 그림 (PNG 권장)</option>
+        </select>
+      </div>
+      <div class="field" id="text-field">
+        <label for="wtext" data-i18n="pwm.text">새길 글자</label>
+        <input type="text" id="wtext" value="대외비" maxlength="80" data-i18n-ph="pwm.textPh" placeholder="예: 대외비 · 사본 · 회사 이름">
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn secondary small" type="button" data-fill="대외비" data-i18n="pwm.q1">대외비</button>
+          <button class="btn secondary small" type="button" data-fill="사본" data-i18n="pwm.q2">사본</button>
+          <button class="btn secondary small" type="button" data-fill="초안 — 배포 금지" data-i18n="pwm.q3">초안 — 배포 금지</button>
+          <button class="btn secondary small" type="button" data-fill="견본" data-i18n="pwm.q4">견본</button>
+        </div>
+      </div>
+      <div class="field" id="logo-field" hidden>
+        <label for="logo" data-i18n="pwm.logo">로고 파일</label>
+        <input type="file" id="logo" accept="image/*" style="display:block">
+        <div class="hint" data-i18n="pwm.logoHint">배경이 투명한 PNG를 쓰면 글자 위에 얹혀도 자연스럽습니다.</div>
+        <div class="btn-row" id="logo-row" hidden>
+          <button class="btn secondary small" id="logo-clear" data-i18n="pwm.logoClear">로고 빼기</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+        <div class="field">
+          <label for="wpos" data-i18n="pwm.pos">위치</label>
+          <select id="wpos">
+            <option value="c" selected data-i18n="pwm.pC">가운데 (한 번)</option>
+            <option value="tile" data-i18n="pwm.pTile">바둑판처럼 반복 (쪽 전체)</option>
+            <option value="tl" data-i18n="pwm.pTl">왼쪽 위</option>
+            <option value="tr" data-i18n="pwm.pTr">오른쪽 위</option>
+            <option value="bl" data-i18n="pwm.pBl">왼쪽 아래</option>
+            <option value="br" data-i18n="pwm.pBr">오른쪽 아래</option>
+            <option value="bc" data-i18n="pwm.pBc">아래 가운데</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wrot" data-i18n="pwm.rot">기울기</label>
+          <select id="wrot">
+            <option value="45" selected data-i18n="pwm.r45">45° 대각선</option>
+            <option value="30" data-i18n="pwm.r30">30° 기울임</option>
+            <option value="0" data-i18n="pwm.r0">수평</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wsize"><span data-i18n="pwm.size">크기</span> <span id="size-val" style="color:var(--accent)">60%</span></label>
+          <input type="range" id="wsize" min="5" max="100" value="60" step="1">
+          <div class="hint" data-i18n="pwm.sizeHint">쪽 가로 폭 대비 비율입니다.</div>
+        </div>
+        <div class="field">
+          <label for="wopacity"><span data-i18n="pwm.opacity">진하기</span> <span id="op-val" style="color:var(--accent)">20%</span></label>
+          <input type="range" id="wopacity" min="5" max="100" value="20" step="5">
+          <div class="hint" data-i18n="pwm.opHint">본문 글자가 읽히려면 15~30%가 알맞습니다.</div>
+        </div>
+        <div class="field" id="color-field">
+          <label for="wcolor" data-i18n="pwm.color">글자 색</label>
+          <input type="color" id="wcolor" value="#c62828" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field">
+          <label for="range" data-i18n="pwm.range">넣을 쪽 (비우면 전체)</label>
+          <input type="text" id="range" placeholder="예: 1-3, 5" data-i18n-ph="pwm.rangePh" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px" data-i18n="pwm.previewNote">첫 쪽 모양으로 미리 봅니다. 실제 본문은 저장한 파일에서 확인하세요.</p>
+    <div class="card" style="padding:10px;text-align:center;background:var(--surface-2)">
+      <canvas id="preview" style="max-width:100%;max-height:480px;height:auto;border:1px solid var(--border);background:#fff" aria-label="워터마크 미리보기"></canvas>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-save" data-i18n="pwm.save">워터마크 넣어 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="pwm.cross">특정 쪽만 보내려면 먼저 <a href="pdf-split.html">PDF 나누기</a>로 뽑고, 여러 파일을 하나로 만들려면 <a href="pdf-merge.html">PDF 합치기</a>를 쓰세요. 사진에는 <a href="image-watermark.html">사진 워터마크</a>가 있습니다.</p>
+
+  <div class="ad-slot"><!-- AD:PDFWATERMARK --></div>
+
+  <h2 data-ko-only>워터마크를 넣어야 할 때</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      계약서 사본, 견적서, 제안서, 강의 자료처럼 <strong style="color:var(--text)">받는 사람이 정해진 문서</strong>에
+      "대외비"나 받는 사람 이름을 흐리게 깔아 두면, 밖으로 흘러나갔을 때 어디서 나갔는지 알 수 있고
+      함부로 돌리기도 꺼려집니다. 신분증·등기부등본 사본을 제출할 때 "○○ 제출용 외 사용 금지"라고 적어 두는 것도
+      같은 이치입니다. 이 페이지는 PDF를 서버로 보내지 않으므로 그런 민감한 문서에 써도 안전합니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>파일이 서버로 올라가나요?</summary>
+      <p>아니요. PDF는 브라우저 안에서만 열고 고치고 저장합니다. 인터넷을 끊어도 동작합니다. 계약서나 신분증 사본처럼 민감한 문서에 쓰라고 만든 도구입니다.</p>
+    </details>
+    <details>
+      <summary>한글이 깨지지 않나요?</summary>
+      <p>깨지지 않습니다. 글자를 PDF 글꼴로 넣는 대신 화면에 그린 그대로 그림으로 새깁니다. 그래서 한글·한자·이모지 모두 보이는 그대로 들어가고, 글꼴 파일을 따로 받을 필요도 없습니다. 대신 글자를 PDF에서 선택·복사할 수는 없는데, 워터마크는 복사되지 않는 쪽이 오히려 낫습니다.</p>
+    </details>
+    <details>
+      <summary>워터마크를 다시 지울 수 있나요?</summary>
+      <p>워터마크는 페이지 위에 겹쳐 그린 별도 그림이라, PDF 편집 프로그램으로 그 그림만 골라 지울 수는 있습니다. 완전히 지울 수 없게 하려면 <a href="pdf-to-image.html">PDF 이미지 변환</a>으로 각 쪽을 그림으로 바꾼 뒤 <a href="img-to-pdf.html">이미지 PDF 변환</a>으로 다시 묶으세요. 글자 선택은 안 되지만 워터마크가 본문과 한 장의 그림이 됩니다.</p>
+    </details>
+    <details>
+      <summary>진하기는 얼마가 좋나요?</summary>
+      <p>본문을 읽어야 하는 문서라면 15~30%로 두세요. 100%는 아래 글자를 완전히 가립니다. 미리보기는 빈 쪽 위에 보여 주므로, 저장한 뒤 실제 본문 위에서 한 번 확인하는 것이 좋습니다.</p>
+    </details>
+    <details>
+      <summary>비밀번호가 걸린 PDF는요?</summary>
+      <p>열 수 없습니다. 비밀번호를 푼 상태로 다시 저장한 파일을 넣어 주세요. 열기는 되는데 편집이 제한된 PDF는 대부분 처리됩니다.</p>
+    </details>
+    <details>
+      <summary>용량이 커지나요?</summary>
+      <p>워터마크 그림 한 장만 PDF에 추가되고 모든 쪽이 그것을 공유하므로, 쪽수가 많아도 보통 수십~수백 KB 정도만 늘어납니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var preview = document.getElementById('preview');
+  var typeSel = document.getElementById('wtype');
+  var textIn = document.getElementById('wtext');
+  var logoIn = document.getElementById('logo');
+  var posSel = document.getElementById('wpos');
+  var rotSel = document.getElementById('wrot');
+  var sizeIn = document.getElementById('wsize');
+  var opIn = document.getElementById('wopacity');
+  var colorIn = document.getElementById('wcolor');
+  var rangeIn = document.getElementById('range');
+
+  var doc = null, bytes = null, baseName = 'document', pageCount = 0, firstSize = null;
+  var logoImg = null, timer = null;
+
+  var msgKind = '';     // 'validate' = 미리보기가 띄운 입력 검증 안내. 이것만 미리보기가 지울 수 있다.
+  function setMsg(text, cls, kind) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+    msgKind = text ? (kind || '') : '';
+  }
+  // 미리보기가 띄운 검증 안내만 지운다. 저장 완료·크기 축소 같은 안내는 사용자가 읽어야 하므로 남긴다.
+  function clearValidate() { if (msgKind === 'validate') setMsg(''); }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  // pdf-lib 은 500KB 다. 파일을 고른 뒤에 받아서 첫 화면을 가볍게 한다.
+  var libPromise = null;
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('PDFLib', 'assets/vendor/pdf-lib.min.js')
+        .catch(function (e) { libPromise = null; throw e; });   // 실패하면 다음에 다시 시도할 수 있게
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof PDFLib !== 'undefined') { fn(); return; }
+    setMsg(t('msg.loadingLib', '처리 도구를 불러오는 중입니다…'));
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg(t('msg.libFail', '처리 도구를 불러오지 못했습니다. 새로고침한 뒤 다시 시도해 주세요.'), 'err');
+    });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+
+  function load(file) {
+    if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+      setMsg(t('msg.pickPdf', 'PDF 파일을 선택해 주세요.'), 'err'); return;
+    }
+    whenReady(function () {
+      setMsg(t('msg.reading', '파일을 읽는 중입니다…'));
+      file.arrayBuffer().then(function (buf) {
+        bytes = new Uint8Array(buf);
+        // Fastest 가 아니면 큰 파일에서 수십 초가 걸린다 (880KB 에서 15초 → 0.2초)
+        return PDFLib.PDFDocument.load(bytes, { parseSpeed: PDFLib.ParseSpeeds.Fastest, ignoreEncryption: false });
+      }).then(function (d) {
+        doc = d;
+        pageCount = d.getPageCount();
+        var p0 = d.getPage(0), s = p0.getSize();
+        // 회전된 쪽은 보이는 가로세로가 바뀐다. 미리보기만 그 모양을 따른다.
+        var rot = (p0.getRotation().angle % 180) !== 0;
+        firstSize = rot ? { w: s.height, h: s.width } : { w: s.width, h: s.height };
+        baseName = file.name.replace(/\.pdf$/i, '');
+        document.getElementById('t-pages').textContent = pageCount;
+        document.getElementById('t-size').textContent = humanSize(file.size);
+        document.getElementById('t-page-size').textContent = Math.round(s.width) + '×' + Math.round(s.height) + 'pt';
+        area.hidden = false;
+        setMsg('');
+        schedule();
+      }).catch(function (e) {
+        doc = null; bytes = null;
+        var detail = e && e.message ? ' — ' + e.message : '';
+        setMsg(t('pwm.cantOpen', '파일을 열 수 없습니다. 비밀번호가 걸려 있거나 손상된 PDF일 수 있습니다.') + detail, 'err');
+      });
+    });
+  }
+
+  function opts() {
+    return {
+      type: typeSel.value,
+      text: textIn.value.trim(),
+      pos: posSel.value,
+      rot: parseInt(rotSel.value, 10) || 0,
+      size: parseInt(sizeIn.value, 10) / 100,
+      alpha: parseInt(opIn.value, 10) / 100,
+      color: colorIn.value
+    };
+  }
+
+  // 워터마크 그림을 투명 캔버스에 만든다. 글자는 쪽 폭의 비율로 폭을 맞춘다.
+  // 그림으로 새기기 때문에 한글·이모지가 글꼴 없이도 그대로 들어간다.
+  // PDF 의 pt 보다 촘촘하게(3배) 그려야 확대해도 흐리지 않다.
+  var SCALE = 3;
+  function makeStamp(pageW, o) {
+    var targetW = Math.max(8, pageW * o.size) * SCALE;
+    var c = document.createElement('canvas');
+    if (o.type === 'logo') {
+      if (!logoImg) return null;
+      var k = targetW / logoImg.naturalWidth;
+      c.width = Math.round(targetW); c.height = Math.max(1, Math.round(logoImg.naturalHeight * k));
+      c.getContext('2d').drawImage(logoImg, 0, 0, c.width, c.height);
+      return c;
+    }
+    if (!o.text) return null;
+    var probe = c.getContext('2d');
+    var family = '-apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+    probe.font = 'bold 100px ' + family;
+    var w100 = probe.measureText(o.text).width || 1;
+    var px = Math.max(6, Math.floor(100 * targetW / w100));
+    var font = 'bold ' + px + 'px ' + family;
+    probe.font = font;
+    var m = probe.measureText(o.text);
+    var pad = Math.ceil(px * 0.15);
+    c.width = Math.ceil(m.width) + pad * 2;
+    c.height = Math.ceil(px * 1.25) + pad * 2;
+    var ctx = c.getContext('2d');
+    ctx.font = font;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = o.color;
+    ctx.fillText(o.text, c.width / 2, c.height / 2);
+    return c;
+  }
+
+  // 쪽 크기(pt)와 도장 크기(pt)로 도장 중심 좌표들을 낸다. 원점은 왼쪽 아래(PDF 좌표계).
+  // 미리보기와 실제 저장이 같은 함수를 쓰므로 둘이 어긋날 수 없다.
+  function centers(W, H, sw, sh, o) {
+    var rad = o.rot * Math.PI / 180;
+    var out = [];
+    if (o.pos === 'tile') {
+      var diag = Math.sqrt(sw * sw + sh * sh);
+      var stepX = Math.max(diag * 1.15, 8), stepY = Math.max(sh * 2.6, 8);
+      var row = 0;
+      for (var y = stepY / 2; y < H + stepY; y += stepY, row++) {
+        var shift = (row % 2) ? stepX / 2 : 0;
+        for (var x = -stepX + shift; x < W + stepX; x += stepX) out.push([x, y]);
+      }
+      return out;
+    }
+    var cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+    var bw = sw * cos + sh * sin, bh = sw * sin + sh * cos;
+    var margin = Math.min(W, H) * 0.04;
+    if (o.pos === 'c') return [[W / 2, H / 2]];
+    var cx = /l/.test(o.pos) ? margin + bw / 2 : (/r/.test(o.pos) ? W - margin - bw / 2 : W / 2);
+    var cy = /t/.test(o.pos) ? H - margin - bh / 2 : margin + bh / 2;
+    return [[cx, cy]];
+  }
+
+  function renderPreview() {
+    if (!firstSize) return;
+    var o = opts();
+    var W = firstSize.w, H = firstSize.h;
+    // 화면용 배율: 긴 쪽이 900px 정도
+    var k = 900 / Math.max(W, H);
+    preview.width = Math.round(W * k); preview.height = Math.round(H * k);
+    var ctx = preview.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, preview.width, preview.height);
+    // 본문이 있는 자리를 흐린 줄로 흉내 내서 진하기를 가늠할 수 있게 한다
+    ctx.fillStyle = '#d9dde3';
+    var lineH = preview.height / 40;
+    for (var i = 3; i < 36; i++) {
+      if (i % 9 === 0) continue;
+      ctx.fillRect(preview.width * 0.1, lineH * i, preview.width * (i % 7 === 0 ? 0.55 : 0.8), lineH * 0.45);
+    }
+    var s = makeStamp(W, o);
+    if (!s) {
+      setMsg(o.type === 'logo' ? t('pwm.needLogo', '로고 파일을 고르세요.') : t('pwm.needText', '새길 글자를 입력하세요.'), 'err', 'validate');
+      return;
+    }
+    clearValidate();
+    var sw = s.width / SCALE, sh = s.height / SCALE;     // pt 단위
+    var rad = o.rot * Math.PI / 180;
+    ctx.save();
+    ctx.globalAlpha = o.alpha;
+    centers(W, H, sw, sh, o).forEach(function (c) {
+      ctx.save();
+      // PDF 는 y 가 위로 자라고 캔버스는 아래로 자란다. 뒤집어 그린다.
+      ctx.translate(c[0] * k, (H - c[1]) * k);
+      ctx.rotate(-rad);
+      ctx.drawImage(s, -sw * k / 2, -sh * k / 2, sw * k, sh * k);
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(renderPreview, 60); }
+
+  function syncType() {
+    var logo = typeSel.value === 'logo';
+    document.getElementById('text-field').hidden = logo;
+    document.getElementById('logo-field').hidden = !logo;
+    document.getElementById('color-field').hidden = logo;
+    document.getElementById('size-val').textContent = sizeIn.value + '%';
+    document.getElementById('op-val').textContent = opIn.value + '%';
+  }
+  [typeSel, posSel, rotSel].forEach(function (el) { el.addEventListener('change', function () { syncType(); schedule(); }); });
+  [textIn, sizeIn, opIn, colorIn].forEach(function (el) { el.addEventListener('input', function () { syncType(); schedule(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-fill]'), function (b) {
+    b.addEventListener('click', function () {
+      // 화면에 보이는(번역된) 글자를 그대로 넣는다. 일본어 사용자는 일본어 문구를 원한다.
+      textIn.value = b.textContent.trim() || b.getAttribute('data-fill');
+      syncType(); schedule();
+    });
+  });
+
+  logoIn.addEventListener('change', function () {
+    var f = logoIn.files && logoIn.files[0];
+    if (!f) return;
+    if (f.type.indexOf('image/') !== 0) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    var url = URL.createObjectURL(f);
+    var img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); logoImg = img; document.getElementById('logo-row').hidden = false; schedule(); };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg(t('pwm.logoFail', '로고 그림을 열 수 없습니다.'), 'err'); };
+    img.src = url;
+  });
+  document.getElementById('logo-clear').addEventListener('click', function () {
+    logoImg = null; logoIn.value = '';
+    document.getElementById('logo-row').hidden = true;
+    schedule();
+  });
+
+  function parseRange(str) {
+    var out = [], seen = {};
+    str.split(',').forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var m = part.match(/^(\d+)\s*[-~]\s*(\d*)$/);
+      if (m) {
+        var a = parseInt(m[1], 10);
+        var b = m[2] ? parseInt(m[2], 10) : pageCount;
+        if (a > b) { var sw = a; a = b; b = sw; }
+        for (var i = a; i <= b; i++) {
+          if (i >= 1 && i <= pageCount && !seen[i]) { seen[i] = 1; out.push(i - 1); }
+        }
+      } else if (/^\d+$/.test(part)) {
+        var n = parseInt(part, 10);
+        if (n >= 1 && n <= pageCount && !seen[n]) { seen[n] = 1; out.push(n - 1); }
+      }
+    });
+    return out;
+  }
+
+  function canvasPng(c) {
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (b) { return b.arrayBuffer(); })
+      .then(function (buf) { return new Uint8Array(buf); });
+  }
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!doc) return;
+    var o = opts();
+    var s = makeStamp(firstSize.w, o);
+    if (!s) { setMsg(o.type === 'logo' ? t('pwm.needLogo', '로고 파일을 고르세요.') : t('pwm.needText', '새길 글자를 입력하세요.'), 'err'); return; }
+    var idxs = rangeIn.value.trim() ? parseRange(rangeIn.value) : null;
+    if (idxs && !idxs.length) { setMsg(t('pwm.badRange', '넣을 쪽을 찾지 못했습니다. 예: 1-3, 5'), 'err'); return; }
+    var btn = this;
+    btn.disabled = true;
+    setMsg(t('pwm.working', '워터마크를 넣는 중입니다…'));
+
+    // 원본 바이트를 다시 읽어 깨끗한 문서에 넣는다. 그래야 두 번 저장해도 겹치지 않는다.
+    var targets = [];     // 완료 안내에서 쪽수를 세야 하므로 바깥에 둔다
+    PDFLib.PDFDocument.load(bytes, { parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (pdf) {
+      return canvasPng(s).then(function (png) { return pdf.embedPng(png); }).then(function (img) {
+        var pages = pdf.getPages();
+        targets = idxs ? idxs.map(function (i) { return pages[i]; }) : pages;
+        var deg = PDFLib.degrees;
+        targets.forEach(function (page) {
+          var size = page.getSize();
+          var rotated = (page.getRotation().angle % 180) !== 0;
+          // 쪽이 90° 돌아가 있으면 보는 사람 기준의 가로세로가 바뀐다. 보이는 모양에 맞춰 넣는다.
+          var W = rotated ? size.height : size.width, H = rotated ? size.width : size.height;
+          var sw = W * o.size, sh = sw * s.height / s.width;
+          var rad = o.rot * Math.PI / 180;
+          centers(W, H, sw, sh, o).forEach(function (c) {
+            // drawImage 는 왼쪽 아래 모서리를 기준으로 돌린다. 중심이 c 에 오도록 모서리를 되계산한다.
+            var x = c[0] - (sw / 2) * Math.cos(rad) + (sh / 2) * Math.sin(rad);
+            var y = c[1] - (sw / 2) * Math.sin(rad) - (sh / 2) * Math.cos(rad);
+            var pos = { x: x, y: y, width: sw, height: sh, opacity: o.alpha, rotate: deg(o.rot) };
+            if (rotated) {
+              // 쪽 자체가 돌아가 있으면 좌표계도 함께 돌려 준다 (90° 기준, 보이는 그대로 들어가게)
+              var pr = page.getRotation().angle % 360; if (pr < 0) pr += 360;
+              if (pr === 90) { pos.x = size.width - y; pos.y = x; pos.rotate = deg(o.rot + 90); }
+              else if (pr === 270) { pos.x = y; pos.y = size.height - x; pos.rotate = deg(o.rot - 90); }
+            }
+            page.drawImage(img, pos);
+          });
+        });
+        return pdf.save();
+      }).then(function (out) {
+        var blob = new Blob([out], { type: 'application/pdf' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url; a.download = baseName + '_' + t('pwm.suffix', '워터마크') + '.pdf';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+        setMsg(targets.length + t('pwm.done', '쪽에 워터마크를 넣어 저장했습니다. ') + humanSize(blob.size), 'ok');
+        btn.disabled = false;
+      });
+    }).catch(function (e) {
+      setMsg(t('pwm.fail', 'PDF를 만들지 못했습니다.') + (e && e.message ? ' — ' + e.message : ''), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    doc = null; bytes = null; firstSize = null; pageCount = 0; logoImg = null;
+    fileInput.value = ''; logoIn.value = ''; rangeIn.value = '';
+    document.getElementById('logo-row').hidden = true;
+    preview.width = preview.height = 1;
+    ['t-pages'].forEach(function (id) { document.getElementById(id).textContent = '0'; });
+    document.getElementById('t-size').textContent = '-';
+    document.getElementById('t-page-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  });
+
+  syncType();
+})();
+</script>
+</body>
+</html>

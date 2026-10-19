@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 워터마크 넣기 - 글자·로고 삽입 무료 | 툴모아</title>
+<meta name="description" content="사진 여러 장에 글자나 로고 워터마크를 한 번에 넣습니다. 위치·크기·투명도·기울기를 고르고 바둑판처럼 반복해 채울 수도 있습니다. 사진은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/image-watermark.html">
+<meta property="og:title" content="사진 워터마크 넣기 · 글자·로고 삽입">
+<meta property="og:description" content="사진 여러 장에 글자·로고 워터마크를 한 번에. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>©</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"사진 워터마크 넣기","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/image-watermark.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/image-watermark.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="사진 워터마크 넣기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="사진 워터마크 넣기 · 글자·로고 삽입">
+<meta name="twitter:description" content="사진 여러 장에 글자·로고 워터마크를 한 번에. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/image-watermark.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"사진이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 사진은 브라우저 안에서만 열고 그리고 저장합니다. 인터넷을 끊어도 그대로 동작합니다. 그래서 수십 장을 한 번에 넣어도 기다릴 일이 없습니다."}},{"@type":"Question","name":"워터마크 글자가 사진마다 크기가 다르게 보여요","acceptedAnswer":{"@type":"Answer","text":"크기는 사진 가로 폭에 대한 비율로 정합니다. 가로 4000픽셀 사진과 800픽셀 사진에 같은 25%를 주면 둘 다 가로의 4분의 1 폭으로 들어갑니다. 픽셀 수가 아니라 보이는 비율을 맞추는 쪽이 여러 장을 한 번에 처리할 때 자연스럽습니다."}},{"@type":"Question","name":"로고가 흰 네모 안에 들어가요","acceptedAnswer":{"@type":"Answer","text":"로고 파일의 배경이 흰색으로 채워져 있기 때문입니다. 배경이 투명한 PNG 로고를 쓰세요. 로고를 만든 프로그램에서 \"배경 투명\" 또는 \"알파 채널 포함\"으로 저장하면 됩니다."}},{"@type":"Question","name":"워터마크를 다시 지울 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"저장한 사진에서는 지울 수 없습니다. 워터마크는 사진 위에 새로 그려져 원래 픽셀을 덮습니다. 원본 사진은 그대로 남아 있으니 원본을 따로 보관하고, 공개용으로만 워터마크 사진을 쓰세요."}},{"@type":"Question","name":"저장하면 화질이 떨어지나요?","acceptedAnswer":{"@type":"Answer","text":"\"원본과 같게\"로 두면 JPG 사진은 JPG(화질 92%)로, PNG는 PNG로 저장합니다. 사진 크기는 바꾸지 않습니다. 투명한 로고를 올렸더라도 바탕이 사진이라 JPG로 저장해도 문제없습니다."}},{"@type":"Question","name":"휴대전화에서도 되나요?","acceptedAnswer":{"@type":"Answer","text":"됩니다. 여러 장을 고르면 ZIP 한 개로 받습니다. 휴대전화는 파일을 연달아 내려받으면 첫 장만 저장되는 일이 잦아 기본으로 묶어 드립니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"사진 워터마크 넣기","item":"https://toolmoa.github.io/image-watermark.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="wm.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" aria-current="page" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="wm.h1">사진 워터마크 넣기</h1>
+  <p class="lead" data-i18n="wm.lead">사진 여러 장에 글자나 로고를 한 번에 새깁니다. 위치·크기·투명도·기울기를 고르고, 바둑판처럼 사진 전체에 반복해 채울 수도 있습니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">©</span>
+    <span class="dz-main" data-i18n="wm.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="wm.drop2">JPG · PNG · WebP · 여러 장 한 번에</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="wtype" data-i18n="wm.type">워터마크 종류</label>
+        <select id="wtype">
+          <option value="text" selected data-i18n="wm.tText">글자</option>
+          <option value="logo" data-i18n="wm.tLogo">로고 그림 (PNG 권장)</option>
+        </select>
+      </div>
+      <div class="field" id="text-field">
+        <label for="wtext" data-i18n="wm.text">새길 글자</label>
+        <input type="text" id="wtext" value="© 툴모아" maxlength="80" data-i18n-ph="wm.textPh" placeholder="예: © 2026 내 이름 · 무단 복제 금지">
+      </div>
+      <div class="field" id="logo-field" hidden>
+        <label for="logo" data-i18n="wm.logo">로고 파일</label>
+        <input type="file" id="logo" accept="image/*" style="display:block">
+        <div class="hint" data-i18n="wm.logoHint">배경이 투명한 PNG를 쓰면 사진 위에 자연스럽게 얹힙니다.</div>
+        <div class="btn-row" id="logo-row" hidden>
+          <button class="btn secondary small" id="logo-clear" data-i18n="wm.logoClear">로고 빼기</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+        <div class="field">
+          <label for="wpos" data-i18n="wm.pos">위치</label>
+          <select id="wpos">
+            <option value="br" selected data-i18n="wm.pBr">오른쪽 아래</option>
+            <option value="bl" data-i18n="wm.pBl">왼쪽 아래</option>
+            <option value="tr" data-i18n="wm.pTr">오른쪽 위</option>
+            <option value="tl" data-i18n="wm.pTl">왼쪽 위</option>
+            <option value="c" data-i18n="wm.pC">가운데</option>
+            <option value="bc" data-i18n="wm.pBc">아래 가운데</option>
+            <option value="tile" data-i18n="wm.pTile">바둑판처럼 반복 (사진 전체)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wrot" data-i18n="wm.rot">기울기</label>
+          <select id="wrot">
+            <option value="0" selected data-i18n="wm.r0">수평</option>
+            <option value="-30" data-i18n="wm.r30">30° 기울임</option>
+            <option value="-45" data-i18n="wm.r45">45° 기울임</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wsize"><span data-i18n="wm.size">크기</span> <span id="size-val" style="color:var(--accent)">25%</span></label>
+          <input type="range" id="wsize" min="5" max="80" value="25" step="1">
+          <div class="hint" data-i18n="wm.sizeHint">사진 가로 폭 대비 비율입니다. 작은 사진과 큰 사진에 같은 비율로 들어갑니다.</div>
+        </div>
+        <div class="field">
+          <label for="wopacity"><span data-i18n="wm.opacity">진하기</span> <span id="op-val" style="color:var(--accent)">50%</span></label>
+          <input type="range" id="wopacity" min="5" max="100" value="50" step="5">
+        </div>
+        <div class="field" id="color-field">
+          <label for="wcolor" data-i18n="wm.color">글자 색</label>
+          <input type="color" id="wcolor" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field">
+          <label for="fmt" data-i18n="wm.fmt">저장 형식</label>
+          <select id="fmt">
+            <option value="auto" selected data-i18n="wm.fAuto">원본과 같게</option>
+            <option value="image/jpeg" data-i18n="wm.fJpg">JPG — 용량이 작습니다</option>
+            <option value="image/png" data-i18n="wm.fPng">PNG — 손실이 없습니다</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl" data-i18n="wm.count">사진 장수</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl" data-i18n="wm.firstSize">첫 사진 크기</span></div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px" data-i18n="wm.previewNote">첫 사진으로 미리 봅니다. 설정을 바꾸면 모든 사진에 같은 방식으로 들어갑니다.</p>
+    <div class="card" style="padding:10px;text-align:center">
+      <canvas id="preview" style="max-width:100%;height:auto;border:1px solid var(--border)" aria-label="워터마크 미리보기"></canvas>
+    </div>
+
+    <ul class="file-list" id="list"></ul>
+
+    <div class="btn-row" style="align-items:center">
+      <button class="btn" id="btn-all" data-i18n="wm.saveAll">워터마크 넣어 저장</button>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:400;font-size:14px">
+        <input type="checkbox" id="as-zip" checked style="width:auto;margin:0">
+        <span data-i18n="wm.asZip">여러 장이면 ZIP 한 개로 받기</span>
+      </label>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="wm.cross">워터마크를 넣기 전에 <a href="image-compress.html">이미지 용량 줄이기</a>로 크기를 맞추거나, 넣은 뒤 <a href="image-exif.html">사진 위치정보 삭제</a>로 촬영 정보를 지우면 공개용 사진이 완성됩니다. PDF 문서에는 <a href="pdf-watermark.html">PDF 워터마크</a>를 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:IMAGEWATERMARK --></div>
+
+  <h2 data-ko-only>워터마크는 도용을 막는 가장 싼 방법</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      블로그·중고 거래·포트폴리오에 올린 사진은 저장 한 번이면 남의 것이 됩니다. 워터마크가 있으면
+      <strong style="color:var(--text)">도용 사진을 보는 사람이 원작자를 알게 되고</strong>, 지우려면 수고가 들어 도용 자체가 줄어듭니다.
+      가장자리에 작게 넣으면 보기 좋지만 잘라내기 쉽고, 바둑판처럼 사진 전체에 반복하면 지울 수 없지만 사진이 가려집니다.
+      상품 사진은 가장자리에, 공개를 원치 않는 자료 사진은 바둑판으로 넣는 것이 보통입니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 사진은 브라우저 안에서만 열고 그리고 저장합니다. 인터넷을 끊어도 그대로 동작합니다. 그래서 수십 장을 한 번에 넣어도 기다릴 일이 없습니다.</p>
+    </details>
+    <details>
+      <summary>워터마크 글자가 사진마다 크기가 다르게 보여요</summary>
+      <p>크기는 사진 가로 폭에 대한 비율로 정합니다. 가로 4000픽셀 사진과 800픽셀 사진에 같은 25%를 주면 둘 다 가로의 4분의 1 폭으로 들어갑니다. 픽셀 수가 아니라 보이는 비율을 맞추는 쪽이 여러 장을 한 번에 처리할 때 자연스럽습니다.</p>
+    </details>
+    <details>
+      <summary>로고가 흰 네모 안에 들어가요</summary>
+      <p>로고 파일의 배경이 흰색으로 채워져 있기 때문입니다. 배경이 투명한 PNG 로고를 쓰세요. 로고를 만든 프로그램에서 "배경 투명" 또는 "알파 채널 포함"으로 저장하면 됩니다.</p>
+    </details>
+    <details>
+      <summary>워터마크를 다시 지울 수 있나요?</summary>
+      <p>저장한 사진에서는 지울 수 없습니다. 워터마크는 사진 위에 새로 그려져 원래 픽셀을 덮습니다. 원본 사진은 그대로 남아 있으니 원본을 따로 보관하고, 공개용으로만 워터마크 사진을 쓰세요.</p>
+    </details>
+    <details>
+      <summary>저장하면 화질이 떨어지나요?</summary>
+      <p>"원본과 같게"로 두면 JPG 사진은 JPG(화질 92%)로, PNG는 PNG로 저장합니다. 사진 크기는 바꾸지 않습니다. 투명한 로고를 올렸더라도 바탕이 사진이라 JPG로 저장해도 문제없습니다.</p>
+    </details>
+    <details>
+      <summary>휴대전화에서도 되나요?</summary>
+      <p>됩니다. 여러 장을 고르면 ZIP 한 개로 받습니다. 휴대전화는 파일을 연달아 내려받으면 첫 장만 저장되는 일이 잦아 기본으로 묶어 드립니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var list = document.getElementById('list');
+  var preview = document.getElementById('preview');
+  var typeSel = document.getElementById('wtype');
+  var textIn = document.getElementById('wtext');
+  var logoIn = document.getElementById('logo');
+  var posSel = document.getElementById('wpos');
+  var rotSel = document.getElementById('wrot');
+  var sizeIn = document.getElementById('wsize');
+  var opIn = document.getElementById('wopacity');
+  var colorIn = document.getElementById('wcolor');
+  var fmtSel = document.getElementById('fmt');
+
+  // 너무 큰 사진은 브라우저가 캔버스를 만들지 못한다. 넘으면 줄이고 알린다.
+  var MAX_PIXELS = 40e6;
+
+  var items = [];       // {file, img, w, h, type, base}
+  var logoImg = null;   // 로고 Image
+  var timer = null;
+
+  var msgKind = '';     // 'validate' = 미리보기가 띄운 입력 검증 안내. 이것만 미리보기가 지울 수 있다.
+  function setMsg(text, cls, kind) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+    msgKind = text ? (kind || '') : '';
+  }
+  // 미리보기가 띄운 검증 안내만 지운다. 저장 완료·크기 축소 같은 안내는 사용자가 읽어야 하므로 남긴다.
+  function clearValidate() { if (msgKind === 'validate') setMsg(''); }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    handle(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  // 캡처한 화면을 파일로 저장한 뒤 다시 고르는 과정이 번거롭다. Ctrl+V로 바로 받는다.
+  document.addEventListener('paste', function (e) {
+    var els = (e.clipboardData && e.clipboardData.items) || [];
+    var picked = [];
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].kind !== 'file' || els[i].type.indexOf('image/') !== 0) continue;
+      var f = els[i].getAsFile();
+      if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], '붙여넣은-사진-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault();
+    handle(picked);
+  });
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('열 수 없는 이미지')); };
+      img.src = url;
+    });
+  }
+
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) { return f.type.indexOf('image/') === 0; });
+    if (!files.length) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    setMsg(t('msg.reading', '파일을 읽는 중입니다…'));
+    Promise.all(files.map(function (f) {
+      return loadImage(f).then(function (img) {
+        var w = img.naturalWidth, h = img.naturalHeight, k = 1;
+        if (w * h > MAX_PIXELS) k = Math.sqrt(MAX_PIXELS / (w * h));
+        return { file: f, img: img, w: Math.max(1, Math.round(w * k)), h: Math.max(1, Math.round(h * k)), scaled: k < 1,
+                 type: f.type === 'image/jpeg' ? 'image/jpeg' : 'image/png',
+                 base: f.name.replace(/\.[^.]+$/, '') };
+      }).catch(function () { return null; });
+    })).then(function (out) {
+      var ok = out.filter(Boolean);
+      if (!ok.length) { setMsg(t('wm.cantOpen', '사진을 열 수 없습니다.'), 'err'); return; }
+      items = items.concat(ok);
+      area.hidden = false;
+      var scaled = ok.filter(function (it) { return it.scaled; }).length;
+      setMsg(scaled ? scaled + t('wm.scaled', '장은 너무 커서 브라우저가 다룰 수 있는 크기로 줄였습니다.') : '', scaled ? 'err' : '');
+      renderList();
+      schedule();
+    });
+  }
+
+  function renderList() {
+    document.getElementById('t-count').textContent = items.length;
+    document.getElementById('t-size').textContent = items.length ? items[0].w + '×' + items[0].h : '-';
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="fname" title="' + it.file.name + '">' + it.file.name + '</span>' +
+                     '<span class="fmeta">' + it.w + '×' + it.h + ' · ' + humanSize(it.file.size) + '</span>';
+      var rm = document.createElement('button');
+      rm.className = 'btn secondary small'; rm.type = 'button';
+      rm.textContent = t('wm.remove', '빼기');
+      rm.setAttribute('data-remove', i);
+      rm.addEventListener('click', function () {
+        items.splice(i, 1);
+        if (!items.length) { reset(); return; }
+        renderList(); schedule();
+      });
+      li.appendChild(rm);
+      list.appendChild(li);
+    });
+  }
+
+  function opts() {
+    return {
+      type: typeSel.value,
+      text: textIn.value.trim(),
+      pos: posSel.value,
+      rot: parseInt(rotSel.value, 10) || 0,
+      size: parseInt(sizeIn.value, 10) / 100,
+      alpha: parseInt(opIn.value, 10) / 100,
+      color: colorIn.value
+    };
+  }
+
+  // 워터마크 한 개(글자 또는 로고)를 투명 캔버스에 그려 둔다. 폭은 사진 폭의 비율로 맞춘다.
+  function makeStamp(W, o) {
+    var targetW = Math.max(8, Math.round(W * o.size));
+    var c = document.createElement('canvas');
+    if (o.type === 'logo') {
+      if (!logoImg) return null;
+      var k = targetW / logoImg.naturalWidth;
+      c.width = targetW; c.height = Math.max(1, Math.round(logoImg.naturalHeight * k));
+      c.getContext('2d').drawImage(logoImg, 0, 0, c.width, c.height);
+      return c;
+    }
+    if (!o.text) return null;
+    // 글자 폭이 targetW 가 되도록 글자 크기를 정한다. 먼저 100px 로 재고 비율로 맞춘다.
+    var probe = c.getContext('2d');
+    probe.font = 'bold 100px -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+    var w100 = probe.measureText(o.text).width || 1;
+    var px = Math.max(6, Math.floor(100 * targetW / w100));
+    var font = 'bold ' + px + 'px -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+    probe.font = font;
+    var m = probe.measureText(o.text);
+    var pad = Math.ceil(px * 0.25);
+    c.width = Math.ceil(m.width) + pad * 2;
+    c.height = Math.ceil(px * 1.3) + pad * 2;
+    var ctx = c.getContext('2d');
+    ctx.font = font;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    // 밝은 사진 위의 흰 글자도 읽히도록 반대색 그림자를 얇게 깐다
+    ctx.shadowColor = o.color.toLowerCase() === '#ffffff' ? 'rgba(0,0,0,.55)' : 'rgba(255,255,255,.45)';
+    ctx.shadowBlur = Math.max(1, px * 0.06);
+    ctx.fillStyle = o.color;
+    ctx.fillText(o.text, c.width / 2, c.height / 2);
+    return c;
+  }
+
+  // 사진 캔버스 위에 워터마크를 얹는다. 위치 계산은 전부 여기 한 곳에서 한다.
+  function stamp(ctx, W, H, o) {
+    var s = makeStamp(W, o);
+    if (!s) return false;
+    var rad = o.rot * Math.PI / 180;
+    var margin = Math.round(Math.min(W, H) * 0.03);
+    ctx.save();
+    ctx.globalAlpha = o.alpha;
+    function put(cx, cy) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rad);
+      ctx.drawImage(s, -s.width / 2, -s.height / 2);
+      ctx.restore();
+    }
+    if (o.pos === 'tile') {
+      // 회전한 도장이 겹치지 않을 간격. 대각선 길이를 기준으로 잡는다.
+      var diag = Math.sqrt(s.width * s.width + s.height * s.height);
+      var stepX = Math.max(diag * 1.15, 16), stepY = Math.max(s.height * 2.4, 16);
+      var row = 0;
+      for (var y = stepY / 2; y < H + stepY; y += stepY, row++) {
+        var shift = (row % 2) ? stepX / 2 : 0;
+        for (var x = -stepX + shift; x < W + stepX; x += stepX) put(x, y);
+      }
+    } else {
+      // 회전해도 가장자리에 걸리지 않게, 회전 후 실제 차지하는 폭·높이로 계산한다
+      var cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+      var bw = s.width * cos + s.height * sin, bh = s.width * sin + s.height * cos;
+      var cx, cy;
+      if (o.pos === 'c') { cx = W / 2; cy = H / 2; }
+      else {
+        cx = /l/.test(o.pos) ? margin + bw / 2 : (/r/.test(o.pos) ? W - margin - bw / 2 : W / 2);
+        cy = /t/.test(o.pos) ? margin + bh / 2 : H - margin - bh / 2;
+      }
+      put(cx, cy);
+    }
+    ctx.restore();
+    return true;
+  }
+
+  function draw(it, canvas) {
+    canvas.width = it.w; canvas.height = it.h;
+    var ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(it.img, 0, 0, it.w, it.h);
+    return stamp(ctx, it.w, it.h, opts());
+  }
+
+  function renderPreview() {
+    if (!items.length) return;
+    var placed = draw(items[0], preview);
+    var o = opts();
+    if (o.type === 'logo' && !logoImg) setMsg(t('wm.needLogo', '로고 파일을 고르세요.'), 'err', 'validate');
+    else if (o.type === 'text' && !o.text) setMsg(t('wm.needText', '새길 글자를 입력하세요.'), 'err', 'validate');
+    else if (placed) clearValidate();
+  }
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(renderPreview, 60);
+  }
+
+  function syncType() {
+    var logo = typeSel.value === 'logo';
+    document.getElementById('text-field').hidden = logo;
+    document.getElementById('logo-field').hidden = !logo;
+    document.getElementById('color-field').hidden = logo;
+    document.getElementById('size-val').textContent = sizeIn.value + '%';
+    document.getElementById('op-val').textContent = opIn.value + '%';
+  }
+  [typeSel, posSel, rotSel, fmtSel].forEach(function (el) { el.addEventListener('change', function () { syncType(); schedule(); }); });
+  [textIn, sizeIn, opIn, colorIn].forEach(function (el) { el.addEventListener('input', function () { syncType(); schedule(); }); });
+  // 언어를 바꾸면 스크립트가 쓴 목록의 버튼 글자도 다시 만들어야 한다
+  document.addEventListener('langchange', function () { renderList(); });
+
+  logoIn.addEventListener('change', function () {
+    var f = logoIn.files && logoIn.files[0];
+    if (!f) return;
+    if (f.type.indexOf('image/') !== 0) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    loadImage(f).then(function (img) {
+      logoImg = img;
+      document.getElementById('logo-row').hidden = false;
+      schedule();
+    }).catch(function () { setMsg(t('wm.cantOpen', '사진을 열 수 없습니다.'), 'err'); });
+  });
+  document.getElementById('logo-clear').addEventListener('click', function () {
+    logoImg = null; logoIn.value = '';
+    document.getElementById('logo-row').hidden = true;
+    schedule();
+  });
+
+  function toBlob(canvas, type) {
+    return new Promise(function (r) { canvas.toBlob(r, type, type === 'image/jpeg' ? 0.92 : undefined); });
+  }
+  function outName(it, type) {
+    return it.base + '_' + t('wm.suffix', '워터마크') + (type === 'image/jpeg' ? '.jpg' : '.png');
+  }
+  function saveBlob(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  // 파일을 하나씩 내려받게 하면 브라우저가 "여러 파일 다운로드"를 묻고,
+  // 휴대전화에서는 첫 장만 저장되는 일이 잦다. 기본적으로 ZIP 한 개로 묶는다.
+  document.getElementById('btn-all').addEventListener('click', function () {
+    if (!items.length) return;
+    var o = opts();
+    if (o.type === 'logo' && !logoImg) { setMsg(t('wm.needLogo', '로고 파일을 고르세요.'), 'err'); return; }
+    if (o.type === 'text' && !o.text) { setMsg(t('wm.needText', '새길 글자를 입력하세요.'), 'err'); return; }
+    var btn = this;
+    btn.disabled = true;
+    setMsg(t('wm.working', '워터마크를 넣는 중입니다…'));
+    var wantZip = document.getElementById('as-zip').checked && typeof makeZip === 'function' && items.length > 1;
+    var canvas = document.createElement('canvas');
+    var chain = Promise.resolve(), outs = [];
+    items.forEach(function (it) {
+      chain = chain.then(function () {
+        draw(it, canvas);
+        var type = fmtSel.value === 'auto' ? it.type : fmtSel.value;
+        return toBlob(canvas, type).then(function (b) { if (b) outs.push({ blob: b, name: outName(it, type) }); });
+      });
+    });
+    chain.then(function () {
+      canvas.width = canvas.height = 1;
+      if (!outs.length) { setMsg(t('wm.fail', '사진을 만들지 못했습니다.'), 'err'); btn.disabled = false; return; }
+      if (!wantZip) {
+        outs.forEach(function (r, i) { setTimeout(function () { saveBlob(r.blob, r.name); }, i * 350); });
+        var total = outs.reduce(function (s, r) { return s + r.blob.size; }, 0);
+        setMsg(outs.length + t('wm.done', '장에 워터마크를 넣어 저장했습니다. ') + humanSize(total), 'ok');
+        btn.disabled = false;
+        return;
+      }
+      // makeZip 은 바이트만 받는다. Blob 을 Uint8Array 로 바꿔 넘긴다.
+      return Promise.all(outs.map(function (r) {
+        return r.blob.arrayBuffer().then(function (buf) { return { name: r.name, bytes: new Uint8Array(buf) }; });
+      })).then(function (entries) {
+        var zip = makeZip(entries);
+        saveBlob(zip, t('wm.zipName', '워터마크-사진') + '.zip');
+        setMsg(outs.length + t('wm.doneZip', '장을 ZIP 한 개로 묶어 저장했습니다. ') + humanSize(zip.size), 'ok');
+        btn.disabled = false;
+      });
+    }).catch(function (e) {
+      setMsg(t('wm.fail', '사진을 만들지 못했습니다.') + ' ' + (e && e.message || ''), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  function reset() {
+    items = []; logoImg = null;
+    fileInput.value = ''; logoIn.value = '';
+    document.getElementById('logo-row').hidden = true;
+    preview.width = preview.height = 1;
+    list.innerHTML = '';
+    document.getElementById('t-count').textContent = '0';
+    document.getElementById('t-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  }
+  document.getElementById('btn-reset').addEventListener('click', reset);
+
+  syncType();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>워터마크 · 분할 · QR 스캔 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">사진 워터마크 · 사진 분할 · PDF 워터마크 · QR 스캔 점검 (2026-10-19)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">
+  저장된 결과물을 다시 열어 픽셀·크기·쪽수를 읽는다. 워터마크는 "들어간 자리의 픽셀이 바뀌었는가 / 비어 있어야 할 자리는 그대로인가"로 본다.
+  PDF 는 pdf-lib 으로 다시 열어 쪽수와 XObject(그림) 수를 세고, pdf.js 로 그려 실제로 색이 찍혔는지 본다.
+  QR 은 생성 라이브러리로 만든 코드를 넣어 원문과 대조한다 (판독기는 다른 라이브러리라 순환 논증이 아니다).
+</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:220px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script src="../assets/vendor/qrcode.min.js"></script>
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 10000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function setVal(d, id, v, ev) {
+  var e = d.getElementById(id); e.value = v; e.dispatchEvent(new Event(ev || 'change', { bubbles: true }));
+}
+// 내려받기를 가로채 Blob 을 모은다. 입력 File 은 name 이 있어 걸러낸다.
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { if (typeof b.name !== 'string') out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+function solid(w, h, color, type) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d'); x.fillStyle = color; x.fillRect(0, 0, w, h);
+  return new Promise(function (r) { c.toBlob(r, type || 'image/png', 0.95); });
+}
+function blobToCanvas(blob) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+      c.getContext('2d').drawImage(img, 0, 0); res(c);
+    };
+    img.onerror = function () { rej(new Error('결과 이미지를 열 수 없음')); };
+    img.src = url;
+  });
+}
+function px(c, x, y) { var d = c.getContext('2d').getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2], d[3]]; }
+function near(p, q, tol) { tol = tol || 8; return Math.abs(p[0] - q[0]) <= tol && Math.abs(p[1] - q[1]) <= tol && Math.abs(p[2] - q[2]) <= tol; }
+// 영역 안에 바탕색과 뚜렷이 다른 픽셀이 몇 개인지 (워터마크가 들어갔는지)
+function changed(c, x0, y0, w, h, base) {
+  var d = c.getContext('2d').getImageData(x0, y0, w, h).data, n = 0;
+  for (var i = 0; i < d.length; i += 4) {
+    if (Math.abs(d[i] - base[0]) > 24 || Math.abs(d[i + 1] - base[1]) > 24 || Math.abs(d[i + 2] - base[2]) > 24) n++;
+  }
+  return n;
+}
+// ZIP 을 직접 해석한다 (zip.js 로 검증하면 순환 논증)
+function readZip(buf) {
+  var v = new DataView(buf), out = [], off = 0;
+  while (off + 30 <= buf.byteLength && v.getUint32(off, true) === 0x04034B50) {
+    var nameLen = v.getUint16(off + 26, true), extra = v.getUint16(off + 28, true), size = v.getUint32(off + 18, true);
+    var name = new TextDecoder().decode(new Uint8Array(buf, off + 30, nameLen));
+    out.push({ name: name, bytes: new Uint8Array(buf, off + 30 + nameLen + extra, size) });
+    off += 30 + nameLen + extra + size;
+  }
+  return out;
+}
+function qrPng(text, cell) {
+  var q = qrcode(0, 'M');
+  // 한글은 UTF-8 바이트 문자열로 넣는다 (생성기 쪽 규칙)
+  var bytes = new TextEncoder().encode(text), s = '';
+  for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  q.addData(s, 'Byte'); q.make();
+  var n = q.getModuleCount(); cell = cell || 6;
+  var c = document.createElement('canvas'); c.width = c.height = (n + 8) * cell;
+  var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.fillStyle = '#000';
+  for (var r = 0; r < n; r++) for (var k = 0; k < n; k++) if (q.isDark(r, k)) x.fillRect((k + 4) * cell, (r + 4) * cell, cell, cell);
+  return new Promise(function (res) { c.toBlob(res, 'image/png'); });
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 사진 워터마크: 글자 · 오른쪽 아래 · 저장 픽셀 =====
+  chain = chain.then(function () {
+    return solid(400, 300, '#2040c0').then(function (png) {
+      return loadFrame('../image-watermark.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([png], 'blue.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') === '1' && d.getElementById('preview').width === 400; }).then(function () {
+          setVal(d, 'wtext', 'SAMPLE', 'input');
+          setVal(d, 'wsize', '30', 'input');
+          setVal(d, 'wopacity', '100', 'input');
+          setVal(d, 'wcolor', '#ffffff', 'input');
+          setVal(d, 'wpos', 'br'); setVal(d, 'wrot', '0'); setVal(d, 'fmt', 'image/png');
+          return sleep(250);
+        }).then(function () {
+          d.getElementById('btn-all').click();
+          return waitFor(function () { return cap.blobs.length >= 1; });
+        }).then(function () {
+          return blobToCanvas(cap.blobs[0]);
+        }).then(function (c) {
+          var base = [32, 64, 192];
+          var br = changed(c, 240, 220, 160, 80, base);      // 오른쪽 아래 — 글자가 있어야 함
+          var tl = changed(c, 0, 0, 200, 150, base);         // 왼쪽 위 — 비어 있어야 함
+          var ok = c.width === 400 && c.height === 300 && br > 200 && tl === 0 && cap.blobs[0].type === 'image/png' &&
+                   /blue_워터마크\.png$/.test(cap.names[0] || '') && !f.dataset.errs;
+          log('워터마크 글자 (오른쪽 아래)', ok, '저장 ' + c.width + '×' + c.height + ' ' + cap.blobs[0].type + ' · 오른쪽 아래 바뀐 픽셀 ' + br + ' (>200) · 왼쪽 위 바뀐 픽셀 ' + tl + ' (0) · 이름 ' + cap.names[0] + ' · 안내 "' + txt(d, 'msg').slice(0, 40) + '"');
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('워터마크 글자 (오른쪽 아래)', false, '오류: ' + e.message); });
+
+  // ===== 2. 사진 워터마크: 위치 7종 · 기울기 · 바둑판은 전체에 =====
+  chain = chain.then(function () {
+    return solid(400, 300, '#2040c0').then(function (png) {
+      return loadFrame('../image-watermark.html').then(function (f) {
+        var d = f.contentDocument, pv = d.getElementById('preview'), base = [32, 64, 192];
+        setFiles(d.getElementById('file'), [new File([png], 'blue.png', { type: 'image/png' })]);
+        return waitFor(function () { return pv.width === 400; }).then(function () {
+          setVal(d, 'wtext', 'SAMPLE', 'input'); setVal(d, 'wsize', '25', 'input'); setVal(d, 'wopacity', '100', 'input');
+          var quad = { 'tl': [0, 0], 'tr': [200, 0], 'bl': [0, 150], 'br': [200, 150], 'c': [100, 75], 'bc': [100, 150] };
+          var seq = Promise.resolve(), got = {};
+          Object.keys(quad).forEach(function (p) {
+            seq = seq.then(function () { setVal(d, 'wpos', p); return sleep(150); }).then(function () {
+              var q = quad[p];
+              got[p] = changed(pv, q[0], q[1], 200, 150, base);
+            });
+          });
+          return seq.then(function () {
+            setVal(d, 'wpos', 'tile'); setVal(d, 'wrot', '-45'); return sleep(200);
+          }).then(function () {
+            var tiles = [changed(pv, 0, 0, 200, 150, base), changed(pv, 200, 0, 200, 150, base), changed(pv, 0, 150, 200, 150, base), changed(pv, 200, 150, 200, 150, base)];
+            setVal(d, 'wpos', 'c'); setVal(d, 'wrot', '-30'); return sleep(150).then(function () {
+              var rot30 = changed(pv, 100, 75, 200, 150, base);
+              var allPos = Object.keys(quad).every(function (p) { return got[p] > 150; });
+              var allTiles = tiles.every(function (n) { return n > 100; });
+              var ok = allPos && allTiles && rot30 > 150 && !f.dataset.errs;
+              log('워터마크 위치 7종 · 기울기', ok, '사분면별 바뀐 픽셀 ' + JSON.stringify(got) + ' (각 >150) · 바둑판 45° 네 구역 ' + tiles.join('/') + ' (각 >100) · 가운데 30° ' + rot30);
+              f.remove();
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('워터마크 위치 7종 · 기울기', false, '오류: ' + e.message); });
+
+  // ===== 3. 사진 워터마크: 로고 · 여러 장 ZIP · 빼기 · 진하기 =====
+  chain = chain.then(function () {
+    return Promise.all([solid(300, 200, '#ffffff', 'image/jpeg'), solid(200, 300, '#ffffff'), solid(60, 30, '#ff0000')]).then(function (b) {
+      return loadFrame('../image-watermark.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), pv = d.getElementById('preview');
+        setFiles(d.getElementById('file'), [new File([b[0]], 'one.jpg', { type: 'image/jpeg' }), new File([b[1]], 'two.png', { type: 'image/png' }), new File([b[1]], 'three.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') === '3'; }).then(function () {
+          // 셋째 장 빼기
+          d.querySelector('[data-remove="2"]').click();
+          return waitFor(function () { return txt(d, 't-count') === '2'; });
+        }).then(function () {
+          setVal(d, 'wtype', 'logo');
+          var logoHidden = d.getElementById('logo-field').hidden, textHidden = d.getElementById('text-field').hidden;
+          d.getElementById('btn-all').click();          // 로고 없이 누르면 안내만
+          var needMsg = txt(d, 'msg');
+          setFiles(d.getElementById('logo'), [new File([b[2]], 'logo.png', { type: 'image/png' })]);
+          return waitFor(function () { return !d.getElementById('logo-row').hidden; }).then(function () {
+            setVal(d, 'wsize', '50', 'input'); setVal(d, 'wopacity', '50', 'input'); setVal(d, 'wpos', 'c'); setVal(d, 'wrot', '0'); setVal(d, 'fmt', 'auto');
+            return sleep(250);
+          }).then(function () {
+            // 진하기 50%: 흰 바탕 위 빨강 로고 → 분홍(255,128,128) 근처
+            var mid = px(pv, 150, 100);
+            d.getElementById('btn-all').click();
+            return waitFor(function () { return cap.blobs.length >= 1 && cap.blobs[0].type === 'application/zip'; }).then(function () {
+              return cap.blobs[0].arrayBuffer();
+            }).then(function (buf) {
+              var entries = readZip(buf);
+              var names = entries.map(function (e) { return e.name; });
+              var jpgSig = entries[0].bytes[0] === 0xFF && entries[0].bytes[1] === 0xD8;
+              var pngSig = entries[1].bytes[0] === 0x89 && entries[1].bytes[1] === 0x50;
+              var ok = logoHidden === false && textHidden === true && /로고 파일을 고르세요/.test(needMsg) &&
+                       entries.length === 2 && names[0] === 'one_워터마크.jpg' && names[1] === 'two_워터마크.png' && jpgSig && pngSig &&
+                       near(mid, [255, 128, 128], 20) && /워터마크-사진\.zip$/.test(cap.names[0] || '') && !f.dataset.errs;
+              log('워터마크 로고 · ZIP · 빼기 · 진하기', ok, '빼기 후 2장 · 로고 없이 저장 → "' + needMsg + '" · 가운데 픽셀 ' + mid.slice(0, 3).join(',') + ' (기대 255,128,128±20) · ZIP [' + names.join(', ') + '] JPG서명 ' + jpgSig + ' PNG서명 ' + pngSig + ' · 이름 ' + cap.names[0]);
+              // 로고 빼기 → 안내
+              d.getElementById('logo-clear').click();
+              return sleep(150).then(function () {
+                var again = txt(d, 'msg');
+                log('워터마크 로고 빼기 · 초기화', /로고 파일을 고르세요/.test(again) && d.getElementById('logo-row').hidden && (d.getElementById('btn-reset').click(), d.getElementById('area').hidden && txt(d, 't-count') === '0'), '빼기 후 안내 "' + again + '" · 로고 행 숨김 · 초기화 후 영역 숨김 ' + d.getElementById('area').hidden);
+                f.remove();
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('워터마크 로고 · ZIP · 빼기 · 진하기', false, '오류: ' + e.message); });
+
+  // ===== 4. 사진 워터마크: 빈 글자 안내 · ZIP 해제 시 개별 저장 · JPG 지정 · 키보드/붙여넣기 =====
+  chain = chain.then(function () {
+    return solid(100, 80, '#000000').then(function (png) {
+      return loadFrame('../image-watermark.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f);
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        var rejectMsg = txt(d, 'msg');
+        var dt = new DataTransfer();
+        dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return waitFor(function () { return txt(d, 't-count') === '2'; }).then(function () {
+          setVal(d, 'wtext', '', 'input');
+          return sleep(150);
+        }).then(function () {
+          var emptyMsg = txt(d, 'msg');
+          d.getElementById('btn-all').click();
+          var emptyMsg2 = txt(d, 'msg');
+          setVal(d, 'wtext', 'X', 'input');
+          d.getElementById('as-zip').checked = false;
+          setVal(d, 'fmt', 'image/jpeg');
+          return sleep(150).then(function () {
+            d.getElementById('btn-all').click();
+            return waitFor(function () { return cap.blobs.length >= 2; }, 6000);
+          }).then(function () {
+            var ok = opened === 2 && /이미지 파일을 선택해/.test(rejectMsg) && /새길 글자를 입력/.test(emptyMsg) && /새길 글자를 입력/.test(emptyMsg2) &&
+                     cap.blobs.length === 2 && cap.blobs.every(function (b) { return b.type === 'image/jpeg'; }) &&
+                     cap.names.every(function (n) { return /^붙여넣은-사진-.*_워터마크\.jpg$/.test(n); }) && !f.dataset.errs;
+            log('워터마크 입력 경로 · 빈 글자 · 개별 JPG', ok, '키보드 열기 ' + opened + '회 · 글자 파일 "' + rejectMsg + '" · 붙여넣기 2장 · 빈 글자 "' + emptyMsg + '" · 개별 저장 ' + cap.blobs.length + '개 ' + cap.names.join(', '));
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('워터마크 입력 경로 · 빈 글자 · 개별 JPG', false, '오류: ' + e.message); });
+
+  // ===== 5. 사진 분할: 9분할 정사각형 · ZIP · 조각 픽셀 =====
+  chain = chain.then(function () {
+    // 왼쪽 절반 빨강, 오른쪽 절반 파랑인 400×300 → 정사각형 3×3 이면 조각 100×100, 가로 50px 씩 버림
+    var c = document.createElement('canvas'); c.width = 400; c.height = 300;
+    var x = c.getContext('2d'); x.fillStyle = '#ff0000'; x.fillRect(0, 0, 200, 300); x.fillStyle = '#0000ff'; x.fillRect(200, 0, 200, 300);
+    return new Promise(function (r) { c.toBlob(r, 'image/jpeg', 0.95); }).then(function (jpg) {
+      return loadFrame('../image-split.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([jpg], 'rb.jpg', { type: 'image/jpeg' })]);
+        return waitFor(function () { return txt(d, 't-count') === '9'; }).then(function () {
+          setVal(d, 'preset', '3x3'); setVal(d, 'fit', 'square'); setVal(d, 'fmt', 'auto');
+          var piece = txt(d, 't-piece');
+          d.getElementById('btn-save').click();
+          return waitFor(function () { return cap.blobs.length >= 1; }).then(function () {
+            return cap.blobs[0].arrayBuffer();
+          }).then(function (buf) {
+            var entries = readZip(buf);
+            return Promise.all([blobToCanvas(new Blob([entries[0].bytes])), blobToCanvas(new Blob([entries[2].bytes]))]).then(function (cs) {
+              var left = px(cs[0], 50, 50), right = px(cs[1], 50, 50);
+              var ok = piece === '100×100' && entries.length === 9 && entries[0].name === 'rb_1.jpg' && entries[8].name === 'rb_9.jpg' &&
+                       cs[0].width === 100 && cs[0].height === 100 && near(left, [255, 0, 0], 12) && near(right, [0, 0, 255], 12) &&
+                       /rb_분할\.zip$/.test(cap.names[0] || '') && !f.dataset.errs;
+              log('분할 9조각 정사각형 · ZIP', ok, '조각 표시 ' + piece + ' (기대 100×100) · ZIP ' + entries.length + '개 [' + entries[0].name + ' … ' + entries[8].name + '] · 1번 ' + cs[0].width + '×' + cs[0].height + ' 색 ' + left.slice(0, 3) + ' (빨강) · 3번 색 ' + right.slice(0, 3) + ' (파랑) · 이름 ' + cap.names[0] + ' · 안내 "' + txt(d, 'msg').slice(0, 30) + '"');
+              f.remove();
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('분할 9조각 정사각형 · ZIP', false, '오류: ' + e.message); });
+
+  // ===== 6. 사진 분할: 프리셋 6종 · 직접 입력 · 그대로 모드 · 개별 PNG =====
+  chain = chain.then(function () {
+    return solid(300, 200, '#808080').then(function (png) {
+      return loadFrame('../image-split.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([png], 'g.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-count') === '9'; }).then(function () {
+          setVal(d, 'fit', 'keep');
+          var got = {};
+          ['1x3', '2x3', '1x2', '2x1', '2x2'].forEach(function (p) { setVal(d, 'preset', p); got[p] = txt(d, 't-count') + ':' + txt(d, 't-piece'); });
+          setVal(d, 'preset', 'custom');
+          var customShown = !d.getElementById('custom-field').hidden;
+          setVal(d, 'rows', '4', 'input'); setVal(d, 'cols', '5', 'input');
+          got.custom = txt(d, 't-count') + ':' + txt(d, 't-piece');
+          var hintKeep = txt(d, 'fit-hint');
+          // 그대로 2×1 을 개별 PNG 로
+          setVal(d, 'preset', '2x1'); setVal(d, 'fmt', 'image/png');
+          d.getElementById('as-zip').checked = false;
+          d.getElementById('btn-save').click();
+          return waitFor(function () { return cap.blobs.length >= 2; }, 6000).then(function () {
+            return blobToCanvas(cap.blobs[1]);
+          }).then(function (c2) {
+            var ok = got['1x3'] === '3:100×200' && got['2x3'] === '6:100×100' && got['1x2'] === '2:150×200' && got['2x1'] === '2:300×100' && got['2x2'] === '4:150×100' &&
+                     customShown && got.custom === '20:60×50' && /버리지 않습니다/.test(hintKeep) &&
+                     cap.blobs.length === 2 && cap.blobs[1].type === 'image/png' && c2.width === 300 && c2.height === 100 && cap.names[1] === 'g_2.png' && !f.dataset.errs;
+            log('분할 프리셋 6종 · 직접 입력 · 그대로', ok, JSON.stringify(got) + ' (기대 1x3=3:100×200, 2x3=6:100×100, 1x2=2:150×200, 2x1=2:300×100, 2x2=4:150×100, custom 4×5=20:60×50) · 직접 입력칸 보임 ' + customShown + ' · 개별 PNG 2개, 2번 ' + c2.width + '×' + c2.height + ' ' + cap.names[1]);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('분할 프리셋 6종 · 직접 입력 · 그대로', false, '오류: ' + e.message); });
+
+  // ===== 7. 사진 분할: 입력 경로 · JPG 지정 · 초기화 =====
+  chain = chain.then(function () {
+    return solid(120, 90, '#336699').then(function (png) {
+      return loadFrame('../image-split.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f);
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        var rejectMsg = txt(d, 'msg');
+        var dt = new DataTransfer();
+        dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return waitFor(function () { return txt(d, 't-size') === '120×90'; }).then(function () {
+          setVal(d, 'preset', '1x2'); setVal(d, 'fit', 'keep'); setVal(d, 'fmt', 'image/jpeg');
+          d.getElementById('btn-save').click();
+          return waitFor(function () { return cap.blobs.length >= 1; });
+        }).then(function () {
+          return cap.blobs[0].arrayBuffer();
+        }).then(function (buf) {
+          var entries = readZip(buf);
+          var jpg = entries.length === 2 && entries[0].bytes[0] === 0xFF && /\.jpg$/.test(entries[0].name);
+          d.getElementById('btn-reset').click();
+          var ok = opened === 2 && /이미지 파일을 선택해/.test(rejectMsg) && jpg && d.getElementById('area').hidden && txt(d, 't-count') === '0' && !f.dataset.errs;
+          log('분할 입력 경로 · JPG · 초기화', ok, '키보드 열기 ' + opened + '회 · 글자 파일 "' + rejectMsg + '" · 붙여넣기 120×90 · ZIP 안 JPG ' + entries.length + '개 (' + (entries[0] && entries[0].name) + ') · 초기화 후 영역 숨김 ' + d.getElementById('area').hidden);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('분할 입력 경로 · JPG · 초기화', false, '오류: ' + e.message); });
+
+  // ===== 8. PDF 워터마크: 글자 · 전체 쪽 · 다시 열어 쪽수·그림 수 · pdf.js 로 그려 색 확인 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (pdf) {
+      pdf.addPage([400, 300]); pdf.addPage([400, 300]); pdf.addPage([300, 400]);
+      return pdf.save();
+    }).then(function (bytes) {
+      return loadFrame('../pdf-watermark.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([bytes], 'three.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '3'; }, 15000).then(function () {
+          var pageSize = txt(d, 't-page-size');
+          setVal(d, 'wtype', 'text'); setVal(d, 'wtext', 'SAMPLE', 'input');
+          setVal(d, 'wpos', 'c'); setVal(d, 'wrot', '45'); setVal(d, 'wsize', '60', 'input'); setVal(d, 'wopacity', '100', 'input'); setVal(d, 'wcolor', '#ff0000', 'input');
+          return sleep(250).then(function () {
+            var pv = d.getElementById('preview');
+            var pvChanged = changed(pv, Math.round(pv.width * 0.3), Math.round(pv.height * 0.3), Math.round(pv.width * 0.4), Math.round(pv.height * 0.4), [255, 255, 255]);
+            d.getElementById('btn-save').click();
+            return waitFor(function () { return cap.blobs.length >= 1; }, 15000).then(function () {
+              return cap.blobs[0].arrayBuffer();
+            }).then(function (buf) {
+              return PDFLib.PDFDocument.load(new Uint8Array(buf)).then(function (out) {
+                var pages = out.getPages();
+                var xobj = pages.map(function (p) { var r = p.node.Resources(); var xo = r && r.lookup(PDFLib.PDFName.of('XObject')); return xo ? xo.keys().length : 0; });
+                // 그려서 실제로 빨강이 찍혔는지 본다
+                return renderPdfPage(buf, 1).then(function (c) {
+                  var red = changed(c, Math.round(c.width * 0.25), Math.round(c.height * 0.25), Math.round(c.width * 0.5), Math.round(c.height * 0.5), [255, 255, 255]);
+                  var ok = pageSize === '400×300pt' && pvChanged > 300 && pages.length === 3 && xobj.every(function (n) { return n === 1; }) &&
+                           red > 300 && /three_워터마크\.pdf$/.test(cap.names[0] || '') && /3쪽에 워터마크/.test(txt(d, 'msg')) && !f.dataset.errs;
+                  log('PDF 워터마크 글자 · 전체 쪽', ok, '첫 쪽 ' + pageSize + ' · 미리보기 바뀐 픽셀 ' + pvChanged + ' · 저장 파일 ' + pages.length + '쪽, 쪽마다 그림 ' + xobj.join('/') + ' (각 1) · pdf.js 렌더 가운데 색 픽셀 ' + red + ' (>300) · 이름 ' + cap.names[0] + ' · 안내 "' + txt(d, 'msg') + '"');
+                  f.remove();
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 워터마크 글자 · 전체 쪽', false, '오류: ' + e.message); });
+
+  // ===== 9. PDF 워터마크: 쪽 범위 · 바둑판 · 위치 7종 · 기울기 3종 · 빠른 문구 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (pdf) {
+      for (var i = 0; i < 5; i++) pdf.addPage([400, 300]);
+      return pdf.save();
+    }).then(function (bytes) {
+      return loadFrame('../pdf-watermark.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), pv = d.getElementById('preview');
+        setFiles(d.getElementById('file'), [new File([bytes], 'five.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '5'; }, 15000).then(function () {
+          setVal(d, 'wsize', '20', 'input'); setVal(d, 'wopacity', '100', 'input'); setVal(d, 'wcolor', '#0000ff', 'input'); setVal(d, 'wrot', '0');
+          var quad = { 'tl': [0, 0, 0.5, 0.5], 'tr': [0.5, 0, 0.5, 0.5], 'bl': [0, 0.5, 0.5, 0.5], 'br': [0.5, 0.5, 0.5, 0.5], 'c': [0.25, 0.25, 0.5, 0.5], 'bc': [0.25, 0.5, 0.5, 0.5] };
+          var seq = Promise.resolve(), got = {};
+          Object.keys(quad).forEach(function (p) {
+            seq = seq.then(function () { setVal(d, 'wpos', p); return sleep(150); }).then(function () {
+              var q = quad[p];
+              got[p] = changed(pv, Math.round(pv.width * q[0]), Math.round(pv.height * q[1]), Math.round(pv.width * q[2]), Math.round(pv.height * q[3]), [255, 255, 255]);
+            });
+          });
+          var tiles, rot30;
+          return seq.then(function () {
+            setVal(d, 'wpos', 'tile'); setVal(d, 'wrot', '30'); return sleep(200);
+          }).then(function () {
+            tiles = [0, 0.5].map(function (x) { return [0, 0.5].map(function (y) { return changed(pv, Math.round(pv.width * x), Math.round(pv.height * y), Math.round(pv.width * 0.5), Math.round(pv.height * 0.5), [255, 255, 255]); }); }).flat();
+            // 빠른 문구 버튼
+            d.querySelector('[data-fill="사본"]').click();
+            var quick = d.getElementById('wtext').value;
+            setVal(d, 'wpos', 'c'); setVal(d, 'wrot', '45');
+            setVal(d, 'range', '2-3, 5', 'input');
+            d.getElementById('btn-save').click();
+            return waitFor(function () { return cap.blobs.length >= 1; }, 15000).then(function () { return cap.blobs[0].arrayBuffer(); }).then(function (buf) {
+              return PDFLib.PDFDocument.load(new Uint8Array(buf)).then(function (out) {
+                var xobj = out.getPages().map(function (p) { var r = p.node.Resources(); var xo = r && r.lookup(PDFLib.PDFName.of('XObject')); return xo ? xo.keys().length : 0; });
+                var doneMsg = txt(d, 'msg');
+                // 잘못된 범위
+                setVal(d, 'range', '9-12', 'input');
+                d.getElementById('btn-save').click();
+                var badMsg = txt(d, 'msg');
+                var allPos = Object.keys(quad).every(function (p) { return got[p] > 50; });
+                var ok = allPos && tiles.every(function (n) { return n > 50; }) && quick === '사본' && xobj.join('') === '01101' && /3쪽에 워터마크/.test(doneMsg) && /넣을 쪽을 찾지 못했/.test(badMsg) && !f.dataset.errs;
+                log('PDF 워터마크 범위 · 바둑판 · 위치', ok, '위치별 바뀐 픽셀 ' + JSON.stringify(got) + ' (각 >50) · 바둑판 30° 네 구역 ' + tiles.join('/') + ' · 빠른 문구 "' + quick + '" · 범위 2-3,5 → 쪽별 그림 수 ' + xobj.join('') + ' (기대 01101) · "' + doneMsg + '" · 범위 9-12 → "' + badMsg + '"');
+                f.remove();
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 워터마크 범위 · 바둑판 · 위치', false, '오류: ' + e.message); });
+
+  // ===== 10. PDF 워터마크: 로고 · 빈 글자 · 손상 파일 · 초기화 · 키보드 =====
+  chain = chain.then(function () {
+    return Promise.all([solid(80, 40, '#00aa00'), PDFLib.PDFDocument.create().then(function (p) { p.addPage([200, 200]); return p.save(); })]).then(function (r) {
+      return loadFrame('../pdf-watermark.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f);
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        var rejectMsg = txt(d, 'msg');
+        setFiles(d.getElementById('file'), [new File(['%PDF-1.4 broken'], 'broken.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return /열 수 없습니다/.test(txt(d, 'msg')); }, 15000).then(function () {
+          var brokenMsg = txt(d, 'msg');
+          setFiles(d.getElementById('file'), [new File([r[1]], 'one.pdf', { type: 'application/pdf' })]);
+          return waitFor(function () { return txt(d, 't-pages') === '1'; }, 15000).then(function () {
+            setVal(d, 'wtext', '', 'input');
+            return sleep(150);
+          }).then(function () {
+            var emptyMsg = txt(d, 'msg');
+            setVal(d, 'wtype', 'logo');
+            var fieldsOk = !d.getElementById('logo-field').hidden && d.getElementById('text-field').hidden && d.getElementById('color-field').hidden;
+            d.getElementById('btn-save').click();
+            var needLogo = txt(d, 'msg');
+            setFiles(d.getElementById('logo'), [new File([r[0]], 'logo.png', { type: 'image/png' })]);
+            return waitFor(function () { return !d.getElementById('logo-row').hidden; }).then(function () {
+              setVal(d, 'wpos', 'br'); setVal(d, 'wrot', '0'); setVal(d, 'wsize', '40', 'input'); setVal(d, 'wopacity', '100', 'input');
+              d.getElementById('btn-save').click();
+              return waitFor(function () { return cap.blobs.length >= 1; }, 15000);
+            }).then(function () { return cap.blobs[0].arrayBuffer(); }).then(function (buf) {
+              return renderPdfPage(buf, 1).then(function (c) {
+                // 오른쪽 아래에 초록 로고, 왼쪽 위는 비어 있어야 한다
+                var br = changed(c, Math.round(c.width * 0.5), Math.round(c.height * 0.5), Math.round(c.width * 0.5), Math.round(c.height * 0.5), [255, 255, 255]);
+                var tl = changed(c, 0, 0, Math.round(c.width * 0.45), Math.round(c.height * 0.45), [255, 255, 255]);
+                d.getElementById('logo-clear').click();
+                var clearHidden = d.getElementById('logo-row').hidden;
+                d.getElementById('btn-reset').click();
+                var ok = opened === 2 && /PDF 파일을 선택해/.test(rejectMsg) && /열 수 없습니다/.test(brokenMsg) && /새길 글자를 입력/.test(emptyMsg) && fieldsOk && /로고 파일을 고르세요/.test(needLogo) &&
+                         br > 100 && tl === 0 && clearHidden && d.getElementById('area').hidden && txt(d, 't-pages') === '0' && !f.dataset.errs;
+                log('PDF 워터마크 로고 · 예외 · 초기화', ok, '키보드 열기 ' + opened + '회 · 글자 파일 "' + rejectMsg + '" · 손상 PDF "' + brokenMsg.slice(0, 40) + '" · 빈 글자 "' + emptyMsg + '" · 로고 칸 전환 ' + fieldsOk + ' · 로고 없이 "' + needLogo + '" · 렌더 오른쪽 아래 색 픽셀 ' + br + ' (>100) 왼쪽 위 ' + tl + ' (0) · 로고 빼기 ' + clearHidden + ' · 초기화 ' + d.getElementById('area').hidden);
+                f.remove();
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 워터마크 로고 · 예외 · 초기화', false, '오류: ' + e.message); });
+
+  // ===== 11. QR 스캔: 주소 · 한글 · 와이파이 · 연락처 · 문자 · 이메일 · 전화 · 글자 =====
+  chain = chain.then(function () {
+    var cases = [
+      ['https://toolmoa.github.io/qr-scan.html?x=1', '링크', function (d) { return d.getElementById('btn-open').hidden === false && d.getElementById('btn-open').href === 'https://toolmoa.github.io/qr-scan.html?x=1' && /toolmoa\.github\.io/.test(txt(d, 'fields')); }],
+      ['안녕하세요 툴모아입니다', '글자', function (d) { return d.getElementById('btn-open').hidden === true; }],
+      ['WIFI:T:WPA;S:Cafe Toolmoa;P:pass\\;1234;H:true;;', '와이파이', function (d) { var s = txt(d, 'fields'); return /Cafe Toolmoa/.test(s) && /pass;1234/.test(s) && /WPA/.test(s) && /숨김 네트워크/.test(s); }],
+      ['BEGIN:VCARD\nVERSION:3.0\nN:홍길동\nFN:홍길동\nTEL;TYPE=CELL:01012345678\nEMAIL:gil@example.com\nORG:툴모아\nEND:VCARD', '연락처', function (d) { var s = txt(d, 'fields'); return /홍길동/.test(s) && /01012345678/.test(s) && /gil@example\.com/.test(s) && /툴모아/.test(s); }],
+      ['SMSTO:01012345678:예약 문의합니다', '문자', function (d) { var s = txt(d, 'fields'); return /01012345678/.test(s) && /예약 문의합니다/.test(s); }],
+      ['MAILTO:hi@example.com?subject=%EB%AC%B8%EC%9D%98&body=hello', '이메일', function (d) { var s = txt(d, 'fields'); return /hi@example\.com/.test(s) && /문의/.test(s) && /hello/.test(s); }],
+      ['tel:0212345678', '전화번호', function (d) { return /0212345678/.test(txt(d, 'fields')); }],
+      ['www.example.com/path', '링크', function (d) { return d.getElementById('btn-open').href === 'https://www.example.com/path'; }]
+    ];
+    return loadFrame('../qr-scan.html').then(function (f) {
+      var d = f.contentDocument, seq = Promise.resolve(), got = [], allOk = true;
+      cases.forEach(function (cs) {
+        seq = seq.then(function () {
+          return qrPng(cs[0]).then(function (png) {
+            d.getElementById('btn-reset').click();
+            setFiles(d.getElementById('file'), [new File([png], 'qr.png', { type: 'image/png' })]);
+            return waitFor(function () { return !d.getElementById('area').hidden && txt(d, 'out') !== ''; }, 15000).then(function () {
+              var same = txt(d, 'out') === cs[0].trim(), kindOk = txt(d, 'kind') === cs[1], extra = false;
+              try { extra = cs[2](d); } catch (e) {}
+              var ok = same && kindOk && extra;
+              if (!ok) allOk = false;
+              got.push(cs[1] + (ok ? ' O' : ' X[' + (same ? '' : '본문 "' + txt(d, 'out').slice(0, 30) + '" ') + (kindOk ? '' : '종류 "' + txt(d, 'kind') + '" ') + (extra ? '' : '항목 "' + txt(d, 'fields').slice(0, 60) + '"') + ']'));
+            });
+          });
+        });
+      });
+      return seq.then(function () {
+        log('QR 스캔 8종 판독·분류', allOk && !f.dataset.errs, got.join(' · ') + (f.dataset.errs ? ' · JS오류 ' + f.dataset.errs : ''));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('QR 스캔 8종 판독·분류', false, '오류: ' + e.message); });
+
+  // ===== 12. QR 스캔: 큰 사진 속 작은 QR · 반전 · 아주 작은 캡처 · QR 없음 · 복사 · 붙여넣기 · 키보드 =====
+  chain = chain.then(function () {
+    return qrPng('https://toolmoa.github.io/', 4).then(function (small) {
+      return blobToCanvas(small).then(function (qc) {
+        // (가) 2000×1500 사진 한구석에 QR
+        var big = document.createElement('canvas'); big.width = 2000; big.height = 1500;
+        var bx = big.getContext('2d'); bx.fillStyle = '#c8d8e8'; bx.fillRect(0, 0, 2000, 1500); bx.drawImage(qc, 1400, 1000, qc.width * 1.5, qc.height * 1.5);
+        // (나) 색 반전
+        var inv = document.createElement('canvas'); inv.width = qc.width; inv.height = qc.height;
+        var ix = inv.getContext('2d'); ix.drawImage(qc, 0, 0); var id = ix.getImageData(0, 0, inv.width, inv.height);
+        for (var i = 0; i < id.data.length; i += 4) { id.data[i] = 255 - id.data[i]; id.data[i + 1] = 255 - id.data[i + 1]; id.data[i + 2] = 255 - id.data[i + 2]; }
+        ix.putImageData(id, 0, 0);
+        // (다) 아주 작은 캡처 (2px 칸)
+        // (라) QR 없는 그림
+        var toBlob = function (c) { return new Promise(function (r) { c.toBlob(r, 'image/png'); }); };
+        return Promise.all([toBlob(big), toBlob(inv), qrPng('tiny', 2), solid(300, 200, '#888888')]).then(function (b) {
+          return loadFrame('../qr-scan.html').then(function (f) {
+            var d = f.contentDocument, w = f.contentWindow, got = [];
+            var dz = d.getElementById('dz'), opened = 0;
+            d.getElementById('file').click = function () { opened++; };
+            dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+            dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+            setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+            var rejectMsg = txt(d, 'msg');
+            function tryOne(blob, label, expect) {
+              d.getElementById('btn-reset').click();
+              setFiles(d.getElementById('file'), [new File([blob], label + '.png', { type: 'image/png' })]);
+              return waitFor(function () { return txt(d, 'out') === expect || /찾지 못했/.test(txt(d, 'msg')); }, 15000).then(function () {
+                var ok = expect === null ? /찾지 못했/.test(txt(d, 'msg')) && d.getElementById('area').hidden : txt(d, 'out') === expect;
+                got.push(label + (ok ? ' O' : ' X("' + (txt(d, 'out') || txt(d, 'msg')).slice(0, 40) + '")'));
+                return ok;
+              });
+            }
+            return tryOne(b[0], '큰사진속QR', 'https://toolmoa.github.io/').then(function (a1) {
+              return tryOne(b[1], '반전QR', 'https://toolmoa.github.io/').then(function (a2) {
+                return tryOne(b[2], '작은캡처', 'tiny').then(function (a3) {
+                  return tryOne(b[3], 'QR없음', null).then(function (a4) {
+                    // 붙여넣기 + 복사
+                    var copied = null;
+                    w.navigator.clipboard.writeText = function (s) { copied = s; return Promise.resolve(); };
+                    var dt = new DataTransfer(); dt.items.add(new File([b[1]], 'image.png', { type: 'image/png' }));
+                    d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+                    return waitFor(function () { return txt(d, 'out') === 'https://toolmoa.github.io/'; }, 15000).then(function (pasted) {
+                      d.getElementById('btn-copy').click();
+                      return waitFor(function () { return copied !== null; }, 3000).then(function () {
+                        var ok = a1 && a2 && a3 && a4 && pasted && copied === 'https://toolmoa.github.io/' && /복사했습니다/.test(txt(d, 'copy-msg')) && opened === 2 && /이미지 파일을 선택해/.test(rejectMsg) && !f.dataset.errs;
+                        log('QR 스캔 어려운 입력 · 붙여넣기 · 복사', ok, got.join(' · ') + ' · 붙여넣기 ' + pasted + ' · 복사 "' + copied + '" ' + txt(d, 'copy-msg') + ' · 키보드 열기 ' + opened + '회 · 글자 파일 "' + rejectMsg + '"');
+                        f.remove();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('QR 스캔 어려운 입력 · 붙여넣기 · 복사', false, '오류: ' + e.message); });
+
+  // ===== 13. QR 스캔: 카메라 버튼 — 장치 없음/거부 안내 (실제 카메라를 켜지 않는다) =====
+  chain = chain.then(function () {
+    return loadFrame('../qr-scan.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow;
+      var err = new w.DOMException('denied', 'NotAllowedError');
+      w.navigator.mediaDevices.getUserMedia = function () { return Promise.reject(err); };
+      d.getElementById('btn-cam').click();
+      return waitFor(function () { return /카메라 사용이 거부/.test(txt(d, 'msg')); }, 15000).then(function (denied) {
+        var deniedMsg = txt(d, 'msg');
+        w.navigator.mediaDevices.getUserMedia = function () { return Promise.reject(new w.DOMException('none', 'NotFoundError')); };
+        d.getElementById('btn-cam').click();
+        return waitFor(function () { return /카메라를 켤 수 없습니다/.test(txt(d, 'msg')); }, 15000).then(function (failed) {
+          // 가짜 스트림으로 켜기 → 카메라 끄기 버튼이 보이고 다시 숨겨지는가
+          var stopped = 0;
+          w.navigator.mediaDevices.getUserMedia = function () { return Promise.resolve({ getTracks: function () { return [{ stop: function () { stopped++; } }]; } }); };
+          // srcObject 에 가짜를 넣으면 video 가 거부하므로 setter 를 무력화한다
+          Object.defineProperty(d.getElementById('video'), 'srcObject', { set: function () {}, get: function () { return null; } });
+          d.getElementById('btn-cam').click();
+          return waitFor(function () { return !d.getElementById('cam-area').hidden; }, 5000).then(function (on) {
+            var camBtnHidden = d.getElementById('btn-cam').hidden, stopShown = !d.getElementById('btn-cam-stop').hidden;
+            d.getElementById('btn-cam-stop').click();
+            var off = d.getElementById('cam-area').hidden && !d.getElementById('btn-cam').hidden && d.getElementById('btn-cam-stop').hidden;
+            var ok = denied && failed && on && camBtnHidden && stopShown && off && stopped === 1 && !f.dataset.errs;
+            log('QR 카메라 켜기·끄기·거부 안내', ok, '거부 → "' + deniedMsg.slice(0, 40) + '" · 장치 없음 안내 ' + failed + ' · 켜짐 ' + on + ' (버튼 전환 ' + camBtnHidden + '/' + stopShown + ') · 끄기 후 복귀 ' + off + ' · 트랙 정지 ' + stopped + '회');
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('QR 카메라 켜기·끄기·거부 안내', false, '오류: ' + e.message); });
+
+  // ===== 14. hidden 속성이 실제로 숨기는가 — .btn / .btn-row 의 display:flex 가 [hidden] 을 이기던 버그 (2026-10-19 발견) =====
+  // 속성(.hidden)만 보면 통과하지만 화면에는 그려지고 있었다. 계산된 display 로 본다.
+  chain = chain.then(function () {
+    var pages = ['qr-generate.html', 'en/qr-generate.html', 'image-watermark.html', 'pdf-watermark.html', 'qr-scan.html', 'image-split.html', 'image-crop.html', 'pdf-split.html'];
+    var seq = Promise.resolve(), bad = [], total = 0;
+    pages.forEach(function (p) {
+      seq = seq.then(function () {
+        return loadFrame('../' + p).then(function (f) {
+          var d = f.contentDocument, w = f.contentWindow;
+          Array.prototype.forEach.call(d.querySelectorAll('[hidden]'), function (el) {
+            total++;
+            if (w.getComputedStyle(el).display !== 'none') bad.push(p + '#' + (el.id || el.className));
+          });
+          f.remove();
+        });
+      });
+    });
+    return seq.then(function () {
+      log('hidden 속성이 실제로 숨김', bad.length === 0, pages.length + '쪽의 hidden 요소 ' + total + '개 확인 · 보이는 것 ' + (bad.length ? bad.join(', ') : '없음'));
+    });
+  }).catch(function (e) { log('hidden 속성이 실제로 숨김', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+// pdf.js 로 n쪽을 그려 캔버스로 돌려준다 (저장된 PDF 에 실제로 색이 찍혔는지 보려고)
+var pdfjsReady = null;
+function renderPdfPage(buf, n) {
+  if (!pdfjsReady) {
+    pdfjsReady = new Promise(function (res, rej) {
+      var sc = document.createElement('script'); sc.src = '../assets/vendor/pdf.min.js';
+      sc.onload = function () { pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js'; res(); };
+      sc.onerror = rej; document.head.appendChild(sc);
+    });
+  }
+  return pdfjsReady.then(function () {
+    return pdfjsLib.getDocument({ data: new Uint8Array(buf).slice() }).promise;
+  }).then(function (doc) { return doc.getPage(n); }).then(function (page) {
+    var vp = page.getViewport({ scale: 1 });
+    var c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    return page.render({ canvasContext: ctx, viewport: vp }).promise.then(function () { return c; });
+  });
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'TOOLS3 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

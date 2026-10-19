@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR코드 스캔 · 이미지로 읽기 - PC에서 무료 | 툴모아</title>
+<meta name="description" content="QR코드 사진이나 캡처 이미지를 올리면 내용을 읽어 줍니다. PC 카메라나 휴대전화 카메라로 바로 스캔할 수도 있습니다. 링크·와이파이·연락처를 알아보기 쉽게 풀어 주고, 이미지는 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/qr-scan.html">
+<meta property="og:title" content="QR코드 스캔 · 이미지로 읽기">
+<meta property="og:description" content="QR 사진·캡처를 올리거나 카메라로 스캔. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<!-- 판독 라이브러리(jsQR, 250KB)는 여기서 미리 받지 않는다. 아래 loadLib() 이 이미지를 고른 뒤에 받는다. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"QR코드 스캔","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .qr-result { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+  .qr-result pre { margin: 0; white-space: pre-wrap; word-break: break-all; font-family: inherit; font-size: 15px; line-height: 1.6; }
+  .qr-kind { display: inline-block; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 10px; margin-bottom: 8px; }
+  .qr-fields { margin: 10px 0 0; padding: 0; list-style: none; font-size: 14px; }
+  .qr-fields li { display: flex; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); }
+  .qr-fields li span:first-child { color: var(--muted); flex: 0 0 90px; }
+  .qr-fields li span:last-child { word-break: break-all; }
+  #video { width: 100%; max-width: 480px; border-radius: var(--radius-sm); background: #000; display: block; margin: 0 auto; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/qr-scan.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/qr-scan.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="QR코드 스캔 · 이미지로 읽기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="QR코드 스캔 · 이미지로 읽기">
+<meta name="twitter:description" content="QR 사진·캡처를 올리거나 카메라로 스캔. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/qr-scan.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"이미지가 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 판독은 브라우저 안에서만 이뤄지고, 읽은 내용도 어디로도 보내지 않습니다. 인터넷을 끊어도 동작합니다. 카메라 영상 역시 화면에서만 처리되고 녹화되지 않습니다."}},{"@type":"Question","name":"읽지 못한다고 나와요","acceptedAnswer":{"@type":"Answer","text":"QR이 너무 작거나(한 변이 100픽셀 아래), 흐리거나, 반사가 심하거나, 사진이 비스듬하면 실패합니다. 화면 캡처라면 QR을 크게 확대한 뒤 다시 캡처해 보세요. 사진이라면 QR이 화면의 절반 이상 차지하게 다시 찍으면 대부분 읽힙니다. 색이 반전된(흰 바탕에 검정이 아닌) QR도 자동으로 시도합니다."}},{"@type":"Question","name":"카메라가 켜지지 않아요","acceptedAnswer":{"@type":"Answer","text":"브라우저가 카메라 사용을 허용하는지 묻는 창이 뜨면 허용을 누르세요. 주소창 왼쪽 자물쇠 아이콘에서 카메라 권한을 바꿀 수 있습니다. 카메라가 없는 PC라면 QR을 사진으로 찍어 올리거나 캡처해 붙여 넣으세요."}},{"@type":"Question","name":"와이파이 QR을 읽었는데 어떻게 연결하나요?","acceptedAnswer":{"@type":"Answer","text":"네트워크 이름(SSID)과 비밀번호를 따로 보여 드립니다. 비밀번호를 복사해 PC의 와이파이 연결 창에 붙여 넣으면 됩니다. 휴대전화는 기본 카메라 앱으로 같은 QR을 찍으면 바로 연결됩니다."}},{"@type":"Question","name":"링크를 열어도 안전한가요?","acceptedAnswer":{"@type":"Answer","text":"QR은 누구나 만들 수 있어서 광고물에 붙은 QR이 가짜로 바뀌어 있는 경우도 있습니다. 그래서 바로 열지 않고 주소를 먼저 보여 드립니다. 주소의 도메인(첫 슬래시 앞부분)이 기대한 곳인지 확인하고 여세요. 단축 주소(bit.ly 등)는 어디로 가는지 알 수 없으니 더 조심하세요."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"QR코드 스캔 · 이미지로 읽기","item":"https://toolmoa.github.io/qr-scan.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="qrs.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" aria-current="page" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="qrs.h1">QR코드 스캔 · 이미지로 읽기</h1>
+  <p class="lead" data-i18n="qrs.lead">QR코드가 찍힌 사진이나 캡처 화면을 올리면 안에 담긴 내용을 읽어 줍니다. 휴대전화가 없어도 PC에서 바로 확인할 수 있고, 카메라로 직접 비춰 읽을 수도 있습니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 이미지가 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🔍</span>
+    <span class="dz-main" data-i18n="qrs.drop">QR코드 이미지를 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="qrs.drop2">JPG · PNG · WebP · 화면 캡처도 됩니다</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <div class="btn-row" style="margin:14px 0 0">
+    <button class="btn secondary" id="btn-cam" data-i18n="qrs.cam">📷 카메라로 스캔</button>
+    <button class="btn secondary" id="btn-cam-stop" hidden data-i18n="qrs.camStop">카메라 끄기</button>
+  </div>
+  <div id="cam-area" hidden style="margin-top:14px">
+    <video id="video" playsinline muted autoplay></video>
+    <p class="hint" style="text-align:center" data-i18n="qrs.camHint">QR코드를 화면 가운데에 맞추면 자동으로 읽습니다.</p>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="qr-result">
+        <span class="qr-kind" id="kind"></span>
+        <pre id="out"></pre>
+        <ul class="qr-fields" id="fields"></ul>
+      </div>
+      <div class="btn-row" style="margin-top:14px">
+        <a class="btn" id="btn-open" target="_blank" rel="noopener noreferrer" hidden data-i18n="qrs.open">링크 열기</a>
+        <button class="btn secondary" id="btn-copy" data-i18n="qrs.copy">내용 복사</button>
+        <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+      </div>
+      <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+    </div>
+    <p class="hint" style="margin:0" data-i18n="qrs.caution">QR코드에 적힌 링크는 누가 만들었는지 알 수 없습니다. 주소를 확인하고 낯선 사이트면 열지 마세요. 결제·로그인 화면이 나오면 특히 의심하세요.</p>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="qrs.cross">반대로 QR코드를 만들려면 <a href="qr-generate.html">QR코드 만들기</a>를 쓰세요. 와이파이·연락처·문자 QR도 만들 수 있습니다.</p>
+
+  <div class="ad-slot"><!-- AD:QRSCAN --></div>
+
+  <h2 data-ko-only>휴대전화 없이 QR을 읽어야 할 때</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      PC 화면에 뜬 QR을 읽으려고 휴대전화를 들고 카메라를 비추는 것은 번거롭습니다. 캡처해서 여기에 붙여 넣으면
+      바로 글자로 나옵니다. 메일로 받은 QR 이미지, 전단지를 찍은 사진, 와이파이 QR 스티커도 마찬가지입니다.
+      <strong style="color:var(--text)">이미지는 서버로 가지 않고</strong> 브라우저 안에서 판독하므로, 안에 담긴 주소나 연락처가 밖으로 새지 않습니다.
+      와이파이 QR은 이름과 비밀번호를 따로 보여 주고, 연락처 QR은 이름·전화·이메일로 풀어 줍니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>이미지가 서버로 올라가나요?</summary>
+      <p>아니요. 판독은 브라우저 안에서만 이뤄지고, 읽은 내용도 어디로도 보내지 않습니다. 인터넷을 끊어도 동작합니다. 카메라 영상 역시 화면에서만 처리되고 녹화되지 않습니다.</p>
+    </details>
+    <details>
+      <summary>읽지 못한다고 나와요</summary>
+      <p>QR이 너무 작거나(한 변이 100픽셀 아래), 흐리거나, 반사가 심하거나, 사진이 비스듬하면 실패합니다. 화면 캡처라면 QR을 크게 확대한 뒤 다시 캡처해 보세요. 사진이라면 QR이 화면의 절반 이상 차지하게 다시 찍으면 대부분 읽힙니다. 색이 반전된(흰 바탕에 검정이 아닌) QR도 자동으로 시도합니다.</p>
+    </details>
+    <details>
+      <summary>카메라가 켜지지 않아요</summary>
+      <p>브라우저가 카메라 사용을 허용하는지 묻는 창이 뜨면 허용을 누르세요. 주소창 왼쪽 자물쇠 아이콘에서 카메라 권한을 바꿀 수 있습니다. 카메라가 없는 PC라면 QR을 사진으로 찍어 올리거나 캡처해 붙여 넣으세요.</p>
+    </details>
+    <details>
+      <summary>와이파이 QR을 읽었는데 어떻게 연결하나요?</summary>
+      <p>네트워크 이름(SSID)과 비밀번호를 따로 보여 드립니다. 비밀번호를 복사해 PC의 와이파이 연결 창에 붙여 넣으면 됩니다. 휴대전화는 기본 카메라 앱으로 같은 QR을 찍으면 바로 연결됩니다.</p>
+    </details>
+    <details>
+      <summary>링크를 열어도 안전한가요?</summary>
+      <p>QR은 누구나 만들 수 있어서 광고물에 붙은 QR이 가짜로 바뀌어 있는 경우도 있습니다. 그래서 바로 열지 않고 주소를 먼저 보여 드립니다. 주소의 도메인(첫 슬래시 앞부분)이 기대한 곳인지 확인하고 여세요. 단축 주소(bit.ly 등)는 어디로 가는지 알 수 없으니 더 조심하세요.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var out = document.getElementById('out');
+  var kind = document.getElementById('kind');
+  var fields = document.getElementById('fields');
+  var openBtn = document.getElementById('btn-open');
+  var video = document.getElementById('video');
+  var camArea = document.getElementById('cam-area');
+  var camBtn = document.getElementById('btn-cam');
+  var camStop = document.getElementById('btn-cam-stop');
+
+  var lastText = '';
+  var stream = null, camTimer = null;
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+
+  // 판독 라이브러리는 250KB 라 첫 화면에서 받지 않는다. 필요할 때 받고, 실패하면 다음에 다시 시도한다.
+  var libPromise = null;
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('jsQR', 'assets/vendor/jsqr.js').catch(function (e) { libPromise = null; throw e; });
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof jsQR !== 'undefined') { fn(); return; }
+    setMsg(t('msg.loadingLib', '처리 도구를 불러오는 중입니다…'));
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg(t('msg.libFail', '처리 도구를 불러오지 못했습니다. 새로고침한 뒤 다시 시도해 주세요.'), 'err');
+    });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  // 화면에 뜬 QR 은 캡처해서 Ctrl+V 로 바로 넣는 것이 가장 빠르다
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile();
+      if (!f) continue;
+      e.preventDefault();
+      load(f);
+      return;
+    }
+  });
+
+  function load(file) {
+    if (file.type.indexOf('image/') !== 0) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    stopCam();
+    whenReady(function () {
+      setMsg(t('qrs.reading', '판독하는 중입니다…'));
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var text = decodeImage(img);
+        if (text === null) {
+          area.hidden = true;
+          setMsg(t('qrs.notFound', 'QR코드를 찾지 못했습니다. QR이 더 크고 또렷하게 보이는 이미지로 다시 시도해 주세요.'), 'err');
+          return;
+        }
+        show(text);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); setMsg(t('qrs.cantOpen', '이 이미지를 열 수 없습니다.'), 'err'); };
+      img.src = url;
+    });
+  }
+
+  // 같은 그림을 여러 크기로 시도한다. 너무 큰 사진은 줄여야 빠르고, 작은 캡처는 키워야 읽힌다.
+  function decodeImage(img) {
+    var w = img.naturalWidth, h = img.naturalHeight;
+    if (!w || !h) return null;
+    var longest = Math.max(w, h);
+    var scales = [];
+    if (longest > 1400) scales.push(1400 / longest);
+    scales.push(1);
+    if (longest < 400) scales.push(2.5);
+    if (longest > 700) scales.push(700 / longest);
+    var c = document.createElement('canvas');
+    for (var i = 0; i < scales.length; i++) {
+      var k = scales[i];
+      c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+      var ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.imageSmoothingEnabled = k < 1;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);   // 투명 PNG 는 흰 바탕을 깔아야 읽힌다
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      var data = ctx.getImageData(0, 0, c.width, c.height);
+      var r = jsQR(data.data, c.width, c.height, { inversionAttempts: 'attemptBoth' });
+      if (r && r.data !== undefined && r.data !== '') return r.data;
+    }
+    c.width = c.height = 1;
+    return null;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // 내용의 종류를 알아내고, 와이파이·연락처처럼 구조가 있는 것은 항목별로 풀어 준다.
+  function analyze(text) {
+    var m, list = [];
+    if (/^https?:\/\//i.test(text)) {
+      try { m = new URL(text); list.push([t('qrs.fDomain', '사이트'), m.hostname]); } catch (e) { /* 그대로 둔다 */ }
+      return { kind: t('qrs.kUrl', '링크'), url: text, fields: list };
+    }
+    if (/^WIFI:/i.test(text)) {
+      var get = function (key) { var r = new RegExp('(?:^WIFI:|;)' + key + ':((?:\\\\.|[^;\\\\])*)', 'i').exec(text); return r ? r[1].replace(/\\(.)/g, '$1') : ''; };
+      list.push([t('qrs.fSsid', '네트워크 이름'), get('S')]);
+      list.push([t('qrs.fPw', '비밀번호'), get('P') || t('qrs.fNoPw', '(없음)')]);
+      list.push([t('qrs.fEnc', '보안 방식'), get('T') || 'nopass']);
+      if (/(?:^WIFI:|;)H:true/i.test(text)) list.push([t('qrs.fHidden', '숨김 네트워크'), t('qrs.yes', '예')]);
+      return { kind: t('qrs.kWifi', '와이파이'), fields: list };
+    }
+    if (/^BEGIN:VCARD/i.test(text)) {
+      var line = function (key) { var r = new RegExp('^' + key + '(?:;[^:]*)?:(.*)$', 'im').exec(text); return r ? r[1].trim() : ''; };
+      var pairs = [['FN', t('qrs.fName', '이름')], ['TEL', t('qrs.fTel', '전화')], ['EMAIL', t('qrs.fMail', '이메일')],
+                   ['ORG', t('qrs.fOrg', '회사')], ['TITLE', t('qrs.fTitle', '직함')], ['URL', t('qrs.fUrl', '웹사이트')], ['ADR', t('qrs.fAdr', '주소')]];
+      pairs.forEach(function (p) { var v = line(p[0]); if (v) list.push([p[1], v.replace(/;+/g, ' ').trim()]); });
+      if (!line('FN') && line('N')) list.unshift([t('qrs.fName', '이름'), line('N').replace(/;/g, ' ').trim()]);
+      return { kind: t('qrs.kVcard', '연락처'), fields: list };
+    }
+    if (/^MECARD:/i.test(text)) {
+      var mg = function (key) { var r = new RegExp('(?:^MECARD:|;)' + key + ':([^;]*)', 'i').exec(text); return r ? r[1] : ''; };
+      [['N', t('qrs.fName', '이름')], ['TEL', t('qrs.fTel', '전화')], ['EMAIL', t('qrs.fMail', '이메일')]].forEach(function (p) {
+        var v = mg(p[0]); if (v) list.push([p[1], v.replace(/,/g, ' ')]);
+      });
+      return { kind: t('qrs.kVcard', '연락처'), fields: list };
+    }
+    if ((m = /^(?:SMSTO|sms):([^:]*):?(.*)$/is.exec(text))) {
+      list.push([t('qrs.fTel', '전화'), m[1]]); if (m[2]) list.push([t('qrs.fBody', '내용'), m[2]]);
+      return { kind: t('qrs.kSms', '문자'), fields: list };
+    }
+    if ((m = /^(?:MAILTO|mailto):([^?]*)\??(.*)$/is.exec(text))) {
+      list.push([t('qrs.fMail', '이메일'), m[1]]);
+      var q = m[2] || '';
+      var sub = /(?:^|&)subject=([^&]*)/i.exec(q), body = /(?:^|&)body=([^&]*)/i.exec(q);
+      var dec = function (s) { try { return decodeURIComponent(s.replace(/\+/g, ' ')); } catch (e) { return s; } };
+      if (sub) list.push([t('qrs.fSubject', '제목'), dec(sub[1])]);
+      if (body) list.push([t('qrs.fBody', '내용'), dec(body[1])]);
+      return { kind: t('qrs.kMail', '이메일'), fields: list };
+    }
+    if ((m = /^tel:(.+)$/i.exec(text))) { list.push([t('qrs.fTel', '전화'), m[1]]); return { kind: t('qrs.kTel', '전화번호'), fields: list }; }
+    if (/^geo:/i.test(text)) return { kind: t('qrs.kGeo', '위치'), fields: list };
+    if (/^BEGIN:VEVENT/i.test(text)) return { kind: t('qrs.kEvent', '일정'), fields: list };
+    // 주소 모양인데 http 가 빠진 것 — 열기 버튼을 주되 https 로 붙인다
+    if (/^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(\/\S*)?$/i.test(text)) {
+      return { kind: t('qrs.kUrl', '링크'), url: 'https://' + text, fields: list };
+    }
+    return { kind: t('qrs.kText', '글자'), fields: list };
+  }
+
+  function show(text) {
+    lastText = text;
+    var a = analyze(text);
+    kind.textContent = a.kind;
+    out.textContent = text;
+    fields.innerHTML = a.fields.map(function (f) { return '<li><span>' + esc(f[0]) + '</span><span>' + esc(f[1]) + '</span></li>'; }).join('');
+    if (a.url) { openBtn.href = a.url; openBtn.hidden = false; } else { openBtn.hidden = true; openBtn.removeAttribute('href'); }
+    document.getElementById('copy-msg').textContent = '';
+    area.hidden = false;
+    setMsg(t('qrs.found', 'QR코드를 읽었습니다.') + ' (' + text.length + t('qrs.chars', '자') + ')', 'ok');
+  }
+  // 언어를 바꾸면 종류 표시와 항목 이름도 다시 만든다
+  document.addEventListener('langchange', function () { if (lastText) show(lastText); });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    if (!lastText) return;
+    var note = document.getElementById('copy-msg');
+    var done = function () { note.textContent = t('qrs.copied', '복사했습니다.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lastText).then(done, function () { fallbackCopy(); done(); });
+    } else { fallbackCopy(); done(); }
+  });
+  function fallbackCopy() {
+    var ta = document.createElement('textarea');
+    ta.value = lastText; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* 무시 */ }
+    ta.remove();
+  }
+
+  /* ===== 카메라 ===== */
+  camBtn.addEventListener('click', function () {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setMsg(t('qrs.noCam', '이 브라우저에서는 카메라를 쓸 수 없습니다. 사진을 올려 주세요.'), 'err'); return;
+    }
+    whenReady(function () {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+        .then(function (s) {
+          stream = s;
+          video.srcObject = s;
+          camArea.hidden = false; camBtn.hidden = true; camStop.hidden = false;
+          area.hidden = true; setMsg(t('qrs.camOn', '카메라를 켰습니다. QR코드를 비춰 주세요.'));
+          var c = document.createElement('canvas');
+          var ctx = c.getContext('2d', { willReadFrequently: true });
+          camTimer = setInterval(function () {
+            if (!video.videoWidth) return;
+            // 긴 쪽 640px 로 줄여 읽는다. 매 프레임 전체 해상도를 훑으면 휴대전화가 뜨거워진다.
+            var k = Math.min(1, 640 / Math.max(video.videoWidth, video.videoHeight));
+            c.width = Math.round(video.videoWidth * k); c.height = Math.round(video.videoHeight * k);
+            ctx.drawImage(video, 0, 0, c.width, c.height);
+            var d = ctx.getImageData(0, 0, c.width, c.height);
+            var r = jsQR(d.data, c.width, c.height, { inversionAttempts: 'dontInvert' });
+            if (r && r.data) { stopCam(); show(r.data); }
+          }, 180);
+        })
+        .catch(function (e) {
+          var denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+          setMsg(denied ? t('qrs.camDenied', '카메라 사용이 거부되었습니다. 주소창의 자물쇠 아이콘에서 카메라를 허용해 주세요.')
+                        : t('qrs.camFail', '카메라를 켤 수 없습니다. 사진을 올려 주세요.'), 'err');
+        });
+    });
+  });
+  function stopCam() {
+    clearInterval(camTimer); camTimer = null;
+    if (stream) { stream.getTracks().forEach(function (tr) { tr.stop(); }); stream = null; }
+    video.srcObject = null;
+    camArea.hidden = true; camBtn.hidden = false; camStop.hidden = true;
+  }
+  camStop.addEventListener('click', function () { stopCam(); setMsg(''); });
+  window.addEventListener('pagehide', stopCam);
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    stopCam();
+    lastText = ''; fileInput.value = '';
+    out.textContent = ''; kind.textContent = ''; fields.innerHTML = '';
+    openBtn.hidden = true; openBtn.removeAttribute('href');
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>
