@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>흰 배경 투명하게 만들기 - 배경 지우고 PNG 저장 무료 | 툴모아</title>
+<meta name="description" content="로고·도장·서명·그림의 흰 배경(또는 고른 색)을 투명하게 지워 PNG로 저장합니다. 바깥쪽 배경만 지우고 안쪽 흰 부분은 남기는 선택, 허용 오차와 가장자리 부드럽게. 사진은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/image-transparent.html">
+<meta property="og:title" content="흰 배경 투명하게 만들기 · PNG 저장">
+<meta property="og:description" content="로고·도장·서명의 흰 배경을 투명 PNG로. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫥</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"흰 배경 투명하게 만들기","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .trp-stage { background-color:#fff; background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0; padding:10px; text-align:center; border-radius:var(--radius-sm); border:1px solid var(--border); }
+  .trp-stage canvas { max-width:100%; height:auto; cursor:crosshair; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/image-transparent.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/image-transparent.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="흰 배경 투명하게 만들기 · 배경 지우고 PNG 저장 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="흰 배경 투명하게 만들기 · PNG 저장">
+<meta name="twitter:description" content="로고·도장·서명의 흰 배경을 투명 PNG로. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/image-transparent.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"그림이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 그림은 브라우저 안에서만 열고 고치고 저장합니다. 인터넷을 끊어도 동작합니다. 서명이나 도장처럼 민감한 그림에 쓰라고 만든 도구입니다."}},{"@type":"Question","name":"\"바깥에서 이어진 배경만\"은 뭐가 다른가요?","acceptedAnswer":{"@type":"Answer","text":"그림 가장자리에서 시작해 이어진 배경색만 지웁니다. 글자 \"O\"의 안쪽이나 눈의 흰자처럼 배경과 같은 색이지만 바깥과 이어지지 않은 부분은 그대로 남습니다. \"같은 색 전부\"는 위치에 상관없이 그 색을 모두 지웁니다. 로고나 도장은 보통 \"바깥만\"이 맞습니다."}},{"@type":"Question","name":"배경이 얼룩덜룩 남아요","acceptedAnswer":{"@type":"Answer","text":"스캔이나 사진의 흰 종이는 밝은 회색·누런색이 섞여 있습니다. 허용 오차를 올리면 그런 색까지 배경으로 봅니다. 글자나 선이 흐릿하게 지워지기 시작하면 너무 올린 것입니다."}},{"@type":"Question","name":"가장자리가 울퉁불퉁해요","acceptedAnswer":{"@type":"Answer","text":"\"가장자리 부드럽게\"를 켜면 배경과 비슷한 색일수록 반투명하게 처리해 경계가 자연스러워집니다. 선이 가는 서명은 켜는 쪽이, 색 경계가 뚜렷한 로고는 끄는 쪽이 깨끗할 때가 있습니다."}},{"@type":"Question","name":"JPG로 저장할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"JPG에는 투명이 없습니다. 투명을 살리려면 PNG여야 해서 PNG로만 저장합니다. 용량이 크면 이미지 용량 줄이기에서 WebP로 바꾸면 투명을 유지하면서 작아집니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"흰 배경 투명하게 만들기 · 배경 지우고 PNG 저장","item":"https://toolmoa.github.io/image-transparent.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="trp.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" aria-current="page" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="trp.h1">흰 배경 투명하게 만들기 · 배경 지우고 PNG 저장</h1>
+  <p class="lead" data-i18n="trp.lead">로고·도장·서명·손그림의 흰 배경(또는 고른 색)을 투명하게 지웁니다. 바깥쪽 배경만 지우고 안쪽 흰 부분은 남길 수 있고, 가장자리를 부드럽게 다듬어 투명 PNG로 저장합니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🫥</span>
+    <span class="dz-main" data-i18n="trp.drop">그림을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="trp.drop2">JPG · PNG · WebP · 한 번에 한 장 · 로고·도장·서명 스캔에 적합</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="pick" data-i18n="trp.pick">지울 색</label>
+          <select id="pick">
+            <option value="white" selected data-i18n="trp.pWhite">흰색</option>
+            <option value="corner" data-i18n="trp.pCorner">모서리 색 (왼쪽 위 픽셀)</option>
+            <option value="custom" data-i18n="trp.pCustom">직접 고르기 (그림을 클릭)</option>
+          </select>
+          <div class="hint" data-i18n="trp.clickHint">그림을 클릭하면 그 자리 색이 지울 색이 됩니다.</div>
+        </div>
+        <div class="field" style="margin:0" id="color-field">
+          <label for="tcolor" data-i18n="trp.color">고른 색</label>
+          <input type="color" id="tcolor" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="region" data-i18n="trp.region">지울 범위</label>
+          <select id="region">
+            <option value="edge" selected data-i18n="trp.rEdge">바깥에서 이어진 배경만 (안쪽 흰 부분은 남김)</option>
+            <option value="all" data-i18n="trp.rAll">같은 색 전부</option>
+          </select>
+          <div class="hint" id="region-hint"></div>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="tol"><span data-i18n="trp.tol">허용 오차</span> <span id="tol-val" style="color:var(--accent)">25</span></label>
+          <input type="range" id="tol" min="0" max="100" value="25" step="1">
+          <div class="hint" data-i18n="trp.tolHint">스캔한 종이는 완전한 흰색이 아닙니다. 배경이 남으면 올리고, 밝은 부분까지 지워지면 내리세요.</div>
+        </div>
+        <div class="field" style="margin:0;align-self:end">
+          <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;margin:0">
+            <input type="checkbox" id="soft" checked style="width:auto;margin:0">
+            <span data-i18n="trp.soft">가장자리 부드럽게</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-removed">0%</span><span class="lbl" data-i18n="trp.removed">투명해진 비율</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl" data-i18n="trp.size">그림 크기</span></div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px" data-i18n="trp.previewNote">바둑판 무늬가 보이는 곳이 투명해진 부분입니다.</p>
+    <div class="trp-stage">
+      <canvas id="view" aria-label="결과 미리보기 — 클릭하면 그 자리 색을 지울 색으로 고릅니다"></canvas>
+    </div>
+
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn" id="btn-save" data-i18n="trp.save">투명 PNG로 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="trp.cross">투명하게 만든 로고는 <a href="image-watermark.html">사진 워터마크</a>나 <a href="qr-generate.html">QR코드</a> 가운데 로고로 바로 쓸 수 있습니다. 먼저 필요한 부분만 남기려면 <a href="image-crop.html">이미지 자르기</a>를 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:IMAGETRANSPARENT --></div>
+
+  <h2 data-ko-only>어디에 쓰나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">도장·서명 스캔</strong> — 종이에 찍어 스캔하면 흰 바탕이 따라옵니다. 지우면 전자 문서 어디에나 얹을 수 있습니다.<br>
+      <strong style="color:var(--text)">로고</strong> — 흰 배경 JPG 로고를 사진이나 색 배경 위에 올리면 흰 네모가 보입니다. 투명 PNG로 바꾸면 사라집니다.<br>
+      <strong style="color:var(--text)">손그림·캐릭터</strong> — 종이에 그린 그림을 스티커나 프로필처럼 쓸 때.<br>
+      사진 속 사람이나 물건의 배경을 지우는 것(누끼)은 색이 아니라 모양을 알아봐야 해서 이 방식으로는 안 됩니다. 이 페이지는 "배경이 한 가지 색인 그림"에 맞습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>그림이 서버로 올라가나요?</summary>
+      <p>아니요. 그림은 브라우저 안에서만 열고 고치고 저장합니다. 인터넷을 끊어도 동작합니다. 서명이나 도장처럼 민감한 그림에 쓰라고 만든 도구입니다.</p>
+    </details>
+    <details>
+      <summary>"바깥에서 이어진 배경만"은 뭐가 다른가요?</summary>
+      <p>그림 가장자리에서 시작해 이어진 배경색만 지웁니다. 글자 "O"의 안쪽이나 눈의 흰자처럼 배경과 같은 색이지만 바깥과 이어지지 않은 부분은 그대로 남습니다. "같은 색 전부"는 위치에 상관없이 그 색을 모두 지웁니다. 로고나 도장은 보통 "바깥만"이 맞습니다.</p>
+    </details>
+    <details>
+      <summary>배경이 얼룩덜룩 남아요</summary>
+      <p>스캔이나 사진의 흰 종이는 밝은 회색·누런색이 섞여 있습니다. 허용 오차를 올리면 그런 색까지 배경으로 봅니다. 글자나 선이 흐릿하게 지워지기 시작하면 너무 올린 것입니다.</p>
+    </details>
+    <details>
+      <summary>가장자리가 울퉁불퉁해요</summary>
+      <p>"가장자리 부드럽게"를 켜면 배경과 비슷한 색일수록 반투명하게 처리해 경계가 자연스러워집니다. 선이 가는 서명은 켜는 쪽이, 색 경계가 뚜렷한 로고는 끄는 쪽이 깨끗할 때가 있습니다.</p>
+    </details>
+    <details>
+      <summary>JPG로 저장할 수 있나요?</summary>
+      <p>JPG에는 투명이 없습니다. 투명을 살리려면 PNG여야 해서 PNG로만 저장합니다. 용량이 크면 <a href="image-compress.html">이미지 용량 줄이기</a>에서 WebP로 바꾸면 투명을 유지하면서 작아집니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">이미지 크기 조절·리사이즈</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), view = el('view');
+  var pickSel = el('pick'), colorIn = el('tcolor'), regionSel = el('region'), tolIn = el('tol'), softCb = el('soft');
+
+  var MAX_PIXELS = 16e6;      // 전체 픽셀을 훑어야 하므로 보통보다 낮게 잡는다
+  var src = null, srcData = null, baseName = 'image', timer = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  // 캡처한 화면을 파일로 저장한 뒤 다시 고르는 과정이 번거롭다. Ctrl+V로 바로 받는다.
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      e.preventDefault();
+      load(new File([f], '붙여넣은-그림-' + stamp + '.' + ext, { type: f.type }));
+      return;
+    }
+  });
+
+  function load(file) {
+    if (file.type.indexOf('image/') !== 0) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.naturalWidth, h = img.naturalHeight, k = 1;
+      if (w * h > MAX_PIXELS) k = Math.sqrt(MAX_PIXELS / (w * h));
+      w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+      src = document.createElement('canvas'); src.width = w; src.height = h;
+      var sc = src.getContext('2d', { willReadFrequently: true });
+      sc.drawImage(img, 0, 0, w, h);
+      srcData = sc.getImageData(0, 0, w, h);
+      baseName = file.name.replace(/\.[^.]+$/, '');
+      view.width = w; view.height = h;
+      el('t-size').textContent = w + '×' + h;
+      area.hidden = false;
+      setMsg(k < 1 ? t('trp.scaled', '그림이 너무 커서 브라우저가 다룰 수 있는 크기로 줄였습니다.') : '', k < 1 ? 'err' : '');
+      if (pickSel.value === 'corner') colorIn.value = cornerHex();
+      render();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg(t('trp.cantOpen', '이 그림을 열 수 없습니다.'), 'err'); };
+    img.src = url;
+  }
+  function hex2(n) { var s = n.toString(16); return s.length < 2 ? '0' + s : s; }
+  function cornerHex() { var d = srcData.data; return '#' + hex2(d[0]) + hex2(d[1]) + hex2(d[2]); }
+  function keyColor() {
+    if (pickSel.value === 'white') return [255, 255, 255];
+    var h = colorIn.value;
+    return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  }
+
+  // 핵심: 색 거리 → 알파. 오차 안이면 완전 투명, 부드럽게 모드면 오차 부근은 반투명.
+  // "바깥만" 모드는 가장자리에서 시작하는 영역 채우기(flood fill)로 이어진 배경만 고른다.
+  function render() {
+    if (!srcData) return;
+    var W = srcData.width, H = srcData.height, d = srcData.data, n = W * H;
+    var key = keyColor(), tol = parseInt(tolIn.value, 10) * 4.41;   // 0~100 → 0~441 (RGB 거리 최대값)
+    var soft = softCb.checked, band = soft ? Math.max(tol * 0.5, 30) : 0;
+    var alpha = new Uint8ClampedArray(n);   // 지울 정도 0(남김)~255(완전 투명)
+    for (var i = 0; i < n; i++) {
+      var dr = d[i * 4] - key[0], dg = d[i * 4 + 1] - key[1], db = d[i * 4 + 2] - key[2];
+      var dist = Math.sqrt(dr * dr + dg * dg + db * db);
+      if (dist <= tol) alpha[i] = 255;
+      else if (soft && dist <= tol + band) alpha[i] = Math.round(255 * (1 - (dist - tol) / band));
+      else alpha[i] = 0;
+    }
+    var mask = alpha;
+    if (regionSel.value === 'edge') {
+      // 가장자리에서 이어진 "지울 만한" 픽셀만 남긴다 (스택으로 4방향 채우기)
+      var seen = new Uint8Array(n), stack = [];
+      for (var x = 0; x < W; x++) { stack.push(x); stack.push((H - 1) * W + x); }
+      for (var y = 0; y < H; y++) { stack.push(y * W); stack.push(y * W + W - 1); }
+      while (stack.length) {
+        var p = stack.pop();
+        if (seen[p] || alpha[p] === 0) continue;
+        seen[p] = 1;
+        var px = p % W, py = (p - px) / W;
+        if (px > 0) stack.push(p - 1);
+        if (px < W - 1) stack.push(p + 1);
+        if (py > 0) stack.push(p - W);
+        if (py < H - 1) stack.push(p + W);
+      }
+      mask = new Uint8ClampedArray(n);
+      for (i = 0; i < n; i++) mask[i] = seen[i] ? alpha[i] : 0;
+    }
+    var out = view.getContext('2d').createImageData(W, H), o = out.data, removed = 0;
+    for (i = 0; i < n; i++) {
+      o[i * 4] = d[i * 4]; o[i * 4 + 1] = d[i * 4 + 1]; o[i * 4 + 2] = d[i * 4 + 2];
+      var a = Math.round(d[i * 4 + 3] * (255 - mask[i]) / 255);
+      o[i * 4 + 3] = a;
+      if (a === 0) removed++;
+    }
+    view.getContext('2d').putImageData(out, 0, 0);
+    el('t-removed').textContent = Math.round(removed / n * 100) + '%';
+    el('tol-val').textContent = tolIn.value;
+    el('color-field').hidden = pickSel.value === 'white';
+    el('region-hint').textContent = regionSel.value === 'edge'
+      ? t('trp.hEdge', '글자 "O"의 안쪽처럼 바깥과 이어지지 않은 부분은 남깁니다.')
+      : t('trp.hAll', '위치에 상관없이 그 색을 전부 지웁니다.');
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(render, 60); }
+
+  pickSel.addEventListener('change', function () { if (pickSel.value === 'corner' && srcData) colorIn.value = cornerHex(); render(); });
+  colorIn.addEventListener('input', function () { if (pickSel.value !== 'custom') pickSel.value = 'custom'; schedule(); });
+  regionSel.addEventListener('change', render);
+  tolIn.addEventListener('input', schedule);
+  softCb.addEventListener('change', render);
+  // 그림을 클릭하면 그 자리 색을 고른다 (원본 색 기준)
+  view.addEventListener('click', function (e) {
+    if (!srcData) return;
+    var r = view.getBoundingClientRect();
+    var x = Math.floor((e.clientX - r.left) * view.width / r.width), y = Math.floor((e.clientY - r.top) * view.height / r.height);
+    x = Math.max(0, Math.min(view.width - 1, x)); y = Math.max(0, Math.min(view.height - 1, y));
+    var i = (y * view.width + x) * 4, d = srcData.data;
+    colorIn.value = '#' + hex2(d[i]) + hex2(d[i + 1]) + hex2(d[i + 2]);
+    pickSel.value = 'custom';
+    render();
+  });
+  // 언어를 바꾸면 스크립트가 쓴 안내문도 다시 만들어야 한다
+  document.addEventListener('langchange', render);
+
+  el('btn-save').addEventListener('click', function () {
+    if (!srcData) return;
+    var btn = this; btn.disabled = true;
+    view.toBlob(function (blob) {
+      btn.disabled = false;
+      if (!blob) { setMsg(t('trp.fail', '그림을 만들지 못했습니다.'), 'err'); return; }
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = baseName + '_' + t('trp.suffix', '투명') + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(t('trp.done', '투명 PNG로 저장했습니다. ') + humanSize(blob.size), 'ok');
+    }, 'image/png');
+  });
+  el('btn-reset').addEventListener('click', function () {
+    src = null; srcData = null; fileInput.value = ''; view.width = view.height = 1;
+    el('t-removed').textContent = '0%'; el('t-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  });
+
+  el('color-field').hidden = true;
+})();
+</script>
+</body>
+</html>

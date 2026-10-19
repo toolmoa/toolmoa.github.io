@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이미지 크기 조절 - 픽셀·비율 지정, 사진 리사이즈 무료 | 툴모아</title>
+<meta name="description" content="사진을 원하는 가로·세로 픽셀이나 비율(%)로 정확히 줄이거나 키웁니다. 유튜브 썸네일·인스타·프로필·명함 규격을 한 번에 고르고, 여러 장을 한꺼번에 ZIP으로 받습니다. 사진은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/image-resize.html">
+<meta property="og:title" content="이미지 크기 조절 · 픽셀·비율 지정 리사이즈">
+<meta property="og:description" content="가로·세로 픽셀이나 %로 정확히. 유튜브·인스타 규격 프리셋. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"이미지 크기 조절","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/image-resize.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/image-resize.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="이미지 크기 조절 · 픽셀·비율 지정 리사이즈 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="이미지 크기 조절 · 픽셀·비율 지정 리사이즈">
+<meta name="twitter:description" content="가로·세로 픽셀이나 %로 정확히. 유튜브·인스타 규격 프리셋. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/image-resize.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"사진이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 크기 조절은 브라우저 안에서만 이뤄지고 저장도 바로 됩니다. 인터넷을 끊어도 동작합니다. 수십 장을 넣어도 기다릴 일이 없습니다."}},{"@type":"Question","name":"비율이 다른 사진을 1080×1080으로 만들면 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"\"비율 유지\"는 가로를 1080에 맞추고 세로는 비율대로 정해져 정확히 정사각형이 되지 않습니다. \"꽉 채우고 잘라내기\"는 가운데를 기준으로 넘치는 쪽을 잘라 정확히 1080×1080이 됩니다. \"여백 채우기\"는 사진 전체를 넣고 남는 곳을 여백 색으로 채웁니다. \"늘리기\"는 사진이 찌그러지니 특별한 경우에만 쓰세요."}},{"@type":"Question","name":"키우면 화질이 좋아지나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 없는 화소를 만들어 내는 것이라 키울수록 흐려집니다. 그래서 \"원본보다 키우지 않기\"가 기본입니다. 인쇄용으로 꼭 큰 픽셀 수가 필요할 때만 체크를 끄세요."}},{"@type":"Question","name":"저장 형식은 뭘 고를까요?","acceptedAnswer":{"@type":"Answer","text":"사진은 JPG, 글자·로고·투명 배경이 있으면 PNG, 웹에 올릴 거면 WebP가 가장 작습니다. \"원본과 같게\"로 두면 JPG는 JPG로, PNG는 PNG로 저장됩니다. JPG·WebP는 화질 92%로 저장합니다."}},{"@type":"Question","name":"촬영 정보(위치)는 남나요?","acceptedAnswer":{"@type":"Answer","text":"남지 않습니다. 크기를 바꾼 사진은 새로 그린 그림이라 원본의 GPS·기기 정보가 들어가지 않습니다. 원본을 그대로 두고 정보만 지우려면 사진 위치정보 삭제를 쓰세요."}},{"@type":"Question","name":"휴대전화에서도 되나요?","acceptedAnswer":{"@type":"Answer","text":"됩니다. 여러 장은 ZIP 한 개로 받습니다. 휴대전화는 파일을 연달아 내려받으면 첫 장만 저장되는 일이 잦아 기본으로 묶어 드립니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"이미지 크기 조절 · 픽셀·비율 지정 리사이즈","item":"https://toolmoa.github.io/image-resize.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="rsz.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" aria-current="page" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="rsz.h1">이미지 크기 조절 · 픽셀·비율 지정 리사이즈</h1>
+  <p class="lead" data-i18n="rsz.lead">사진을 원하는 가로·세로 픽셀이나 비율로 정확히 바꿉니다. 유튜브 썸네일·인스타그램·프로필 사진 규격을 바로 고를 수 있고, 여러 장을 같은 설정으로 한꺼번에 처리합니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">📐</span>
+    <span class="dz-main" data-i18n="rsz.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="rsz.drop2">JPG · PNG · WebP · GIF · BMP · 여러 장 한 번에</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="preset" data-i18n="rsz.preset">규격 고르기</label>
+        <select id="preset">
+          <option value="custom" selected data-i18n="rsz.pCustom">직접 입력</option>
+          <option value="1280x720" data-i18n="rsz.pYt">유튜브 썸네일 1280×720</option>
+          <option value="1080x1080" data-i18n="rsz.pInsta">인스타그램 정사각형 1080×1080</option>
+          <option value="1080x1350" data-i18n="rsz.pInstaP">인스타그램 세로 1080×1350</option>
+          <option value="1080x1920" data-i18n="rsz.pStory">스토리·릴스·쇼츠 1080×1920</option>
+          <option value="1200x630" data-i18n="rsz.pOg">링크 공유 썸네일 1200×630</option>
+          <option value="800x800" data-i18n="rsz.pShop">쇼핑몰 상품 800×800</option>
+          <option value="400x400" data-i18n="rsz.pProfile">프로필 사진 400×400</option>
+          <option value="1920x1080" data-i18n="rsz.pFhd">FHD 배경 1920×1080</option>
+          <option value="3840x2160" data-i18n="rsz.p4k">4K 배경 3840×2160</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="mode" data-i18n="rsz.mode">지정 방법</label>
+          <select id="mode">
+            <option value="px" selected data-i18n="rsz.mPx">픽셀 (가로·세로)</option>
+            <option value="pct" data-i18n="rsz.mPct">비율 (%)</option>
+            <option value="long" data-i18n="rsz.mLong">긴 쪽 길이만</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="w-field">
+          <label for="w" data-i18n="rsz.w">가로 (px)</label>
+          <input type="number" id="w" min="1" max="16384" value="1280" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="h-field">
+          <label for="h" data-i18n="rsz.h">세로 (px)</label>
+          <input type="number" id="h" min="1" max="16384" value="720" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="pct-field" hidden>
+          <label for="pct" data-i18n="rsz.pct">비율 (%)</label>
+          <input type="number" id="pct" min="1" max="1000" value="50" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="long-field" hidden>
+          <label for="long" data-i18n="rsz.long">긴 쪽 (px)</label>
+          <input type="number" id="long" min="1" max="16384" value="1920" inputmode="numeric">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px">
+        <div class="field" style="margin:0" id="fit-field">
+          <label for="fit" data-i18n="rsz.fit">비율이 다를 때</label>
+          <select id="fit">
+            <option value="keep" selected data-i18n="rsz.fKeep">비율 유지 — 가로에 맞추고 세로는 자동</option>
+            <option value="cover" data-i18n="rsz.fCover">꽉 채우고 넘치는 부분 잘라내기 (가운데 기준)</option>
+            <option value="contain" data-i18n="rsz.fContain">전체가 들어가게 여백 채우기</option>
+            <option value="stretch" data-i18n="rsz.fStretch">비율 무시하고 늘리기</option>
+          </select>
+          <div class="hint" id="fit-hint"></div>
+        </div>
+        <div class="field" style="margin:0" id="bg-field" hidden>
+          <label for="bgc" data-i18n="rsz.bg">여백 색</label>
+          <input type="color" id="bgc" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="fmt" data-i18n="rsz.fmt">저장 형식</label>
+          <select id="fmt">
+            <option value="auto" selected data-i18n="rsz.fAuto">원본과 같게</option>
+            <option value="image/jpeg" data-i18n="rsz.fJpg">JPG — 용량이 작습니다</option>
+            <option value="image/png" data-i18n="rsz.fPng">PNG — 손실이 없습니다</option>
+            <option value="image/webp" data-i18n="rsz.fWebp">WebP — 더 작습니다</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;margin:0">
+            <input type="checkbox" id="noup" checked style="width:auto;margin:0">
+            <span data-i18n="rsz.noUp">원본보다 키우지 않기</span>
+          </label>
+          <div class="hint" data-i18n="rsz.noUpHint">작은 사진을 키우면 흐려집니다. 끄면 지정한 크기로 키웁니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl" data-i18n="rsz.count">사진 장수</span></div>
+      <div class="stat"><span class="num" id="t-out" style="font-size:18px">-</span><span class="lbl" data-i18n="rsz.outSize">첫 사진 결과 크기</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl" data-i18n="rsz.total">결과 용량 합계</span></div>
+    </div>
+
+    <ul class="file-list" id="list"></ul>
+
+    <div class="btn-row" style="align-items:center">
+      <button class="btn" id="btn-all" data-i18n="rsz.saveAll">크기 바꿔 저장</button>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:400;font-size:14px">
+        <input type="checkbox" id="as-zip" checked style="width:auto;margin:0">
+        <span data-i18n="rsz.asZip">여러 장이면 ZIP 한 개로 받기</span>
+      </label>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="rsz.cross">용량(KB)을 줄이는 것이 목적이면 <a href="image-compress.html">이미지 용량 줄이기</a>가 맞고, 원하는 부분만 잘라내려면 <a href="image-crop.html">이미지 자르기</a>를 쓰세요. 형식만 바꾸려면 <a href="image-convert.html">이미지 형식 변환</a>이 있습니다.</p>
+
+  <div class="ad-slot"><!-- AD:IMAGERESIZE --></div>
+
+  <h2 data-ko-only>크기 조절과 용량 줄이기는 다르다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      "사진 크기를 줄여 달라"는 요청은 두 가지 뜻입니다. <strong style="color:var(--text)">픽셀 크기</strong>(가로 4000 → 1280)와 <strong style="color:var(--text)">파일 용량</strong>(5MB → 500KB).
+      게시판이 "가로 1000픽셀 이하"라고 하면 이 페이지, "2MB 이하"라고 하면 <a href="image-compress.html">이미지 용량 줄이기</a>입니다.
+      규격이 정해진 곳(유튜브 썸네일 1280×720, 인스타 1080×1080)은 프리셋을 고르고 "꽉 채우고 잘라내기"를 쓰면 비율이 달라도 정확히 그 크기로 나옵니다.
+      작은 사진을 큰 규격으로 키우면 흐려지므로 기본으로 키우지 않게 막아 두었고, 꼭 키워야 할 때만 체크를 끄세요.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 크기 조절은 브라우저 안에서만 이뤄지고 저장도 바로 됩니다. 인터넷을 끊어도 동작합니다. 수십 장을 넣어도 기다릴 일이 없습니다.</p>
+    </details>
+    <details>
+      <summary>비율이 다른 사진을 1080×1080으로 만들면 어떻게 되나요?</summary>
+      <p>"비율 유지"는 가로를 1080에 맞추고 세로는 비율대로 정해져 정확히 정사각형이 되지 않습니다. "꽉 채우고 잘라내기"는 가운데를 기준으로 넘치는 쪽을 잘라 정확히 1080×1080이 됩니다. "여백 채우기"는 사진 전체를 넣고 남는 곳을 여백 색으로 채웁니다. "늘리기"는 사진이 찌그러지니 특별한 경우에만 쓰세요.</p>
+    </details>
+    <details>
+      <summary>키우면 화질이 좋아지나요?</summary>
+      <p>아니요. 없는 화소를 만들어 내는 것이라 키울수록 흐려집니다. 그래서 "원본보다 키우지 않기"가 기본입니다. 인쇄용으로 꼭 큰 픽셀 수가 필요할 때만 체크를 끄세요.</p>
+    </details>
+    <details>
+      <summary>저장 형식은 뭘 고를까요?</summary>
+      <p>사진은 JPG, 글자·로고·투명 배경이 있으면 PNG, 웹에 올릴 거면 WebP가 가장 작습니다. "원본과 같게"로 두면 JPG는 JPG로, PNG는 PNG로 저장됩니다. JPG·WebP는 화질 92%로 저장합니다.</p>
+    </details>
+    <details>
+      <summary>촬영 정보(위치)는 남나요?</summary>
+      <p>남지 않습니다. 크기를 바꾼 사진은 새로 그린 그림이라 원본의 GPS·기기 정보가 들어가지 않습니다. 원본을 그대로 두고 정보만 지우려면 <a href="image-exif.html">사진 위치정보 삭제</a>를 쓰세요.</p>
+    </details>
+    <details>
+      <summary>휴대전화에서도 되나요?</summary>
+      <p>됩니다. 여러 장은 ZIP 한 개로 받습니다. 휴대전화는 파일을 연달아 내려받으면 첫 장만 저장되는 일이 잦아 기본으로 묶어 드립니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">흰 배경 투명하게 만들기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), list = el('list');
+  var presetSel = el('preset'), modeSel = el('mode'), wIn = el('w'), hIn = el('h'), pctIn = el('pct'), longIn = el('long');
+  var fitSel = el('fit'), bgIn = el('bgc'), fmtSel = el('fmt'), noupCb = el('noup');
+
+  // 너무 큰 결과는 브라우저가 캔버스를 만들지 못한다
+  var MAX_PIXELS = 40e6;
+  var items = [];      // {file, img, w, h, type, base}
+  var results = [];    // {name, blob, url, w, h}
+  var timer = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); handle(e.dataTransfer.files); });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  // 캡처한 화면을 파일로 저장한 뒤 다시 고르는 과정이 번거롭다. Ctrl+V로 바로 받는다.
+  document.addEventListener('paste', function (e) {
+    var els = (e.clipboardData && e.clipboardData.items) || [], picked = [];
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].kind !== 'file' || els[i].type.indexOf('image/') !== 0) continue;
+      var f = els[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], '붙여넣은-사진-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault(); handle(picked);
+  });
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('cannot open image')); };
+      img.src = url;
+    });
+  }
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) { return f.type.indexOf('image/') === 0; });
+    if (!files.length) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    setMsg(t('msg.reading', '파일을 읽는 중입니다…'));
+    Promise.all(files.map(function (f) {
+      return loadImage(f).then(function (img) {
+        return { file: f, img: img, w: img.naturalWidth, h: img.naturalHeight,
+                 type: f.type === 'image/jpeg' ? 'image/jpeg' : (f.type === 'image/webp' ? 'image/webp' : 'image/png'),
+                 base: f.name.replace(/\.[^.]+$/, '') };
+      }).catch(function () { return null; });
+    })).then(function (out) {
+      var ok = out.filter(Boolean);
+      if (!ok.length) { setMsg(t('rsz.cantOpen', '사진을 열 수 없습니다.'), 'err'); return; }
+      items = items.concat(ok);
+      area.hidden = false;
+      setMsg('');
+      schedule();
+    });
+  }
+
+  // 설정에서 목표 크기를 구한다. 반환 {w, h, fit}
+  function target(it) {
+    var mode = modeSel.value, W, H, fit = fitSel.value;
+    if (mode === 'pct') {
+      var k = (parseFloat(pctIn.value) || 100) / 100;
+      W = Math.max(1, Math.round(it.w * k)); H = Math.max(1, Math.round(it.h * k)); fit = 'stretch';
+    } else if (mode === 'long') {
+      var L = parseInt(longIn.value, 10) || Math.max(it.w, it.h);
+      var kk = L / Math.max(it.w, it.h);
+      W = Math.max(1, Math.round(it.w * kk)); H = Math.max(1, Math.round(it.h * kk)); fit = 'stretch';
+    } else {
+      W = parseInt(wIn.value, 10) || it.w; H = parseInt(hIn.value, 10) || it.h;
+      if (fit === 'keep') { H = Math.max(1, Math.round(it.h * W / it.w)); fit = 'stretch'; }
+    }
+    if (noupCb.checked) {
+      // 원본보다 키우지 않는다: 목표가 원본보다 크면 원본 크기로 되돌린다 (비율별로)
+      if (W > it.w || H > it.h) {
+        var s = Math.min(it.w / W, it.h / H, 1);
+        W = Math.max(1, Math.round(W * s)); H = Math.max(1, Math.round(H * s));
+      }
+    }
+    var cap = Math.sqrt(MAX_PIXELS / (W * H));
+    if (cap < 1) { W = Math.max(1, Math.floor(W * cap)); H = Math.max(1, Math.floor(H * cap)); }
+    return { w: W, h: H, fit: fit };
+  }
+
+  function draw(it, canvas) {
+    var tg = target(it), W = tg.w, H = tg.h;
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    var type = fmtSel.value === 'auto' ? it.type : fmtSel.value;
+    if (type === 'image/jpeg' || tg.fit === 'contain') { ctx.fillStyle = type === 'image/jpeg' && tg.fit !== 'contain' ? '#ffffff' : bgIn.value; ctx.fillRect(0, 0, W, H); }
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    if (tg.fit === 'cover') {
+      var k = Math.max(W / it.w, H / it.h), sw = W / k, sh = H / k;
+      ctx.drawImage(it.img, (it.w - sw) / 2, (it.h - sh) / 2, sw, sh, 0, 0, W, H);
+    } else if (tg.fit === 'contain') {
+      var k2 = Math.min(W / it.w, H / it.h), dw = it.w * k2, dh = it.h * k2;
+      ctx.drawImage(it.img, 0, 0, it.w, it.h, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    } else {
+      // 크게 줄일 때 한 번에 그리면 계단이 생긴다. 절반씩 줄여 간다.
+      var cur = it.img, cw = it.w, ch = it.h;
+      while (cw / 2 > W && ch / 2 > H) {
+        var tmp = document.createElement('canvas'); tmp.width = Math.round(cw / 2); tmp.height = Math.round(ch / 2);
+        var tc = tmp.getContext('2d'); tc.imageSmoothingEnabled = true; tc.imageSmoothingQuality = 'high';
+        tc.drawImage(cur, 0, 0, tmp.width, tmp.height);
+        cur = tmp; cw = tmp.width; ch = tmp.height;
+      }
+      ctx.drawImage(cur, 0, 0, cw, ch, 0, 0, W, H);
+    }
+    return { type: type, w: W, h: H };
+  }
+  function toBlob(canvas, type) { return new Promise(function (r) { canvas.toBlob(r, type, type === 'image/png' ? undefined : 0.92); }); }
+  function outName(it, type) {
+    return it.base + '_' + t('rsz.suffix', '크기조절') + (type === 'image/jpeg' ? '.jpg' : type === 'image/webp' ? '.webp' : '.png');
+  }
+
+  function process() {
+    if (!items.length) return;
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = [];
+    var canvas = document.createElement('canvas'), chain = Promise.resolve();
+    items.forEach(function (it) {
+      chain = chain.then(function () {
+        var o = draw(it, canvas);
+        return toBlob(canvas, o.type).then(function (b) {
+          if (b) results.push({ name: outName(it, o.type), blob: b, url: URL.createObjectURL(b), w: o.w, h: o.h, before: it.file.size, src: it.w + '×' + it.h });
+        });
+      });
+    });
+    chain.then(function () { canvas.width = canvas.height = 1; renderList(); });
+  }
+  function renderList() {
+    el('t-count').textContent = items.length;
+    el('t-out').textContent = results.length ? results[0].w + '×' + results[0].h : '-';
+    el('t-size').textContent = humanSize(results.reduce(function (s, r) { return s + r.blob.size; }, 0));
+    list.innerHTML = '';
+    results.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.innerHTML = '<a href="' + r.url + '" target="_blank" rel="noopener"><img src="' + r.url + '" alt="" class="thumb"></a>' +
+        '<span class="fname" title="' + r.name + '">' + r.name + '</span>' +
+        '<span class="fmeta">' + r.src + ' → <strong>' + r.w + '×' + r.h + '</strong> · ' + humanSize(r.blob.size) + '</span>';
+      var rm = document.createElement('button');
+      rm.className = 'btn secondary small'; rm.type = 'button'; rm.textContent = t('rsz.remove', '빼기'); rm.setAttribute('data-remove', i);
+      rm.addEventListener('click', function () { items.splice(i, 1); if (!items.length) { reset(); return; } process(); });
+      li.appendChild(rm);
+      list.appendChild(li);
+    });
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(process, 80); }
+
+  function syncFields() {
+    var mode = modeSel.value;
+    el('w-field').hidden = mode !== 'px'; el('h-field').hidden = mode !== 'px' || fitSel.value === 'keep';
+    el('pct-field').hidden = mode !== 'pct'; el('long-field').hidden = mode !== 'long';
+    el('fit-field').hidden = mode !== 'px';
+    el('bg-field').hidden = !(mode === 'px' && fitSel.value === 'contain');
+    el('fit-hint').textContent = fitSel.value === 'keep' ? t('rsz.hKeep', '세로는 가로에 맞춰 자동으로 정해집니다.')
+      : fitSel.value === 'cover' ? t('rsz.hCover', '지정한 크기가 정확히 나옵니다. 비율이 다르면 가장자리가 잘립니다.')
+      : fitSel.value === 'contain' ? t('rsz.hContain', '지정한 크기가 정확히 나오고, 사진은 전부 보이며 남는 곳은 여백 색입니다.')
+      : t('rsz.hStretch', '사진이 찌그러질 수 있습니다.');
+  }
+  presetSel.addEventListener('change', function () {
+    var v = presetSel.value;
+    if (v !== 'custom') {
+      var m = v.split('x'); wIn.value = m[0]; hIn.value = m[1]; modeSel.value = 'px';
+      if (fitSel.value === 'keep') fitSel.value = 'cover';     // 규격은 정확한 크기가 목적이다
+    }
+    syncFields(); schedule();
+  });
+  [modeSel, fitSel, fmtSel, noupCb].forEach(function (e) { e.addEventListener('change', function () { syncFields(); schedule(); }); });
+  [wIn, hIn, pctIn, longIn, bgIn].forEach(function (e) { e.addEventListener('input', function () { presetSel.value = 'custom'; schedule(); }); });
+  // 언어를 바꾸면 스크립트가 쓴 안내문·버튼도 다시 만들어야 한다
+  document.addEventListener('langchange', function () { syncFields(); renderList(); });
+
+  function saveBlob(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+  // 파일을 하나씩 내려받게 하면 브라우저가 "여러 파일 다운로드"를 묻고,
+  // 휴대전화에서는 첫 장만 저장되는 일이 잦다. 기본적으로 ZIP 한 개로 묶는다.
+  el('btn-all').addEventListener('click', function () {
+    if (!results.length) return;
+    var wantZip = el('as-zip').checked && typeof makeZip === 'function' && results.length > 1;
+    if (!wantZip) {
+      results.forEach(function (r, i) { setTimeout(function () { saveBlob(r.blob, r.name); }, i * 350); });
+      setMsg(results.length + t('rsz.done', '장을 저장했습니다.'), 'ok');
+      return;
+    }
+    var btn = this; btn.disabled = true;
+    // makeZip 은 바이트만 받는다. Blob 을 Uint8Array 로 바꿔 넘긴다.
+    Promise.all(results.map(function (r) { return r.blob.arrayBuffer().then(function (buf) { return { name: r.name, bytes: new Uint8Array(buf) }; }); }))
+      .then(function (entries) {
+        var zip = makeZip(entries);
+        saveBlob(zip, t('rsz.zipName', '크기조절-사진') + '.zip');
+        setMsg(results.length + t('rsz.doneZip', '장을 ZIP 한 개로 묶어 저장했습니다. ') + humanSize(zip.size), 'ok');
+        btn.disabled = false;
+      }).catch(function (e) { setMsg(t('rsz.fail', '저장하지 못했습니다.') + ' ' + (e && e.message || ''), 'err'); btn.disabled = false; });
+  });
+
+  function reset() {
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    items = []; results = []; fileInput.value = ''; list.innerHTML = '';
+    el('t-count').textContent = '0'; el('t-out').textContent = '-'; el('t-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  }
+  el('btn-reset').addEventListener('click', reset);
+
+  syncFields();
+})();
+</script>
+</body>
+</html>

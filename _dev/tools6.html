@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>이미지 크기 조절 · 배경 투명 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">이미지 크기 조절 · 흰 배경 투명하게 점검 (2026-10-20)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">저장된 그림을 다시 열어 크기와 픽셀(색·투명도)을 읽는다. 투명 처리는 "바깥과 이어진 흰색만" 모드에서 글자 안쪽의 흰 구멍이 남는지를 본다.</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:220px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 10000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function setVal(d, id, v, ev) { var e = d.getElementById(id); e.value = v; e.dispatchEvent(new Event(ev || 'change', { bubbles: true })); }
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { if (typeof b.name !== 'string') out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+function solid(w, h, color, type) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  var x = c.getContext('2d'); x.fillStyle = color; x.fillRect(0, 0, w, h);
+  return new Promise(function (r) { c.toBlob(r, type || 'image/png', 0.95); });
+}
+function blobToCanvas(blob) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); var c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img, 0, 0); res(c); };
+    img.onerror = function () { rej(new Error('결과 이미지를 열 수 없음')); };
+    img.src = url;
+  });
+}
+function px(c, x, y) { var d = c.getContext('2d').getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2], d[3]]; }
+function near(p, q, tol) { tol = tol || 8; return Math.abs(p[0] - q[0]) <= tol && Math.abs(p[1] - q[1]) <= tol && Math.abs(p[2] - q[2]) <= tol; }
+function readZip(buf) {
+  var v = new DataView(buf), out = [], off = 0;
+  while (off + 30 <= buf.byteLength && v.getUint32(off, true) === 0x04034B50) {
+    var nameLen = v.getUint16(off + 26, true), extra = v.getUint16(off + 28, true), size = v.getUint32(off + 18, true);
+    out.push({ name: new TextDecoder().decode(new Uint8Array(buf, off + 30, nameLen)), bytes: new Uint8Array(buf, off + 30 + nameLen + extra, size) });
+    off += 30 + nameLen + extra + size;
+  }
+  return out;
+}
+// 모든 결과가 그려졌는지: 결과 목록 줄 수가 사진 수와 같고 결과 크기 표시가 있을 때
+function ready(d, n) { return waitFor(function () { return d.querySelectorAll('#list li').length === n && txt(d, 't-out') !== '-'; }); }
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 크기 조절: 픽셀(비율 유지) · 꽉 채우기 · 여백 · 늘리기 · 키우지 않기 =====
+  chain = chain.then(function () {
+    // 왼쪽 빨강 / 오른쪽 파랑 800×400
+    var c = document.createElement('canvas'); c.width = 800; c.height = 400;
+    var x = c.getContext('2d'); x.fillStyle = '#ff0000'; x.fillRect(0, 0, 400, 400); x.fillStyle = '#0000ff'; x.fillRect(400, 0, 400, 400);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (png) {
+      return loadFrame('../image-resize.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f);
+        setFiles(d.getElementById('file'), [new File([png], 'rb.png', { type: 'image/png' })]);
+        return ready(d, 1).then(function () {
+          var got = {};
+          setVal(d, 'mode', 'px'); setVal(d, 'fit', 'keep'); setVal(d, 'w', '400', 'input'); setVal(d, 'h', '400', 'input');
+          return sleep(350).then(function () { got.keep = txt(d, 't-out'); }).then(function () {
+            setVal(d, 'fit', 'cover'); return sleep(350);
+          }).then(function () { got.cover = txt(d, 't-out'); setVal(d, 'fit', 'contain'); setVal(d, 'bgc', '#00ff00', 'input'); return sleep(350);
+          }).then(function () { got.contain = txt(d, 't-out'); var bgShown = !d.getElementById('bg-field').hidden;
+            setVal(d, 'fit', 'stretch'); return sleep(350).then(function () { got.stretch = txt(d, 't-out'); got.bgShown = bgShown; });
+          }).then(function () {
+            // 키우지 않기: 1600×800 요청 → 원본 800×400 유지. 끄면 1600×800
+            setVal(d, 'w', '1600', 'input'); setVal(d, 'h', '800', 'input'); return sleep(350);
+          }).then(function () { got.noUp = txt(d, 't-out'); d.getElementById('noup').checked = false; d.getElementById('noup').dispatchEvent(new Event('change', { bubbles: true })); return sleep(350);
+          }).then(function () { got.up = txt(d, 't-out');
+            // contain 저장 → 가운데 여백 색 확인: 400×400 에 800×400 을 넣으면 위아래 100px 여백(초록)
+            d.getElementById('noup').checked = true; setVal(d, 'fit', 'contain'); setVal(d, 'w', '400', 'input'); setVal(d, 'h', '400', 'input'); setVal(d, 'fmt', 'image/png');
+            return sleep(300);
+          }).then(function () {
+            d.getElementById('btn-all').click();
+            return waitFor(function () { return cap.blobs.length >= 1; });
+          }).then(function () { return blobToCanvas(cap.blobs[cap.blobs.length - 1]); }).then(function (out) {
+            var top = px(out, 200, 50), mid = px(out, 100, 200), midR = px(out, 300, 200);
+            var ok = got.keep === '400×200' && got.cover === '400×400' && got.contain === '400×400' && got.stretch === '400×400' && got.bgShown &&
+                     got.noUp === '800×400' && got.up === '1600×800' && out.width === 400 && out.height === 400 && near(top, [0, 255, 0]) && near(mid, [255, 0, 0]) && near(midR, [0, 0, 255]) &&
+                     /rb_크기조절\.png$/.test(cap.names[0] || '') && !f.dataset.errs;
+            log('크기 조절 맞춤 4종 · 키우지 않기', ok, '비율유지 ' + got.keep + ' (400×200) · 채우기 ' + got.cover + ' · 여백 ' + got.contain + ' (여백색 칸 ' + got.bgShown + ') · 늘리기 ' + got.stretch + ' · 1600 요청 시 ' + got.noUp + ' (800×400) → 끄면 ' + got.up + ' (1600×800) · 여백 저장 ' + out.width + '×' + out.height + ' 위 ' + top.slice(0, 3) + ' (초록) 가운데 ' + mid.slice(0, 3) + '/' + midR.slice(0, 3) + ' · ' + cap.names[0]);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('크기 조절 맞춤 4종 · 키우지 않기', false, '오류: ' + e.message); });
+
+  // ===== 2. 크기 조절: 프리셋 · % · 긴 쪽 · 형식 · 여러 장 ZIP · 빼기 =====
+  chain = chain.then(function () {
+    return Promise.all([solid(1000, 500, '#808080', 'image/jpeg'), solid(300, 600, '#336699')]).then(function (b) {
+      return loadFrame('../image-resize.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File([b[0]], 'wide.jpg', { type: 'image/jpeg' }), new File([b[1]], 'tall.png', { type: 'image/png' })]);
+        return ready(d, 2).then(function () {
+          setVal(d, 'preset', '1280x720'); return sleep(350);
+        }).then(function () { got.presetFit = d.getElementById('fit').value; got.presetOut = txt(d, 't-out'); got.presetW = d.getElementById('w').value;
+          setVal(d, 'preset', '1080x1080'); return sleep(350);
+        }).then(function () { got.insta = txt(d, 't-out');
+          ['1080x1350', '1080x1920', '1200x630', '800x800', '400x400', '1920x1080', '3840x2160'].forEach(function (p) { setVal(d, 'preset', p); });
+          got.p4k = d.getElementById('w').value + 'x' + d.getElementById('h').value;
+          setVal(d, 'mode', 'pct'); setVal(d, 'pct', '50', 'input'); return sleep(350);
+        }).then(function () { got.pct = txt(d, 't-out'); got.pctFields = !d.getElementById('pct-field').hidden && d.getElementById('w-field').hidden;
+          setVal(d, 'mode', 'long'); setVal(d, 'long', '200', 'input'); return sleep(350);
+        }).then(function () { got.long = txt(d, 't-out'); got.long2 = d.querySelectorAll('#list li .fmeta')[1].textContent;
+          setVal(d, 'fmt', 'image/webp'); return sleep(350);
+        }).then(function () {
+          d.getElementById('btn-all').click();
+          return waitFor(function () { return cap.blobs.length >= 1 && cap.blobs[cap.blobs.length - 1].type === 'application/zip'; });
+        }).then(function () { return cap.blobs[cap.blobs.length - 1].arrayBuffer(); }).then(function (buf) {
+          var entries = readZip(buf); got.zip = entries.map(function (e) { return e.name; }).join(',');
+          got.webp = entries[0].bytes[8] === 0x57 && entries[0].bytes[9] === 0x45;   // 'WE'BP
+          d.querySelector('[data-remove="0"]').click();
+          return waitFor(function () { return d.querySelectorAll('#list li').length === 1; }).then(function () {
+            got.afterRemove = txt(d, 't-count');
+            var ok = got.presetFit === 'cover' && got.presetOut === '889×500' && got.presetW === '1280' && got.insta === '500×500' && got.p4k === '3840x2160' &&
+                     got.pct === '500×250' && got.pctFields && got.long === '200×100' && /→ 100×200/.test(got.long2) &&
+                     got.zip === 'wide_크기조절.webp,tall_크기조절.webp' && got.webp && /크기조절-사진\.zip$/.test(cap.names[0] || '') && got.afterRemove === '1' && !f.dataset.errs;
+            log('프리셋 · % · 긴 쪽 · WebP ZIP · 빼기', ok, '유튜브 프리셋 → 맞춤 ' + got.presetFit + ' 가로 ' + got.presetW + ' 결과 ' + got.presetOut + ' (키우지 않아 16:9 상자가 500 높이에 맞춰져 889×500) · 인스타 ' + got.insta + ' (500×500, 세로 500 한도) · 4K 값 ' + got.p4k + ' · 50% ' + got.pct + ' 칸 전환 ' + got.pctFields + ' · 긴 쪽 200 → ' + got.long + ' / 둘째 "' + got.long2.slice(0, 20) + '" · ZIP [' + got.zip + '] WebP 서명 ' + got.webp + ' · 빼기 후 ' + got.afterRemove + '장');
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('프리셋 · % · 긴 쪽 · WebP ZIP · 빼기', false, '오류: ' + e.message); });
+
+  // ===== 3. 크기 조절: 입력 경로 · JPG 개별 저장 · 초기화 =====
+  chain = chain.then(function () {
+    return solid(100, 80, '#000000').then(function (png) {
+      return loadFrame('../image-resize.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f);
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        var rejectMsg = txt(d, 'msg');
+        var dt = new DataTransfer(); dt.items.add(new File([png], 'image.png', { type: 'image/png' })); dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return ready(d, 2).then(function () {
+          setVal(d, 'mode', 'pct'); setVal(d, 'pct', '200', 'input'); d.getElementById('noup').checked = false; d.getElementById('noup').dispatchEvent(new Event('change', { bubbles: true }));
+          setVal(d, 'fmt', 'image/jpeg'); d.getElementById('as-zip').checked = false;
+          return sleep(300);
+        }).then(function () {
+          var out = txt(d, 't-out');
+          d.getElementById('btn-all').click();
+          return waitFor(function () { return cap.blobs.length >= 2; }, 6000).then(function () {
+            d.getElementById('btn-reset').click();
+            var ok = opened === 2 && /이미지 파일을 선택해/.test(rejectMsg) && out === '200×160' && cap.blobs.slice(-2).every(function (b) { return b.type === 'image/jpeg'; }) &&
+                     cap.names.every(function (n) { return /^붙여넣은-사진-.*_크기조절\.jpg$/.test(n); }) && d.getElementById('area').hidden && txt(d, 't-count') === '0' && !f.dataset.errs;
+            log('입력 경로 · 200% 확대 · JPG 개별 · 초기화', ok, '키보드 열기 ' + opened + '회 · 글자 파일 "' + rejectMsg + '" · 붙여넣기 2장 · 200% → ' + out + ' (200×160) · 개별 JPG ' + cap.names.join(', ') + ' · 초기화 ' + d.getElementById('area').hidden);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('입력 경로 · 200% 확대 · JPG 개별 · 초기화', false, '오류: ' + e.message); });
+
+  // ===== 4. 배경 투명: 바깥만 / 전부 · 허용 오차 · 저장 픽셀 =====
+  chain = chain.then(function () {
+    // 흰 바탕 200×120 에 검정 테두리 네모(50..150 × 30..90), 그 안은 흰색(구멍), 바깥 한 곳에 연한 회색 얼룩
+    var c = document.createElement('canvas'); c.width = 200; c.height = 120;
+    var x = c.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, 200, 120);
+    x.fillStyle = '#000000'; x.fillRect(50, 30, 100, 60); x.fillStyle = '#ffffff'; x.fillRect(60, 40, 80, 40);
+    x.fillStyle = '#eeeeee'; x.fillRect(10, 10, 20, 20);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (png) {
+      return loadFrame('../image-transparent.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), view = d.getElementById('view');
+        setFiles(d.getElementById('file'), [new File([png], 'logo.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-size') === '200×120'; }).then(function () {
+          setVal(d, 'pick', 'white'); setVal(d, 'region', 'edge'); setVal(d, 'tol', '25', 'input'); d.getElementById('soft').checked = false; d.getElementById('soft').dispatchEvent(new Event('change', { bubbles: true }));
+          return sleep(200);
+        }).then(function () {
+          var got = {};
+          got.edgeOut = px(view, 5, 5)[3]; got.edgeHole = px(view, 100, 60)[3]; got.edgeInk = px(view, 55, 35)[3]; got.edgeSmudge = px(view, 20, 20)[3]; got.pctEdge = txt(d, 't-removed');
+          setVal(d, 'region', 'all'); return sleep(200).then(function () {
+            got.allHole = px(view, 100, 60)[3]; got.pctAll = txt(d, 't-removed');
+            setVal(d, 'tol', '3', 'input'); return sleep(200);
+          }).then(function () {
+            got.lowTolSmudge = px(view, 20, 20)[3];
+            setVal(d, 'tol', '25', 'input'); setVal(d, 'region', 'edge'); return sleep(200);
+          }).then(function () {
+            d.getElementById('btn-save').click();
+            return waitFor(function () { return cap.blobs.length >= 1; });
+          }).then(function () { return blobToCanvas(cap.blobs[0]); }).then(function (out) {
+            var saved = px(out, 5, 5), savedInk = px(out, 55, 35), savedHole = px(out, 100, 60);
+            var ok = got.edgeOut === 0 && got.edgeHole === 255 && got.edgeInk === 255 && got.edgeSmudge === 0 && got.allHole === 0 && got.lowTolSmudge === 255 &&
+                     cap.blobs[0].type === 'image/png' && saved[3] === 0 && savedInk[3] === 255 && near(savedInk, [0, 0, 0]) && savedHole[3] === 255 && /logo_투명\.png$/.test(cap.names[0] || '') && /투명 PNG로 저장/.test(txt(d, 'msg')) && !f.dataset.errs;
+            log('배경 투명: 바깥만 / 전부 · 오차 · 저장', ok, '바깥만: 배경 α ' + got.edgeOut + ' (0) · 구멍 α ' + got.edgeHole + ' (255 남김) · 검정 α ' + got.edgeInk + ' · 회색 얼룩 α ' + got.edgeSmudge + ' (오차 25 → 지움) · 비율 ' + got.pctEdge + ' ;; 전부: 구멍 α ' + got.allHole + ' (0) 비율 ' + got.pctAll + ' ;; 오차 3: 얼룩 α ' + got.lowTolSmudge + ' (255 남김) ;; 저장 PNG 배경 α ' + saved[3] + ' 검정 ' + savedInk.join(',') + ' 구멍 α ' + savedHole[3] + ' · ' + cap.names[0]);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('배경 투명: 바깥만 / 전부 · 오차 · 저장', false, '오류: ' + e.message); });
+
+  // ===== 5. 배경 투명: 모서리 색 · 직접 고르기(클릭) · 부드럽게 · 입력 경로 · 초기화 =====
+  chain = chain.then(function () {
+    // 파란 바탕 160×100, 가운데 빨간 네모
+    var c = document.createElement('canvas'); c.width = 160; c.height = 100;
+    var x = c.getContext('2d'); x.fillStyle = '#1040e0'; x.fillRect(0, 0, 160, 100); x.fillStyle = '#ff0000'; x.fillRect(60, 30, 40, 40);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (png) {
+      return loadFrame('../image-transparent.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, view = d.getElementById('view'), got = {};
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        got.reject = txt(d, 'msg');
+        var dt = new DataTransfer(); dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return waitFor(function () { return txt(d, 't-size') === '160×100'; }).then(function () {
+          got.whiteBg = px(view, 5, 5)[3];                   // 흰색 모드에서는 파란 배경이 남는다
+          setVal(d, 'pick', 'corner'); return sleep(200);
+        }).then(function () {
+          got.cornerColor = d.getElementById('tcolor').value; got.cornerBg = px(view, 5, 5)[3]; got.cornerRed = px(view, 80, 50)[3]; got.colorShown = !d.getElementById('color-field').hidden;
+          // 그림을 클릭해 빨강을 고른다 → 빨강이 지워지고 파랑이 남는다 (안쪽 색이라 '전부' 모드로)
+          setVal(d, 'region', 'all');
+          var r = view.getBoundingClientRect();
+          view.dispatchEvent(new w.MouseEvent('click', { bubbles: true, clientX: r.left + 80 * r.width / 160, clientY: r.top + 50 * r.height / 100 }));
+          return sleep(200);
+        }).then(function () {
+          got.clickPick = d.getElementById('pick').value; got.clickColor = d.getElementById('tcolor').value; got.clickRed = px(view, 80, 50)[3]; got.clickBlue = px(view, 5, 5)[3];
+          // 부드럽게: 오차 경계 근처 색이 반투명이 되는가 — 파랑(배경)을 고르고 오차 10, 경계색은 조금 다른 파랑
+          setVal(d, 'pick', 'corner'); setVal(d, 'tol', '0', 'input'); d.getElementById('soft').checked = true; d.getElementById('soft').dispatchEvent(new Event('change', { bubbles: true }));
+          return sleep(200);
+        }).then(function () {
+          got.softExact = px(view, 5, 5)[3];     // 정확히 같은 색 → 완전 투명
+          d.getElementById('btn-reset').click();
+          var ok = opened === 2 && /이미지 파일을 선택해/.test(got.reject) && got.whiteBg === 255 && got.cornerColor === '#1040e0' && got.cornerBg === 0 && got.cornerRed === 255 && got.colorShown &&
+                   got.clickPick === 'custom' && got.clickColor === '#ff0000' && got.clickRed === 0 && got.clickBlue === 255 && got.softExact === 0 && d.getElementById('area').hidden && !f.dataset.errs;
+          log('모서리 색 · 클릭으로 고르기 · 부드럽게 · 초기화', ok, '키보드 열기 ' + opened + '회 · 글자 파일 "' + got.reject + '" · 흰색 모드에서 파란 배경 α ' + got.whiteBg + ' (255) · 모서리 색 ' + got.cornerColor + ' → 배경 α ' + got.cornerBg + ' 빨강 α ' + got.cornerRed + ' 색 칸 ' + got.colorShown + ' · 클릭 → ' + got.clickPick + ' ' + got.clickColor + ' 빨강 α ' + got.clickRed + ' 파랑 α ' + got.clickBlue + ' · 부드럽게+오차0 같은 색 α ' + got.softExact + ' · 초기화 ' + d.getElementById('area').hidden);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('모서리 색 · 클릭으로 고르기 · 부드럽게 · 초기화', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'TOOLS6 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

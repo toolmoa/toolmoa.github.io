@@ -231,6 +231,23 @@ var SETUP = {
     };
     document.head.appendChild(sc);
   },
+  // 사진을 넣어야 설정 칸·목록·안내문이 보인다
+  'image-resize.html': function (d) {
+    var c = document.createElement('canvas'); c.width = 120; c.height = 80;
+    c.getContext('2d').fillRect(0, 0, 120, 80);
+    c.toBlob(function (blob) {
+      var dt = new DataTransfer(); dt.items.add(new File([blob], 'x.png', { type: 'image/png' }));
+      var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 'image/png');
+  },
+  'image-transparent.html': function (d) {
+    var c = document.createElement('canvas'); c.width = 120; c.height = 80;
+    var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 120, 80); x.fillStyle = '#000'; x.fillRect(30, 20, 60, 40);
+    c.toBlob(function (blob) {
+      var dt = new DataTransfer(); dt.items.add(new File([blob], 'x.png', { type: 'image/png' }));
+      var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 'image/png');
+  },
   // 결과 표가 그려진 상태에서 본다. 입력은 사용자 데이터라 번역 대상이 아니므로 한글이 아닌 것으로.
   'romanize.html': function (d) {
     var n = d.getElementById('names'); n.value = 'ABC'; n.dispatchEvent(new Event('input', { bubbles: true }));
@@ -259,7 +276,7 @@ var PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf
              'unit-convert.html', 'date-calc.html', 'age-calc.html',
              'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html',
              'text-diff.html', 'image-mosaic.html', 'image-exif.html',
-             'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'time-calc.html', 'color-convert.html', 'barcode.html'];
+             'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'time-calc.html', 'color-convert.html', 'barcode.html', 'image-resize.html', 'image-transparent.html'];
 
 function run() {
   var seq = Promise.resolve();

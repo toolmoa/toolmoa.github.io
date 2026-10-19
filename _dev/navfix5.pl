@@ -4,6 +4,7 @@ binmode(STDOUT, ':utf8');
 # [파일, 헤더 라벨, 푸터 라벨, 번역키]
 my @T = (
   ['image-compress.html','이미지 압축','이미지 용량 줄이기','nav.imgc'],
+  ['image-resize.html','크기 조절','이미지 크기 조절·리사이즈','nav.rsz'],
   ['image-crop.html','이미지 자르기','이미지 자르기','nav.crop'],
   ['image-convert.html','형식 변환','이미지 형식 변환 (PNG·JPG·WebP)','nav.icv'],
   ['image-join.html','사진 붙이기','사진 이어붙이기','nav.ijn'],
@@ -11,6 +12,7 @@ my @T = (
   ['image-exif.html','위치정보 삭제','사진 위치정보·EXIF 삭제','nav.exif'],
   ['image-watermark.html','워터마크','사진 워터마크 넣기','nav.wm'],
   ['image-split.html','사진 분할','사진 분할·그리드 나누기','nav.spl'],
+  ['image-transparent.html','배경 투명','흰 배경 투명하게 만들기','nav.trp'],
   ['img-to-pdf.html','이미지→PDF','이미지 PDF 변환','nav.i2p'],
   ['char-count.html','글자수 세기','글자수 세기','nav.char'],
   ['text-clean.html','텍스트 정리','텍스트 정리·중복 제거','nav.txt'],

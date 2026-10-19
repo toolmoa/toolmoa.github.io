@@ -27,11 +27,13 @@ privacy.html          개인정보처리방침   ← 애드센스 승인 요건�
 terms.html            이용약관 · 면책
 licenses.html         오픈소스 고지 (Apache-2.0 고지 의무 이행)
 image-compress.html   이미지 용량 줄이기      ← 키워드: 이미지 용량 줄이기, 사진 크기 조절
+image-resize.html     이미지 크기 조절        ← 키워드: 이미지 크기 조절, 사진 리사이즈, 이미지 픽셀 변경
 image-crop.html       이미지 자르기           ← 키워드: 사진 자르기, 이미지 크롭
 image-convert.html    이미지 형식 변환        ← 키워드: png jpg 변환, webp jpg 변환
 image-join.html       사진 이어붙이기         ← 키워드: 사진 이어붙이기, 이미지 합치기
 image-mosaic.html     사진 모자이크           ← 키워드: 사진 모자이크, 개인정보 가리기, 모자이크 처리
 image-exif.html       사진 위치정보 삭제       ← 키워드: 사진 위치정보 삭제, exif 제거, 사진 gps 지우기
+image-transparent.html 흰 배경 투명하게        ← 키워드: 흰 배경 투명하게, 배경 투명 png, 로고 배경 제거
 image-watermark.html  사진 워터마크 넣기       ← 키워드: 사진 워터마크, 이미지 워터마크 넣기, 로고 삽입
 image-split.html      사진 분할               ← 키워드: 사진 분할, 인스타 그리드 나누기, 이미지 9분할
 img-to-pdf.html       이미지 PDF 변환         ← 키워드: 사진 PDF 변환
@@ -70,7 +72,7 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 29종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 31종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
@@ -101,7 +103,7 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 tools4 tools5 mobile meta exif
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 tools4 tools5 tools6 mobile meta exif
 ```
 
 에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.
