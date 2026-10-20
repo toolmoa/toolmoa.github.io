@@ -123,8 +123,74 @@ function hangulLeft(d) {
   return m ? m.slice(0, 5).join(',') : '';
 }
 
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function cpx(c, x, y) { var d = c.getContext('2d').getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2], d[3]]; }
+// 아래 결과 표 읽기와 바코드 해독기는 _dev/tools5.html 과 같다 (검사 전용, 페이지 코드와 무관)
+// 결과 표를 {이름표: 값} 으로
+function rowsOf(d) {
+  var o = {};
+  Array.prototype.forEach.call(d.querySelectorAll('#rows tr'), function (tr) { o[tr.children[0].textContent.trim()] = tr.children[1].textContent.trim(); });
+  return o;
+}
+
+/* ===== 바코드 해석기 (검사 전용, 페이지 코드와 무관) ===== */
+function readModules(canvas, scale) {
+  var ctx = canvas.getContext('2d'), quiet = 10 * scale, n = Math.round((canvas.width - quiet * 2) / scale), m = '';
+  var row = ctx.getImageData(0, 10, canvas.width, 1).data;
+  for (var i = 0; i < n; i++) { var x = quiet + i * scale + Math.floor(scale / 2); m += row[x * 4] < 128 ? '1' : '0'; }
+  return m;
+}
+var L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+var G = L.map(function (p) { return p.split('').reverse().join(''); });
+var R = L.map(function (p) { return p.replace(/[01]/g, function (c) { return c === '0' ? '1' : '0'; }); });
+var PARITY = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+function decodeEan13(m) {
+  if (m.length !== 95 || m.slice(0, 3) !== '101' || m.slice(45, 50) !== '01010' || m.slice(92) !== '101') return 'guard 불일치 (' + m.length + ')';
+  var par = '', digits = '';
+  for (var i = 0; i < 6; i++) {
+    var seg = m.slice(3 + i * 7, 10 + i * 7), li = L.indexOf(seg), gi = G.indexOf(seg);
+    if (li >= 0) { par += 'L'; digits += li; } else if (gi >= 0) { par += 'G'; digits += gi; } else return '왼쪽 ' + i + ' 해석 불가';
+  }
+  var first = PARITY.indexOf(par); if (first < 0) return '패리티 불일치 ' + par;
+  for (i = 0; i < 6; i++) { var ri = R.indexOf(m.slice(50 + i * 7, 57 + i * 7)); if (ri < 0) return '오른쪽 ' + i + ' 해석 불가'; digits += ri; }
+  return String(first) + digits;
+}
+function decodeEan8(m) {
+  if (m.length !== 67 || m.slice(0, 3) !== '101' || m.slice(31, 36) !== '01010' || m.slice(64) !== '101') return 'guard 불일치 (' + m.length + ')';
+  var digits = '';
+  for (var i = 0; i < 4; i++) { var li = L.indexOf(m.slice(3 + i * 7, 10 + i * 7)); if (li < 0) return '왼쪽 해석 불가'; digits += li; }
+  for (i = 0; i < 4; i++) { var ri = R.indexOf(m.slice(36 + i * 7, 43 + i * 7)); if (ri < 0) return '오른쪽 해석 불가'; digits += ri; }
+  return digits;
+}
+var C128 = ['212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213', '221312', '231212', '112232', '122132', '122231', '113222', '123122', '123221', '223211', '221132', '221231', '213212', '223112', '312131', '311222', '321122', '321221', '312212', '322112', '322211', '212123', '212321', '232121', '111323', '131123', '131321', '112313', '132113', '132311', '211313', '231113', '231311', '112133', '112331', '132131', '113123', '113321', '133121', '313121', '211331', '231131', '213113', '213311', '213131', '311123', '311321', '331121', '312113', '312311', '332111', '314111', '221411', '431111', '111224', '111422', '121124', '121421', '141122', '141221', '112214', '112412', '122114', '122411', '142112', '142211', '241211', '221114', '413111', '241112', '134111', '111242', '121142', '121241', '114212', '124112', '124211', '411212', '421112', '421211', '212141', '214121', '412121', '111143', '111341', '131141', '114113', '114311', '411113', '411311', '113141', '114131', '311141', '411131', '211412', '211214', '211232', '2331112'];
+function decodeCode128(m) {
+  // 모듈 열 → 폭 열 (막대·공백 교대)
+  var widths = [], cur = m[0], n = 0;
+  for (var i = 0; i < m.length; i++) { if (m[i] === cur) n++; else { widths.push(n); cur = m[i]; n = 1; } }
+  widths.push(n);
+  if (m[0] !== '1') return '막대로 시작하지 않음';
+  var vals = [], pos = 0;
+  while (pos + 6 <= widths.length) {
+    var six = widths.slice(pos, pos + 6).join('');
+    if (pos + 7 === widths.length && widths.slice(pos).join('') === '2331112') { vals.push(106); pos += 7; break; }
+    var v = C128.indexOf(six); if (v < 0) return '기호 해석 불가 @' + pos + ' ' + six;
+    vals.push(v); pos += 6;
+  }
+  if (vals[vals.length - 1] !== 106) return '정지 기호 없음';
+  var sum = vals[0]; for (i = 1; i < vals.length - 2; i++) sum += vals[i] * i;
+  if (sum % 103 !== vals[vals.length - 2]) return '검사 기호 불일치 ' + (sum % 103) + '≠' + vals[vals.length - 2];
+  var mode = vals[0] === 104 ? 'B' : vals[0] === 105 ? 'C' : 'A', out = '';
+  for (i = 1; i < vals.length - 2; i++) {
+    var v2 = vals[i];
+    if (v2 === 99) { mode = 'C'; continue; } if (v2 === 100) { mode = 'B'; continue; } if (v2 === 101) { mode = 'A'; continue; }
+    if (mode === 'C') out += (v2 < 10 ? '0' : '') + v2; else out += String.fromCharCode(v2 + 32);
+  }
+  return out;
+}
+
 var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
-           'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html'];
+           'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html',
+           'image-resize.html', 'image-transparent.html', 'color-convert.html', 'barcode.html'];
 var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
               'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
 var MENU_N = ALL_EN.length - 1;   // 홈을 뺀 툴 수 = 머리 메뉴 개수 = 영어 홈 카드 수
@@ -584,6 +650,132 @@ function run() {
       });
     });
   }).catch(function (e) { log('로마자 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 영어판 4쪽 (2026-10-21): 크기 조절 · 배경 투명 · 색상 변환 · 바코드 =====
+  // 한국어판 검사(tools5·tools6)와 같은 입력을 넣고, 영어 문구·영어 파일 이름으로 결과를 다시 읽는다.
+  chain = chain.then(function () {
+    // 왼쪽 빨강 / 오른쪽 파랑 800×400 두 장 → 400×400 "꽉 채우기" · 키우지 않기 · WebP ZIP
+    var c = document.createElement('canvas'); c.width = 800; c.height = 400;
+    var x = c.getContext('2d'); x.fillStyle = '#ff0000'; x.fillRect(0, 0, 400, 400); x.fillStyle = '#0000ff'; x.fillRect(400, 0, 400, 400);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (png) {
+      return loadFrame('../en/image-resize.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File([png], 'a.png', { type: 'image/png' }), new File([png], 'b.png', { type: 'image/png' })]);
+        return waitFor(function () { return d.querySelectorAll('#list li').length === 2 && txt(d, 't-out') !== '-'; }).then(function () {
+          set(d, 'mode', 'px'); set(d, 'fit', 'keep'); set(d, 'w', '400', 'input'); set(d, 'h', '400', 'input');
+          return sleep(350);
+        }).then(function () { got.keep = txt(d, 't-out'); got.hintKeep = txt(d, 'fit-hint');
+          set(d, 'fit', 'cover'); return sleep(350);
+        }).then(function () { got.cover = txt(d, 't-out'); got.hintCover = txt(d, 'fit-hint');
+          set(d, 'w', '1600', 'input'); set(d, 'h', '800', 'input'); return sleep(350);
+        }).then(function () { got.noUp = txt(d, 't-out'); got.noUpLabel = d.querySelector('label[for="noup"]') ? d.querySelector('label[for="noup"]').textContent.trim() : d.getElementById('noup').parentNode.textContent.trim();
+          set(d, 'w', '400', 'input'); set(d, 'h', '400', 'input'); set(d, 'fmt', 'image/webp'); return sleep(350);
+        }).then(function () {
+          got.meta2 = d.querySelectorAll('#list li .fmeta')[1].textContent;
+          click(d, 'btn-all');
+          return waitFor(function () { return outputs(cap, /zip/).length >= 1; });
+        }).then(function () { return outputs(cap, /zip/)[0].arrayBuffer(); }).then(function (buf) {
+          var entries = readZip(new Uint8Array(buf));
+          got.zip = entries.map(function (e) { return e.name; }).join(',');
+          got.webp = entries[0].bytes[8] === 0x57 && entries[0].bytes[9] === 0x45;   // 'WE'BP
+          got.msg = txt(d, 'msg');
+          var ok = got.keep === '400×200' && got.cover === '400×400' && got.noUp === '800×400' && /height is set automatically/.test(got.hintKeep) && /edges are cropped/.test(got.hintCover) &&
+                   /Never enlarge/.test(got.noUpLabel) && /→ 400×400/.test(got.meta2) && got.zip === 'a_resized.webp,b_resized.webp' && got.webp &&
+                   cap.names[0] === 'resized-photos.zip' && /2 photo\(s\) saved in one ZIP/.test(got.msg) && !hangulLeft(d) && !f.dataset.errs;
+          log('크기 조절 (영어)', ok, '비율유지 ' + got.keep + ' (400×200) "' + got.hintKeep.slice(0, 30) + '" · 채우기 ' + got.cover + ' "' + got.hintCover.slice(-22) + '" · 1600 요청 ' + got.noUp + ' (800×400) "' + got.noUpLabel.slice(0, 24) + '" · 둘째 "' + got.meta2.slice(0, 24) + '" · ZIP [' + got.zip + '] ' + cap.names[0] + ' WebP ' + got.webp + ' · "' + got.msg.slice(0, 40) + '" · 한글 ' + (hangulLeft(d) || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('크기 조절 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    // 흰 바탕 200×120, 검정 테두리 네모 안은 흰 구멍, 바깥에 연한 회색 얼룩
+    var c = document.createElement('canvas'); c.width = 200; c.height = 120;
+    var x = c.getContext('2d'); x.fillStyle = '#ffffff'; x.fillRect(0, 0, 200, 120);
+    x.fillStyle = '#000000'; x.fillRect(50, 30, 100, 60); x.fillStyle = '#ffffff'; x.fillRect(60, 40, 80, 40);
+    x.fillStyle = '#eeeeee'; x.fillRect(10, 10, 20, 20);
+    return new Promise(function (r) { c.toBlob(r, 'image/png'); }).then(function (png) {
+      return loadFrame('../en/image-transparent.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), view = d.getElementById('view'), got = {};
+        setFiles(d.getElementById('file'), [new File([png], 'logo.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-size') === '200×120'; }).then(function () {
+          set(d, 'pick', 'white'); set(d, 'region', 'edge'); set(d, 'tol', '25', 'input');
+          d.getElementById('soft').checked = false; d.getElementById('soft').dispatchEvent(new Event('change', { bubbles: true }));
+          return sleep(250);
+        }).then(function () {
+          got.edgeOut = cpx(view, 5, 5)[3]; got.edgeHole = cpx(view, 100, 60)[3]; got.edgeInk = cpx(view, 55, 35)[3]; got.edgeSmudge = cpx(view, 20, 20)[3];
+          got.hintEdge = txt(d, 'region-hint'); got.pct = txt(d, 't-removed');
+          set(d, 'region', 'all'); return sleep(250);
+        }).then(function () {
+          got.allHole = cpx(view, 100, 60)[3]; got.hintAll = txt(d, 'region-hint');
+          set(d, 'region', 'edge'); return sleep(250);
+        }).then(function () {
+          click(d, 'btn-save');
+          return waitFor(function () { return outputs(cap, /png/).length >= 1; });
+        }).then(function () { return pixel(outputs(cap, /png/)[0], 5, 5); }).then(function (p) {
+          got.saved = p; got.msg = txt(d, 'msg');
+          var ok = got.edgeOut === 0 && got.edgeHole === 255 && got.edgeInk === 255 && got.edgeSmudge === 0 && got.allHole === 0 &&
+                   /inside of an "O", are kept/.test(got.hintEdge) && /Removes that colour everywhere/.test(got.hintAll) && /%$/.test(got.pct) &&
+                   p.w === 200 && p.h === 120 && p.a === 0 && cap.names[0] === 'logo_transparent.png' && /Saved as a transparent PNG/.test(got.msg) && !hangulLeft(d) && !f.dataset.errs;
+          log('배경 투명 (영어)', ok, '바깥만: 배경 α ' + got.edgeOut + ' 구멍 α ' + got.edgeHole + ' (255) 검정 α ' + got.edgeInk + ' 얼룩 α ' + got.edgeSmudge + ' (0) · 비율 ' + got.pct + ' · 안내 "' + got.hintEdge.slice(0, 30) + '" / "' + got.hintAll.slice(0, 24) + '" · 전부: 구멍 α ' + got.allHole + ' (0) · 저장 ' + p.w + '×' + p.h + ' α ' + p.a + ' ' + cap.names[0] + ' · "' + got.msg.slice(0, 32) + '" · 한글 ' + (hangulLeft(d) || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('배경 투명 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return loadFrame('../en/color-convert.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, copied = [], got = {};
+      w.navigator.clipboard.writeText = function (s) { copied.push(s); return Promise.resolve(); };
+      set(d, 'cin', '#3498db', 'input'); got.a = rowsOf(d);
+      set(d, 'cin', 'tomato', 'input'); got.b = rowsOf(d);
+      set(d, 'cin', 'nope', 'input'); got.bad = txt(d, 'parse-msg');
+      set(d, 'cin', '#2f6df6', 'input');
+      set(d, 'cin2', '#777777', 'input'); set(d, 'cin3', '#ffffff', 'input');
+      got.ratio = txt(d, 'ratio'); got.badges = Array.prototype.map.call(d.querySelectorAll('#badges .cc-badge'), function (b) { return b.textContent.trim(); }).join(' | ');
+      click(d, 'btn-swap'); got.swapped = d.getElementById('cin2').value + '/' + d.getElementById('cin3').value;
+      got.shades = d.querySelectorAll('#pal-shade button').length; got.harmony = d.querySelectorAll('#pal-harmony button').length;
+      got.comp = d.querySelectorAll('#pal-harmony button')[1].getAttribute('data-hex');
+      d.querySelectorAll('#pal-harmony button')[1].click();
+      got.swatch = txt(d, 'sw-black');
+      return waitFor(function () { return copied.length >= 1; }).then(function () {
+        got.copyMsg = txt(d, 'copy-msg');
+        var ok = got.a.HEX === '#3498db' && got.a.RGB === 'rgb(52, 152, 219)' && got.a.HSL === 'hsl(204, 70%, 53%)' && got.a['HSV/HSB'] === 'hsv(204, 76%, 86%)' && got.a.CMYK === 'cmyk(76%, 31%, 0%, 14%)' &&
+                 got.a.Luminance === '28.3%' && got.a.Decimal === '3447003' && got.b.HEX === '#ff6347' && /Unrecognized format/.test(got.bad) &&
+                 got.ratio === '4.48:1' && /AA body fail/.test(got.badges) && /AA large pass/.test(got.badges) && got.swapped === '#ffffff/#777777' &&
+                 got.shades === 10 && got.harmony === 8 && got.comp === '#f6b82f' && copied[0] === '#f6b82f' && /copied/.test(got.copyMsg) && /^Aa [\d.]+:1$/.test(got.swatch) && !hangulLeft(d) && !f.dataset.errs;
+        log('색상 변환 (영어)', ok, '#3498db → ' + [got.a.RGB, got.a.HSL, got.a['HSV/HSB'], got.a.CMYK].join(' / ') + ' · Luminance ' + got.a.Luminance + ' Decimal ' + got.a.Decimal + ' · tomato → ' + got.b.HEX + ' · nope "' + got.bad.slice(0, 20) + '" · #777/흰 ' + got.ratio + ' [' + got.badges + '] · 바꾸기 ' + got.swapped + ' · 밝기 ' + got.shades + ' 조화 ' + got.harmony + ' 보색 ' + got.comp + ' 복사 ' + copied[0] + ' "' + got.copyMsg + '" · 견본 "' + got.swatch + '" · 한글 ' + (hangulLeft(d) || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('색상 변환 (영어)', false, '오류: ' + e.message); });
+
+  chain = chain.then(function () {
+    return loadFrame('../en/barcode.html').then(function (f) {
+      var d = f.contentDocument, c = d.getElementById('canvas'), cap = capture(f), got = {};
+      got.defType = d.getElementById('type').value; got.defText = d.getElementById('text').value; got.defInfo = txt(d, 'info');
+      set(d, 'type', 'ean13'); set(d, 'scale', '3');
+      set(d, 'text', '978020137962', 'input'); got.dec1 = decodeEan13(readModules(c, 3)); got.info1 = txt(d, 'info');
+      set(d, 'text', '9780201379625', 'input'); got.wrong = txt(d, 'msg');
+      set(d, 'text', '12ab', 'input'); got.alpha = txt(d, 'msg');
+      set(d, 'type', 'code128'); set(d, 'text', 'Hello World 2024', 'input'); got.c128 = decodeCode128(readModules(c, 3)); got.c128info = txt(d, 'info');
+      set(d, 'text', '한글', 'input'); got.ko = txt(d, 'msg');
+      set(d, 'type', 'ean8'); set(d, 'text', '9638507', 'input'); got.dec8 = decodeEan8(readModules(c, 3)); got.hint8 = txt(d, 'type-hint');
+      click(d, 'btn-png');
+      return waitFor(function () { return outputs(cap, /png/).length >= 1; }).then(function () {
+        got.saved = txt(d, 'copy-msg');
+        var han = hangulLeft(d).replace(/한글/g, '');   // 검사가 넣은 입력값 "한글" 은 사용자 데이터
+        var ok = got.defType === 'ean13' && got.defText === '501234567890' && /Check digit 0 was added/.test(got.defInfo) && /95 modules/.test(got.defInfo) &&
+                 got.dec1 === '9780201379624' && /Check digit 4 was added/.test(got.info1) && /it should be 4/.test(got.wrong) && got.alpha === 'Digits only.' &&
+                 got.c128 === 'Hello World 2024' && /symbols · check symbol/.test(got.c128info) && /Code 128 only holds letters/.test(got.ko) &&
+                 got.dec8 === '96385074' && /7 digits \(check digit added\) or 8 digits/.test(got.hint8) && cap.names[0] === 'barcode_96385074.png' && /Saved as PNG/.test(got.saved) && !han && !f.dataset.errs;
+        log('바코드 (영어)', ok, '기본 ' + got.defType + ' ' + got.defText + ' "' + got.defInfo.slice(0, 40) + '" · 978020137962 → ' + got.dec1 + ' "' + got.info1.slice(0, 26) + '" · 틀린 체크 "' + got.wrong.slice(-18) + '" · 12ab "' + got.alpha + '" · Code 128 → "' + got.c128 + '" "' + got.c128info.slice(0, 30) + '" · 한글 입력 "' + got.ko.slice(0, 28) + '" · EAN-8 → ' + got.dec8 + ' "' + got.hint8 + '" · ' + cap.names[0] + ' "' + got.saved + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('바코드 (영어)', false, '오류: ' + e.message); });
 
   chain.then(render);
 }

@@ -22,6 +22,10 @@ my %PAIR = (
   'pdf-watermark.html'  => 'pdf-watermark.html',
   'qr-scan.html'        => 'qr-scan.html',
   'romanize.html'       => 'romanize.html',
+  'image-resize.html'   => 'image-resize.html',
+  'image-transparent.html' => 'image-transparent.html',
+  'color-convert.html'  => 'color-convert.html',
+  'barcode.html'        => 'barcode.html',
 );
 
 my $BASE = 'https://toolmoa.github.io/';

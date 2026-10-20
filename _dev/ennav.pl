@@ -23,6 +23,10 @@ my @TOOLS = (   # 파일, 머리 메뉴 이름, 바닥 이름
   ['pdf-watermark.html',  'PDF watermark',  'PDF watermark'],
   ['qr-scan.html',        'Read QR',        'Read a QR code from an image'],
   ['romanize.html',       'Romanize name',  'Romanize a Korean name'],
+  ['image-resize.html',   'Resize image',   'Resize image'],
+  ['image-transparent.html', 'Transparent bg', 'Make a white background transparent'],
+  ['color-convert.html',  'Color codes',    'Color code converter'],
+  ['barcode.html',        'Barcode',        'Barcode generator'],
 );
 
 for my $path (glob('en/*.html')) {

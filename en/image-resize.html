@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resize an image to exact pixels or percent — free, no upload</title>
+<meta name="description" content="Resize photos to an exact width and height or by percent, in your browser. YouTube, Instagram and profile presets, many photos to one ZIP. Nothing is uploaded.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-resize.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-resize.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-resize.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-resize.html">
+<meta property="og:title" content="Resize an image without uploading it">
+<meta property="og:description" content="Exact pixels or percent, YouTube and Instagram presets, many photos at once. Runs in your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Image resizer","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/image-resize.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-image-resize.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Resize image · exact pixels or percent — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Resize an image without uploading it">
+<meta name="twitter:description" content="Exact pixels or percent, YouTube and Instagram presets, many photos at once. Runs in your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-image-resize.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Are my photos uploaded anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. Resizing happens inside your browser and the result is saved straight to your device. The page keeps working with the internet switched off, which is the easiest way to check. It is also why dozens of photos finish without a wait — there is no upload."}},{"@type":"Question","name":"What happens to a photo of a different shape at 1080×1080?","acceptedAnswer":{"@type":"Answer","text":"\"Keep ratio\" fits the width to 1080 and lets the height follow, so the result is not a perfect square. \"Fill and crop\" trims the overflow around the centre and gives exactly 1080×1080. \"Fit everything and pad\" keeps the whole photo and fills the rest with the padding colour. \"Stretch\" distorts the picture, so use it only when you must."}},{"@type":"Question","name":"Does enlarging improve quality?","acceptedAnswer":{"@type":"Answer","text":"No. Pixels that were never captured have to be invented, so the bigger you go the blurrier it gets. That is why \"Never enlarge beyond the original\" is on by default. Untick it only when a print shop insists on a pixel count your photo does not have."}},{"@type":"Question","name":"Which format should I save in?","acceptedAnswer":{"@type":"Answer","text":"JPG for photographs, PNG for text, logos and anything with a transparent background, WebP for the smallest files on the web. \"Same as the original\" keeps JPG as JPG and PNG as PNG. JPG and WebP are saved at 92% quality."}},{"@type":"Question","name":"Is the camera and location data kept?","acceptedAnswer":{"@type":"Answer","text":"No. A resized photo is a freshly drawn image, so the GPS position and camera details of the original are not carried over. To keep the photo as it is and strip only that data, use remove photo location."}},{"@type":"Question","name":"Does it work on a phone?","acceptedAnswer":{"@type":"Answer","text":"Yes. Several photos are delivered as one ZIP, because phone browsers often keep only the first file of a series of downloads. Untick \"Several photos → one ZIP\" to save them one by one."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Resize image · exact pixels or percent","item":"https://toolmoa.github.io/en/image-resize.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html" aria-current="page">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+    </nav>
+    <a class="lang-link" href="../image-resize.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Resize image · exact pixels or percent</h1>
+  <p class="lead">Change a photo to the exact width and height you need, or by percent. Pick YouTube, Instagram or profile-picture sizes directly, and process many photos with the same settings at once.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">📐</span>
+    <span class="dz-main">Drop photos here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · GIF · BMP · several at once</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
+    <input type="file" id="file" accept="image/*" multiple>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div class="field">
+        <label for="preset">Preset size</label>
+        <select id="preset">
+          <option value="custom" selected>Custom</option>
+          <option value="1280x720">YouTube thumbnail 1280×720</option>
+          <option value="1080x1080">Instagram square 1080×1080</option>
+          <option value="1080x1350">Instagram portrait 1080×1350</option>
+          <option value="1080x1920">Story · Reels · Shorts 1080×1920</option>
+          <option value="1200x630">Link preview 1200×630</option>
+          <option value="800x800">Product photo 800×800</option>
+          <option value="400x400">Profile picture 400×400</option>
+          <option value="1920x1080">Full HD wallpaper 1920×1080</option>
+          <option value="3840x2160">4K wallpaper 3840×2160</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="mode">How to specify</label>
+          <select id="mode">
+            <option value="px" selected>Pixels (width × height)</option>
+            <option value="pct">Percent</option>
+            <option value="long">Longest side only</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="w-field">
+          <label for="w">Width (px)</label>
+          <input type="number" id="w" min="1" max="16384" value="1280" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="h-field">
+          <label for="h">Height (px)</label>
+          <input type="number" id="h" min="1" max="16384" value="720" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="pct-field" hidden>
+          <label for="pct">Percent (%)</label>
+          <input type="number" id="pct" min="1" max="1000" value="50" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="long-field" hidden>
+          <label for="long">Longest side (px)</label>
+          <input type="number" id="long" min="1" max="16384" value="1920" inputmode="numeric">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:14px">
+        <div class="field" style="margin:0" id="fit-field">
+          <label for="fit">If the aspect ratio differs</label>
+          <select id="fit">
+            <option value="keep" selected>Keep ratio — fit the width, height follows</option>
+            <option value="cover">Fill and crop the overflow (centred)</option>
+            <option value="contain">Fit everything and pad the rest</option>
+            <option value="stretch">Stretch, ignoring the ratio</option>
+          </select>
+          <div class="hint" id="fit-hint"></div>
+        </div>
+        <div class="field" style="margin:0" id="bg-field" hidden>
+          <label for="bgc">Padding colour</label>
+          <input type="color" id="bgc" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="fmt">Save as</label>
+          <select id="fmt">
+            <option value="auto" selected>Same as the original</option>
+            <option value="image/jpeg">JPG — small file</option>
+            <option value="image/png">PNG — lossless</option>
+            <option value="image/webp">WebP — even smaller</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;margin:0">
+            <input type="checkbox" id="noup" checked style="width:auto;margin:0">
+            <span>Never enlarge beyond the original</span>
+          </label>
+          <div class="hint">Enlarging a small photo makes it blurry. Untick to enlarge anyway.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Photos</span></div>
+      <div class="stat"><span class="num" id="t-out" style="font-size:18px">-</span><span class="lbl">First photo result</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl">Total output size</span></div>
+    </div>
+
+    <ul class="file-list" id="list"></ul>
+
+    <div class="btn-row" style="align-items:center">
+      <button class="btn" id="btn-all">Resize and save</button>
+      <label style="display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:400;font-size:14px">
+        <input type="checkbox" id="as-zip" checked style="width:auto;margin:0">
+        <span>Several photos → one ZIP</span>
+      </label>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">If the goal is a smaller file size in KB, use <a href="image-compress.html">compress image</a>; to keep only part of the picture, use <a href="image-crop.html">crop image</a>. To change only the format there is <a href="image-convert.html">convert image</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_IMAGERESIZE --></div>
+
+  <h2>Resizing is not the same as compressing</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      "Make the picture smaller" means two different things: fewer <strong style="color:var(--text)">pixels</strong> (4000 wide down to 1280) or a smaller
+      <strong style="color:var(--text)">file</strong> (5&nbsp;MB down to 500&nbsp;KB). If a form says "no wider than 1000 pixels", this is the page; if it says
+      "under 2&nbsp;MB", use <a href="image-compress.html">compress image</a>. For a fixed format — a YouTube thumbnail at 1280×720, an Instagram square at
+      1080×1080 — pick the preset and "Fill and crop": you get exactly that size even if the photo's shape differs. Enlarging a small photo only makes it
+      blurry, so enlarging is blocked by default; untick the box only when you really need the bigger pixel count. Everything is resized by your own browser,
+      which is why a batch of fifty photos takes seconds and nothing is uploaded.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my photos uploaded anywhere?</summary>
+      <p>No. Resizing happens inside your browser and the result is saved straight to your device. The page keeps working with the internet switched off, which is the easiest way to check. It is also why dozens of photos finish without a wait — there is no upload.</p>
+    </details>
+    <details>
+      <summary>What happens to a photo of a different shape at 1080×1080?</summary>
+      <p>"Keep ratio" fits the width to 1080 and lets the height follow, so the result is not a perfect square. "Fill and crop" trims the overflow around the centre and gives exactly 1080×1080. "Fit everything and pad" keeps the whole photo and fills the rest with the padding colour. "Stretch" distorts the picture, so use it only when you must.</p>
+    </details>
+    <details>
+      <summary>Does enlarging improve quality?</summary>
+      <p>No. Pixels that were never captured have to be invented, so the bigger you go the blurrier it gets. That is why "Never enlarge beyond the original" is on by default. Untick it only when a print shop insists on a pixel count your photo does not have.</p>
+    </details>
+    <details>
+      <summary>Which format should I save in?</summary>
+      <p>JPG for photographs, PNG for text, logos and anything with a transparent background, WebP for the smallest files on the web. "Same as the original" keeps JPG as JPG and PNG as PNG. JPG and WebP are saved at 92% quality.</p>
+    </details>
+    <details>
+      <summary>Is the camera and location data kept?</summary>
+      <p>No. A resized photo is a freshly drawn image, so the GPS position and camera details of the original are not carried over. To keep the photo as it is and strip only that data, use <a href="image-exif.html">remove photo location</a>.</p>
+    </details>
+    <details>
+      <summary>Does it work on a phone?</summary>
+      <p>Yes. Several photos are delivered as one ZIP, because phone browsers often keep only the first file of a series of downloads. Untick "Several photos → one ZIP" to save them one by one.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="../image-resize.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), list = el('list');
+  var presetSel = el('preset'), modeSel = el('mode'), wIn = el('w'), hIn = el('h'), pctIn = el('pct'), longIn = el('long');
+  var fitSel = el('fit'), bgIn = el('bgc'), fmtSel = el('fmt'), noupCb = el('noup');
+
+  // 너무 큰 결과는 브라우저가 캔버스를 만들지 못한다
+  var MAX_PIXELS = 40e6;
+  var items = [];      // {file, img, w, h, type, base}
+  var results = [];    // {name, blob, url, w, h}
+  var timer = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); handle(e.dataTransfer.files); });
+  fileInput.addEventListener('change', function () { handle(fileInput.files); });
+  // 캡처한 화면을 파일로 저장한 뒤 다시 고르는 과정이 번거롭다. Ctrl+V로 바로 받는다.
+  document.addEventListener('paste', function (e) {
+    var els = (e.clipboardData && e.clipboardData.items) || [], picked = [];
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].kind !== 'file' || els[i].type.indexOf('image/') !== 0) continue;
+      var f = els[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      picked.push(new File([f], 'pasted-image-' + stamp + '-' + (picked.length + 1) + '.' + ext, { type: f.type }));
+    }
+    if (!picked.length) return;
+    e.preventDefault(); handle(picked);
+  });
+
+  function loadImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('cannot open image')); };
+      img.src = url;
+    });
+  }
+  function handle(fileList) {
+    var files = Array.prototype.slice.call(fileList).filter(function (f) { return f.type.indexOf('image/') === 0; });
+    if (!files.length) { setMsg('Please choose an image file.', 'err'); return; }
+    setMsg('Reading the file…');
+    Promise.all(files.map(function (f) {
+      return loadImage(f).then(function (img) {
+        return { file: f, img: img, w: img.naturalWidth, h: img.naturalHeight,
+                 type: f.type === 'image/jpeg' ? 'image/jpeg' : (f.type === 'image/webp' ? 'image/webp' : 'image/png'),
+                 base: f.name.replace(/\.[^.]+$/, '') };
+      }).catch(function () { return null; });
+    })).then(function (out) {
+      var ok = out.filter(Boolean);
+      if (!ok.length) { setMsg('The photo could not be opened.', 'err'); return; }
+      items = items.concat(ok);
+      area.hidden = false;
+      setMsg('');
+      schedule();
+    });
+  }
+
+  // 설정에서 목표 크기를 구한다. 반환 {w, h, fit}
+  function target(it) {
+    var mode = modeSel.value, W, H, fit = fitSel.value;
+    if (mode === 'pct') {
+      var k = (parseFloat(pctIn.value) || 100) / 100;
+      W = Math.max(1, Math.round(it.w * k)); H = Math.max(1, Math.round(it.h * k)); fit = 'stretch';
+    } else if (mode === 'long') {
+      var L = parseInt(longIn.value, 10) || Math.max(it.w, it.h);
+      var kk = L / Math.max(it.w, it.h);
+      W = Math.max(1, Math.round(it.w * kk)); H = Math.max(1, Math.round(it.h * kk)); fit = 'stretch';
+    } else {
+      W = parseInt(wIn.value, 10) || it.w; H = parseInt(hIn.value, 10) || it.h;
+      if (fit === 'keep') { H = Math.max(1, Math.round(it.h * W / it.w)); fit = 'stretch'; }
+    }
+    if (noupCb.checked) {
+      // 원본보다 키우지 않는다: 목표가 원본보다 크면 원본 크기로 되돌린다 (비율별로)
+      if (W > it.w || H > it.h) {
+        var s = Math.min(it.w / W, it.h / H, 1);
+        W = Math.max(1, Math.round(W * s)); H = Math.max(1, Math.round(H * s));
+      }
+    }
+    var cap = Math.sqrt(MAX_PIXELS / (W * H));
+    if (cap < 1) { W = Math.max(1, Math.floor(W * cap)); H = Math.max(1, Math.floor(H * cap)); }
+    return { w: W, h: H, fit: fit };
+  }
+
+  function draw(it, canvas) {
+    var tg = target(it), W = tg.w, H = tg.h;
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    var type = fmtSel.value === 'auto' ? it.type : fmtSel.value;
+    if (type === 'image/jpeg' || tg.fit === 'contain') { ctx.fillStyle = type === 'image/jpeg' && tg.fit !== 'contain' ? '#ffffff' : bgIn.value; ctx.fillRect(0, 0, W, H); }
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    if (tg.fit === 'cover') {
+      var k = Math.max(W / it.w, H / it.h), sw = W / k, sh = H / k;
+      ctx.drawImage(it.img, (it.w - sw) / 2, (it.h - sh) / 2, sw, sh, 0, 0, W, H);
+    } else if (tg.fit === 'contain') {
+      var k2 = Math.min(W / it.w, H / it.h), dw = it.w * k2, dh = it.h * k2;
+      ctx.drawImage(it.img, 0, 0, it.w, it.h, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    } else {
+      // 크게 줄일 때 한 번에 그리면 계단이 생긴다. 절반씩 줄여 간다.
+      var cur = it.img, cw = it.w, ch = it.h;
+      while (cw / 2 > W && ch / 2 > H) {
+        var tmp = document.createElement('canvas'); tmp.width = Math.round(cw / 2); tmp.height = Math.round(ch / 2);
+        var tc = tmp.getContext('2d'); tc.imageSmoothingEnabled = true; tc.imageSmoothingQuality = 'high';
+        tc.drawImage(cur, 0, 0, tmp.width, tmp.height);
+        cur = tmp; cw = tmp.width; ch = tmp.height;
+      }
+      ctx.drawImage(cur, 0, 0, cw, ch, 0, 0, W, H);
+    }
+    return { type: type, w: W, h: H };
+  }
+  function toBlob(canvas, type) { return new Promise(function (r) { canvas.toBlob(r, type, type === 'image/png' ? undefined : 0.92); }); }
+  function outName(it, type) {
+    return it.base + '_' + 'resized' + (type === 'image/jpeg' ? '.jpg' : type === 'image/webp' ? '.webp' : '.png');
+  }
+
+  function process() {
+    if (!items.length) return;
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    results = [];
+    var canvas = document.createElement('canvas'), chain = Promise.resolve();
+    items.forEach(function (it) {
+      chain = chain.then(function () {
+        var o = draw(it, canvas);
+        return toBlob(canvas, o.type).then(function (b) {
+          if (b) results.push({ name: outName(it, o.type), blob: b, url: URL.createObjectURL(b), w: o.w, h: o.h, before: it.file.size, src: it.w + '×' + it.h });
+        });
+      });
+    });
+    chain.then(function () { canvas.width = canvas.height = 1; renderList(); });
+  }
+  function renderList() {
+    el('t-count').textContent = items.length;
+    el('t-out').textContent = results.length ? results[0].w + '×' + results[0].h : '-';
+    el('t-size').textContent = humanSize(results.reduce(function (s, r) { return s + r.blob.size; }, 0));
+    list.innerHTML = '';
+    results.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.innerHTML = '<a href="' + r.url + '" target="_blank" rel="noopener"><img src="' + r.url + '" alt="" class="thumb"></a>' +
+        '<span class="fname" title="' + r.name + '">' + r.name + '</span>' +
+        '<span class="fmeta">' + r.src + ' → <strong>' + r.w + '×' + r.h + '</strong> · ' + humanSize(r.blob.size) + '</span>';
+      var rm = document.createElement('button');
+      rm.className = 'btn secondary small'; rm.type = 'button'; rm.textContent = 'Remove'; rm.setAttribute('data-remove', i);
+      rm.addEventListener('click', function () { items.splice(i, 1); if (!items.length) { reset(); return; } process(); });
+      li.appendChild(rm);
+      list.appendChild(li);
+    });
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(process, 80); }
+
+  function syncFields() {
+    var mode = modeSel.value;
+    el('w-field').hidden = mode !== 'px'; el('h-field').hidden = mode !== 'px' || fitSel.value === 'keep';
+    el('pct-field').hidden = mode !== 'pct'; el('long-field').hidden = mode !== 'long';
+    el('fit-field').hidden = mode !== 'px';
+    el('bg-field').hidden = !(mode === 'px' && fitSel.value === 'contain');
+    el('fit-hint').textContent = fitSel.value === 'keep' ? 'The height is set automatically from the width.'
+      : fitSel.value === 'cover' ? 'You get exactly the size you asked for; if the ratio differs, the edges are cropped.'
+      : fitSel.value === 'contain' ? 'You get exactly the size you asked for with the whole photo visible; the rest is padding colour.'
+      : 'The photo may look squashed.';
+  }
+  presetSel.addEventListener('change', function () {
+    var v = presetSel.value;
+    if (v !== 'custom') {
+      var m = v.split('x'); wIn.value = m[0]; hIn.value = m[1]; modeSel.value = 'px';
+      if (fitSel.value === 'keep') fitSel.value = 'cover';     // 규격은 정확한 크기가 목적이다
+    }
+    syncFields(); schedule();
+  });
+  [modeSel, fitSel, fmtSel, noupCb].forEach(function (e) { e.addEventListener('change', function () { syncFields(); schedule(); }); });
+  [wIn, hIn, pctIn, longIn, bgIn].forEach(function (e) { e.addEventListener('input', function () { presetSel.value = 'custom'; schedule(); }); });
+  // 언어를 바꾸면 스크립트가 쓴 안내문·버튼도 다시 만들어야 한다
+
+  function saveBlob(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+  // 파일을 하나씩 내려받게 하면 브라우저가 "여러 파일 다운로드"를 묻고,
+  // 휴대전화에서는 첫 장만 저장되는 일이 잦다. 기본적으로 ZIP 한 개로 묶는다.
+  el('btn-all').addEventListener('click', function () {
+    if (!results.length) return;
+    var wantZip = el('as-zip').checked && typeof makeZip === 'function' && results.length > 1;
+    if (!wantZip) {
+      results.forEach(function (r, i) { setTimeout(function () { saveBlob(r.blob, r.name); }, i * 350); });
+      setMsg(results.length + ' photo(s) saved.', 'ok');
+      return;
+    }
+    var btn = this; btn.disabled = true;
+    // makeZip 은 바이트만 받는다. Blob 을 Uint8Array 로 바꿔 넘긴다.
+    Promise.all(results.map(function (r) { return r.blob.arrayBuffer().then(function (buf) { return { name: r.name, bytes: new Uint8Array(buf) }; }); }))
+      .then(function (entries) {
+        var zip = makeZip(entries);
+        saveBlob(zip, 'resized-photos' + '.zip');
+        setMsg(results.length + ' photo(s) saved in one ZIP. ' + humanSize(zip.size), 'ok');
+        btn.disabled = false;
+      }).catch(function (e) { setMsg('Could not save.' + ' ' + (e && e.message || ''), 'err'); btn.disabled = false; });
+  });
+
+  function reset() {
+    results.forEach(function (r) { URL.revokeObjectURL(r.url); });
+    items = []; results = []; fileInput.value = ''; list.innerHTML = '';
+    el('t-count').textContent = '0'; el('t-out').textContent = '-'; el('t-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  }
+  el('btn-reset').addEventListener('click', reset);
+
+  syncFields();
+})();
+</script>
+</body>
+</html>

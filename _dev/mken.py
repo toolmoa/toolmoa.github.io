@@ -252,6 +252,195 @@ PAGES = {
     </details>
   </div>
 '''),
+ 'image-resize': dict(
+   title='Resize an image to exact pixels or percent — free, no upload',
+   desc='Resize photos to an exact width and height or by percent, in your browser. YouTube, Instagram and profile presets, many photos to one ZIP. Nothing is uploaded.',
+   og_t='Resize an image without uploading it',
+   og_d='Exact pixels or percent, YouTube and Instagram presets, many photos at once. Runs in your browser.',
+   name='Image resizer', cat='MultimediaApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Resizing is not the same as compressing</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      "Make the picture smaller" means two different things: fewer <strong style="color:var(--text)">pixels</strong> (4000 wide down to 1280) or a smaller
+      <strong style="color:var(--text)">file</strong> (5&nbsp;MB down to 500&nbsp;KB). If a form says "no wider than 1000 pixels", this is the page; if it says
+      "under 2&nbsp;MB", use <a href="image-compress.html">compress image</a>. For a fixed format — a YouTube thumbnail at 1280×720, an Instagram square at
+      1080×1080 — pick the preset and "Fill and crop": you get exactly that size even if the photo's shape differs. Enlarging a small photo only makes it
+      blurry, so enlarging is blocked by default; untick the box only when you really need the bigger pixel count. Everything is resized by your own browser,
+      which is why a batch of fifty photos takes seconds and nothing is uploaded.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Are my photos uploaded anywhere?</summary>
+      <p>No. Resizing happens inside your browser and the result is saved straight to your device. The page keeps working with the internet switched off, which is the easiest way to check. It is also why dozens of photos finish without a wait — there is no upload.</p>
+    </details>
+    <details>
+      <summary>What happens to a photo of a different shape at 1080×1080?</summary>
+      <p>"Keep ratio" fits the width to 1080 and lets the height follow, so the result is not a perfect square. "Fill and crop" trims the overflow around the centre and gives exactly 1080×1080. "Fit everything and pad" keeps the whole photo and fills the rest with the padding colour. "Stretch" distorts the picture, so use it only when you must.</p>
+    </details>
+    <details>
+      <summary>Does enlarging improve quality?</summary>
+      <p>No. Pixels that were never captured have to be invented, so the bigger you go the blurrier it gets. That is why "Never enlarge beyond the original" is on by default. Untick it only when a print shop insists on a pixel count your photo does not have.</p>
+    </details>
+    <details>
+      <summary>Which format should I save in?</summary>
+      <p>JPG for photographs, PNG for text, logos and anything with a transparent background, WebP for the smallest files on the web. "Same as the original" keeps JPG as JPG and PNG as PNG. JPG and WebP are saved at 92% quality.</p>
+    </details>
+    <details>
+      <summary>Is the camera and location data kept?</summary>
+      <p>No. A resized photo is a freshly drawn image, so the GPS position and camera details of the original are not carried over. To keep the photo as it is and strip only that data, use <a href="image-exif.html">remove photo location</a>.</p>
+    </details>
+    <details>
+      <summary>Does it work on a phone?</summary>
+      <p>Yes. Several photos are delivered as one ZIP, because phone browsers often keep only the first file of a series of downloads. Untick "Several photos → one ZIP" to save them one by one.</p>
+    </details>
+  </div>
+'''),
+ 'image-transparent': dict(
+   title='Make a white background transparent — logo to PNG, free',
+   desc='Remove the white or any chosen background from a logo, stamp or signature and save a transparent PNG in your browser. Tolerance and soft edges. Nothing is uploaded.',
+   og_t='Make a white background transparent',
+   og_d='Logos, stamps, signatures and drawings to transparent PNG, in your browser. Nothing is uploaded.',
+   name='Transparent background maker', cat='MultimediaApplication',
+   aria={'파일 선택': 'Choose a file', '결과 미리보기 — 클릭하면 그 자리 색을 지울 색으로 고릅니다': 'Result preview — click a spot to use its colour as the one to remove'},
+   attrs=[],
+   body='''  <h2>What it is for</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Scanned signatures and stamps</strong> — a signature on paper comes with the paper. Remove the white and it can sit on any document.<br>
+      <strong style="color:var(--text)">Logos</strong> — a JPG logo in a white box looks wrong on a photo or a coloured background. As a transparent PNG the box disappears.<br>
+      <strong style="color:var(--text)">Drawings and characters</strong> — pencil sketches and hand lettering that you want to use as stickers or profile pictures.<br>
+      Cutting a person or an object out of a photograph is a different job: that needs a program that recognises shapes, not colours. This page is for
+      <strong style="color:var(--text)">pictures whose background is a single colour</strong>. It runs entirely inside your browser, which matters for signatures
+      and company stamps — the one kind of image you should never hand to a website.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my picture uploaded anywhere?</summary>
+      <p>No. The picture is opened, edited and saved inside your browser. The page keeps working with the internet switched off. It was built for signatures and stamps, exactly the images that must not leave your device.</p>
+    </details>
+    <details>
+      <summary>What does "only background connected to the outside" mean?</summary>
+      <p>Removal starts at the edges of the picture and spreads only through connected background. The inside of an "O", the white of an eye, a white box inside a logo — same colour, but not connected to the outside — are kept. "Every pixel of that colour" removes the colour wherever it appears. For logos and stamps the first mode is usually right.</p>
+    </details>
+    <details>
+      <summary>Patches of background remain</summary>
+      <p>White paper in a scan or photo is never pure white; it is a mix of light greys and yellows. Raise the tolerance and those shades count as background too. If lines and letters start to fade, you have gone too far.</p>
+    </details>
+    <details>
+      <summary>The edges look jagged</summary>
+      <p>Turn on "Soften edges": pixels close to the background colour become partly transparent, so the outline blends in. Thin signatures usually look better with it on; logos with crisp colour boundaries are sometimes cleaner with it off.</p>
+    </details>
+    <details>
+      <summary>Can I save as JPG?</summary>
+      <p>No — JPG has no transparency. A transparent image has to be PNG, so PNG is the only output. If the file is large, <a href="image-compress.html">compress image</a> can turn it into WebP, which keeps the transparency and is much smaller.</p>
+    </details>
+    <details>
+      <summary>I clicked a colour inside the picture and nothing happened</summary>
+      <p>With "only background connected to the outside", a colour that does not touch the edge is never reached. Switch to "Every pixel of that colour" and the colour you picked is removed everywhere.</p>
+    </details>
+  </div>
+'''),
+ 'color-convert': dict(
+   title='Color code converter — HEX, RGB, HSL, CMYK and WCAG contrast',
+   desc='Convert HEX, RGB, HSL, HSV, CMYK and CSS color names in one place, check the WCAG contrast ratio of two colors and build palettes. Runs in your browser.',
+   og_t='Color code converter and contrast checker',
+   og_d='HEX, RGB, HSL, HSV, CMYK and color names, WCAG contrast ratio, tints and palettes. In your browser.',
+   name='Color code converter', cat='DesignApplication',
+   aria={'색 고르기': 'Pick a color', '변환 결과': 'Results', '글자 색 고르기': 'Pick the text color', '배경 색 고르기': 'Pick the background color'},
+   attrs=[('Aa 가나다', 'Aa Bb Cc')],
+   body='''  <h2>Which format is used where</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">HEX (#2f6df6)</strong> — web and app design, CSS, Figma. The most common form. Two extra digits at the end (#2f6df680) are the alpha, or opacity.<br>
+      <strong style="color:var(--text)">RGB (47, 109, 246)</strong> — the "custom color" dialog in Photoshop, PowerPoint, Word and most office software takes these three numbers.<br>
+      <strong style="color:var(--text)">HSL (216°, 92%, 57%)</strong> — hue, saturation and lightness. The easiest form for a human to adjust: "the same color, a little lighter" is one number.<br>
+      <strong style="color:var(--text)">HSV / HSB</strong> — the H·S·B fields of the Photoshop color picker. Similar to HSL but with a different definition of brightness.<br>
+      <strong style="color:var(--text)">CMYK</strong> — for print. Screens and ink work differently, so these values are an approximation; always check a real print against a swatch book.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is anything I type sent anywhere?</summary>
+      <p>No. Conversion and contrast calculation happen inside your browser. The page keeps working with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>Which formats can I enter?</summary>
+      <p>HEX such as #fff, #ffffff or #ffffff80; rgb(255,0,0) and rgba(255,0,0,.5); hsl(120,100%,50%); and all 148 CSS color names such as red, tomato or steelblue. 2f6df6 without the # works too.</p>
+    </details>
+    <details>
+      <summary>What does a contrast ratio of 4.5:1 mean?</summary>
+      <p>It compares the brightness of the text color with the background. Black on white is the maximum at 21:1; identical colors are 1:1. The Web Content Accessibility Guidelines (WCAG) ask for at least 4.5:1 for body text and 3:1 for large text and icons at level AA, and 7:1 and 4.5:1 at level AAA. Grey text that is hard to read usually fails even 3:1.</p>
+    </details>
+    <details>
+      <summary>The CMYK values differ from my printer's</summary>
+      <p>Screens (RGB) and ink (CMYK) can reproduce different ranges of color, so there is no exact conversion. The values here come from the common simple formula; every program differs by a few percent depending on its color profile. Check printed work against a physical swatch.</p>
+    </details>
+    <details>
+      <summary>How are the palettes built?</summary>
+      <p>The tints and shades change only the HSL lightness in 10% steps. The complement sits opposite on the color wheel (180°), analogous colors are 30° either side, and the triad is spaced at 120°. Use them as a starting point for hover and pressed states of a button or for chart colors.</p>
+    </details>
+  </div>
+'''),
+ 'barcode': dict(
+   title='Barcode generator — EAN-13, EAN-8 and Code 128, free, saves PNG',
+   desc='Generate EAN-13, EAN-8 and Code 128 barcodes and save them as PNG. Check digits are calculated and verified; bar width and height adjustable. Nothing is uploaded.',
+   og_t='Barcode generator — EAN-13, EAN-8 and Code 128',
+   og_d='Product barcodes with automatic check digits, and Code 128 for text. Saved as PNG from your browser.',
+   name='Barcode generator', cat='UtilitiesApplication',
+   aria={'바코드': 'Barcode'},
+   attrs=[('value="880123456789"', 'value="501234567890"')],
+   body='''  <h2>Which barcode do you need</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">EAN-13</strong> — the retail product barcode scanned at supermarket tills and used by online marketplaces (in North America it
+      appears as the 12-digit UPC, which scanners read as an EAN-13 with a leading zero). The number itself is issued to your company by GS1 in your country; the
+      first digits identify the issuing country and the company. Any 13 digits you invent will scan, but they will point at someone else's product, so use this page
+      to turn a number you have been assigned into a picture.<br>
+      <strong style="color:var(--text)">EAN-8</strong> — the 8-digit version for small packages such as gum and chocolate bars.<br>
+      <strong style="color:var(--text)">Code 128</strong> — holds letters and symbols as well as digits, which makes it the usual choice for shipping labels, asset tags,
+      membership and library cards and warehouse locations. For numbers used only inside your own organisation, no registration is needed — choose whatever you like.
+      It cannot hold accented or non-Latin characters; for those, use a QR code.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is anything I type sent anywhere?</summary>
+      <p>No. The barcode is drawn inside your browser and nothing is transmitted. The page keeps working with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>What is the check digit?</summary>
+      <p>The last digit of an EAN barcode is calculated from the digits before it. If a scanner misreads a bar, the check fails and the read is rejected. Enter 12 digits and the check digit is added for you; enter 13 and the last digit is verified, with a message if it is wrong.</p>
+    </details>
+    <details>
+      <summary>It will not scan</summary>
+      <p>Check three things. First, that the white margin on each side of the bars has not been cropped away — without it a scanner cannot find the code. Second, that it is not printed too small: use the "for print" bar width and print at least 3 cm wide. Third, faint inkjet output and glossy, reflective paper are hard to read.</p>
+    </details>
+    <details>
+      <summary>How do I get a product barcode number?</summary>
+      <p>Join GS1 in your country (GS1 US, GS1 UK and so on). You receive a company prefix and append your own product numbers to make 13 digits. This page does not issue numbers; it turns a number you already have into a barcode image.</p>
+    </details>
+    <details>
+      <summary>Can Code 128 hold accents or other scripts?</summary>
+      <p>No. Code 128 covers letters, digits and basic symbols (ASCII) only. For other scripts or longer content use a <a href="qr-generate.html">QR code</a>.</p>
+    </details>
+    <details>
+      <summary>How big should it be printed?</summary>
+      <p>The nominal size of an EAN-13 is 37.3 mm wide by 25.9 mm tall, and it may be scaled between 80% and 200%. A PNG saved at 6 pixels per module and printed about 4 cm wide is read by nearly every scanner.</p>
+    </details>
+  </div>
+'''),
 }
 
 def convert(slug):
@@ -336,6 +525,7 @@ def convert(slug):
         return js_str(EN[key])
     h = re.sub(r"\bt\('([^']+)',\s*'(?:[^'\\]|\\.)*'\)", sub_t, h)
     h = h.replace("'붙여넣은-사진-'", "'pasted-image-'")
+    h = h.replace("'붙여넣은-그림-'", "'pasted-image-'")
     h = re.sub(r"\n[^\n]*addEventListener\('langchange'[^\n]*", '', h)
     # 로컬 링크는 같은 폴더의 영어판을 가리킨다 (전부 영어판이 있는 툴만 cross 에 적었다)
     left_t = re.findall(r"(?<![\w.])t\('[^']*'", h)   # getContext('2d') 처럼 't(' 로 끝나는 이름은 제외

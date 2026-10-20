@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Barcode generator — EAN-13, EAN-8 and Code 128, free, saves PNG</title>
+<meta name="description" content="Generate EAN-13, EAN-8 and Code 128 barcodes and save them as PNG. Check digits are calculated and verified; bar width and height adjustable. Nothing is uploaded.">
+<link rel="canonical" href="https://toolmoa.github.io/en/barcode.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/barcode.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/barcode.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/barcode.html">
+<meta property="og:title" content="Barcode generator — EAN-13, EAN-8 and Code 128">
+<meta property="og:description" content="Product barcodes with automatic check digits, and Code 128 for text. Saved as PNG from your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>▥</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Barcode generator","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<style>
+  .bc-stage { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center; overflow:auto; }
+  .bc-stage canvas { max-width:100%; height:auto; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/barcode.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-barcode.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Barcode generator · EAN-13 · Code 128 — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Barcode generator — EAN-13, EAN-8 and Code 128">
+<meta name="twitter:description" content="Product barcodes with automatic check digits, and Code 128 for text. Saved as PNG from your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-barcode.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is anything I type sent anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. The barcode is drawn inside your browser and nothing is transmitted. The page keeps working with the internet switched off."}},{"@type":"Question","name":"What is the check digit?","acceptedAnswer":{"@type":"Answer","text":"The last digit of an EAN barcode is calculated from the digits before it. If a scanner misreads a bar, the check fails and the read is rejected. Enter 12 digits and the check digit is added for you; enter 13 and the last digit is verified, with a message if it is wrong."}},{"@type":"Question","name":"It will not scan","acceptedAnswer":{"@type":"Answer","text":"Check three things. First, that the white margin on each side of the bars has not been cropped away — without it a scanner cannot find the code. Second, that it is not printed too small: use the \"for print\" bar width and print at least 3 cm wide. Third, faint inkjet output and glossy, reflective paper are hard to read."}},{"@type":"Question","name":"How do I get a product barcode number?","acceptedAnswer":{"@type":"Answer","text":"Join GS1 in your country (GS1 US, GS1 UK and so on). You receive a company prefix and append your own product numbers to make 13 digits. This page does not issue numbers; it turns a number you already have into a barcode image."}},{"@type":"Question","name":"Can Code 128 hold accents or other scripts?","acceptedAnswer":{"@type":"Answer","text":"No. Code 128 covers letters, digits and basic symbols (ASCII) only. For other scripts or longer content use a QR code."}},{"@type":"Question","name":"How big should it be printed?","acceptedAnswer":{"@type":"Answer","text":"The nominal size of an EAN-13 is 37.3 mm wide by 25.9 mm tall, and it may be scaled between 80% and 200%. A PNG saved at 6 pixels per module and printed about 4 cm wide is read by nearly every scanner."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Barcode generator · EAN-13 · Code 128","item":"https://toolmoa.github.io/en/barcode.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html" aria-current="page">Barcode</a>
+    </nav>
+    <a class="lang-link" href="../barcode.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Barcode generator · EAN-13 · Code 128</h1>
+  <p class="lead">Make EAN-13 and EAN-8 product barcodes, or Code 128 barcodes for letters and numbers, and save them as PNG. Check digits are calculated automatically and existing numbers are verified.</p>
+  <span class="privacy-badge">🔒 What you type is never sent anywhere</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="type">Barcode type</label>
+      <select id="type">
+        <option value="ean13" selected>EAN-13 — retail product barcode (13 digits)</option>
+        <option value="ean8">EAN-8 — small packages (8 digits)</option>
+        <option value="code128">Code 128 — letters, digits and symbols (shipping, assets, membership)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="text">Content</label>
+      <input type="text" id="text" value="501234567890" spellcheck="false" autocomplete="off" placeholder="EAN-13: 12 digits (check digit added) or 13 digits">
+      <div class="hint" id="type-hint"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px">
+      <div class="field" style="margin:0">
+        <label for="scale">Bar width (pixels per module)</label>
+        <select id="scale">
+          <option value="2">2px — small</option>
+          <option value="3" selected>3px — normal</option>
+          <option value="4">4px — large</option>
+          <option value="6">6px — for print</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="height">Bar height (px)</label>
+        <input type="number" id="height" min="30" max="300" value="90" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0;align-self:end">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:600;margin:0">
+          <input type="checkbox" id="showtext" checked style="width:auto;margin:0">
+          <span>Print the digits or text underneath</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div class="card">
+    <div class="bc-stage">
+      <canvas id="canvas" aria-label="Barcode"></canvas>
+    </div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn" id="btn-png">Save as PNG</button>
+      <button class="btn secondary" id="btn-copy">Copy image</button>
+    </div>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+    <div class="hint" id="info"></div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">For a web address, Wi-Fi login or contact card you want a <a href="qr-generate.html">QR code</a>, not a barcode. Trim the saved picture for a label with <a href="image-crop.html">crop image</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_BARCODE --></div>
+
+  <h2>Which barcode do you need</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">EAN-13</strong> — the retail product barcode scanned at supermarket tills and used by online marketplaces (in North America it
+      appears as the 12-digit UPC, which scanners read as an EAN-13 with a leading zero). The number itself is issued to your company by GS1 in your country; the
+      first digits identify the issuing country and the company. Any 13 digits you invent will scan, but they will point at someone else's product, so use this page
+      to turn a number you have been assigned into a picture.<br>
+      <strong style="color:var(--text)">EAN-8</strong> — the 8-digit version for small packages such as gum and chocolate bars.<br>
+      <strong style="color:var(--text)">Code 128</strong> — holds letters and symbols as well as digits, which makes it the usual choice for shipping labels, asset tags,
+      membership and library cards and warehouse locations. For numbers used only inside your own organisation, no registration is needed — choose whatever you like.
+      It cannot hold accented or non-Latin characters; for those, use a QR code.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is anything I type sent anywhere?</summary>
+      <p>No. The barcode is drawn inside your browser and nothing is transmitted. The page keeps working with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>What is the check digit?</summary>
+      <p>The last digit of an EAN barcode is calculated from the digits before it. If a scanner misreads a bar, the check fails and the read is rejected. Enter 12 digits and the check digit is added for you; enter 13 and the last digit is verified, with a message if it is wrong.</p>
+    </details>
+    <details>
+      <summary>It will not scan</summary>
+      <p>Check three things. First, that the white margin on each side of the bars has not been cropped away — without it a scanner cannot find the code. Second, that it is not printed too small: use the "for print" bar width and print at least 3 cm wide. Third, faint inkjet output and glossy, reflective paper are hard to read.</p>
+    </details>
+    <details>
+      <summary>How do I get a product barcode number?</summary>
+      <p>Join GS1 in your country (GS1 US, GS1 UK and so on). You receive a company prefix and append your own product numbers to make 13 digits. This page does not issue numbers; it turns a number you already have into a barcode image.</p>
+    </details>
+    <details>
+      <summary>Can Code 128 hold accents or other scripts?</summary>
+      <p>No. Code 128 covers letters, digits and basic symbols (ASCII) only. For other scripts or longer content use a <a href="qr-generate.html">QR code</a>.</p>
+    </details>
+    <details>
+      <summary>How big should it be printed?</summary>
+      <p>The nominal size of an EAN-13 is 37.3 mm wide by 25.9 mm tall, and it may be scaled between 80% and 200%. A PNG saved at 6 pixels per module and printed about 4 cm wide is read by nearly every scanner.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="../barcode.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var textIn = el('text'), typeSel = el('type'), scaleSel = el('scale'), heightIn = el('height'), showCb = el('showtext'), canvas = el('canvas'), msg = el('msg');
+  var lastModules = null, lastLabel = '';
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+
+  /* ===== EAN-13 / EAN-8 ===== */
+  // 숫자 0~9 의 L 패턴 (7칸). G 는 L 을 뒤집은 것, R 은 L 의 흑백을 바꾼 것.
+  var L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+  var G = L.map(function (p) { return p.split('').reverse().join(''); });
+  var R = L.map(function (p) { return p.replace(/[01]/g, function (c) { return c === '0' ? '1' : '0'; }); });
+  // EAN-13 첫 숫자에 따른 왼쪽 6자리의 L/G 배열
+  var PARITY = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'];
+
+  function eanCheck(digits) {       // 체크 숫자를 뺀 앞자리들로 계산
+    var sum = 0;
+    for (var i = 0; i < digits.length; i++) {
+      var w = (digits.length - i) % 2 === 1 ? 3 : 1;   // 오른쪽 끝(체크 바로 앞)부터 3,1,3,1…
+      sum += parseInt(digits[i], 10) * w;
+    }
+    return (10 - sum % 10) % 10;
+  }
+  function ean(digits, len) {       // 반환 { modules: '0101…', label, note } 또는 { error }
+    var s = digits.replace(/\s+/g, '');
+    if (!/^\d+$/.test(s)) return { error: 'Digits only.' };
+    if (s.length !== len && s.length !== len - 1) return { error: 'Enter {a} digits (check digit added) or {b} digits.'.replace('{a}', len - 1).replace('{b}', len) };
+    var note = '';
+    if (s.length === len - 1) { s += eanCheck(s); note = 'Check digit {d} was added.'.replace('{d}', s[s.length - 1]); }
+    else {
+      var want = eanCheck(s.slice(0, -1));
+      if (want !== parseInt(s[s.length - 1], 10)) return { error: 'The last check digit is wrong. For this number it should be {d}.'.replace('{d}', want) };
+      note = 'The check digit is valid.';
+    }
+    var m = '101';
+    if (len === 13) {
+      var par = PARITY[parseInt(s[0], 10)];
+      for (var i = 1; i <= 6; i++) m += (par[i - 1] === 'L' ? L : G)[parseInt(s[i], 10)];
+      m += '01010';
+      for (i = 7; i <= 12; i++) m += R[parseInt(s[i], 10)];
+    } else {
+      for (i = 0; i < 4; i++) m += L[parseInt(s[i], 10)];
+      m += '01010';
+      for (i = 4; i < 8; i++) m += R[parseInt(s[i], 10)];
+    }
+    m += '101';
+    return { modules: m, label: s, note: note };
+  }
+
+  /* ===== Code 128 ===== */
+  // 값 0~106 의 막대·공백 폭. 여섯 폭의 합은 항상 11 (정지 기호는 7개, 합 13).
+  var C128 = ['212222', '222122', '222221', '121223', '121322', '131222', '122213', '122312', '132212', '221213', '221312', '231212', '112232', '122132', '122231', '113222', '123122', '123221', '223211', '221132', '221231', '213212', '223112', '312131', '311222', '321122', '321221', '312212', '322112', '322211', '212123', '212321', '232121', '111323', '131123', '131321', '112313', '132113', '132311', '211313', '231113', '231311', '112133', '112331', '132131', '113123', '113321', '133121', '313121', '211331', '231131', '213113', '213311', '213131', '311123', '311321', '331121', '312113', '312311', '332111', '314111', '221411', '431111', '111224', '111422', '121124', '121421', '141122', '141221', '112214', '112412', '122114', '122411', '142112', '142211', '241211', '221114', '413111', '241112', '134111', '111242', '121142', '121241', '114212', '124112', '124211', '411212', '421112', '421211', '212141', '214121', '412121', '111143', '111341', '131141', '114113', '114311', '411113', '411311', '113141', '114131', '311141', '411131', '211412', '211214', '211232', '2331112'];
+  var START_B = 104, START_C = 105, CODE_B = 100, CODE_C = 99, STOP = 106;
+
+  // 숫자가 4자리 이상 이어지면 C(두 자리씩)로, 나머지는 B로. 값 목록을 만든다.
+  function code128Values(s) {
+    var vals = [], i = 0, mode = null;
+    function digitsAhead(k) { var n = 0; while (k + n < s.length && /\d/.test(s[k + n])) n++; return n; }
+    while (i < s.length) {
+      var run = digitsAhead(i);
+      if (run >= 4 || (run >= 2 && i + run === s.length && mode === 'C')) {
+        if (run % 2 === 1) {                       // 홀수면 첫 숫자는 B 로
+          if (mode !== 'B') { vals.push(mode === null ? START_B : CODE_B); mode = 'B'; }
+          vals.push(s.charCodeAt(i) - 32); i++; run--;
+        }
+        if (mode !== 'C') { vals.push(mode === null ? START_C : CODE_C); mode = 'C'; }
+        while (run >= 2) { vals.push(parseInt(s.substr(i, 2), 10)); i += 2; run -= 2; }
+      } else {
+        if (mode !== 'B') { vals.push(mode === null ? START_B : CODE_B); mode = 'B'; }
+        vals.push(s.charCodeAt(i) - 32); i++;
+      }
+    }
+    return vals;
+  }
+  function code128(s) {
+    if (!s.length) return { error: 'Enter some content.' };
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 32 || c > 126) return { error: 'Code 128 only holds letters, digits and basic symbols (ASCII). For other scripts use a QR code.' };
+    }
+    if (s.length > 80) return { error: 'Too long. Keep it to 80 characters.' };
+    var vals = code128Values(s);
+    var sum = vals[0];
+    for (i = 1; i < vals.length; i++) sum += vals[i] * i;
+    vals.push(sum % 103);
+    vals.push(STOP);
+    var m = '';
+    vals.forEach(function (v) {
+      var p = C128[v];
+      for (var k = 0; k < p.length; k++) m += (k % 2 === 0 ? '1' : '0').repeat(parseInt(p[k], 10));
+    });
+    return { modules: m, label: s, note: '{n} symbols · check symbol {c}'.replace('{n}', vals.length).replace('{c}', vals[vals.length - 2]) };
+  }
+
+  /* ===== 그리기 ===== */
+  function build() {
+    var type = typeSel.value, s = textIn.value.trim();
+    var r = type === 'ean13' ? ean(s, 13) : type === 'ean8' ? ean(s, 8) : code128(s);
+    if (r.error) { setMsg(r.error, 'err'); lastModules = null; canvas.width = canvas.height = 1; el('info').textContent = ''; return; }
+    setMsg('');
+    lastModules = r.modules; lastLabel = r.label;
+    draw();
+    el('info').textContent = r.note + ' · ' + r.modules.length + ' modules' + ' · ' + canvas.width + '×' + canvas.height + 'px';
+  }
+  function draw() {
+    if (!lastModules) return;
+    var scale = parseInt(scaleSel.value, 10) || 3, h = Math.max(30, Math.min(300, parseInt(heightIn.value, 10) || 90));
+    var quiet = 10 * scale;                           // 양옆 여백 10칸 — 없으면 스캐너가 못 읽는다
+    var font = Math.max(12, Math.round(scale * 5));
+    var textH = showCb.checked ? font + 8 : 0;
+    canvas.width = lastModules.length * scale + quiet * 2;
+    canvas.height = h + textH + 10;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000000';
+    for (var i = 0; i < lastModules.length; i++) {
+      if (lastModules[i] === '1') ctx.fillRect(quiet + i * scale, 5, scale, h);
+    }
+    if (showCb.checked) {
+      ctx.font = font + 'px ui-monospace, Consolas, "Courier New", monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      var label = lastLabel;
+      if (typeSel.value === 'ean13') label = label[0] + '  ' + label.slice(1, 7) + '  ' + label.slice(7);
+      else if (typeSel.value === 'ean8') label = label.slice(0, 4) + '  ' + label.slice(4);
+      ctx.fillText(label, canvas.width / 2, h + 9);
+    }
+  }
+  function syncHint() {
+    var tp = typeSel.value;
+    el('type-hint').textContent = tp === 'ean13' ? 'Enter 12 digits and the check digit is calculated; enter 13 and it is verified.'
+      : tp === 'ean8' ? '7 digits (check digit added) or 8 digits.'
+      : 'Up to 80 letters, digits and symbols. Runs of digits are packed automatically (subset C).';
+  }
+  typeSel.addEventListener('change', function () { syncHint(); build(); });
+  textIn.addEventListener('input', build);
+  [scaleSel, heightIn, showCb].forEach(function (e) { e.addEventListener('change', function () { draw(); build(); }); e.addEventListener('input', function () { draw(); }); });
+  // 언어를 바꾸면 스크립트가 쓴 안내문도 다시 만들어야 한다
+
+  el('btn-png').addEventListener('click', function () {
+    if (!lastModules) return;
+    canvas.toBlob(function (blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'barcode' + '_' + lastLabel.replace(/[^\w-]+/g, '_').slice(0, 30) + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      el('copy-msg').textContent = 'Saved as PNG.';
+    }, 'image/png');
+  });
+  el('btn-copy').addEventListener('click', function () {
+    if (!lastModules) return;
+    var note = el('copy-msg');
+    if (!navigator.clipboard || !window.ClipboardItem) { note.textContent = 'This browser cannot copy images. Please save as PNG instead.'; return; }
+    canvas.toBlob(function (blob) {
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(function () {
+        note.textContent = 'Copied to the clipboard.';
+      }, function () { note.textContent = 'This browser cannot copy images. Please save as PNG instead.'; });
+    }, 'image/png');
+  });
+
+  syncHint();
+  build();
+})();
+</script>
+</body>
+</html>

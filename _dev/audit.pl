@@ -131,6 +131,10 @@ my @PAIRS = (
   ['qr-scan.html',        ['function decodeImage', 'inversionAttempts', 'function analyze', 'getUserMedia', 'function stopCam',
                             "addEventListener('paste'", 'pagehide']],
   ['romanize.html',       ['function romanizeWord', 'function splitName', 'var COMMON', 'var TWO', 'function givenRoman', 'FIN_INIT']],
+  ['image-resize.html',   ['function target', 'function draw', 'function syncFields', "addEventListener('paste'", 'MAX_PIXELS', 'id="noup"', 'makeZip(entries)']],
+  ['image-transparent.html', ['function keyColor', 'function render', 'function cornerHex', 'MAX_PIXELS', "addEventListener('paste'", 'id="region"']],
+  ['color-convert.html',  ['function parse', 'function hslToRgb', 'function rgbToCmyk', 'function contrast', 'function renderPalettes', 'id="btn-swap"']],
+  ['barcode.html',        ['function eanCheck', 'function code128Values', 'var PARITY', 'START_B = 104', 'function draw', 'id="showtext"']],
 );
 
 my $gap = 0;
