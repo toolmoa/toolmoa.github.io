@@ -248,6 +248,76 @@ var SETUP = {
       var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
     }, 'image/png');
   },
+  // PDF 두 쪽을 만들어 올린다 (미리보기 안내문이 그려진 상태에서 본다)
+  'pdf-page-number.html': function (d) {
+    var w = d.defaultView;
+    var sc = d.createElement('script'); sc.src = '../assets/vendor/pdf-lib.min.js';
+    sc.onload = function () {
+      w.PDFLib.PDFDocument.create().then(function (pdf) {
+        pdf.addPage([400, 300]); pdf.addPage([400, 300]);
+        return pdf.save();
+      }).then(function (bytes) {
+        var dt = new DataTransfer();
+        dt.items.add(new File([bytes], 'sample.pdf', { type: 'application/pdf' }));
+        var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    };
+    d.head.appendChild(sc);
+  },
+  // 글자가 있는 쪽과 없는 쪽을 만들어 "글자 없는 쪽" 안내가 뜬 상태에서 본다
+  'pdf-to-text.html': function (d) {
+    var w = d.defaultView;
+    var sc = d.createElement('script'); sc.src = '../assets/vendor/pdf-lib.min.js';
+    sc.onload = function () {
+      w.PDFLib.PDFDocument.create().then(function (pdf) {
+        return pdf.embedFont(w.PDFLib.StandardFonts.Helvetica).then(function (font) {
+          var p = pdf.addPage([400, 300]); p.drawText('Hello sample', { x: 40, y: 250, size: 14, font: font });
+          pdf.addPage([400, 300]);
+          return pdf.save();
+        });
+      }).then(function (bytes) {
+        var dt = new DataTransfer();
+        dt.items.add(new File([bytes], 'sample.pdf', { type: 'application/pdf' }));
+        var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    };
+    d.head.appendChild(sc);
+  },
+  'favicon.html': function (d) {
+    var c = document.createElement('canvas'); c.width = 64; c.height = 64;
+    var x = c.getContext('2d'); x.fillStyle = '#2f6df6'; x.fillRect(0, 0, 64, 64);
+    c.toBlob(function (blob) {
+      var dt = new DataTransfer(); dt.items.add(new File([blob], 'x.png', { type: 'image/png' }));
+      var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 'image/png');
+  },
+  'image-palette.html': function (d) {
+    var c = document.createElement('canvas'); c.width = 120; c.height = 80;
+    var x = c.getContext('2d'); x.fillStyle = '#ff0000'; x.fillRect(0, 0, 60, 80); x.fillStyle = '#0000ff'; x.fillRect(60, 0, 60, 80);
+    c.toBlob(function (blob) {
+      var dt = new DataTransfer(); dt.items.add(new File([blob], 'x.png', { type: 'image/png' }));
+      var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+    }, 'image/png');
+  },
+  'json-format.html': function (d) {
+    var s = d.getElementById('src'); s.value = '{a: 1,}'; s.dispatchEvent(new Event('input', { bubbles: true }));
+  },
+  'file-hash.html': function (d) {
+    var tx = d.getElementById('text'); tx.value = 'abc'; tx.dispatchEvent(new Event('input', { bubbles: true }));
+    var dt = new DataTransfer(); dt.items.add(new File(['hello'], 'x.txt', { type: 'text/plain' }));
+    var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+    var ex = d.getElementById('expect'); ex.value = 'ffff'; ex.dispatchEvent(new Event('input', { bubbles: true }));
+  },
+  'svg-to-png.html': function (d) {
+    var c = d.getElementById('code'); c.value = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#f00"/></svg>';
+    d.getElementById('btn-code').click();
+  },
+  'base64.html': function (d) {
+    var p = d.getElementById('plain'); p.value = 'abc'; p.dispatchEvent(new Event('input', { bubbles: true }));
+    var dc = d.getElementById('dec'); dc.value = 'YWJj'; dc.dispatchEvent(new Event('input', { bubbles: true }));
+    var dt = new DataTransfer(); dt.items.add(new File(['hello'], 'x.txt', { type: 'text/plain' }));
+    var input = d.getElementById('file'); input.files = dt.files; input.dispatchEvent(new Event('change', { bubbles: true }));
+  },
   // 결과 표가 그려진 상태에서 본다. 입력은 사용자 데이터라 번역 대상이 아니므로 한글이 아닌 것으로.
   'romanize.html': function (d) {
     var n = d.getElementById('names'); n.value = 'ABC'; n.dispatchEvent(new Event('input', { bubbles: true }));
@@ -276,7 +346,9 @@ var PAGES = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf
              'unit-convert.html', 'date-calc.html', 'age-calc.html',
              'pdf-to-image.html', 'image-convert.html', 'image-join.html', 'random-pick.html',
              'text-diff.html', 'image-mosaic.html', 'image-exif.html',
-             'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'time-calc.html', 'color-convert.html', 'barcode.html', 'image-resize.html', 'image-transparent.html'];
+             'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'time-calc.html', 'color-convert.html', 'barcode.html', 'image-resize.html', 'image-transparent.html',
+             'pdf-page-number.html', 'pdf-to-text.html', 'favicon.html', 'image-palette.html',
+             'json-format.html', 'file-hash.html', 'svg-to-png.html', 'base64.html'];
 
 function run() {
   var seq = Promise.resolve();

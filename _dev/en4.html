@@ -26,9 +26,11 @@
 <tbody id="rows"></tbody></table>
 
 <script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/pdf.min.js"></script>
 <script src="../assets/vendor/qrcode.min.js"></script>
 <script>
 try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
 var results = [];
 function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
 
@@ -191,10 +193,77 @@ function decodeCode128(m) {
 var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
            'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html',
            'image-resize.html', 'image-transparent.html', 'color-convert.html', 'barcode.html',
-           'text-clean.html', 'pdf-edit.html', 'password-gen.html', 'time-calc.html', 'text-diff.html'];
+           'text-clean.html', 'pdf-edit.html', 'password-gen.html', 'time-calc.html', 'text-diff.html',
+           'pdf-page-number.html', 'pdf-to-text.html', 'favicon.html', 'image-palette.html',
+           'json-format.html', 'file-hash.html', 'svg-to-png.html', 'base64.html'];
 var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
               'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
 var MENU_N = ALL_EN.length - 1;   // 홈을 뺀 툴 수 = 머리 메뉴 개수 = 영어 홈 카드 수
+
+// ---- 2026-10-21 새 툴 4종 검사용 (tools7 과 같다) ----
+function outs(cap) { return cap.blobs.filter(function (b) { return !(b && typeof b.name === 'string'); }); }
+function toCanvas7(blob) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); var c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img, 0, 0); res(c); };
+    img.onerror = function () { rej(new Error('결과 이미지를 열 수 없음')); };
+    img.src = url;
+  });
+}
+function px7(c, x, y) { var d = c.getContext('2d').getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2], d[3]]; }
+function clip7(f) {
+  var box = { text: null };
+  Object.defineProperty(f.contentWindow.navigator, 'clipboard', { configurable: true, value: { writeText: function (s) { box.text = s; return Promise.resolve(); } } });
+  return box;
+}
+function png7(w, h, draw) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'));
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+function zip7(buf) {
+  var v = new DataView(buf), out = [], off = 0;
+  while (off + 30 <= buf.byteLength && v.getUint32(off, true) === 0x04034B50) {
+    var nameLen = v.getUint16(off + 26, true), extra = v.getUint16(off + 28, true), size = v.getUint32(off + 18, true);
+    out.push({ name: new TextDecoder().decode(new Uint8Array(buf, off + 30, nameLen)), bytes: new Uint8Array(buf, off + 30 + nameLen + extra, size) });
+    off += 30 + nameLen + extra + size;
+  }
+  return out;
+}
+// pdf.js 로 각 쪽의 글자 조각을 보이는 좌표(왼쪽 위 원점, 회전 반영)로 읽는다
+function readTexts7(bytes) {
+  return pdfjsLib.getDocument({ data: new Uint8Array(bytes).slice() }).promise.then(function (pdf) {
+    var out = [], seq = Promise.resolve();
+    for (var i = 1; i <= pdf.numPages; i++) {
+      (function (n) {
+        seq = seq.then(function () {
+          return pdf.getPage(n).then(function (page) {
+            var vp = page.getViewport({ scale: 1 });
+            return page.getTextContent().then(function (tc) {
+              out.push({ w: vp.width, h: vp.height, items: tc.items.filter(function (it) { return it.str.trim(); }).map(function (it) {
+                var p = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+                return { str: it.str, x: p[0], y: p[1], width: it.width };
+              }) });
+            });
+          });
+        });
+      })(i);
+    }
+    return seq.then(function () { return out; });
+  });
+}
+function parseIco7(u8) {
+  var v = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), n = v.getUint16(4, true), entries = [];
+  for (var i = 0; i < n; i++) {
+    var e = 6 + i * 16;
+    entries.push({ w: u8[e] || 256, h: u8[e + 1] || 256, bits: v.getUint16(e + 6, true), off: v.getUint32(e + 12, true) });
+  }
+  entries.forEach(function (en) {
+    en.bmpOk = v.getUint32(en.off, true) === 40 && v.getInt32(en.off + 4, true) === en.w && v.getInt32(en.off + 8, true) === en.h * 2 && v.getUint16(en.off + 14, true) === 32;
+    en.pixel = function (x, y) { var row = en.h - 1 - y, o = en.off + 40 + (row * en.w + x) * 4; return [u8[o + 2], u8[o + 1], u8[o], u8[o + 3]]; };
+  });
+  return { count: n, entries: entries };
+}
 
 function run() {
   var chain = Promise.resolve();
@@ -948,6 +1017,284 @@ function run() {
     });
   }).catch(function (e) { log('PDF 회전·삭제 (영어)', false, '오류: ' + e.message); });
 
+  // ===== 23. PDF 쪽 번호 (영어): 2- · 1 / N · 회전 쪽 · 저장 PDF 를 pdf.js 로 되읽기 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (doc) {
+      [[200, 300, 0], [200, 300, 90], [200, 300, 0]].forEach(function (s) {
+        var pg = doc.addPage([s[0], s[1]]);
+        pg.drawRectangle({ x: 10, y: 10, width: 30, height: 30, color: PDFLib.rgb(0.2, 0.4, 0.9) });
+        if (s[2]) pg.setRotation(PDFLib.degrees(s[2]));
+      });
+      return doc.save();
+    }).then(function (bytes) {
+      return loadFrame('../en/pdf-page-number.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File(['x'], 'a.txt', { type: 'text/plain' })]);
+        got.reject = txt(d, 'msg');
+        setFiles(d.getElementById('file'), [new File([bytes], 'doc.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '3'; }, 20000).then(function () {
+          set(d, 'range', '2-', 'input'); set(d, 'start', '1', 'input'); set(d, 'fmt', 'n-of'); set(d, 'pos', 'br'); set(d, 'size', '11', 'input'); set(d, 'margin', '12', 'input');
+          return sleep(200);
+        }).then(function () {
+          got.num = txt(d, 't-num'); got.note = txt(d, 'preview-note');
+          got.opt = d.querySelector('#pos option[value="bo"]').textContent;
+          click(d, 'btn-save');
+          return waitFor(function () { return outs(cap).length >= 1 && /saved/.test(txt(d, 'msg')); }, 20000);
+        }).then(function () { got.msg = txt(d, 'msg'); return outs(cap)[0].arrayBuffer(); }).then(readTexts7).then(function (pages) {
+          var a = pages[1].items[0], b = pages[2].items[0], m = 34.02;
+          got.p1 = pages[0].items.length; got.p2 = a ? a.str : '-'; got.p3 = b ? b.str : '-';
+          got.p2pos = a ? Math.round(a.x + a.width) + ',' + Math.round(a.y) + ' (' + Math.round(pages[1].w - m) + ',' + Math.round(pages[1].h - m) + ')' : '-';
+          got.p2size = Math.round(pages[1].w) + '×' + Math.round(pages[1].h);
+          var han = hangulLeft(d);
+          var ok = /Please choose a PDF/.test(got.reject) && got.num === '2' && got.note === 'Preview of page 2 — number "1 / 2"' && got.opt === 'Bottom outside (odd right · even left)' &&
+                   got.p1 === 0 && got.p2 === '1 / 2' && got.p3 === '2 / 2' && got.p2size === '300×200' && a && Math.abs(a.x + a.width - (pages[1].w - m)) < 2 && Math.abs(a.y - (pages[1].h - m)) < 2 &&
+                   /^Numbered 2 page\(s\) and saved\./.test(got.msg) && cap.names[0] === 'doc_numbered.pdf' && !han && !f.dataset.errs;
+          log('PDF 쪽 번호 (영어)', ok, '글자 파일 "' + got.reject + '" · 2- → ' + got.num + ' · "' + got.note + '" · 선택지 "' + got.opt + '" · 1쪽 글자 ' + got.p1 + ' · 2쪽(90°) "' + got.p2 + '" ' + got.p2size + ' 오른쪽 아래 ' + got.p2pos + ' · 3쪽 "' + got.p3 + '" · "' + got.msg + '" ' + cap.names[0] + ' · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 쪽 번호 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 24. PDF 텍스트 (영어): 줄 · 문단 · 구분선 "Page n" · 빈 쪽 안내 · 스캔 안내 · 복사 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (doc) {
+      return doc.embedFont(PDFLib.StandardFonts.Helvetica).then(function (font) {
+        var p1 = doc.addPage([400, 300]);
+        p1.drawText('Alpha beta', { x: 40, y: 250, size: 12, font: font });
+        p1.drawText('Gamma', { x: 40, y: 236, size: 12, font: font });
+        p1.drawText('Delta', { x: 40, y: 150, size: 12, font: font });
+        doc.addPage([400, 300]);
+        return doc.save();
+      });
+    }).then(function (bytes) {
+      return loadFrame('../en/pdf-to-text.html').then(function (f) {
+        var d = f.contentDocument, cb = clip7(f), cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File([bytes], 'doc.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '2'; }, 20000).then(function () {
+          got.lines = d.getElementById('out').value; got.msg = txt(d, 'msg'); got.empty = txt(d, 't-empty'); got.words = txt(d, 't-words');
+          set(d, 'layout', 'flow'); return sleep(300);
+        }).then(function () {
+          got.flow = d.getElementById('out').value;
+          set(d, 'range', '2', 'input'); return sleep(500);
+        }).then(function () {
+          got.scan = txt(d, 'msg');
+          set(d, 'range', '1', 'input'); set(d, 'layout', 'lines'); return sleep(500);
+        }).then(function () {
+          click(d, 'btn-copy');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.copyMsg = txt(d, 'copy-msg');
+          click(d, 'btn-down');
+          return waitFor(function () { return outs(cap).length >= 1; }, 3000);
+        }).then(function () {
+          got.ph = d.getElementById('range').getAttribute('placeholder');
+          var han = hangulLeft(d);
+          var ok = got.lines === '===== Page 1 =====\nAlpha beta\nGamma\nDelta\n\n===== Page 2 =====\n' && /1 page\(s\) contain no text/.test(got.msg) && got.empty === '1' && got.words === '4' &&
+                   got.flow === '===== Page 1 =====\nAlpha beta Gamma\n\nDelta\n\n===== Page 2 =====\n' && /There is no text at all/.test(got.scan) &&
+                   cb.text === '===== Page 1 =====\nAlpha beta\nGamma\nDelta' && got.copyMsg === 'Copied' && cap.names[0] === 'doc.txt' && got.ph === 'Empty = all · e.g. 1-3, 7' && !han && !f.dataset.errs;
+          log('PDF 텍스트 (영어)', ok, '줄 ' + JSON.stringify(got.lines) + ' "' + got.msg + '" 빈 쪽 ' + got.empty + ' 단어 ' + got.words + ' · 문단 ' + JSON.stringify(got.flow) + ' · 2쪽만 "' + got.scan.slice(0, 24) + '" · 복사 ' + JSON.stringify(cb.text) + ' "' + got.copyMsg + '" · ' + cap.names[0] + ' · 자리글 "' + got.ph + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 텍스트 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 25. 파비콘 (영어): ICO 3장 32비트 · ZIP 8개 · manifest 이름 · 안내 영어 =====
+  chain = chain.then(function () {
+    return png7(100, 60, function (x) { x.fillStyle = '#ff0000'; x.fillRect(0, 0, 50, 60); x.fillStyle = '#0000ff'; x.fillRect(50, 0, 50, 60); }).then(function (png) {
+      return loadFrame('../en/favicon.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File([png], 'logo.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-src') === '100×60'; }, 8000).then(function () {
+          got.small = txt(d, 'msg'); got.q = txt(d, 't-warn'); got.files = txt(d, 't-files');
+          set(d, 'bg', 'white'); set(d, 'sitename', 'Demo', 'input'); return sleep(250);
+        }).then(function () {
+          click(d, 'btn-ico');
+          return waitFor(function () { return outs(cap).length >= 1; }, 5000);
+        }).then(function () { return outs(cap)[0].arrayBuffer(); }).then(function (buf) {
+          var ico = parseIco7(new Uint8Array(buf)), p = ico.entries[0].pixel(2, 8);
+          got.ico = ico.count + ' [' + ico.entries.map(function (e) { return e.w + '@' + e.bits; }).join(',') + '] 왼쪽 ' + p.join(',');
+          got.icoOk = ico.count === 3 && ico.entries.every(function (e) { return e.bits === 32 && e.bmpOk; }) && p[0] > 200 && p[2] < 60 && p[3] === 255;
+          got.icoMsg = txt(d, 'msg');
+          click(d, 'btn-zip');
+          return waitFor(function () { return outs(cap).length >= 2 && outs(cap)[outs(cap).length - 1].type === 'application/zip'; }, 15000);
+        }).then(function () { return outs(cap)[outs(cap).length - 1].arrayBuffer(); }).then(function (buf) {
+          var entries = zip7(buf), by = {}; entries.forEach(function (e) { by[e.name] = e; });
+          got.zip = entries.length; got.mf = JSON.parse(new TextDecoder().decode(by['site.webmanifest'].bytes)).name;
+          got.zipMsg = txt(d, 'msg'); got.zipName = cap.names[cap.names.length - 1];
+          got.fit = d.querySelector('#fit option[value="contain"]').textContent;
+          var han = hangulLeft(d);
+          var ok = /The source is small/.test(got.small) && got.q === 'Blurry' && got.files === '8' && got.icoOk && /^Saved favicon\.ico \(16·32·48\)\./.test(got.icoMsg) &&
+                   got.zip === 8 && got.mf === 'Demo' && /^Saved 8 files in one ZIP\./.test(got.zipMsg) && got.zipName === 'favicon-logo.zip' && got.fit === 'Add padding and show all of it' && !han && !f.dataset.errs;
+          log('파비콘 (영어)', ok, '"' + got.small.slice(0, 20) + '" ' + got.q + ' 파일 ' + got.files + ' · ICO ' + got.ico + ' "' + got.icoMsg + '" · ZIP ' + got.zip + '개 manifest "' + got.mf + '" "' + got.zipMsg + '" ' + got.zipName + ' · 선택지 "' + got.fit + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('파비콘 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 26. 색상 추출 (영어): 3색 비율 · 클릭 · 복사 문구 · PNG 이름 =====
+  chain = chain.then(function () {
+    return png7(120, 80, function (x) { x.fillStyle = '#ff0000'; x.fillRect(0, 0, 60, 80); x.fillStyle = '#0000ff'; x.fillRect(60, 0, 40, 80); x.fillStyle = '#ffffff'; x.fillRect(100, 0, 20, 80); }).then(function (png) {
+      return loadFrame('../en/image-palette.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f), cb = clip7(f), got = {};
+        var dt = new DataTransfer(); dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        return waitFor(function () { return d.querySelectorAll('#list li').length >= 1; }, 8000).then(function () {
+          set(d, 'count', '3', 'input'); return sleep(250);
+        }).then(function () {
+          got.list = Array.prototype.map.call(d.querySelectorAll('#list li'), function (li) { return li.querySelector('.hex').textContent + ' ' + li.querySelector('.sw').textContent; }).join(' | ');
+          var view = d.getElementById('view'), r = view.getBoundingClientRect();
+          view.dispatchEvent(new w.MouseEvent('click', { bubbles: true, clientX: r.left + 70 * r.width / 120, clientY: r.top + 40 * r.height / 80 }));
+          got.pick = txt(d, 'pick-hex');
+          click(d, 'btn-pick-copy');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.pickMsg = txt(d, 'copy-msg'); cb.text = null;
+          click(d, 'btn-copyall');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.allMsg = txt(d, 'copy-msg'); got.all = cb.text;
+          click(d, 'btn-png');
+          return waitFor(function () { return outs(cap).length >= 1; }, 5000);
+        }).then(function () {
+          got.pngName = cap.names[0]; got.pngMsg = txt(d, 'copy-msg');
+          got.opt = d.querySelector('#sort option[value="hue"]').textContent;
+          var han = hangulLeft(d);
+          var ok = got.list === '#ff0000 50% | #0000ff 33% | #ffffff 17%' && got.pick === '#0000ff' && got.pickMsg === '#0000ff copied' && got.allMsg === 'Copied 3 colors' &&
+                   got.all.split('\n').length === 3 && /^pasted-image-\d{6}_palette\.png$/.test(got.pngName) && got.pngMsg === 'Palette PNG saved' && got.opt === 'By hue' && !han && !f.dataset.errs;
+          log('색상 추출 (영어)', ok, '[' + got.list + '] · 클릭 ' + got.pick + ' "' + got.pickMsg + '" · 전부 "' + got.allMsg + '" ' + got.all.split('\n').length + '줄 · PNG ' + got.pngName + ' "' + got.pngMsg + '" · 선택지 "' + got.opt + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('색상 추출 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 27. JSON (영어): 정리 · 통계 · 고치기 안내 · 오류 위치 영어 · 복사 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/json-format.html').then(function (f) {
+      var d = f.contentDocument, cb = clip7(f), got = {};
+      set(d, 'src', '{"b":1,"a":[1,2,{"c":null}],"big":12345678901234567890}', 'input');
+      return sleep(300).then(function () {
+        got.status = txt(d, 't-status'); got.keys = txt(d, 't-keys'); got.big = txt(d, 'msg');
+        set(d, 'indent', '0'); set(d, 'sort', 'asc'); got.min = d.getElementById('out').value;
+        set(d, 'src', "{a: 'x', b: [1,2,],}", 'input'); return sleep(300);
+      }).then(function () {
+        got.repaired = txt(d, 't-status') + ' | ' + d.getElementById('out').value + ' | ' + txt(d, 'msg').slice(0, 40);
+        d.getElementById('lenient').checked = false; d.getElementById('lenient').dispatchEvent(new Event('change', { bubbles: true })); return sleep(300);
+      }).then(function () {
+        got.strict = txt(d, 't-status') + ' | ' + txt(d, 'msg').slice(0, 44);
+        d.getElementById('lenient').checked = true; d.getElementById('lenient').dispatchEvent(new Event('change', { bubbles: true }));
+        set(d, 'src', '{"x":1}', 'input'); return sleep(300);
+      }).then(function () {
+        click(d, 'btn-copy');
+        return waitFor(function () { return cb.text !== null; }, 3000);
+      }).then(function () {
+        got.copyMsg = txt(d, 'copy-msg'); got.ph = d.getElementById('src').getAttribute('placeholder');
+        got.opt = d.querySelector('#indent option[value="0"]').textContent;
+        var han = hangulLeft(d);
+        var ok = got.status === 'Valid' && got.keys === '4' && /1 number\(s\) exceed 2\^53/.test(got.big) && got.min === '{"a":[1,2,{"c":null}],"b":1,"big":12345678901234567000}' &&
+                 got.repaired === 'Valid after repair | {"a":"x","b":[1,2]} | The input was not strict JSON, so common' && /^Error \| JSON syntax error — line 1, column 2/.test(got.strict) &&
+                 cb.text === '{"x":1}' && got.copyMsg === 'Copied' && got.ph === '{"name": "Toolmoa", "tools": 39, "free": true}' && got.opt === 'Minify (one line)' && !han && !f.dataset.errs;
+        log('JSON (영어)', ok, got.status + ' 키 ' + got.keys + ' "' + got.big.slice(0, 36) + '" · 압축 ' + got.min + ' · 고침 "' + got.repaired + '" · 엄격 "' + got.strict + '" · 복사 ' + cb.text + ' "' + got.copyMsg + '" · 자리글 ' + got.ph + ' · 선택지 "' + got.opt + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('JSON (영어)', false, '오류: ' + e.message); });
+
+  // ===== 28. 파일 해시 (영어): hello 벡터 · 파일 SHA-256 · 대조 "match" · 복사 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/file-hash.html').then(function (f) {
+      var d = f.contentDocument, cb = clip7(f), got = {};
+      set(d, 'text', 'hello', 'input');
+      return waitFor(function () { return txt(d, 'tx-md5') !== '-' && txt(d, 'tx-sha256') !== '-'; }, 5000).then(function () {
+        got.md5 = txt(d, 'tx-md5'); got.sha256 = txt(d, 'tx-sha256');
+        setFiles(d.getElementById('file'), [new File(['hello'], 'h.txt', { type: 'text/plain' })]);
+        return waitFor(function () { return d.querySelectorAll('#list code').length >= 1; }, 10000);
+      }).then(function () {
+        got.file = d.querySelector('#list code').textContent.trim().slice(0, 64);
+        set(d, 'expect', '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824', 'input'); return sleep(300);
+      }).then(function () {
+        got.match = (d.querySelector('#list .hs-match') || {}).textContent || '';
+        set(d, 'expect', 'abc', 'input'); return sleep(300);
+      }).then(function () {
+        got.nomatch = (d.querySelector('#list .hs-nomatch') || {}).textContent || '';
+        click(d, 'btn-copyall');
+        return waitFor(function () { return cb.text !== null; }, 3000);
+      }).then(function () {
+        got.copyMsg = txt(d, 'copy-msg'); got.ph = d.getElementById('expect').getAttribute('placeholder');
+        var han = hangulLeft(d);
+        var ok = got.md5 === '5d41402abc4b2a76b9719d911017c592' && got.sha256 === '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824' && got.file === got.sha256 &&
+                 /✓ match/.test(got.match) && /No value matches/.test(got.nomatch) && /^2cf24dba.*  h\.txt  \(SHA-256\)$/.test(cb.text || '') && got.copyMsg === 'Copied' && got.ph === 'Paste the value published with the download' && !han && !f.dataset.errs;
+        log('파일 해시 (영어)', ok, 'hello md5 ' + got.md5 + ' sha256 ' + got.sha256.slice(0, 12) + ' · 파일 ' + got.file.slice(0, 12) + ' · 대조 "' + got.match.trim() + '" / "' + got.nomatch.trim() + '" · 복사 ' + JSON.stringify(cb.text) + ' "' + got.copyMsg + '" · 자리글 "' + got.ph + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('파일 해시 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 29. SVG→PNG (영어): 코드 추가 · 크기 · 저장 PNG 픽셀 · ZIP 이름 · 안내 영어 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/svg-to-png.html').then(function (f) {
+      var d = f.contentDocument, cap = capture(f), got = {};
+      function outsP() { return outs(cap).filter(function (b) { return b.type !== 'image/svg+xml'; }); }
+      set(d, 'code', 'nope', 'input'); click(d, 'btn-code'); got.bad = txt(d, 'msg');
+      set(d, 'code', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 5"><rect width="5" height="5" fill="#ff0000"/></svg>', 'input'); click(d, 'btn-code');
+      return waitFor(function () { return d.querySelectorAll('#list li').length === 1; }, 5000).then(function () {
+        got.name = d.querySelector('#list .fname').textContent; got.meta = d.querySelector('#list .fmeta').textContent;
+        set(d, 'mode', 'width'); set(d, 'px', '100', 'input'); return sleep(200);
+      }).then(function () {
+        click(d, 'btn-all');
+        return waitFor(function () { return outsP().length >= 1; }, 8000);
+      }).then(function () { return toCanvas7(outsP()[0]); }).then(function (c) {
+        got.png = c.width + '×' + c.height + ' ' + px7(c, 20, 25).join(',') + ' / ' + px7(c, 80, 25)[3];
+        got.msg = txt(d, 'msg');
+        set(d, 'code', '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"><rect width="20" height="10" fill="#00f"/></svg>', 'input'); click(d, 'btn-code');
+        return waitFor(function () { return d.querySelectorAll('#list li').length === 2; }, 5000);
+      }).then(function () {
+        click(d, 'btn-all');
+        return waitFor(function () { return outsP().length >= 2 && outsP()[outsP().length - 1].type === 'application/zip'; }, 10000);
+      }).then(function () { return outsP()[outsP().length - 1].arrayBuffer(); }).then(function (buf) {
+        got.zip = zip7(buf).map(function (e) { return e.name; }).join(','); got.zipName = cap.names[cap.names.length - 1]; got.zipMsg = txt(d, 'msg');
+        got.rm = d.querySelector('#list button[data-remove]').textContent;
+        var han = hangulLeft(d);
+        var ok = /That is not SVG code/.test(got.bad) && got.name === 'pasted-svg-1.png' && got.meta === '10×5 → 512×256' && got.png === '100×50 255,0,0,255 / 0' && /^Saved 1 file\(s\)\./.test(got.msg) &&
+                 got.zip === 'pasted-svg-1.png,pasted-svg-2.png' && got.zipName === 'svg-converted.zip' && /^Saved 2 file\(s\) in one ZIP\./.test(got.zipMsg) && got.rm === 'Remove' && !han && !f.dataset.errs;
+        log('SVG→PNG (영어)', ok, '"' + got.bad.slice(0, 22) + '" · ' + got.name + ' ' + got.meta + ' · PNG ' + got.png + ' "' + got.msg + '" · ZIP [' + got.zip + '] ' + got.zipName + ' "' + got.zipMsg + '" · 버튼 "' + got.rm + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('SVG→PNG (영어)', false, '오류: ' + e.message); });
+
+  // ===== 30. Base64 (영어): 왕복 · 안내문 · 오류 문구 · 파일 data URI · 복원 이름 =====
+  chain = chain.then(function () {
+    return png7(2, 2, function (x) { x.fillStyle = '#00ff00'; x.fillRect(0, 0, 2, 2); }).then(function (png) {
+      return loadFrame('../en/base64.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        set(d, 'plain', 'Hello world', 'input'); got.enc = d.getElementById('enc').value; got.info = txt(d, 't-info');
+        set(d, 'enc', 'ab$c', 'input'); got.bad = txt(d, 'msg');
+        set(d, 'enc', '/w==', 'input'); got.notUtf8 = txt(d, 'msg').slice(0, 30);
+        setFiles(d.getElementById('file'), [new File([png], 'dot.png', { type: 'image/png' })]);
+        return waitFor(function () { return d.getElementById('fout').value; }, 5000).then(function () {
+          got.uri = d.getElementById('fout').value.slice(0, 22); got.kind = d.querySelector('#fkind option[value="img"]').textContent;
+          set(d, 'dec', d.getElementById('fout').value, 'input');
+          return waitFor(function () { return /image\/png/.test(txt(d, 'dinfo')); }, 3000);
+        }).then(function () {
+          got.dinfo = txt(d, 'dinfo');
+          click(d, 'btn-save-file');
+          return waitFor(function () { return cap.names.length >= 1; }, 3000);
+        }).then(function () {
+          got.saved = cap.names[0] + ' "' + txt(d, 'dmsg') + '"'; got.ph = d.getElementById('plain').getAttribute('placeholder');
+          var han = hangulLeft(d);
+          var ok = got.enc === 'SGVsbG8gd29ybGQ=' && got.info === 'Text 11 chars · 11 bytes → Base64 16 chars' && /The character "\$" at position 3/.test(got.bad) && got.notUtf8 === 'The bytes are not UTF-8 text, ' &&
+                   got.uri === 'data:image/png;base64,' && got.kind === '<img src="data:…"> tag' && /bytes · type image\/png/.test(got.dinfo) && got.saved === 'decoded.png "Saved decoded.png"' && got.ph === 'Hello world' && !han && !f.dataset.errs;
+          log('Base64 (영어)', ok, got.enc + ' "' + got.info + '" · "' + got.bad.slice(0, 40) + '" · "' + got.notUtf8 + '" · ' + got.uri + ' 선택지 "' + got.kind + '" · 복원 "' + got.dinfo + '" ' + got.saved + ' · 자리글 "' + got.ph + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('Base64 (영어)', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 
@@ -962,7 +1309,8 @@ function render() {
   }).join('');
   document.title = 'EN4 ' + pass + '/' + results.length + ' :: ' +
     // 창 제목이 너무 길면 뒤쪽 항목이 잘려 보이지 않는다. 통과한 항목은 설명을 줄이고 실패한 항목만 전부 적는다.
-    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + (r.ok && r.detail.length > 160 ? r.detail.slice(0, 160) + '…' : r.detail); }).join(' ;; ');
+    results.filter(function (r) { return !r.ok; }).map(function (r) { return r.name + ' [FAIL] ' + r.detail; })
+      .concat(results.filter(function (r) { return r.ok; }).map(function (r) { return r.name + ' [PASS] ' + (pass < results.length ? '' : (r.detail.length > 160 ? r.detail.slice(0, 160) + '…' : r.detail)); })).join(' ;; ');
 }
 
 window.addEventListener('load', function () { setTimeout(run, 300); });

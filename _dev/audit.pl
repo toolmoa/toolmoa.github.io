@@ -140,6 +140,14 @@ my @PAIRS = (
   ['pdf-edit.html',       ['function renderThumbs', 'function rotate', 'function move', 'function loadLibs', 'id="all-l"', 'id="undo-del"']],
   ['password-gen.html',   ['function entropyBits', 'function makeOne', 'function pools', 'crypto.getRandomValues', 'id="noamb"', 'id="each"']],
   ['time-calc.html',      ['function parseLine', 'function parseTime', 'function calc3', 'function calc4', 'id="list-brk"', 'id="target"']],
+  ['pdf-page-number.html', ['function parseRange', 'function label', 'function place', 'function render', 'StandardFonts.Helvetica', 'id="pos"', 'id="range"']],
+  ['pdf-to-text.html',    ['function linesOf', 'function joinLines', 'function extract', 'function parseRange', 'getTextContent', 'id="layout"', 'id="sep"']],
+  ['favicon.html',        ['function iconCanvas', 'function buildIco', 'function manifest', 'function htmlCode', 'id="fit"', 'id="round"', 'id="btn-zip"']],
+  ['image-palette.html',  ['function medianCut', 'function analyze', 'function renderList', 'function showPick', 'id="skipbw"', 'id="btn-css"']],
+  ['json-format.html',    ['function repair', 'function errorPos', 'function sortKeys', 'function stats', 'function toAscii', 'id="lenient"', 'id="btn-use"']],
+  ['file-hash.html',      ['function Md5', 'Md5.prototype.block', 'function hashFile', 'function hashText', 'crypto.subtle.digest', 'id="expect"', 'id="a-sha512"']],
+  ['svg-to-png.html',     ['function intrinsic', 'function addSvg', 'function target', 'function draw', 'MAX_SIDE', 'id="btn-code"', 'id="as-zip"']],
+  ['base64.html',         ['function bytesToB64', 'function b64ToBytes', 'function sniff', 'function parseDec', 'id="urlsafe"', 'id="fkind"', 'id="btn-save-file"']],
 );
 
 my $gap = 0;

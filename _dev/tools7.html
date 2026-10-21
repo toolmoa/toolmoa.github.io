@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>PDF 쪽 번호 · PDF 텍스트 · 파비콘 · 색상 추출 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+<script src="../assets/vendor/pdf-lib.min.js"></script>
+<script src="../assets/vendor/pdf.min.js"></script>
+</head>
+<body>
+<h1 style="font-size:22px">PDF 페이지 번호 · PDF 텍스트 추출 · 파비콘 · 사진 색상 추출 점검 (2026-10-21)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">저장된 결과물을 다른 라이브러리로 되읽는다. 쪽 번호는 pdf.js 로 글자와 좌표를 읽어 위치를 확인하고(회전된 쪽 포함), ICO 는 헤더와 BMP 픽셀을 직접 해석한다. 색상 추출은 색 비율이 알려진 그림으로 본다.</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:240px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 10000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function setVal(d, id, v, ev) { var e = d.getElementById(id); e.value = v; e.dispatchEvent(new Event(ev || 'change', { bubbles: true })); }
+function setChk(d, id, on) { var e = d.getElementById(id); e.checked = on; e.dispatchEvent(new Event('change', { bubbles: true })); }
+function click(d, id) { d.getElementById(id).click(); }
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { if (typeof b.name !== 'string') out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+function clip(f) {
+  var box = { text: null };
+  Object.defineProperty(f.contentWindow.navigator, 'clipboard', { configurable: true, value: { writeText: function (s) { box.text = s; return Promise.resolve(); } } });
+  return box;
+}
+function blobToCanvas(blob) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); var c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img, 0, 0); res(c); };
+    img.onerror = function () { rej(new Error('결과 이미지를 열 수 없음')); };
+    img.src = url;
+  });
+}
+function px(c, x, y) { var d = c.getContext('2d').getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2], d[3]]; }
+function near(a, b, tol) { return Math.abs(a - b) <= (tol || 2); }
+function readZip(buf) {
+  var v = new DataView(buf), out = [], off = 0;
+  while (off + 30 <= buf.byteLength && v.getUint32(off, true) === 0x04034B50) {
+    var nameLen = v.getUint16(off + 26, true), extra = v.getUint16(off + 28, true), size = v.getUint32(off + 18, true);
+    out.push({ name: new TextDecoder().decode(new Uint8Array(buf, off + 30, nameLen)), bytes: new Uint8Array(buf, off + 30 + nameLen + extra, size) });
+    off += 30 + nameLen + extra + size;
+  }
+  return out;
+}
+// 시험용 PDF: 쪽 크기 [w,h] 와 회전각 목록으로 만든다. 글자는 넣지 않는다 (쪽 번호만 읽히게)
+function makePdf(specs) {
+  return PDFLib.PDFDocument.create().then(function (doc) {
+    specs.forEach(function (s) {
+      var pg = doc.addPage([s.w, s.h]);
+      pg.drawRectangle({ x: 10, y: 10, width: 30, height: 30, color: PDFLib.rgb(0.2, 0.4, 0.9) });
+      if (s.rot) pg.setRotation(PDFLib.degrees(s.rot));
+    });
+    return doc.save();
+  });
+}
+// pdf.js 로 각 쪽의 글자 조각을 "보이는 좌표"(왼쪽 위 원점, 회전 반영) 로 읽는다
+function readTexts(bytes) {
+  return pdfjsLib.getDocument({ data: new Uint8Array(bytes).slice() }).promise.then(function (pdf) {
+    var out = [], seq = Promise.resolve();
+    for (var i = 1; i <= pdf.numPages; i++) {
+      (function (n) {
+        seq = seq.then(function () {
+          return pdf.getPage(n).then(function (page) {
+            var vp = page.getViewport({ scale: 1 });
+            return page.getTextContent().then(function (tc) {
+              out.push({ w: vp.width, h: vp.height, items: tc.items.filter(function (it) { return it.str.trim(); }).map(function (it) {
+                var p = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+                return { str: it.str, x: p[0], y: p[1], width: it.width, height: it.height };
+              }) });
+            });
+          });
+        });
+      })(i);
+    }
+    return seq.then(function () { return out; });
+  });
+}
+// ICO 해석: 항목 목록과 각 항목의 BMP 픽셀 읽기
+function parseIco(u8) {
+  var v = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), n = v.getUint16(4, true), entries = [];
+  for (var i = 0; i < n; i++) {
+    var e = 6 + i * 16;
+    entries.push({ w: u8[e] || 256, h: u8[e + 1] || 256, bits: v.getUint16(e + 6, true), size: v.getUint32(e + 8, true), off: v.getUint32(e + 12, true) });
+  }
+  entries.forEach(function (en) {
+    var hdr = v.getUint32(en.off, true), w = v.getInt32(en.off + 4, true), h2 = v.getInt32(en.off + 8, true);
+    en.bmpOk = hdr === 40 && w === en.w && h2 === en.h * 2 && v.getUint16(en.off + 14, true) === 32;
+    en.pixel = function (x, y) {   // y 는 위에서부터
+      var row = en.h - 1 - y, o = en.off + 40 + (row * en.w + x) * 4;
+      return [u8[o + 2], u8[o + 1], u8[o], u8[o + 3]];   // RGBA
+    };
+  });
+  return { type: v.getUint16(2, true), count: n, entries: entries };
+}
+function solidPng(w, h, draw) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'));
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. 쪽 번호: 표지 건너뛰기(2-) · "1 / N" 형식 · 아래 가운데 · 저장 PDF 되읽기 =====
+  chain = chain.then(function () {
+    return makePdf([{ w: 200, h: 300 }, { w: 200, h: 300 }, { w: 200, h: 300 }]).then(function (bytes) {
+      return loadFrame('../pdf-page-number.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f), got = {};
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['hello'], 'memo.txt', { type: 'text/plain' })]);
+        got.reject = txt(d, 'msg');
+        setFiles(d.getElementById('file'), [new File([bytes], 'doc.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '3'; }, 20000).then(function () {
+          got.size = txt(d, 't-size');
+          setVal(d, 'range', '2-', 'input'); setVal(d, 'start', '1', 'input'); setVal(d, 'fmt', 'n-of'); setVal(d, 'pos', 'bc');
+          return sleep(200);
+        }).then(function () {
+          got.num = txt(d, 't-num'); got.note = txt(d, 'preview-note');
+          setVal(d, 'fmt', 'dash'); got.noteDash = txt(d, 'preview-note');
+          setVal(d, 'fmt', 'page-of'); got.notePage = txt(d, 'preview-note');
+          setVal(d, 'range', '9', 'input'); return sleep(200);
+        }).then(function () {
+          got.noPages = txt(d, 't-num') + ' ' + txt(d, 'preview-note');
+          setVal(d, 'range', '2-', 'input'); setVal(d, 'fmt', 'n-of'); setVal(d, 'size', '11', 'input'); setVal(d, 'margin', '12', 'input'); setVal(d, 'color', 'black');
+          return sleep(200);
+        }).then(function () {
+          click(d, 'btn-save');
+          return waitFor(function () { return cap.blobs.length >= 1 && /저장했습니다/.test(txt(d, 'msg')); }, 20000);
+        }).then(function () { got.msg = txt(d, 'msg'); return cap.blobs[0].arrayBuffer(); })
+          .then(readTexts).then(function (pages) {
+          got.p1 = pages[0].items.map(function (i) { return i.str; }).join('|');
+          var a = pages[1].items[0], b = pages[2].items[0];
+          got.p2 = a ? a.str : '(없음)'; got.p3 = b ? b.str : '(없음)';
+          // 아래 가운데: 글자 가운데 x ≈ 100, 기준선 y ≈ 300 - 34 (12mm = 34pt)
+          got.cx = a ? Math.round((a.x + a.width / 2) * 10) / 10 : 0; got.by = a ? Math.round(a.y * 10) / 10 : 0;
+          var ok = opened === 1 && /PDF 파일을 선택/.test(got.reject) && got.size === '71×106' && got.num === '2' && /2쪽 미리보기 — 번호 "1 \/ 2"/.test(got.note) &&
+                   /"- 1 -"/.test(got.noteDash) && /"Page 1 of 2"/.test(got.notePage) && /^0 적용할 쪽이 없습니다/.test(got.noPages) &&
+                   got.p1 === '' && got.p2 === '1 / 2' && got.p3 === '2 / 2' && near(got.cx, 100, 1.5) && near(got.by, 266, 1.5) &&
+                   /^2쪽에 번호를 넣어 저장했습니다/.test(got.msg) && cap.names[0] === 'doc_쪽번호.pdf' && !f.dataset.errs;
+          log('쪽 번호: 표지 건너뛰기 · 1 / N · 아래 가운데 · 되읽기', ok, '키보드 열기 ' + opened + ' · 글자 파일 "' + got.reject + '" · 쪽 크기 ' + got.size + ' (71×106) · 2- → ' + got.num + '쪽 · 안내 "' + got.note + '" / "' + got.noteDash.slice(-8) + '" / "' + got.notePage.slice(-14) + '" · 범위 9 → "' + got.noPages + '" · 저장 1쪽 [' + got.p1 + '] 2쪽 "' + got.p2 + '" 3쪽 "' + got.p3 + '" · 가운데 x ' + got.cx + ' (100) 기준선 y ' + got.by + ' (266) · "' + got.msg + '" ' + cap.names[0]);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('쪽 번호: 표지 건너뛰기 · 1 / N · 아래 가운데 · 되읽기', false, '오류: ' + e.message); });
+
+  // ===== 2. 쪽 번호: 회전된 쪽(90·180·270) · 바깥쪽(홀수 오른쪽·짝수 왼쪽) · 위쪽 · 회색 · 시작 번호 =====
+  chain = chain.then(function () {
+    return makePdf([{ w: 200, h: 300 }, { w: 200, h: 300, rot: 90 }, { w: 200, h: 300, rot: 180 }, { w: 300, h: 200, rot: 270 }]).then(function (bytes) {
+      return loadFrame('../pdf-page-number.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File([bytes], 'rot.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '4'; }, 20000).then(function () {
+          setVal(d, 'pos', 'bo'); setVal(d, 'fmt', 'n'); setVal(d, 'start', '5', 'input'); setVal(d, 'size', '11', 'input'); setVal(d, 'margin', '12', 'input'); setVal(d, 'color', 'gray');
+          return sleep(200);
+        }).then(function () {
+          click(d, 'btn-save');
+          return waitFor(function () { return cap.blobs.length >= 1; }, 20000);
+        }).then(function () { return cap.blobs[0].arrayBuffer(); }).then(readTexts).then(function (pages) {
+          // 보이는 크기: 1쪽 200×300, 2쪽 300×200(90°), 3쪽 200×300(180°), 4쪽 200×300(270°, 원래 300×200)
+          var m = 34.02, desc = [], ok = true;
+          pages.forEach(function (p, i) {
+            var it = p.items[0], odd = (i + 1) % 2 === 1;
+            if (!it) { ok = false; desc.push((i + 1) + '쪽 글자 없음'); return; }
+            var want = String(5 + i), xOk = odd ? near(it.x + it.width, p.w - m, 2) : near(it.x, m, 2), yOk = near(it.y, p.h - m, 2);
+            if (it.str !== want || !xOk || !yOk) ok = false;
+            desc.push((i + 1) + '쪽 ' + Math.round(p.w) + '×' + Math.round(p.h) + ' "' + it.str + '" x ' + Math.round(it.x) + (odd ? '+' + Math.round(it.width) + '→' + Math.round(it.x + it.width) + ' (오른쪽 ' + Math.round(p.w - m) + ')' : ' (왼쪽 34)') + ' y ' + Math.round(it.y) + ' (' + Math.round(p.h - m) + ')');
+          });
+          var sizesOk = Math.round(pages[1].w) === 300 && Math.round(pages[1].h) === 200 && Math.round(pages[3].w) === 200 && Math.round(pages[3].h) === 300;
+          log('쪽 번호: 회전 90·180·270 · 바깥쪽 · 시작 5', ok && sizesOk && pages.length === 4 && !f.dataset.errs, desc.join(' · ') + ' · 회전 쪽 보이는 크기 ' + sizesOk);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('쪽 번호: 회전 90·180·270 · 바깥쪽 · 시작 5', false, '오류: ' + e.message); });
+
+  // ===== 3. PDF 텍스트: 줄 세우기 · 문단 합치기 · 구분선 · 글자 없는 쪽 · 범위 · 복사 · txt 저장 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (doc) {
+      return doc.embedFont(PDFLib.StandardFonts.Helvetica).then(function (font) {
+        var p1 = doc.addPage([400, 300]);
+        p1.drawText('Alpha beta', { x: 40, y: 250, size: 12, font: font });
+        p1.drawText('Gamma', { x: 40, y: 236, size: 12, font: font });      // 14pt 아래 = 같은 문단
+        p1.drawText('Delta', { x: 40, y: 150, size: 12, font: font });      // 멀리 = 새 문단
+        p1.drawText('Right', { x: 300, y: 250, size: 12, font: font });     // 첫 줄 오른쪽 조각
+        var p2 = doc.addPage([400, 300]);
+        p2.drawText('Second page', { x: 40, y: 250, size: 12, font: font });
+        doc.addPage([400, 300]);                                             // 글자 없는 쪽
+        return doc.save();
+      });
+    }).then(function (bytes) {
+      return loadFrame('../pdf-to-text.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), cb = clip(f), got = {};
+        setFiles(d.getElementById('file'), [new File([bytes], 'doc.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-pages') === '3'; }, 20000).then(function () {
+          got.lines = d.getElementById('out').value; got.empty = txt(d, 't-empty'); got.msg = txt(d, 'msg'); got.chars = txt(d, 't-chars'); got.words = txt(d, 't-words');
+          setVal(d, 'layout', 'flow'); return sleep(300);
+        }).then(function () {
+          got.flow = d.getElementById('out').value;
+          setChk(d, 'sep', false); return sleep(300);
+        }).then(function () {
+          got.noSep = d.getElementById('out').value;
+          setVal(d, 'range', '3', 'input'); return sleep(500);
+        }).then(function () {
+          got.scanMsg = txt(d, 'msg'); got.scanPages = txt(d, 't-pages');
+          setVal(d, 'range', '1-2', 'input'); setVal(d, 'layout', 'lines'); setChk(d, 'sep', true); return sleep(500);
+        }).then(function () {
+          click(d, 'btn-copy');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.copyMsg = txt(d, 'copy-msg');
+          click(d, 'btn-down');
+          return waitFor(function () { return cap.blobs.length >= 1; }, 3000);
+        }).then(function () { return cap.blobs[0].text(); }).then(function (saved) {
+          got.saved = saved; got.saveName = cap.names[0];
+          click(d, 'btn-reset');
+          got.reset = d.getElementById('area').hidden && d.getElementById('out').value === '';
+          var ok = got.lines === '===== 1쪽 =====\nAlpha beta Right\nGamma\nDelta\n\n===== 2쪽 =====\nSecond page\n\n===== 3쪽 =====\n' && got.empty === '1' && /1쪽에는 글자가 없습니다/.test(got.msg) &&
+                   got.chars === '34' && got.words === '7' &&
+                   got.flow === '===== 1쪽 =====\nAlpha beta Right Gamma\n\nDelta\n\n===== 2쪽 =====\nSecond page\n\n===== 3쪽 =====\n' &&
+                   got.noSep === 'Alpha beta Right Gamma\n\nDelta\n\nSecond page\n\n' && /글자가 하나도 없습니다/.test(got.scanMsg) && got.scanPages === '1' &&
+                   cb.text === '===== 1쪽 =====\nAlpha beta Right\nGamma\nDelta\n\n===== 2쪽 =====\nSecond page' && /복사했습니다/.test(got.copyMsg) &&
+                   got.saved === cb.text && got.saveName === 'doc.txt' && got.reset && !f.dataset.errs;
+          log('PDF 텍스트: 줄 · 문단 · 구분선 · 빈 쪽 · 범위 · 복사 · 저장', ok, '줄 모드 ' + JSON.stringify(got.lines) + ' · 빈 쪽 ' + got.empty + ' "' + got.msg + '" · 글자 ' + got.chars + ' (34) 단어 ' + got.words + ' (7) · 문단 모드 ' + JSON.stringify(got.flow) + ' · 구분선 끔 ' + JSON.stringify(got.noSep) + ' · 3쪽만 "' + got.scanMsg.slice(0, 20) + '" ' + got.scanPages + '쪽 · 복사 ' + JSON.stringify(cb.text) + ' "' + got.copyMsg + '" · 저장 ' + got.saveName + ' 같음 ' + (got.saved === cb.text) + ' · 초기화 ' + got.reset);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 텍스트: 줄 · 문단 · 구분선 · 빈 쪽 · 범위 · 복사 · 저장', false, '오류: ' + e.message); });
+
+  // ===== 4. 파비콘: ICO 구조·픽셀 · 여백 넣기(contain) · 배경 흰색 · ZIP 8개 · manifest · 코드 · SVG 입력 =====
+  chain = chain.then(function () {
+    return solidPng(100, 60, function (x) { x.fillStyle = '#ff0000'; x.fillRect(0, 0, 50, 60); x.fillStyle = '#0000ff'; x.fillRect(50, 0, 50, 60); }).then(function (png) {
+      return loadFrame('../favicon.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f), cb = clip(f), got = {};
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['x'], 'a.txt', { type: 'text/plain' })]);
+        got.reject = txt(d, 'msg');
+        setFiles(d.getElementById('file'), [new File([png], 'logo.png', { type: 'image/png' })]);
+        return waitFor(function () { return txt(d, 't-src') === '100×60'; }, 8000).then(function () {
+          got.small = txt(d, 'msg'); got.quality = txt(d, 't-warn'); got.files = txt(d, 't-files');
+          got.previews = d.querySelectorAll('#pv-light canvas').length + '/' + d.querySelectorAll('#pv-dark canvas').length;
+          setVal(d, 'fit', 'contain'); setVal(d, 'bg', 'keep'); setVal(d, 'pad', '0', 'input'); setVal(d, 'round', '0', 'input');
+          return sleep(250);
+        }).then(function () {
+          click(d, 'btn-ico');
+          return waitFor(function () { return cap.blobs.length >= 1; }, 5000);
+        }).then(function () { return cap.blobs[0].arrayBuffer(); }).then(function (buf) {
+          var ico = parseIco(new Uint8Array(buf)), e16 = ico.entries[0];
+          got.ico = ico.type + ' ' + ico.entries.map(function (e) { return e.w + 'x' + e.h + '@' + e.bits + (e.bmpOk ? '' : '!'); }).join(',');
+          // 100×60 을 16 에 contain: 가로 16, 세로 약 10 → 위 1~2줄은 투명, 가운데 왼쪽 빨강 오른콽 파랑
+          var pL = e16.pixel(2, 8), pR = e16.pixel(13, 8), pT = e16.pixel(8, 0);
+          got.px = pL.join(',') + ' / ' + pR.join(',') + ' / 위 α ' + pT[3];
+          got.icoOk = ico.type === 1 && ico.count === 3 && ico.entries.every(function (e) { return e.bits === 32 && e.bmpOk; }) && e16.w === 16 && ico.entries[2].w === 48 &&
+                      pL[0] > 200 && pL[2] < 60 && pL[3] === 255 && pR[2] > 200 && pR[0] < 60 && pR[3] === 255 && pT[3] === 0;
+          got.icoMsg = txt(d, 'msg'); got.icoName = cap.names[0];
+          setVal(d, 'bg', 'white'); setVal(d, 'sitename', 'My Site', 'input'); setVal(d, 'bgc', '#123456', 'input'); return sleep(250);
+        }).then(function () {
+          click(d, 'btn-zip');
+          return waitFor(function () { return cap.blobs.length >= 2 && cap.blobs[cap.blobs.length - 1].type === 'application/zip'; }, 15000);
+        }).then(function () { return cap.blobs[cap.blobs.length - 1].arrayBuffer(); }).then(function (buf) {
+          var entries = readZip(buf); got.zip = entries.map(function (e) { return e.name; }).join(',');
+          var byName = {}; entries.forEach(function (e) { byName[e.name] = e; });
+          var ico2 = parseIco(byName['favicon.ico'].bytes), top = ico2.entries[0].pixel(8, 0);
+          got.whiteTop = top.join(',');
+          var mf = JSON.parse(new TextDecoder().decode(byName['site.webmanifest'].bytes));
+          got.manifest = mf.name + ' / ' + mf.icons.length + ' / ' + mf.background_color;
+          got.head = new TextDecoder().decode(byName['favicon-head.html'].bytes);
+          return blobToCanvas(new Blob([byName['android-chrome-512x512.png'].bytes], { type: 'image/png' })).then(function (c512) {
+            got.c512 = c512.width + '×' + c512.height + ' 가운데 ' + px(c512, 100, 256).slice(0, 3).join(',') + ' 위 ' + px(c512, 256, 10).slice(0, 3).join(',');
+            got.c512ok = c512.width === 512 && px(c512, 100, 256)[0] > 200 && px(c512, 256, 10)[0] > 240 && px(c512, 256, 10)[1] > 240;
+            got.zipMsg = txt(d, 'msg'); got.zipName = cap.names[cap.names.length - 1];
+            got.code = d.getElementById('code').value;
+            click(d, 'btn-copy');
+            return waitFor(function () { return cb.text !== null; }, 3000);
+          });
+        }).then(function () {
+          // SVG 입력 (크기 정보 없음)
+          var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="#00aa00"/></svg>';
+          setFiles(d.getElementById('file'), [new File([svg], 'logo.svg', { type: 'image/svg+xml' })]);
+          return waitFor(function () { return txt(d, 't-src') === 'SVG'; }, 8000);
+        }).then(function () {
+          got.svgQ = txt(d, 't-warn');
+          var c = d.querySelector('#pv-light canvas'); got.svgPx = c ? px(c, 8, 8).slice(0, 3).join(',') : '없음';
+          click(d, 'btn-reset');
+          got.reset = d.getElementById('area').hidden;
+          var ok = opened === 1 && /이미지 파일을 선택/.test(got.reject) && /원본이 작아/.test(got.small) && got.quality === '흐림' && got.files === '8' && got.previews === '4/4' &&
+                   got.icoOk && /favicon\.ico를 저장했습니다/.test(got.icoMsg) && got.icoName === 'favicon.ico' &&
+                   got.zip === 'favicon.ico,favicon-16x16.png,favicon-32x32.png,apple-touch-icon.png,android-chrome-192x192.png,android-chrome-512x512.png,site.webmanifest,favicon-head.html' &&
+                   got.whiteTop === '255,255,255,255' && got.manifest === 'My Site / 2 / #ffffff' && /apple-touch-icon/.test(got.head) && got.c512ok && /8개 파일을 ZIP/.test(got.zipMsg) && got.zipName === 'favicon-logo.zip' &&
+                   cb.text === got.code && /rel="manifest"/.test(got.code) && got.svgQ === '선명 (SVG)' && got.svgPx === '0,170,0' && got.reset && !f.dataset.errs;
+          log('파비콘: ICO 구조·픽셀 · 배경 · ZIP 8개 · manifest · 코드 · SVG', ok, '키보드 ' + opened + ' · 글자 파일 "' + got.reject + '" · 작은 원본 "' + got.small.slice(0, 12) + '" ' + got.quality + ' · 파일 ' + got.files + ' 미리보기 ' + got.previews + ' · ICO [' + got.ico + '] 픽셀 ' + got.px + ' "' + got.icoMsg.slice(0, 20) + '" ' + got.icoName + ' · ZIP [' + got.zip + '] 흰 배경 위 ' + got.whiteTop + ' · manifest ' + got.manifest + ' · 512 ' + got.c512 + ' · "' + got.zipMsg.slice(0, 16) + '" ' + got.zipName + ' · 코드 복사 ' + (cb.text === got.code) + ' · SVG ' + got.svgQ + ' 픽셀 ' + got.svgPx + ' · 초기화 ' + got.reset);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('파비콘: ICO 구조·픽셀 · 배경 · ZIP 8개 · manifest · 코드 · SVG', false, '오류: ' + e.message); });
+
+  // ===== 5. 색상 추출: 비율이 알려진 3색 · 정렬 · 배경 빼기 · 클릭 집기 · 복사 · CSS · PNG =====
+  chain = chain.then(function () {
+    // 120×80: 빨강 60 · 파랑 40 · 흰색 20 → 50% · 33% · 17%
+    return solidPng(120, 80, function (x) { x.fillStyle = '#ff0000'; x.fillRect(0, 0, 60, 80); x.fillStyle = '#0000ff'; x.fillRect(60, 0, 40, 80); x.fillStyle = '#ffffff'; x.fillRect(100, 0, 20, 80); }).then(function (png) {
+      return loadFrame('../image-palette.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f), cb = clip(f), got = {};
+        var dz = d.getElementById('dz'), opened = 0;
+        d.getElementById('file').click = function () { opened++; };
+        dz.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        setFiles(d.getElementById('file'), [new File(['x'], 'a.txt', { type: 'text/plain' })]);
+        got.reject = txt(d, 'msg');
+        var dt = new DataTransfer(); dt.items.add(new File([png], 'image.png', { type: 'image/png' }));
+        d.dispatchEvent(new w.ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+        function sw() { return Array.prototype.map.call(d.querySelectorAll('#list li'), function (li) { return li.querySelector('.hex').textContent + ' ' + li.querySelector('.sw').textContent; }); }
+        return waitFor(function () { return d.querySelectorAll('#list li').length >= 1; }, 8000).then(function () {
+          setVal(d, 'count', '3', 'input'); setVal(d, 'sort', 'share'); return sleep(250);
+        }).then(function () {
+          got.share = sw().join(' | ');
+          setVal(d, 'count', '6', 'input'); return sleep(250);
+        }).then(function () {
+          got.six = sw().length;      // 색이 셋뿐이면 6을 요청해도 셋만 나와야 한다
+          setVal(d, 'sort', 'light'); return sleep(100);
+        }).then(function () {
+          got.light = sw()[0];
+          setChk(d, 'skipbw', true); return sleep(250);
+        }).then(function () {
+          got.skip = sw().join(' | ');
+          setChk(d, 'skipbw', false); setVal(d, 'sort', 'share'); return sleep(250);
+        }).then(function () {
+          var view = d.getElementById('view'), r = view.getBoundingClientRect();
+          view.dispatchEvent(new w.MouseEvent('click', { bubbles: true, clientX: r.left + 70 * r.width / 120, clientY: r.top + 40 * r.height / 80 }));
+          got.pick = txt(d, 'pick-hex') + ' ' + txt(d, 'pick-rgb') + ' ' + !d.getElementById('pick').hidden;
+          click(d, 'btn-pick-copy');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.pickCopy = cb.text + ' "' + txt(d, 'copy-msg') + '"'; cb.text = null;
+          d.querySelectorAll('#list li button')[1].click();
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.swCopy = cb.text; cb.text = null;
+          click(d, 'btn-copyall');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.all = cb.text; cb.text = null;
+          click(d, 'btn-css');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.css = cb.text;
+          click(d, 'btn-png');
+          return waitFor(function () { return cap.blobs.length >= 1; }, 5000);
+        }).then(function () { return blobToCanvas(cap.blobs[0]); }).then(function (c) {
+          got.png = c.width + '×' + c.height + ' 첫 칸 ' + px(c, 80, 75).slice(0, 3).join(',') + ' 둘째 칸 ' + px(c, 240, 75).slice(0, 3).join(',');
+          got.pngOk = c.width === 480 && c.height === 200 && px(c, 80, 75)[0] === 255 && px(c, 80, 75)[1] === 0 && px(c, 240, 75)[2] === 255 && px(c, 240, 75)[0] === 0;
+          got.pngName = cap.names[0]; got.pngMsg = txt(d, 'copy-msg');
+          click(d, 'btn-reset');
+          got.reset = d.getElementById('area').hidden && d.querySelectorAll('#list li').length === 0;
+          var ok = opened === 1 && /이미지 파일을 선택/.test(got.reject) && got.share === '#ff0000 50% | #0000ff 33% | #ffffff 17%' && got.six === 3 && got.light === '#ffffff 17%' &&
+                   got.skip === '#ff0000 60% | #0000ff 40%' && got.pick === '#0000ff rgb(0, 0, 255) true' && got.pickCopy === '#0000ff "#0000ff 복사했습니다"' && got.swCopy === '#0000ff' &&
+                   got.all === '#ff0000  rgb(255, 0, 0)  50%\n#0000ff  rgb(0, 0, 255)  33%\n#ffffff  rgb(255, 255, 255)  17%' &&
+                   got.css === ':root {\n  --color-1: #ff0000;\n  --color-2: #0000ff;\n  --color-3: #ffffff;\n}' && got.pngOk && /^붙여넣은-사진-\d{6}_팔레트\.png$/.test(got.pngName) && /팔레트 PNG를 저장/.test(got.pngMsg) && got.reset && !f.dataset.errs;
+          log('색상 추출: 3색 비율 · 정렬 · 배경 빼기 · 클릭 · 복사 · CSS · PNG', ok, '키보드 ' + opened + ' · 글자 파일 "' + got.reject + '" · 비율순 [' + got.share + '] · 6개 요청 → ' + got.six + '개 · 밝은 순 첫 ' + got.light + ' · 배경 빼기 [' + got.skip + '] · 클릭 ' + got.pick + ' · 집은 색 복사 ' + got.pickCopy + ' · 칸 복사 ' + got.swCopy + ' · 전부 ' + JSON.stringify(got.all) + ' · CSS ' + JSON.stringify(got.css) + ' · PNG ' + got.png + ' ' + got.pngName + ' "' + got.pngMsg + '" · 초기화 ' + got.reset);
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('색상 추출: 3색 비율 · 정렬 · 배경 빼기 · 클릭 · 복사 · CSS · PNG', false, '오류: ' + e.message); });
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'TOOLS7 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

@@ -32,6 +32,14 @@ my @TOOLS = (   # 파일, 머리 메뉴 이름, 바닥 이름
   ['pdf-edit.html',       'Rotate PDF',     'Rotate, delete and reorder PDF pages'],
   ['password-gen.html',   'Password',       'Password generator'],
   ['time-calc.html',      'Time calc',      'Time calculator · work hours'],
+  ['pdf-page-number.html', 'Page numbers',  'Add page numbers to a PDF'],
+  ['pdf-to-text.html',    'PDF to text',    'Extract text from a PDF'],
+  ['favicon.html',        'Favicon',        'Favicon generator'],
+  ['image-palette.html',  'Color palette',  'Extract colors from an image'],
+  ['svg-to-png.html',     'SVG to PNG',     'Convert SVG to PNG'],
+  ['json-format.html',    'JSON',           'JSON formatter · validator'],
+  ['base64.html',         'Base64',         'Base64 encode · decode'],
+  ['file-hash.html',      'File hash',      'File hash · SHA-256 · MD5 checksum'],
 );
 
 for my $path (glob('en/*.html')) {

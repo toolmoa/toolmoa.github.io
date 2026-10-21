@@ -46,18 +46,26 @@ pdf-split.html        PDF 나누기             ← 키워드: PDF 나누기, �
 pdf-edit.html         PDF 회전·삭제·순서 변경  ← 키워드: PDF 회전, PDF 페이지 삭제
 pdf-to-image.html     PDF 이미지 변환         ← 키워드: pdf 이미지 변환, pdf jpg 변환
 pdf-watermark.html    PDF 워터마크 넣기        ← 키워드: pdf 워터마크, pdf 워터마크 넣기, 대외비 표시
+pdf-page-number.html  PDF 페이지 번호 넣기     ← 키워드: pdf 페이지 번호 넣기, pdf 쪽수 매기기, pdf 페이지 번호 삽입
+pdf-to-text.html      PDF 텍스트 추출          ← 키워드: pdf 텍스트 추출, pdf 글자 복사, pdf txt 변환
 file-convert.html     CSV·JSON·엑셀 변환     ← 키워드: csv json 변환, 엑셀 변환
 qr-generate.html      QR코드 만들기           ← 키워드: QR코드 만들기, QR 생성
 qr-scan.html          QR코드 스캔·읽기        ← 키워드: QR코드 스캔 PC, QR코드 이미지 읽기, QR 해독
 barcode.html          바코드 생성기           ← 키워드: 바코드 생성기, 바코드 만들기, EAN-13 바코드
 password-gen.html     비밀번호 생성기         ← 키워드: 비밀번호 생성기
 color-convert.html    색상 코드 변환기         ← 키워드: 색상 코드 변환, hex rgb 변환, 명도 대비 검사
+image-palette.html    사진 색상 추출           ← 키워드: 사진 색상 추출, 이미지 색상 코드 추출, 색상 팔레트 추출
+favicon.html          파비콘 만들기            ← 키워드: 파비콘 만들기, png ico 변환, 파비콘 생성기
+svg-to-png.html       SVG PNG 변환             ← 키워드: svg png 변환, svg를 png로, svg 변환
+json-format.html      JSON 정리·검증           ← 키워드: json 포맷터, json 정렬, json 검증, json 뷰어
+base64.html           Base64 인코딩·디코딩      ← 키워드: base64 인코딩, base64 디코딩, 이미지 base64 변환
+file-hash.html        파일 해시 확인           ← 키워드: sha256 확인, 파일 해시값, md5 체크섬, 해시 계산기
 random-pick.html      랜덤 뽑기·추첨기        ← 키워드: 랜덤 뽑기, 추첨기, 조 나누기
 unit-convert.html     단위 변환기·평수 계산    ← 키워드: 평수 계산, 인치 cm 변환
 date-calc.html        날짜 계산기·디데이       ← 키워드: 디데이 계산, 근무일수
 time-calc.html        시간 계산기             ← 키워드: 시간 계산기, 근무시간 계산, 시간 더하기
 age-calc.html         만 나이 계산기          ← 키워드: 만 나이 계산기, 세는 나이
-en/                   영어 SEO 페이지 28종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
+en/                   영어 SEO 페이지 36종 (번역본이 아니라 따로 쓴 글. 메뉴는 _dev/ennav.pl 이 한 목록으로 다시 쓴다)
 assets/style.css      공통 스타일 (다크모드 포함)
 assets/i18n.js        다국어 엔진 겸 사전 (ko/en/ja)
 assets/og/            공유용 이미지 1200×630 (페이지마다 1장, 생성물)
@@ -72,7 +80,7 @@ sitemap.xml           사이트맵 (생성물)
 
 **허용적(permissive) 라이선스만 쓴다. GPL 계열은 담지 않는다.**
 브라우저로 파일을 내려보내는 것이 곧 "배포"라서, GPL 코드를 담으면 이 저장소 전체가
-같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 31종과 검사 체계를 통째로 복제해도 막을 수 없다.
+같은 조건에 묶일 수 있다. 그러면 경쟁자가 툴 39종과 검사 체계를 통째로 복제해도 막을 수 없다.
 실제로 처음 쓰던 QR 라이브러리(QRious)가 GPL v3여서 2026-09-20에 MIT 라이브러리로 교체했다.
 
 현재 쓰는 것은 전부 MIT 또는 Apache-2.0이며, 목록과 조건은 `licenses.html`에 있다.
@@ -103,15 +111,15 @@ perl _dev/seocheck.pl     구조화 데이터·공유 메타 (JSON::PP 로 실�
 ### 브라우저로 돌리는 것
 
 ```
-bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 tools4 tools5 tools6 mobile meta exif
+bash _dev/run.sh selftest edge layout gaps opts i18nlive verify verify-real deep paths full en4 tools2 tools3 tools4 tools5 tools6 tools7 tools8 mobile meta exif
 ```
 
 에이전트 셸처럼 명령이 끝날 때 자식 프로세스를 거두는 환경에서는 run.sh 로 띄운 크롬이 같이 죽는다.
 그때는 PowerShell 로 `_dev/runwin.ps1 en4 edge …` 를 쓴다. 같은 플래그로 띄우고, 창 제목을
 기다렸다가 결과를 글로 출력한다(같은 검사의 이전 창은 먼저 닫는다).
 
-`en4` 는 영어판을 실제로 띄워 결과물을 다시 읽는다. 영어판 23쪽·기능 17항목이라 6분 가까이 걸리므로
-`runwin.ps1 en4 -TimeoutSec 600` 처럼 기다리는 시간을 늘려 돌린다 (기본 240초면 결과가 나오기 전에 끊긴다). `coverage.pl` 은 id 이름으로만 대조하므로
+`en4` 는 영어판을 실제로 띄워 결과물을 다시 읽는다. 영어판 36쪽·기능 30항목이라 12분 가까이 걸리므로
+`runwin.ps1 en4 -TimeoutSec 1200` 처럼 기다리는 시간을 늘려 돌린다 (기본 240초면 결과가 나오기 전에 끊긴다). `coverage.pl` 은 id 이름으로만 대조하므로
 한국어판과 id 가 같은 영어판은 한 번도 띄우지 않아도 "검사됨" 으로 나온다 — 그 빈틈을 메운다.
 
 결과는 **창 제목**에 실린다 (`RESULT 26/26 :: …`). 헤드리스로 돌리지 말 것 —

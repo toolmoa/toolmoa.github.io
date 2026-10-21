@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Convert SVG to PNG at any size — free, batch, no upload</title>
+<meta name="description" content="Render SVG to PNG, JPG or WebP at an exact pixel width, height or scale, with a transparent, white or custom background. Many files to one ZIP; paste SVG code too.">
+<link rel="canonical" href="https://toolmoa.github.io/en/svg-to-png.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/svg-to-png.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/svg-to-png.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/svg-to-png.html">
+<meta property="og:title" content="SVG to PNG at any size, in your browser">
+<meta property="og:description" content="Exact pixel size or scale, transparent or colored background, PNG, JPG or WebP, many files to one ZIP.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"SVG to PNG","applicationCategory":"MultimediaApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<style>
+  .sv-code { font-family:ui-monospace, Consolas, monospace; min-height:90px; }
+  .file-list .thumb { width:48px; height:48px; object-fit:contain; background-color:#fff; background-image:linear-gradient(45deg,#ddd 25%,transparent 25%),linear-gradient(-45deg,#ddd 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ddd 75%),linear-gradient(-45deg,transparent 75%,#ddd 75%); background-size:12px 12px; background-position:0 0,0 6px,6px -6px,-6px 0; border-radius:4px; flex:none; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/svg-to-png.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-svg-to-png.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="SVG to PNG · exact size · many at once — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SVG to PNG at any size, in your browser">
+<meta name="twitter:description" content="Exact pixel size or scale, transparent or colored background, PNG, JPG or WebP, many files to one ZIP.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-svg-to-png.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my file uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. The SVG is read, rendered and saved as PNG inside your browser; it works with the internet switched off."}},{"@type":"Question","name":"Edges look blurry or jagged","acceptedAnswer":{"@type":"Answer","text":"At small sizes thin lines fall inside a single pixel and blur. Render at twice the size you will display and let the page or document scale it down — that is what the 2× and 3× scale options are for."}},{"@type":"Question","name":"The transparent background came out white or black","acceptedAnswer":{"@type":"Answer","text":"JPG has no transparency, so transparent areas become white. Choose PNG or WebP to keep transparency. To preview on a dark background, set the background to a custom color."}},{"@type":"Question","name":"Text in the SVG uses the wrong font","acceptedAnswer":{"@type":"Answer","text":"SVG files name fonts but do not contain them, so a missing font is replaced. Convert text to outlines in your drawing program before exporting and it will look the same everywhere."}},{"@type":"Question","name":"What is the maximum size?","acceptedAnswer":{"@type":"Answer","text":"8192 pixels on a side, the limit of what a browser canvas can draw in one piece. For very large print graphics, use the SVG itself."}},{"@type":"Question","name":"Will the PNG be larger than the SVG?","acceptedAnswer":{"@type":"Answer","text":"Usually, yes: an SVG stores shapes, a PNG stores every pixel. On the web keep the SVG wherever possible and convert only where PNG is required. The PNG can be shrunk further with compress image."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"SVG to PNG · exact size · many at once","item":"https://toolmoa.github.io/en/svg-to-png.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html">Clean up text</a>
+      <a href="text-diff.html">Compare text</a>
+      <a href="pdf-edit.html">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html">Time calc</a>
+      <a href="pdf-page-number.html">Page numbers</a>
+      <a href="pdf-to-text.html">PDF to text</a>
+      <a href="favicon.html">Favicon</a>
+      <a href="image-palette.html">Color palette</a>
+      <a href="svg-to-png.html" aria-current="page">SVG to PNG</a>
+      <a href="json-format.html">JSON</a>
+      <a href="base64.html">Base64</a>
+      <a href="file-hash.html">File hash</a>
+    </nav>
+    <a class="lang-link" href="../svg-to-png.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>SVG to PNG · exact size · many at once</h1>
+  <p class="lead">Turn SVG icons, logos and drawings into PNG (transparency kept), JPG or WebP at the pixel size you need. Scale up sharply by width or multiplier, get several files as one ZIP, or paste SVG code directly.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🖼️</span>
+    <span class="dz-main">Drop SVG files here, or click to choose</span>
+    <span class="dz-sub">Several at once · .svg · or paste SVG code below</span>
+    <input type="file" id="file" accept=".svg,image/svg+xml" multiple>
+  </div>
+
+  <div class="field" style="margin-top:12px">
+    <label for="code">Or paste SVG code</label>
+    <textarea id="code" class="sv-code" spellcheck="false" placeholder='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">…</svg>'></textarea>
+    <div class="btn-row" style="margin-bottom:0"><button class="btn small secondary" id="btn-code" type="button">Add code to the list</button></div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="mode">Size by</label>
+          <select id="mode">
+            <option value="width" selected>Width in pixels</option>
+            <option value="height">Height in pixels</option>
+            <option value="scale">Scale (original size × n)</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="px-field">
+          <label for="px">Pixels</label>
+          <input type="number" id="px" min="1" max="8192" value="512" inputmode="numeric">
+        </div>
+        <div class="field" style="margin:0" id="scale-field" hidden>
+          <label for="scale">Scale</label>
+          <select id="scale">
+            <option value="1">1×</option>
+            <option value="2" selected>2×</option>
+            <option value="3">3×</option>
+            <option value="4">4×</option>
+            <option value="8">8×</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="fmt">Format</label>
+          <select id="fmt">
+            <option value="image/png" selected>PNG</option>
+            <option value="image/jpeg">JPG</option>
+            <option value="image/webp">WebP</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="bg">Background</label>
+          <select id="bg">
+            <option value="transparent" selected>Transparent (PNG · WebP)</option>
+            <option value="white">White</option>
+            <option value="custom">Custom color</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="bgc-field" hidden>
+          <label for="bgc">Background color</label>
+          <input type="color" id="bgc" value="#ffffff" style="width:64px;height:38px;padding:2px">
+        </div>
+      </div>
+      <div class="hint" id="jpg-note" hidden>JPG has no transparency, so transparent areas become white.</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-count">0</span><span class="lbl">Files</span></div>
+      <div class="stat"><span class="num" id="t-out" style="font-size:18px">-</span><span class="lbl">Output size of first file</span></div>
+    </div>
+
+    <ul class="file-list" id="list"></ul>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-all">Convert and save</button>
+      <label class="inline-check" style="margin:0"><input type="checkbox" id="as-zip" checked> <span>ZIP when more than one</span></label>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To shrink the PNG further use <a href="image-compress.html">compress image</a>; for a site icon use the <a href="favicon.html">favicon generator</a> (it accepts SVG directly); to convert between PNG, JPG and WebP use <a href="image-convert.html">convert image format</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_SVGTOPNG --></div>
+
+  <h2>Why convert SVG to PNG</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      SVG is a vector format that never pixelates, but <strong style="color:var(--text)">older versions of PowerPoint and Word, social networks, many shop admin panels and
+      email</strong> either refuse SVG or render it badly. Exporting a PNG once at the size you need makes the graphic usable everywhere. A 2× or 3× scale stays crisp on
+      high-density (Retina) screens, and transparency is preserved in PNG and WebP. The conversion uses the browser's own SVG renderer, so the result looks exactly as the
+      SVG does on screen.
+    </p>
+  </div>
+
+  <h2>SVGs without a size · fonts · external images</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">No width/height</strong> — the aspect ratio is taken from the viewBox and fitted to the pixel width you choose. Without a viewBox the file
+      is treated as 300×150, so set the pixel size yourself.<br>
+      <strong style="color:var(--text)">Fonts</strong> — text inside an SVG is drawn with the fonts installed on this computer. If the designer's machine had different fonts the
+      shapes will differ; SVGs with text converted to outlines are safe.<br>
+      <strong style="color:var(--text)">External images and stylesheets</strong> — <code>&lt;image href="http://…"&gt;</code> pointing at other files and external CSS are not loaded
+      for security reasons. Images embedded as data URIs inside the SVG do work.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — unreleased logos and internal diagrams are exactly what gets converted. Nothing is uploaded, and the
+      page works offline once loaded.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my file uploaded?</summary>
+      <p>No. The SVG is read, rendered and saved as PNG inside your browser; it works with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>Edges look blurry or jagged</summary>
+      <p>At small sizes thin lines fall inside a single pixel and blur. Render at twice the size you will display and let the page or document scale it down — that is what the 2× and 3× scale options are for.</p>
+    </details>
+    <details>
+      <summary>The transparent background came out white or black</summary>
+      <p>JPG has no transparency, so transparent areas become white. Choose PNG or WebP to keep transparency. To preview on a dark background, set the background to a custom color.</p>
+    </details>
+    <details>
+      <summary>Text in the SVG uses the wrong font</summary>
+      <p>SVG files name fonts but do not contain them, so a missing font is replaced. Convert text to outlines in your drawing program before exporting and it will look the same everywhere.</p>
+    </details>
+    <details>
+      <summary>What is the maximum size?</summary>
+      <p>8192 pixels on a side, the limit of what a browser canvas can draw in one piece. For very large print graphics, use the SVG itself.</p>
+    </details>
+    <details>
+      <summary>Will the PNG be larger than the SVG?</summary>
+      <p>Usually, yes: an SVG stores shapes, a PNG stores every pixel. On the web keep the SVG wherever possible and convert only where PNG is required. The PNG can be shrunk further with <a href="image-compress.html">compress image</a>.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-clean.html">Remove duplicate lines · clean up text</a>
+      <a href="text-diff.html">Compare two texts</a>
+      <a href="pdf-edit.html">Rotate, delete and reorder PDF pages</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="time-calc.html">Time calculator · work hours</a>
+      <a href="pdf-page-number.html">Add page numbers to a PDF</a>
+      <a href="pdf-to-text.html">Extract text from a PDF</a>
+      <a href="favicon.html">Favicon generator</a>
+      <a href="image-palette.html">Extract colors from an image</a>
+      <a href="json-format.html">JSON formatter · validator</a>
+      <a href="base64.html">Base64 encode · decode</a>
+      <a href="file-hash.html">File hash · SHA-256 · MD5 checksum</a>
+      <a href="../svg-to-png.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), list = el('list');
+  var modeSel = el('mode'), pxIn = el('px'), scaleSel = el('scale'), fmtSel = el('fmt'), bgSel = el('bg'), bgcIn = el('bgc');
+  var MAX_SIDE = 8192, items = [], timer = null, seq = 0, nameSeq = 0, notice = '';   // notice: 거부·오류 안내 (다시 그려도 남는다)
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); addFiles(e.dataTransfer.files); });
+  fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+  el('btn-code').addEventListener('click', function () {
+    var code = el('code').value.trim();
+    notice = '';
+    if (!/<svg[\s>]/i.test(code)) { notice = 'That is not SVG code. Paste the whole &lt;svg …&gt;…&lt;/svg&gt; element.'; setMsg(notice, 'err'); return; }
+    addSvg(code, 'pasted-svg-' + (++nameSeq));
+    el('code').value = '';
+  });
+
+  function addFiles(files) {
+    var bad = [];
+    notice = '';
+    Array.prototype.forEach.call(files, function (f) {
+      if (!(f.type === 'image/svg+xml' || /\.svg$/i.test(f.name))) { bad.push(esc(f.name)); return; }
+      f.text().then(function (code) { addSvg(code, f.name.replace(/\.[^.]+$/, '')); });
+    });
+    if (bad.length) { notice = 'Only SVG files can be added: ' + bad.join(', '); setMsg(notice, 'err'); }
+  }
+  // 핵심: SVG 의 고유 크기를 알아낸다. width/height → viewBox → 300×150 순.
+  function intrinsic(code) {
+    var open = /<svg\b[^>]*>/i.exec(code), tag = open ? open[0] : '';
+    var w = /\swidth="([\d.]+)(px)?"/i.exec(tag), h = /\sheight="([\d.]+)(px)?"/i.exec(tag), vb = /\sviewBox="\s*([-\d.]+)[\s,]+([-\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"/i.exec(tag);
+    if (w && h) return { w: parseFloat(w[1]), h: parseFloat(h[1]), from: 'attr' };
+    if (vb) {
+      var vw = parseFloat(vb[3]), vh = parseFloat(vb[4]);
+      if (w) return { w: parseFloat(w[1]), h: parseFloat(w[1]) * vh / vw, from: 'viewBox' };
+      if (h) return { w: parseFloat(h[1]) * vw / vh, h: parseFloat(h[1]), from: 'viewBox' };
+      return { w: vw, h: vh, from: 'viewBox' };
+    }
+    return { w: 300, h: 150, from: 'default' };
+  }
+  function addSvg(code, name) {
+    if (!/<svg[\s>]/i.test(code)) { notice = 'That is not SVG code. Paste the whole &lt;svg …&gt;…&lt;/svg&gt; element.'; setMsg(notice, 'err'); return; }
+    if (!/xmlns=/.test(code.slice(0, code.indexOf('>') + 1))) code = code.replace(/<svg\b/i, '<svg xmlns="http://www.w3.org/2000/svg>'.slice(0, -1) + '"');
+    var size = intrinsic(code), it = { code: code, name: name, w: size.w, h: size.h, from: size.from, img: null, id: ++seq };
+    // <img> 로 읽어 그릴 수 있는지 확인한다. 크기 속성이 없으면 고유 크기로 넣어 준다.
+    var fixed = code;
+    if (size.from !== 'attr') fixed = code.replace(/<svg\b([^>]*?)(\swidth="[^"]*")?(\sheight="[^"]*")?/i, function (m, a) { return '<svg' + a.replace(/\s(width|height)="[^"]*"/gi, '') + ' width="' + size.w + '" height="' + size.h + '"'; });
+    var url = URL.createObjectURL(new Blob([fixed], { type: 'image/svg+xml' })), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      if (img.naturalWidth) { it.w = img.naturalWidth; it.h = img.naturalHeight; }
+      it.img = img; items.push(it);
+      area.hidden = false;
+      render();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); notice = 'This SVG cannot be drawn (it may contain a syntax error): ' + esc(name); setMsg(notice, 'err'); };
+    img.src = url;
+  }
+
+  function target(it) {
+    var mode = modeSel.value, w, h;
+    if (mode === 'scale') { var k = parseFloat(scaleSel.value); w = it.w * k; h = it.h * k; }
+    else {
+      var px = Math.max(1, parseInt(pxIn.value, 10) || 1);
+      if (mode === 'width') { w = px; h = px * it.h / it.w; } else { h = px; w = px * it.w / it.h; }
+    }
+    var cap = Math.max(w, h) > MAX_SIDE ? MAX_SIDE / Math.max(w, h) : 1;
+    return { w: Math.max(1, Math.round(w * cap)), h: Math.max(1, Math.round(h * cap)), capped: cap < 1 };
+  }
+  function draw(it) {
+    var tg = target(it), c = document.createElement('canvas'); c.width = tg.w; c.height = tg.h;
+    var x = c.getContext('2d'), fmt = fmtSel.value, bg = bgSel.value;
+    if (fmt === 'image/jpeg' && bg === 'transparent') bg = 'white';
+    if (bg !== 'transparent') { x.fillStyle = bg === 'white' ? '#ffffff' : bgcIn.value; x.fillRect(0, 0, tg.w, tg.h); }
+    x.drawImage(it.img, 0, 0, tg.w, tg.h);
+    return c;
+  }
+  function ext() { return fmtSel.value === 'image/jpeg' ? 'jpg' : fmtSel.value === 'image/webp' ? 'webp' : 'png'; }
+
+  function render() {
+    el('px-field').hidden = modeSel.value === 'scale';
+    el('scale-field').hidden = modeSel.value !== 'scale';
+    el('bgc-field').hidden = bgSel.value !== 'custom';
+    el('jpg-note').hidden = !(fmtSel.value === 'image/jpeg' && bgSel.value === 'transparent');
+    el('t-count').textContent = items.length;
+    list.innerHTML = '';
+    var capped = false;
+    items.forEach(function (it, i) {
+      var tg = target(it); if (tg.capped) capped = true;
+      var li = document.createElement('li');
+      var thumb = document.createElement('img'); thumb.className = 'thumb'; thumb.alt = ''; thumb.src = it.img.src;
+      li.appendChild(thumb);
+      var info = document.createElement('div'); info.style.flex = '1'; info.style.minWidth = '0';
+      info.innerHTML = '<div class="fname">' + esc(it.name) + '.' + ext() + '</div><div class="fmeta">' + Math.round(it.w) + '×' + Math.round(it.h) + (it.from === 'default' ? ' (' + 'no size information' + ')' : '') + ' → ' + tg.w + '×' + tg.h + '</div>';
+      li.appendChild(info);
+      var rm = document.createElement('button'); rm.className = 'btn small secondary'; rm.type = 'button'; rm.textContent = 'Remove'; rm.setAttribute('data-remove', i);
+      li.appendChild(rm);
+      list.appendChild(li);
+    });
+    if (items.length) { var t0 = target(items[0]); el('t-out').textContent = t0.w + '×' + t0.h; } else el('t-out').textContent = '-';
+    setMsg(capped ? 'Reduced so that no side exceeds 8192px.' : notice, 'err');
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(render, 80); }
+  [modeSel, scaleSel, fmtSel, bgSel].forEach(function (x) { x.addEventListener('change', render); });
+  [pxIn, bgcIn].forEach(function (x) { x.addEventListener('input', schedule); });
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-remove]'); if (!b) return;
+    var it = items.splice(parseInt(b.getAttribute('data-remove'), 10), 1)[0];
+    if (it && it.img) URL.revokeObjectURL(it.img.src);
+    if (!items.length) area.hidden = true;
+    render();
+  });
+
+  function toBlob(c) { return new Promise(function (r) { c.toBlob(r, fmtSel.value, 0.92); }); }
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+  el('btn-all').addEventListener('click', function () {
+    if (!items.length) return;
+    var btn = this; btn.disabled = true; notice = '';
+    var wantZip = el('as-zip').checked && items.length > 1 && typeof makeZip === 'function';
+    Promise.all(items.map(function (it) { return toBlob(draw(it)).then(function (b) { if (!b) throw new Error('blob'); return { name: it.name + '.' + ext(), blob: b }; }); })).then(function (outs) {
+      if (wantZip) {
+        return Promise.all(outs.map(function (o) { return o.blob.arrayBuffer().then(function (buf) { return { name: o.name, bytes: new Uint8Array(buf) }; }); })).then(function (entries) {
+          var zip = makeZip(entries), blob = new Blob([zip], { type: 'application/zip' });
+          download(blob, 'svg-converted' + '.zip');
+          setMsg('Saved {n} file(s) in one ZIP. '.replace('{n}', outs.length) + humanSize(blob.size), 'ok');
+        });
+      }
+      outs.forEach(function (o) { download(o.blob, o.name); });
+      setMsg('Saved {n} file(s). '.replace('{n}', outs.length) + humanSize(outs.reduce(function (s, o) { return s + o.blob.size; }, 0)), 'ok');
+    }).catch(function () { setMsg('Conversion failed.', 'err'); }).then(function () { btn.disabled = false; });
+  });
+  el('btn-reset').addEventListener('click', function () {
+    items.forEach(function (it) { if (it.img) URL.revokeObjectURL(it.img.src); });
+    items = []; list.innerHTML = ''; el('code').value = ''; notice = ''; nameSeq = 0; el('t-count').textContent = '0'; el('t-out').textContent = '-';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

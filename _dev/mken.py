@@ -714,6 +714,472 @@ PAGES = {
     </details>
   </div>
 '''),
+ 'pdf-page-number': dict(
+   title='Add page numbers to a PDF — free, nothing uploaded',
+   desc='Number the pages of a PDF in your browser. Position, format (1, 1 / 12, - 1 -, Page 1 of 12), start number, font size and a range so the cover is skipped.',
+   og_t='Add page numbers to a PDF without uploading it',
+   og_d='Position, format, start number and page range. Written into the file, in your browser.',
+   name='PDF page numbers', cat='UtilitiesApplication',
+   aria={'파일 선택': 'Choose a file', '페이지 번호 위치 미리보기': 'Preview of the page number position'},
+   attrs=[],
+   body='''  <h2>When you need it</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">After merging documents</strong> — files that each had their own numbering end up with numbers that jump around. Numbering the merged file gives one sequence from start to end.<br>
+      <strong style="color:var(--text)">Scanned paper</strong> — pages that never had numbers, before filing or submitting them.<br>
+      <strong style="color:var(--text)">Skipping the cover</strong> — set the range to "2-" and the start number to 1 and the page after the cover becomes page 1.<br>
+      <strong style="color:var(--text)">Double-sided printing</strong> — "Bottom outside" puts odd pages on the right and even pages on the left, so the numbers sit at the outer edge when the pages are bound like a book.
+    </p>
+  </div>
+
+  <h2>Why not upload the file</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Documents that need page numbers are usually the ones that matter — contracts, theses, reports, legal exhibits. Most online tools send the whole file
+      to a server before adding a single digit. This page reads, numbers and saves the PDF with your own browser. It works offline once loaded, there is
+      no size cap beyond your device's memory, and nothing is kept when you close the tab. The existing content is never removed: the number is drawn on top,
+      so if the document already has numbers you may see two. Move yours to the opposite edge or adjust the margin — the preview shows exactly where it will go.
+      Landscape and rotated pages get the number in the same place relative to how the page is viewed.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my PDF uploaded?</summary>
+      <p>No. Reading, numbering and saving all happen inside your browser; the page keeps working with the internet switched off. It was built for files you would not hand to a stranger.</p>
+    </details>
+    <details>
+      <summary>How do I leave the cover unnumbered and start the body at 1?</summary>
+      <p>Enter <code>2-</code> in "Pages to number" and keep the start number at 1. Pages 2 to the end get 1, 2, 3… With a two-page cover use <code>3-</code>.</p>
+    </details>
+    <details>
+      <summary>What is the 12 in "1 / 12"?</summary>
+      <p>The number of the last page that gets numbered. In a 12-page file with the cover skipped and numbering starting at 1 on page 2, the numbers run "1 / 11" to "11 / 11".</p>
+    </details>
+    <details>
+      <summary>Can I use another language or a custom label?</summary>
+      <p>The formats use digits and the words "Page", "of" and "p." because those can be written with the font every PDF reader has built in. Other text would require embedding a font file, which makes the PDF much larger, so it is deliberately not offered.</p>
+    </details>
+    <details>
+      <summary>Does the text stay selectable? Is quality affected?</summary>
+      <p>Yes and no, respectively. Pages are not turned into images; only a small text object is added to each page. The original text remains searchable and copyable, images keep their resolution, and the file grows by a few kilobytes.</p>
+    </details>
+    <details>
+      <summary>What about password-protected PDFs?</summary>
+      <p>Files with an open password cannot be read and a message tells you so. Remove the password in your PDF reader, save, and try again.</p>
+    </details>
+  </div>
+'''),
+ 'pdf-to-text': dict(
+   title='Extract text from a PDF — copy or save as .txt, free, no upload',
+   desc='Pull the text out of a PDF in page order and copy it or save it as .txt, in your browser. Page range, paragraph mode, and a warning when the PDF is only a scan.',
+   og_t='Extract text from a PDF without uploading it',
+   og_d='All the text in page order, copy or save as .txt. Paragraph mode and scanned-PDF detection.',
+   name='PDF to text', cat='UtilitiesApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Why copying from a viewer scrambles the text</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      A PDF stores text as "draw these characters at these coordinates". There is no notion of a line or a paragraph in the file, which is why
+      drag-selecting in a viewer interleaves two columns or drags the page header into the middle of a sentence. This page reads the coordinates,
+      gathers characters at the same height into one line, stacks the lines top to bottom and joins the pages in order. "Merge into paragraphs"
+      then removes the forced break at the end of each line and keeps a blank line only where the gap between lines is wide — between paragraphs.
+    </p>
+  </div>
+
+  <h2>If nothing comes out, it is a scan</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      A PDF made by scanning paper or photographing a page looks like text but is a <strong style="color:var(--text)">picture</strong>. The file holds no
+      characters, so no tool can extract them as they are; that takes OCR (optical character recognition), which guesses letters from their shapes and
+      makes mistakes. This page counts such pages as "pages without text" and tells you when the whole file is like that. If you can get the original
+      document (Word, Google Docs), it will always be more accurate than OCR.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — the PDFs people need text from are contracts, medical reports, bank statements
+      and papers under review. Sending them to a conversion server is a risk you do not need to take: the extraction here happens on your device, works offline,
+      and leaves nothing behind when the tab closes.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my file uploaded?</summary>
+      <p>No. The text is read out by your own browser; the page works with the internet switched off. Nothing is stored.</p>
+    </details>
+    <details>
+      <summary>Tables come out broken</summary>
+      <p>Table cells have positions but no cell boundaries in the text data, so the cells of one row are joined with spaces. Keep "Keep lines as shown" so at least the rows are right. To move a table into a spreadsheet, paste a row and use "Text to columns".</p>
+    </details>
+    <details>
+      <summary>The characters are in the wrong order</summary>
+      <p>Two-column layouts and vertical text put characters from different columns at the same height, so they can be merged into one line. Some PDFs also deliberately scramble their fonts to prevent copying; those cannot be extracted correctly by any tool.</p>
+    </details>
+    <details>
+      <summary>Letters show as boxes or question marks</summary>
+      <p>The PDF lacks the font mapping needed to turn glyphs back into characters. A PDF exported again with "embed fonts" from the program that made it will work. If someone sent you the file, only they can fix that.</p>
+    </details>
+    <details>
+      <summary>How many pages can it handle?</summary>
+      <p>Hundreds. Pages are read one at a time with a progress message. To extract only part of a document, enter a page range such as <code>1-3, 7</code>.</p>
+    </details>
+    <details>
+      <summary>Which encoding is the .txt?</summary>
+      <p>UTF-8, which every modern editor and operating system reads correctly. If an old program shows garbled characters, open the file in Notepad and re-save it with a different encoding.</p>
+    </details>
+  </div>
+'''),
+ 'favicon': dict(
+   title='Favicon generator — PNG to ICO and every size, free, no upload',
+   desc='One logo becomes favicon.ico (16·32·48), PNG icons for iPhone and Android (180·192·512), a site.webmanifest and the HTML to paste. Nothing is uploaded.',
+   og_t='Favicon generator — one logo, every size, in your browser',
+   og_d='favicon.ico, PNG icons from 16 to 512, site.webmanifest and the HTML snippet, all in one ZIP.',
+   name='Favicon generator', cat='DesignApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Why so many sizes</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">favicon.ico</strong> — browser tabs, bookmarks, the address bar. One file holding 16, 32 and 48 px versions so the browser picks the right one for the screen scale. The oldest format, understood everywhere.<br>
+      <strong style="color:var(--text)">favicon-16x16 · 32x32.png</strong> — for modern browsers that ask for PNG rather than ICO.<br>
+      <strong style="color:var(--text)">apple-touch-icon.png (180)</strong> — the icon iPhone and iPad show for "Add to Home Screen". iOS rounds the corners itself.<br>
+      <strong style="color:var(--text)">android-chrome-192 · 512.png + site.webmanifest</strong> — Android home screens and installable web apps (PWA); 512 is used on the install screen and splash.<br>
+      Detail disappears as icons shrink, so a logo with words in it is unreadable at 16 px. For the tab icon, a symbol or a single initial works best.
+    </p>
+  </div>
+
+  <h2>How to install them</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Unzip the files into the <strong style="color:var(--text)">root folder</strong> of your site (where index.html lives) and paste the code into the <code>&lt;head&gt;</code> of every page.
+      If the files live in a subfolder, change the leading <code>/</code> in the code to that folder. Browsers cache favicons aggressively: if the new one does not show,
+      open <code>/favicon.ico</code> directly in a new tab or clear the cache. WordPress users can simply upload the 512 PNG under Appearance → Customize → Site Icon.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — a logo you are preparing a favicon for is often not public yet. The resizing, the ICO and the ZIP are
+      all produced on your device; the picture is never uploaded, and the page works offline.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my logo uploaded?</summary>
+      <p>No. Resizing, packing the ICO and PNGs and building the ZIP all happen inside your browser. It works with the internet switched off, and nothing of an unreleased logo is left anywhere.</p>
+    </details>
+    <details>
+      <summary>What picture should I start from?</summary>
+      <p>Something close to square and at least 512 px keeps every size sharp; an SVG stays sharp at any size. A PNG with a transparent background is ideal. If the background is white, either keep it or remove it first with <a href="image-transparent.html">make a white background transparent</a>.</p>
+    </details>
+    <details>
+      <summary>Can I get away with just the ICO?</summary>
+      <p>For the tab icon alone, "Save favicon.ico only" is enough. iPhone home screens, Android and installable web apps ignore ICO and need PNG, so for phones use the full ZIP.</p>
+    </details>
+    <details>
+      <summary>Why add padding?</summary>
+      <p>Android masks icons into circles and other shapes, and artwork that reaches the edge gets clipped. 10–15% padding is safe for any mask. Tab icons, on the other hand, look bigger when they fill the square.</p>
+    </details>
+    <details>
+      <summary>The transparent background looks black somewhere</summary>
+      <p>The ICO stores 32-bit pixels with alpha, so transparency is preserved. A few old Windows programs render ICO transparency as black; browsers do not. If it worries you, set the background to white.</p>
+    </details>
+    <details>
+      <summary>What is the site name in site.webmanifest for?</summary>
+      <p>It is the label shown under the icon when the site is added to an Android home screen. Leave it empty and the browser uses the page title. You can edit the file later in any text editor.</p>
+    </details>
+  </div>
+'''),
+ 'image-palette': dict(
+   title='Extract colors from an image — HEX codes and palette, free',
+   desc='Dominant colors of a photo or logo as HEX and RGB with their share. Click to pick any pixel\'s exact color. Save as PNG or CSS variables. Nothing is uploaded.',
+   og_t='Extract colors from a photo without uploading it',
+   og_d='Dominant colors as HEX and RGB with their share. Click to pick a pixel. Save as PNG or CSS variables.',
+   name='Image color palette', cat='DesignApplication',
+   aria={'파일 선택': 'Choose a file', '사진 — 클릭하면 그 자리 색을 집습니다': 'Photo — click to pick the color at that spot'},
+   attrs=[],
+   body='''  <h2>What it is for</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Recovering brand colors</strong> — you have the logo file but not the color codes. Pick them here and hand a designer the exact HEX.<br>
+      <strong style="color:var(--text)">Backgrounds and text that fit a photo</strong> — a thumbnail or social card built on a color taken from the photo itself never clashes with it.<br>
+      <strong style="color:var(--text)">Interior and fashion references</strong> — keep the color combination of a picture you like as codes and reproduce the mood later.<br>
+      <strong style="color:var(--text)">Web and app themes</strong> — "Copy as CSS variables" gives you <code>--color-1: #…;</code> lines ready to paste into a stylesheet.
+    </p>
+  </div>
+
+  <h2>How the colors are chosen</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      All the pixels are treated as one box in color space, and the box is split in half along its widest axis until there are as many boxes as colors
+      you asked for (median cut). The average of each box is a palette color and the number of pixels in it is the share. Small accent colors therefore only
+      appear when you raise the count, and a gradient photo can produce several similar colors. When you need the exact value at one spot, click the picture:
+      that reads the original pixel directly.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — the photo is reduced and counted on your device. Nothing is uploaded, which is what you want for
+      unreleased product shots or a logo that is not public yet, and the page works offline.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my photo uploaded?</summary>
+      <p>No. The colors are counted inside your browser and the picture goes nowhere. It works with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>The logo color is slightly off</summary>
+      <p>A palette color is an average of similar pixels, so JPEG noise and anti-aliased edges can shift it a few steps. For the exact value, click a flat area of the logo — that shows the pixel as it is. A PNG or SVG original is more accurate than a JPEG.</p>
+    </details>
+    <details>
+      <summary>White background comes first</summary>
+      <p>If the background is most of the picture, it naturally has the largest share. Turn on "Ignore white/black background" to leave out nearly white and nearly black pixels so only the object's colors remain.</p>
+    </details>
+    <details>
+      <summary>What does the percentage mean?</summary>
+      <p>The share of all pixels assigned to that color. With the background ignored, it is the share of the remaining pixels.</p>
+    </details>
+    <details>
+      <summary>Does it work with large photos?</summary>
+      <p>Yes. Counting is done on a reduced copy, so even photos of tens of millions of pixels finish instantly. The color picked by clicking still comes from the full-resolution image.</p>
+    </details>
+  </div>
+'''),
+ 'json-format': dict(
+   title='JSON formatter, validator and minifier — free, nothing sent',
+   desc='Pretty-print or minify JSON in your browser, see the line and column of a syntax error, sort keys, repair trailing commas and unquoted keys. Nothing is sent.',
+   og_t='JSON formatter and validator that never sees your data',
+   og_d='Pretty-print, minify, pinpoint syntax errors, sort keys, repair common slips. Runs in your browser.',
+   name='JSON formatter', cat='DeveloperApplication',
+   aria={},
+   attrs=[],
+   body='''  <h2>Why API responses and config files should not go to a random site</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      The moment you need to format JSON is usually the moment you are looking at an <strong style="color:var(--text)">API response, a config file, a log,
+      or a request body with a token in it</strong> — data that often contains user records or secret keys. Most "JSON formatter" sites post your input to a server,
+      and some wrap it in analytics scripts. This page uses only the browser's own <code>JSON.parse</code> and <code>JSON.stringify</code>. It keeps working offline,
+      and a refresh clears the input.
+    </p>
+  </div>
+
+  <h2>What "repair common slips" does</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Strict JSON needs double quotes around keys, allows no comma after the last item and no comments. Text copied from JavaScript or a config file often breaks
+      those rules. With the option on, the page <strong style="color:var(--text)">removes trailing commas, quotes bare keys, turns single quotes into double quotes and strips
+      <code>//</code> and <code>/* */</code> comments</strong> before parsing again. Nothing inside string values is touched. When a repair was needed the result says
+      "Valid after repair", so switch the option off when you need to know whether the original is strictly valid.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my JSON sent to a server?</summary>
+      <p>No. Formatting and validation run inside your browser and nothing is transmitted. It works with the internet switched off, and nothing is stored — a reload clears it.</p>
+    </details>
+    <details>
+      <summary>How do I read the error position?</summary>
+      <p>"Line 3, column 14" means everything up to that point parsed correctly. The problem is usually right there or in the item just before it — a missing comma, quote or bracket. The output box shows that line with a caret under the position.</p>
+    </details>
+    <details>
+      <summary>Large numbers come out changed</summary>
+      <p>JavaScript keeps integers exact only up to 2^53 (about 9 quadrillion). Longer IDs may lose their last digits. Store such values as strings in the source; this page warns when it sees a number that could be affected.</p>
+    </details>
+    <details>
+      <summary>Does the key order change?</summary>
+      <p>With "Keep order" the original order is preserved. "Alphabetical" sorts the keys of every object at every level. Arrays are never reordered.</p>
+    </details>
+    <details>
+      <summary>Non-ASCII characters show as \\uXXXX — or I want them to</summary>
+      <p>By default characters are kept as they are. Turn on "Escape non-ASCII" when a legacy system needs pure ASCII. The other way round, \\uXXXX escapes in the input are turned back into characters automatically.</p>
+    </details>
+    <details>
+      <summary>How large a file can it handle?</summary>
+      <p>Tens of megabytes without trouble; beyond that the browser may pause for a moment. Use "Open file" or drop a file onto the input box.</p>
+    </details>
+  </div>
+'''),
+ 'file-hash': dict(
+   title='File hash and checksum — SHA-256, SHA-1, MD5, free, no upload',
+   desc='SHA-256, SHA-512, SHA-1 and MD5 of files or text, computed in your browser and compared with a published checksum. Several files at once; large files read in chunks.',
+   og_t='File hash and checksum checker that never uploads the file',
+   og_d='SHA-256, SHA-512, SHA-1 and MD5 of files or text, matched against a published checksum.',
+   name='File hash', cat='SecurityApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Why verify a checksum</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Publishers of installers and operating-system images list a <strong style="color:var(--text)">SHA-256 value</strong> next to the download. If the file you
+      received produces the same value, not a single byte changed in transit and nobody swapped the file on the way. A one-character change produces a completely
+      different hash, so comparing a few characters by eye is already strong evidence — this page compares the whole value for you. The same idea tells you whether a
+      backup still matches the original or whether a document you were emailed was altered.
+    </p>
+  </div>
+
+  <h2>Which algorithm</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">SHA-256</strong> — the current standard; most published checksums use it.<br>
+      <strong style="color:var(--text)">SHA-512</strong> — a longer digest, used by some Linux distributions.<br>
+      <strong style="color:var(--text)">SHA-1 · MD5</strong> — older; collisions can be manufactured, so they are no longer used for security. They remain common for
+      legacy checksums and for detecting transfer errors, which is why they are still offered.<br>
+      SHA digests come from the browser's built-in <code>crypto.subtle</code>; MD5 is not available there, so it is implemented in the page (RFC 1321). Files are read in
+      chunks rather than loaded whole, so multi-gigabyte files work.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — the files people verify are installers, disk images and internal documents. Uploading
+      gigabytes to a hashing service would be slow and pointless; here the bytes never leave your machine and the page works offline.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my file uploaded?</summary>
+      <p>No. Hashing happens entirely in your browser and the file goes nowhere. It works with the internet switched off, which is why even large installers and internal data are fine to check here.</p>
+    </details>
+    <details>
+      <summary>The value differs from the publisher's</summary>
+      <p>First make sure the algorithm matches — a SHA-256 and an MD5 of the same file are naturally different. If it still differs, the download was probably interrupted or you have a different version. Download again; if it still does not match, do not run the file.</p>
+    </details>
+    <details>
+      <summary>The published checksum has a prefix like "sha256: "</summary>
+      <p>Paste it as it is. Characters that are not hexadecimal, and spaces, are ignored in the comparison. A whole line in the "hash  filename" format works too — only the hash part is compared.</p>
+    </details>
+    <details>
+      <summary>How long does a large file take?</summary>
+      <p>A few seconds per gigabyte on an ordinary computer, with a progress indicator. Each extra algorithm you tick adds time.</p>
+    </details>
+    <details>
+      <summary>What is the text hash for?</summary>
+      <p>When a program or configuration needs the hash of a specific string, or to compare two long texts by a short value. Text is encoded as UTF-8 before hashing, so the result matches other tools.</p>
+    </details>
+  </div>
+'''),
+ 'svg-to-png': dict(
+   title='Convert SVG to PNG at any size — free, batch, no upload',
+   desc='Render SVG to PNG, JPG or WebP at an exact pixel width, height or scale, with a transparent, white or custom background. Many files to one ZIP; paste SVG code too.',
+   og_t='SVG to PNG at any size, in your browser',
+   og_d='Exact pixel size or scale, transparent or colored background, PNG, JPG or WebP, many files to one ZIP.',
+   name='SVG to PNG', cat='MultimediaApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Why convert SVG to PNG</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      SVG is a vector format that never pixelates, but <strong style="color:var(--text)">older versions of PowerPoint and Word, social networks, many shop admin panels and
+      email</strong> either refuse SVG or render it badly. Exporting a PNG once at the size you need makes the graphic usable everywhere. A 2× or 3× scale stays crisp on
+      high-density (Retina) screens, and transparency is preserved in PNG and WebP. The conversion uses the browser's own SVG renderer, so the result looks exactly as the
+      SVG does on screen.
+    </p>
+  </div>
+
+  <h2>SVGs without a size · fonts · external images</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">No width/height</strong> — the aspect ratio is taken from the viewBox and fitted to the pixel width you choose. Without a viewBox the file
+      is treated as 300×150, so set the pixel size yourself.<br>
+      <strong style="color:var(--text)">Fonts</strong> — text inside an SVG is drawn with the fonts installed on this computer. If the designer's machine had different fonts the
+      shapes will differ; SVGs with text converted to outlines are safe.<br>
+      <strong style="color:var(--text)">External images and stylesheets</strong> — <code>&lt;image href="http://…"&gt;</code> pointing at other files and external CSS are not loaded
+      for security reasons. Images embedded as data URIs inside the SVG do work.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — unreleased logos and internal diagrams are exactly what gets converted. Nothing is uploaded, and the
+      page works offline once loaded.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my file uploaded?</summary>
+      <p>No. The SVG is read, rendered and saved as PNG inside your browser; it works with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>Edges look blurry or jagged</summary>
+      <p>At small sizes thin lines fall inside a single pixel and blur. Render at twice the size you will display and let the page or document scale it down — that is what the 2× and 3× scale options are for.</p>
+    </details>
+    <details>
+      <summary>The transparent background came out white or black</summary>
+      <p>JPG has no transparency, so transparent areas become white. Choose PNG or WebP to keep transparency. To preview on a dark background, set the background to a custom color.</p>
+    </details>
+    <details>
+      <summary>Text in the SVG uses the wrong font</summary>
+      <p>SVG files name fonts but do not contain them, so a missing font is replaced. Convert text to outlines in your drawing program before exporting and it will look the same everywhere.</p>
+    </details>
+    <details>
+      <summary>What is the maximum size?</summary>
+      <p>8192 pixels on a side, the limit of what a browser canvas can draw in one piece. For very large print graphics, use the SVG itself.</p>
+    </details>
+    <details>
+      <summary>Will the PNG be larger than the SVG?</summary>
+      <p>Usually, yes: an SVG stores shapes, a PNG stores every pixel. On the web keep the SVG wherever possible and convert only where PNG is required. The PNG can be shrunk further with <a href="image-compress.html">compress image</a>.</p>
+    </details>
+  </div>
+'''),
+ 'base64': dict(
+   title='Base64 encode and decode — text, files, images to data URI, free',
+   desc='Text to Base64 and back as UTF-8, files and images to Base64 data URIs, Base64 back to a file, all in your browser. URL-safe variant and MIME line breaks.',
+   og_t='Base64 encoder and decoder that never sends your data',
+   og_d='Text ↔ Base64 (UTF-8), file ↔ data URI, URL-safe and MIME variants. Runs in your browser.',
+   name='Base64 encoder/decoder', cat='DeveloperApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Base64 is not encryption</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Base64 is a <strong style="color:var(--text)">notation</strong> that writes bytes with 64 characters (A–Z, a–z, 0–9, + and /). Anyone can reverse it, so it hides nothing.
+      It exists for places that can only carry text and still need to hold a file: small images inside HTML and CSS (data URIs), email attachments (MIME), files inside JSON,
+      parts of API tokens. The output is about 33% larger than the input, so it is the wrong tool for big files. Text is converted to UTF-8 bytes first, which is why the result
+      matches other tools and accented or non-Latin characters survive the round trip.
+    </p>
+  </div>
+
+  <h2>URL-safe and line breaks</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      The <code>+</code> and <code>/</code> of standard Base64 have meanings in a URL and get mangled. The <strong style="color:var(--text)">URL-safe</strong> variant replaces them
+      with <code>-</code> and <code>_</code> and drops the trailing <code>=</code>; JWT tokens and values in query strings use it. Email (MIME) breaks lines every 76 characters.
+      When decoding, any variant is accepted and line breaks and spaces are ignored. If the input is not Base64 at all — a forbidden character or an impossible length — the page
+      tells you where the problem is.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — what people paste here is tokens, credentials and internal files. Nothing is transmitted; the page works
+      offline and leaves nothing behind.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my input sent anywhere?</summary>
+      <p>No. Conversion happens in your browser only; it works with the internet switched off. Tokens and internal files you paste are not stored anywhere.</p>
+    </details>
+    <details>
+      <summary>Decoded text contains garbled characters</summary>
+      <p>The Base64 probably encodes bytes in an encoding other than UTF-8, or it is not text at all. The page decodes as UTF-8 and warns when the bytes are not valid text. Use "Base64 → file" to save the bytes and open them with the right program.</p>
+    </details>
+    <details>
+      <summary>How do I put a data URI in HTML?</summary>
+      <p>For an image, <code>&lt;img src="data:image/png;base64,…"&gt;</code>; in CSS, <code>background-image: url("data:…")</code>. Pick that output form and copy it as is. Good for icons of a few kilobytes; large pictures are better kept as files.</p>
+    </details>
+    <details>
+      <summary>How is the file type detected when restoring?</summary>
+      <p>From the MIME type in a data URI, or otherwise from the first bytes (PNG, JPEG, GIF, PDF, ZIP, WebP, SVG). If it cannot be determined the file is saved as .bin — give it a name with the right extension.</p>
+    </details>
+    <details>
+      <summary>Does it work with large files?</summary>
+      <p>Up to tens of megabytes, though the text boxes get slow. Base64 was never meant for large files; under 5MB is recommended.</p>
+    </details>
+  </div>
+'''),
 }
 
 def convert(slug):
@@ -763,7 +1229,7 @@ def convert(slug):
         if key not in EN: missing.append(key); return m.group(0)
         return m.group(1).replace(m.group(0), '')
     # 사전의 '\n' 은 JS 이스케이프다. 속성값에서는 줄바꿈 문자 참조로 바꿔야 자리글이 여러 줄로 보인다.
-    def ph(key): return EN.get(key, '?').replace('\\n', '&#10;')
+    def ph(key): return EN.get(key, '?').replace('\\n', '&#10;').replace('"', '&quot;')   # 속성값 안의 큰따옴표
     h = re.sub(r'placeholder="[^"]*"([^>]*?) data-i18n-ph="([^"]+)"', lambda m: 'placeholder="' + ph(m.group(2)) + '"' + m.group(1), h)
     h = re.sub(r' data-i18n-ph="([^"]+)"(\s[^>]*?)placeholder="[^"]*"', lambda m: m.group(2) + 'placeholder="' + ph(m.group(1)) + '"', h)
     assert 'data-i18n' not in h, ('data-i18n 잔존', re.findall(r'data-i18n[^ >]*', h)[:5])

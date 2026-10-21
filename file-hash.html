@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파일 해시 확인 - SHA-256·SHA-1·MD5 체크섬 계산 무료 | 툴모아</title>
+<meta name="description" content="파일이나 글의 SHA-256·SHA-512·SHA-1·MD5 해시값을 계산하고, 배포처가 적어 둔 체크섬과 같은지 바로 대조합니다. 여러 파일 한 번에, 큰 파일도 조각으로 읽어 처리. 파일은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/file-hash.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/file-hash.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/file-hash.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/file-hash.html">
+<meta property="og:title" content="파일 해시 확인 · SHA-256 · MD5 체크섬">
+<meta property="og:description" content="파일·글의 해시값 계산과 체크섬 대조. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>#️⃣</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"파일 해시 확인","applicationCategory":"SecurityApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .hs-list { list-style:none; margin:16px 0 0; padding:0; }
+  .hs-list li { border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; background:var(--surface); }
+  .hs-list .fname { font-weight:700; word-break:break-all; }
+  .hs-list .fmeta { color:var(--muted); font-size:13px; margin-left:8px; }
+  .hs-row { display:grid; grid-template-columns:72px 1fr auto; gap:8px; align-items:center; margin-top:6px; font-size:13px; }
+  .hs-row .algo { color:var(--muted); font-weight:600; }
+  .hs-row code { font-family:ui-monospace, Consolas, monospace; font-size:12px; word-break:break-all; }
+  .hs-match { font-weight:700; color:var(--ok); }
+  .hs-nomatch { font-weight:700; color:var(--danger); }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/file-hash.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/file-hash.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="파일 해시 확인 · SHA-256 · MD5 체크섬 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="파일 해시 확인 · SHA-256 · MD5 체크섬">
+<meta name="twitter:description" content="파일·글의 해시값 계산과 체크섬 대조. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/file-hash.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"파일이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 해시 계산은 전부 브라우저 안에서 이뤄지고 파일은 어디로도 가지 않습니다. 인터넷을 끊어도 동작합니다. 그래서 내부 자료나 설치 파일처럼 큰 파일도 안심하고 넣을 수 있습니다."}},{"@type":"Question","name":"값이 배포처와 달라요","acceptedAnswer":{"@type":"Answer","text":"먼저 알고리즘이 같은지 보세요(SHA-256 값과 MD5 값은 당연히 다릅니다). 같은데도 다르면 내려받기가 중간에 끊겨 파일이 불완전하거나, 다른 버전을 받은 것입니다. 다시 내려받아 보세요. 그래도 다르면 그 파일을 실행하지 마세요."}},{"@type":"Question","name":"대조할 체크섬에 \"sha256: \" 같은 접두어가 붙어 있어요","acceptedAnswer":{"@type":"Answer","text":"그대로 붙여 넣어도 됩니다. 16진수가 아닌 글자와 공백은 무시하고 비교합니다. \"파일명 해시\" 형식으로 한 줄을 통째로 붙여도 해시 부분만 찾아 대조합니다."}},{"@type":"Question","name":"큰 파일은 얼마나 걸리나요?","acceptedAnswer":{"@type":"Answer","text":"보통 컴퓨터에서 1GB에 몇 초 정도입니다. 진행률을 표시합니다. 계산할 해시를 여러 개 켜면 그만큼 더 걸립니다."}},{"@type":"Question","name":"글의 해시는 어디에 쓰나요?","acceptedAnswer":{"@type":"Answer","text":"프로그래밍이나 설정에서 특정 문자열의 해시가 필요할 때, 또는 두 긴 글이 완전히 같은지 짧은 값으로 비교할 때 씁니다. 글은 UTF-8 바이트로 바꿔 계산하므로 다른 도구와 같은 값이 나옵니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"파일 해시 확인 · SHA-256 · MD5 체크섬","item":"https://toolmoa.github.io/file-hash.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="hs.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 쪽 번호</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF→텍스트</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="image-palette.html" data-i18n="nav.pl">색상 추출</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG→PNG</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64</a>
+      <a href="file-hash.html" aria-current="page" data-i18n="nav.hs">파일 해시</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="hs.h1">파일 해시 확인 · SHA-256 · MD5 체크섬</h1>
+  <p class="lead" data-i18n="hs.lead">내려받은 파일이 배포처가 올린 것과 같은지, 전송 중 깨지지 않았는지 확인합니다. 파일의 SHA-256·SHA-512·SHA-1·MD5 값을 계산하고, 적어 둔 체크섬을 붙여 넣으면 같은지 바로 알려 줍니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 파일이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">#️⃣</span>
+    <span class="dz-main" data-i18n="hs.drop">파일을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="hs.drop2">어떤 파일이든 · 여러 개 가능 · 수 GB 파일도 조각으로 읽어 계산합니다</span>
+    <input type="file" id="file" multiple>
+  </div>
+
+  <div class="card">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+      <div class="field" style="margin:0">
+        <label data-i18n="hs.algos">계산할 해시</label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px 16px;padding-top:6px">
+          <label class="inline-check" style="margin:0"><input type="checkbox" id="a-sha256" checked> <span>SHA-256</span></label>
+          <label class="inline-check" style="margin:0"><input type="checkbox" id="a-sha1"> <span>SHA-1</span></label>
+          <label class="inline-check" style="margin:0"><input type="checkbox" id="a-md5"> <span>MD5</span></label>
+          <label class="inline-check" style="margin:0"><input type="checkbox" id="a-sha512"> <span>SHA-512</span></label>
+        </div>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="expect" data-i18n="hs.expect">대조할 체크섬 (선택)</label>
+        <input type="text" id="expect" placeholder="배포처에 적힌 값을 붙여 넣으세요" data-i18n-ph="hs.expectPh" spellcheck="false" autocomplete="off">
+        <div class="hint" data-i18n="hs.expectHint">대소문자·공백은 무시합니다. 어느 알고리즘 값이든 일치하면 표시합니다.</div>
+      </div>
+      <div class="field" style="margin:0;align-self:end">
+        <label class="inline-check" style="margin:0">
+          <input type="checkbox" id="upper">
+          <span data-i18n="hs.upper">대문자로 표시</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+  <ul class="hs-list" id="list"></ul>
+  <div class="btn-row" id="actions" hidden>
+    <button class="btn secondary" id="btn-copyall" data-i18n="hs.copyAll">전부 복사 (파일명 · 해시)</button>
+    <button class="btn secondary" id="btn-clear" data-i18n="hs.clear">목록 비우기</button>
+    <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+  </div>
+
+  <h2 style="margin-top:28px" data-i18n="hs.textH">글자의 해시</h2>
+  <div class="card">
+    <div class="field" style="margin:0">
+      <label for="text" data-i18n="hs.text">글 입력 (UTF-8 기준)</label>
+      <textarea id="text" style="min-height:80px" placeholder="hello" spellcheck="false"></textarea>
+    </div>
+    <div class="hs-row" style="grid-template-columns:72px 1fr auto"><span class="algo">SHA-256</span><code id="tx-sha256">-</code><button class="btn small secondary" type="button" data-copy="tx-sha256" data-i18n="hs.copy">복사</button></div>
+    <div class="hs-row"><span class="algo">SHA-1</span><code id="tx-sha1">-</code><button class="btn small secondary" type="button" data-copy="tx-sha1" data-i18n="hs.copy">복사</button></div>
+    <div class="hs-row"><span class="algo">MD5</span><code id="tx-md5">-</code><button class="btn small secondary" type="button" data-copy="tx-md5" data-i18n="hs.copy">복사</button></div>
+    <div class="hs-row"><span class="algo">SHA-512</span><code id="tx-sha512">-</code><button class="btn small secondary" type="button" data-copy="tx-sha512" data-i18n="hs.copy">복사</button></div>
+    <div class="hint" data-i18n="hs.textHint">줄 끝의 줄바꿈까지 그대로 계산합니다. 리눅스의 echo 는 끝에 줄바꿈을 붙이므로 값이 다르면 그 차이입니다.</div>
+    <div class="hint" id="copy-msg2" role="status" aria-live="polite"></div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="hs.cross">해시는 내용이 같은지 확인하는 도구이고 암호가 아닙니다. 안전한 비밀번호는 <a href="password-gen.html">비밀번호 생성기</a>에서 만드세요. 두 글의 어디가 다른지 보려면 <a href="text-diff.html">텍스트 비교</a>입니다.</p>
+
+  <div class="ad-slot"><!-- AD:FILEHASH --></div>
+
+  <h2 data-ko-only>체크섬을 왜 확인하나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      프로그램 설치 파일이나 운영체제 이미지를 내려받으면 배포처가 <strong style="color:var(--text)">SHA-256 값</strong>을 함께 적어 둡니다.
+      내려받은 파일의 값이 그와 같으면 전송 중 한 바이트도 바뀌지 않았고, 누가 중간에서 다른 파일로 바꿔치기하지도 않았다는 뜻입니다.
+      한 글자만 달라도 해시는 완전히 다른 값이 되므로, 앞뒤 몇 글자만 눈으로 비교해도 충분합니다 — 이 페이지는 전체를 대조해 줍니다.
+      같은 원리로 백업한 파일이 원본과 같은지, 메일로 받은 문서가 중간에 바뀌지 않았는지도 확인할 수 있습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>어떤 알고리즘을 쓰나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">SHA-256</strong> — 지금 표준. 배포처 체크섬은 대부분 이것입니다.<br>
+      <strong style="color:var(--text)">SHA-512</strong> — 더 긴 값. 일부 리눅스 배포판이 씁니다.<br>
+      <strong style="color:var(--text)">SHA-1 · MD5</strong> — 오래된 방식으로, 일부러 같은 값을 만드는 공격이 알려져 보안 용도로는 쓰지 않습니다. 그래도 옛 자료의 체크섬이나 전송 오류 확인에는 여전히 쓰이므로 두었습니다.<br>
+      SHA 계열은 브라우저에 내장된 <code>crypto.subtle</code>로 계산하고, MD5는 브라우저가 지원하지 않아 직접 구현했습니다(RFC 1321).
+      파일은 통째로 메모리에 올리지 않고 조각으로 읽어 계산하므로 수 GB 파일도 됩니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>파일이 서버로 올라가나요?</summary>
+      <p>아니요. 해시 계산은 전부 브라우저 안에서 이뤄지고 파일은 어디로도 가지 않습니다. 인터넷을 끊어도 동작합니다. 그래서 내부 자료나 설치 파일처럼 큰 파일도 안심하고 넣을 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>값이 배포처와 달라요</summary>
+      <p>먼저 알고리즘이 같은지 보세요(SHA-256 값과 MD5 값은 당연히 다릅니다). 같은데도 다르면 내려받기가 중간에 끊겨 파일이 불완전하거나, 다른 버전을 받은 것입니다. 다시 내려받아 보세요. 그래도 다르면 그 파일을 실행하지 마세요.</p>
+    </details>
+    <details>
+      <summary>대조할 체크섬에 "sha256: " 같은 접두어가 붙어 있어요</summary>
+      <p>그대로 붙여 넣어도 됩니다. 16진수가 아닌 글자와 공백은 무시하고 비교합니다. "파일명  해시" 형식으로 한 줄을 통째로 붙여도 해시 부분만 찾아 대조합니다.</p>
+    </details>
+    <details>
+      <summary>큰 파일은 얼마나 걸리나요?</summary>
+      <p>보통 컴퓨터에서 1GB에 몇 초 정도입니다. 진행률을 표시합니다. 계산할 해시를 여러 개 켜면 그만큼 더 걸립니다.</p>
+    </details>
+    <details>
+      <summary>글의 해시는 어디에 쓰나요?</summary>
+      <p>프로그래밍이나 설정에서 특정 문자열의 해시가 필요할 때, 또는 두 긴 글이 완전히 같은지 짧은 값으로 비교할 때 씁니다. 글은 UTF-8 바이트로 바꿔 계산하므로 다른 도구와 같은 값이 나옵니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">이미지 크기 조절·리사이즈</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">흰 배경 투명하게 만들기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 페이지 번호 넣기</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF 텍스트 추출</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="image-palette.html" data-i18n="nav.pl">사진 색상 추출·색상 코드 뽑기</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘 만들기 (PNG→ICO)</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG PNG 변환</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리·검증·압축</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64 인코딩·디코딩</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), msg = el('msg'), list = el('list'), expectIn = el('expect'), upperCb = el('upper'), textIn = el('text');
+  var ALGOS = [['sha256', 'SHA-256'], ['sha1', 'SHA-1'], ['md5', 'MD5'], ['sha512', 'SHA-512']];
+  var items = [], timer = null, textTimer = null, seq = 0;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : b < 1073741824 ? (b / 1048576).toFixed(2) + ' MB' : (b / 1073741824).toFixed(2) + ' GB'; }
+  function hex(buf) { var u = new Uint8Array(buf), s = ''; for (var i = 0; i < u.length; i++) s += (u[i] < 16 ? '0' : '') + u[i].toString(16); return s; }
+  function chosen() { return ALGOS.filter(function (a) { return el('a-' + a[0]).checked; }).map(function (a) { return a[0]; }); }
+
+  // ===== MD5 (RFC 1321) — 브라우저 crypto.subtle 에 없어 직접 구현. 조각(chunk) 단위로 이어서 계산한다 =====
+  function Md5() { this.h = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]; this.buf = new Uint8Array(64); this.bufLen = 0; this.total = 0; }
+  var K = [], S = [7, 12, 17, 22, 5, 9, 14, 20, 4, 11, 16, 23, 6, 10, 15, 21];
+  for (var ki = 0; ki < 64; ki++) K[ki] = Math.floor(Math.abs(Math.sin(ki + 1)) * 4294967296) >>> 0;
+  Md5.prototype.block = function (u8, off) {
+    var M = new Int32Array(16), h = this.h, a = h[0], b = h[1], c = h[2], d = h[3];
+    for (var i = 0; i < 16; i++) M[i] = u8[off + i * 4] | (u8[off + i * 4 + 1] << 8) | (u8[off + i * 4 + 2] << 16) | (u8[off + i * 4 + 3] << 24);
+    for (i = 0; i < 64; i++) {
+      var f, g, r = i >> 4;
+      if (r === 0) { f = (b & c) | (~b & d); g = i; }
+      else if (r === 1) { f = (d & b) | (~d & c); g = (5 * i + 1) & 15; }
+      else if (r === 2) { f = b ^ c ^ d; g = (3 * i + 5) & 15; }
+      else { f = c ^ (b | ~d); g = (7 * i) & 15; }
+      var tmp = d; d = c; c = b;
+      var x = (a + f + K[i] + M[g]) | 0, s = S[r * 4 + (i & 3)];
+      b = (b + ((x << s) | (x >>> (32 - s)))) | 0;
+      a = tmp;
+    }
+    h[0] = (h[0] + a) | 0; h[1] = (h[1] + b) | 0; h[2] = (h[2] + c) | 0; h[3] = (h[3] + d) | 0;
+  };
+  Md5.prototype.update = function (u8) {
+    this.total += u8.length;
+    var i = 0;
+    if (this.bufLen) {
+      var take = Math.min(64 - this.bufLen, u8.length);
+      this.buf.set(u8.subarray(0, take), this.bufLen); this.bufLen += take; i = take;
+      if (this.bufLen < 64) return;
+      this.block(this.buf, 0); this.bufLen = 0;
+    }
+    for (; i + 64 <= u8.length; i += 64) this.block(u8, i);
+    if (i < u8.length) { this.buf.set(u8.subarray(i)); this.bufLen = u8.length - i; }
+  };
+  Md5.prototype.digest = function () {
+    var pad = new Uint8Array(((this.bufLen + 8) >= 64 ? 128 : 64) - this.bufLen);
+    pad[0] = 0x80;
+    var bits = this.total * 8, lo = bits >>> 0, hi = Math.floor(bits / 4294967296);
+    var v = new DataView(pad.buffer); v.setUint32(pad.length - 8, lo, true); v.setUint32(pad.length - 4, hi, true);
+    this.total -= pad.length;   // update 가 total 을 더하므로 되돌려 둔다
+    this.update(pad);
+    var out = new Uint8Array(16), dv = new DataView(out.buffer);
+    for (var i = 0; i < 4; i++) dv.setInt32(i * 4, this.h[i], true);
+    return hex(out.buffer);
+  };
+
+  // ===== 파일 해시: SHA 는 crypto.subtle (통째로 읽어야 한다), MD5 는 조각으로. 큰 파일의 SHA 는 조각 합치기가 안 되므로
+  // 2GB 를 넘으면 안내한다. 그 이하는 arrayBuffer 로 읽는다. 진행률은 MD5 조각 읽기에서 보인다.
+  var SUBTLE = { sha256: 'SHA-256', sha1: 'SHA-1', sha512: 'SHA-512' }, CHUNK = 2 * 1024 * 1024;
+  function hashFile(file, algos, onProgress) {
+    var result = {};
+    var needSubtle = algos.filter(function (a) { return SUBTLE[a]; }), needMd5 = algos.indexOf('md5') >= 0;
+    var p = Promise.resolve();
+    if (needMd5) {
+      p = p.then(function () {
+        var md5 = new Md5(), off = 0;
+        function step() {
+          if (off >= file.size) { result.md5 = md5.digest(); return; }
+          var end = Math.min(file.size, off + CHUNK);
+          return file.slice(off, end).arrayBuffer().then(function (buf) { md5.update(new Uint8Array(buf)); off = end; onProgress(off / file.size * (needSubtle.length ? 0.5 : 1)); return step(); });
+        }
+        return step();
+      });
+    }
+    if (needSubtle.length) {
+      p = p.then(function () {
+        if (file.size > 2147483647) throw new Error('too-big');
+        return file.arrayBuffer().then(function (buf) {
+          var s2 = Promise.resolve();
+          needSubtle.forEach(function (a, i) {
+            s2 = s2.then(function () { return crypto.subtle.digest(SUBTLE[a], buf).then(function (d) { result[a] = hex(d); onProgress((needMd5 ? 0.5 : 0) + (i + 1) / needSubtle.length * (needMd5 ? 0.5 : 1)); }); });
+          });
+          return s2;
+        });
+      });
+    }
+    return p.then(function () { return result; });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); addFiles(e.dataTransfer.files); });
+  fileInput.addEventListener('change', function () { addFiles(fileInput.files); fileInput.value = ''; });
+
+  function addFiles(files) {
+    var algos = chosen();
+    if (!algos.length) { setMsg(t('hs.needAlgo', '계산할 해시를 하나 이상 고르세요.'), 'err'); return; }
+    Array.prototype.forEach.call(files, function (f) {
+      var it = { file: f, algos: algos, result: null, progress: 0, error: null, id: ++seq };
+      items.push(it);
+      hashFile(f, algos, function (p) { it.progress = p; renderItem(it); }).then(function (r) { it.result = r; renderItem(it); })
+        .catch(function (e) { it.error = e && e.message === 'too-big' ? t('hs.tooBig', '2GB를 넘는 파일의 SHA 는 브라우저가 한 번에 읽지 못합니다. MD5 만 고르거나 파일을 나누세요.') : t('hs.readFail', '파일을 읽지 못했습니다.'); renderItem(it); });
+    });
+    setMsg('');
+    render();
+  }
+  function normExpect() { return (expectIn.value || '').toLowerCase().replace(/[^0-9a-f]/g, ''); }
+  function fmt(h) { return upperCb.checked ? h.toUpperCase() : h; }
+  function renderItem(it) {
+    var li = el('hs-' + it.id);
+    if (!li) { li = document.createElement('li'); li.id = 'hs-' + it.id; list.appendChild(li); }
+    var exp = normExpect(), html = '<div><span class="fname">' + esc(it.file.name) + '</span><span class="fmeta">' + humanSize(it.file.size) + '</span></div>';
+    if (it.error) html += '<div class="notice err" style="margin-top:6px">' + it.error + '</div>';
+    else if (!it.result) html += '<div class="hint" style="margin:6px 0 0">' + t('hs.working', '계산 중… {p}%').replace('{p}', Math.round(it.progress * 100)) + '</div>';
+    else {
+      var any = false;
+      ALGOS.forEach(function (a) {
+        if (!it.result[a[0]]) return;
+        var h = it.result[a[0]], match = exp && exp.indexOf(h) >= 0;
+        if (match) any = true;
+        html += '<div class="hs-row"><span class="algo">' + a[1] + '</span><code>' + fmt(h) + (match ? ' <span class="hs-match">✓ ' + t('hs.match', '일치') + '</span>' : '') + '</code>' +
+                '<button class="btn small secondary" type="button" data-hash="' + h + '">' + t('hs.copy', '복사') + '</button></div>';
+      });
+      if (exp && !any) html += '<div class="hs-nomatch" style="margin-top:6px;font-size:13px">✗ ' + t('hs.noMatch', '대조한 체크섬과 일치하는 값이 없습니다') + '</div>';
+    }
+    li.innerHTML = html;
+  }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function render() { items.forEach(renderItem); el('actions').hidden = items.length === 0; }
+  expectIn.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(render, 120); });
+  upperCb.addEventListener('change', function () { render(); hashText(); });
+  document.addEventListener('langchange', function () { render(); });
+
+  function copy(text, m) {
+    navigator.clipboard.writeText(text).then(function () {
+      m.textContent = t('hs.copied', '복사했습니다');
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = t('hs.copyFail', '복사하지 못했습니다'); });
+  }
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-hash]'); if (!b) return;
+    copy(fmt(b.getAttribute('data-hash')), el('copy-msg'));
+  });
+  el('btn-copyall').addEventListener('click', function () {
+    var lines = [];
+    items.forEach(function (it) {
+      if (!it.result) return;
+      ALGOS.forEach(function (a) { if (it.result[a[0]]) lines.push(fmt(it.result[a[0]]) + '  ' + it.file.name + '  (' + a[1] + ')'); });
+    });
+    if (!lines.length) { el('copy-msg').textContent = t('hs.nothing', '복사할 값이 없습니다'); return; }
+    copy(lines.join('\n'), el('copy-msg'));
+  });
+  el('btn-clear').addEventListener('click', function () { items = []; list.innerHTML = ''; el('actions').hidden = true; el('copy-msg').textContent = ''; });
+
+  // ===== 글자의 해시 =====
+  function hashText() {
+    var bytes = new TextEncoder().encode(textIn.value);
+    if (!textIn.value) { ALGOS.forEach(function (a) { el('tx-' + a[0]).textContent = '-'; }); return; }
+    var md5 = new Md5(); md5.update(bytes); el('tx-md5').textContent = fmt(md5.digest());
+    ['sha256', 'sha1', 'sha512'].forEach(function (a) {
+      crypto.subtle.digest(SUBTLE[a], bytes).then(function (d) { el('tx-' + a).textContent = fmt(hex(d)); });
+    });
+  }
+  textIn.addEventListener('input', function () { clearTimeout(textTimer); textTimer = setTimeout(hashText, 120); });
+  document.querySelectorAll('button[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () { var v = el(b.getAttribute('data-copy')).textContent; if (v !== '-') copy(v, el('copy-msg2')); });
+  });
+})();
+</script>
+</body>
+</html>

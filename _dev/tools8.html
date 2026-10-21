@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>JSON 정리 · 파일 해시 · SVG→PNG · Base64 점검</title>
+<style>
+  body { font-family:"Malgun Gothic",sans-serif; padding:24px; background:#fff; color:#111; }
+  table { border-collapse:collapse; width:100%; max-width:1100px; font-size:14px; }
+  th,td { text-align:left; padding:7px 10px; border-bottom:1px solid #ddd; vertical-align:top; }
+  th { background:#f2f4f7; }
+  .pass { color:#0a7f3f; font-weight:700; }
+  .fail { color:#c62828; font-weight:700; }
+  #summary { font-size:18px; font-weight:700; margin:16px 0; }
+  iframe { position:absolute; left:-9999px; width:1100px; height:900px; border:0; }
+</style>
+</head>
+<body>
+<h1 style="font-size:22px">JSON 정리 · 파일 해시 · SVG→PNG · Base64 점검 (2026-10-21)</h1>
+<p style="color:#555;font-size:14px;max-width:980px">해시는 공개된 시험 벡터(RFC 1321·FIPS 180)와 대조하고, MD5 조각 읽기는 같은 바이트를 한 번에 넣은 값과 비교한다. SVG 변환은 저장된 PNG 픽셀을 되읽고, Base64 는 알려진 값과 왕복 복원으로 본다.</p>
+<div id="summary">실행 중…</div>
+<table><thead><tr><th style="width:240px">항목</th><th style="width:60px">결과</th><th>확인</th></tr></thead>
+<tbody id="rows"></tbody></table>
+
+<script>
+try { localStorage.setItem('toolmoa_lang', 'ko'); } catch (e) {}
+var results = [];
+function log(n, ok, d) { results.push({ name: n, ok: ok, detail: d }); }
+function waitFor(c, ms) {
+  var s = Date.now(), lim = ms || 10000;
+  return new Promise(function (r) {
+    (function p() {
+      var o = false; try { o = c(); } catch (e) {}
+      if (o || Date.now() - s > lim) { r(o); return; }
+      setTimeout(p, 60);
+    })();
+  });
+}
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function loadFrame(src) {
+  return new Promise(function (res, rej) {
+    var f = document.createElement('iframe');
+    f.dataset.errs = '';
+    f.src = src;
+    f.onload = function () {
+      try { f.contentWindow.addEventListener('error', function (e) { f.dataset.errs += (e.message || 'err') + ' | '; }); } catch (e) {}
+      setTimeout(function () { res(f); }, 300);
+    };
+    f.onerror = function () { rej(new Error('로드 실패: ' + src)); };
+    document.body.appendChild(f);
+  });
+}
+function setFiles(input, files) {
+  var dt = new DataTransfer();
+  files.forEach(function (f) { dt.items.add(f); });
+  input.files = dt.files;
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+}
+function txt(d, id) { var e = d.getElementById(id); return e ? e.textContent.trim() : ''; }
+function val(d, id) { return d.getElementById(id).value; }
+function setVal(d, id, v, ev) { var e = d.getElementById(id); e.value = v; e.dispatchEvent(new Event(ev || 'change', { bubbles: true })); }
+function setChk(d, id, on) { var e = d.getElementById(id); e.checked = on; e.dispatchEvent(new Event('change', { bubbles: true })); }
+function click(d, id) { d.getElementById(id).click(); }
+function capture(f) {
+  var w = f.contentWindow, out = [], names = [];
+  var orig = w.URL.createObjectURL.bind(w.URL);
+  w.URL.createObjectURL = function (b) { if (typeof b.name !== 'string') out.push(b); return orig(b); };
+  w.HTMLAnchorElement.prototype.click = function () { names.push(this.download); };
+  return { blobs: out, names: names };
+}
+function clip(f) {
+  var box = { text: null };
+  Object.defineProperty(f.contentWindow.navigator, 'clipboard', { configurable: true, value: { writeText: function (s) { box.text = s; return Promise.resolve(); } } });
+  return box;
+}
+function blobToCanvas(blob) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () { URL.revokeObjectURL(url); var c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img, 0, 0); res(c); };
+    img.onerror = function () { rej(new Error('결과 이미지를 열 수 없음')); };
+    img.src = url;
+  });
+}
+function px(c, x, y) { var d = c.getContext('2d').getImageData(x, y, 1, 1).data; return [d[0], d[1], d[2], d[3]]; }
+function readZip(buf) {
+  var v = new DataView(buf), out = [], off = 0;
+  while (off + 30 <= buf.byteLength && v.getUint32(off, true) === 0x04034B50) {
+    var nameLen = v.getUint16(off + 26, true), extra = v.getUint16(off + 28, true), size = v.getUint32(off + 18, true);
+    out.push({ name: new TextDecoder().decode(new Uint8Array(buf, off + 30, nameLen)), bytes: new Uint8Array(buf, off + 30 + nameLen + extra, size) });
+    off += 30 + nameLen + extra + size;
+  }
+  return out;
+}
+function solidPng(w, h, draw) {
+  var c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'));
+  return new Promise(function (r) { c.toBlob(r, 'image/png'); });
+}
+
+function run() {
+  var chain = Promise.resolve();
+
+  // ===== 1. JSON: 정리 · 통계 · 큰 숫자 경고 · 정렬 · 압축 · \u 변환 · 고치기 · 오류 위치 · 복사 · 저장 · 파일 =====
+  chain = chain.then(function () {
+    return loadFrame('../json-format.html').then(function (f) {
+      var d = f.contentDocument, cap = capture(f), cb = clip(f), got = {};
+      setVal(d, 'src', '{"b":1,"a":[1,2,{"c":null}],"big":12345678901234567890}', 'input');
+      return sleep(300).then(function () {
+        got.status = txt(d, 't-status'); got.keys = txt(d, 't-keys'); got.depth = txt(d, 't-depth'); got.big = txt(d, 'msg'); got.pretty = val(d, 'out');
+        setVal(d, 'sort', 'asc'); setVal(d, 'indent', '0');
+        got.min = val(d, 'out');
+        setVal(d, 'indent', 'tab'); got.tab = val(d, 'out').split('\n')[1];
+        setVal(d, 'indent', '2'); setVal(d, 'sort', 'none');
+        setVal(d, 'src', '{"k":"한"}', 'input'); return sleep(300);
+      }).then(function () {
+        got.ko = val(d, 'out'); setChk(d, 'ascii', true); got.ascii = val(d, 'out'); setChk(d, 'ascii', false);
+        setVal(d, 'indent', '0'); setChk(d, 'lenient', true);
+        setVal(d, 'src', "{a: 'x', // 주석\n b: [1,2,], /* c */ }", 'input'); return sleep(300);
+      }).then(function () {
+        got.repaired = txt(d, 't-status') + ' ' + val(d, 'out') + ' | ' + txt(d, 'msg').slice(0, 20);
+        setChk(d, 'lenient', false); return sleep(300);
+      }).then(function () {
+        got.strict = txt(d, 't-status') + ' | ' + txt(d, 'msg').slice(0, 40) + ' | ' + val(d, 'out').split('\n')[0];
+        setChk(d, 'lenient', true); setVal(d, 'indent', '2');
+        setVal(d, 'src', '{"x":[1,2,3]}', 'input'); return sleep(300);
+      }).then(function () {
+        click(d, 'btn-copy');
+        return waitFor(function () { return cb.text !== null; }, 3000);
+      }).then(function () {
+        got.copy = cb.text === val(d, 'out') && /복사했습니다/.test(txt(d, 'copy-msg'));
+        click(d, 'btn-down');
+        return waitFor(function () { return cap.blobs.length >= 1; }, 3000);
+      }).then(function () { return cap.blobs[0].text(); }).then(function (saved) {
+        got.saved = saved === val(d, 'out') && cap.names[0] === 'data.json';
+        setVal(d, 'indent', '0'); click(d, 'btn-use'); got.use = val(d, 'src');
+        var opened = 0; d.getElementById('file').click = function () { opened++; }; click(d, 'btn-file'); got.fileBtn = opened === 1;
+        setFiles(d.getElementById('file'), [new File(['{"from":"file"}'], 'cfg.json', { type: 'application/json' })]);
+        return waitFor(function () { return /file/.test(val(d, 'out')); }, 3000);
+      }).then(function () {
+        click(d, 'btn-down');
+        return waitFor(function () { return cap.names.length >= 2; }, 3000);
+      }).then(function () {
+        got.fileName = cap.names[1];
+        click(d, 'btn-clear'); got.cleared = val(d, 'src') === '' && val(d, 'out') === '' && txt(d, 't-status') === '-';
+        var ok = got.status === '올바름' && got.keys === '4' && got.depth === '4' && /2\^53보다 큰 숫자 1개/.test(got.big) && got.pretty === '{\n  "b": 1,\n  "a": [\n    1,\n    2,\n    {\n      "c": null\n    }\n  ],\n  "big": 12345678901234567000\n}' &&
+                 got.min === '{"a":[1,2,{"c":null}],"b":1,"big":12345678901234567000}' && got.tab === '\t"a": [' && got.ko === '{\n  "k": "한"\n}' && got.ascii === '{\n  "k": "\\ud55c"\n}' &&
+                 got.repaired === '고쳐서 읽음 {"a":"x","b":[1,2]} | 원본은 엄격한 JSON이 아니어서 흔' && /^오류 \| JSON 문법 오류 — 1번째 줄 2번째 칸/.test(got.strict) && /\| 1번째 줄 2번째 칸$/.test(got.strict) &&
+                 got.copy && got.saved && got.use === '{"x":[1,2,3]}' && got.fileBtn && got.fileName === 'cfg.json' && got.cleared && !f.dataset.errs;
+        log('JSON: 정리 · 통계 · 정렬 · 압축 · \\u · 고치기 · 오류 위치 · 복사 · 저장 · 파일', ok, got.status + ' 키 ' + got.keys + ' 깊이 ' + got.depth + ' · 큰 수 "' + got.big.slice(0, 30) + '" · 정리 ' + JSON.stringify(got.pretty).slice(0, 60) + '… · 압축 ' + got.min + ' · 탭 ' + JSON.stringify(got.tab) + ' · 한글 ' + JSON.stringify(got.ko) + ' → ' + JSON.stringify(got.ascii) + ' · 고침 "' + got.repaired + '" · 엄격 "' + got.strict + '" · 복사 ' + got.copy + ' 저장 ' + got.saved + ' · 결과→입력 ' + got.use + ' 파일 버튼 ' + got.fileBtn + ' · 파일 이름 ' + got.fileName + ' · 지우기 ' + got.cleared);
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('JSON: 정리 · 통계 · 정렬 · 압축 · \\u · 고치기 · 오류 위치 · 복사 · 저장 · 파일', false, '오류: ' + e.message); });
+
+  // ===== 2. 파일 해시: 글 시험 벡터 · 파일 4종 (a×1,000,000) · 조각 MD5 · 대조 · 대문자 · 복사 · 비우기 · 알고리즘 미선택 =====
+  chain = chain.then(function () {
+    return loadFrame('../file-hash.html').then(function (f) {
+      var d = f.contentDocument, cb = clip(f), got = {};
+      setVal(d, 'text', 'hello', 'input');
+      return waitFor(function () { return txt(d, 'tx-sha512') !== '-' && txt(d, 'tx-md5') !== '-'; }, 5000).then(function () {
+        got.hello = [txt(d, 'tx-md5'), txt(d, 'tx-sha1'), txt(d, 'tx-sha256'), txt(d, 'tx-sha512').slice(0, 16)];
+        setVal(d, 'text', 'The quick brown fox jumps over the lazy dog', 'input');
+        return waitFor(function () { return txt(d, 'tx-md5') === '9e107d9d372bb6826bd81d3542a419d6'; }, 5000);
+      }).then(function (okFox) {
+        got.fox = okFox; got.foxSha1 = txt(d, 'tx-sha1');
+        // 빈 글 → '-' / 1,000,000 개의 a 를 파일로
+        setVal(d, 'text', '', 'input');
+        return waitFor(function () { return txt(d, 'tx-md5') === '-'; }, 3000);
+      }).then(function () {
+        got.emptyDash = txt(d, 'tx-md5');
+        ['a-sha256', 'a-sha1', 'a-md5', 'a-sha512'].forEach(function (id) { setChk(d, id, true); });
+        var million = new Array(1000001).join('a');
+        setFiles(d.getElementById('file'), [new File([million], 'million-a.txt', { type: 'text/plain' })]);
+        return waitFor(function () { return d.querySelectorAll('#list code').length >= 4; }, 30000);
+      }).then(function () {
+        var codes = Array.prototype.map.call(d.querySelectorAll('#list code'), function (c) { return c.textContent.trim(); });
+        got.million = codes;
+        // 조각 읽기 (2MB 단위) 검증: 5,000,001 바이트를 파일로 (조각 셋) 와 글(한 번에) 로 MD5 비교
+        var big = new Array(5000002).join('b');
+        ['a-sha1', 'a-sha512'].forEach(function (id) { setChk(d, id, false); });
+        setFiles(d.getElementById('file'), [new File([big], 'big.txt', { type: 'text/plain' })]);
+        return waitFor(function () { return d.querySelectorAll('#list li').length === 2 && d.querySelectorAll('#list li')[1].querySelectorAll('code').length >= 2; }, 60000).then(function () {
+          var c2 = Array.prototype.map.call(d.querySelectorAll('#list li')[1].querySelectorAll('code'), function (c) { return c.textContent.trim(); });
+          got.bigFile = c2;
+          setVal(d, 'text', big, 'input');
+          return waitFor(function () { return txt(d, 'tx-md5') !== '-' && txt(d, 'tx-sha256') !== '-'; }, 30000);
+        });
+      }).then(function () {
+        got.bigText = [txt(d, 'tx-sha256'), txt(d, 'tx-md5')];
+        setVal(d, 'text', '', 'input');
+        // 대조: 공개 SHA-256 을 "sha256: ..." 형태로 붙여 넣기
+        setVal(d, 'expect', 'SHA256: CDC76E5C9914FB9281A1C7E284D73E67F1809A48A497200E046D39CCC7112CD0', 'input');
+        return sleep(300);
+      }).then(function () {
+        got.match = d.querySelectorAll('#list .hs-match').length + '/' + d.querySelectorAll('#list .hs-nomatch').length;
+        setVal(d, 'expect', 'deadbeef', 'input'); return sleep(300);
+      }).then(function () {
+        got.nomatch = d.querySelectorAll('#list .hs-match').length + '/' + d.querySelectorAll('#list .hs-nomatch').length;
+        setVal(d, 'expect', '', 'input'); setChk(d, 'upper', true); return sleep(300);
+      }).then(function () {
+        got.upper = d.querySelector('#list code').textContent.trim();
+        d.querySelector('#list button[data-hash]').click();
+        return waitFor(function () { return cb.text !== null; }, 3000);
+      }).then(function () {
+        got.copyOne = cb.text; cb.text = null;
+        setChk(d, 'upper', false);
+        click(d, 'btn-copyall');
+        return waitFor(function () { return cb.text !== null; }, 3000);
+      }).then(function () {
+        got.copyAll = cb.text.split('\n');
+        click(d, 'btn-clear'); got.cleared = d.querySelectorAll('#list li').length === 0 && d.getElementById('actions').hidden;
+        ['a-sha256', 'a-sha1', 'a-md5', 'a-sha512'].forEach(function (id) { setChk(d, id, false); });
+        setFiles(d.getElementById('file'), [new File(['x'], 'x.txt', { type: 'text/plain' })]);
+        got.needAlgo = txt(d, 'msg');
+        var ok = got.hello.join('|') === '5d41402abc4b2a76b9719d911017c592|aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d|2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824|9b71d224bd62f378' &&
+                 got.fox && got.foxSha1 === '2fd4e1c67a2d28fced849ee1bb76e7391b93eb12' && got.emptyDash === '-' &&
+                 got.million.join('|') === 'cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0|34aa973cd4c4daa4f61eeb2bdbad27316534016f|7707d6ae4e027c70eea2a935c2296f21|e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b' &&
+                 got.bigFile[0] === got.bigText[0] && got.bigFile[1] === got.bigText[1] && got.bigFile[1].length === 32 &&
+                 got.match === '1/1' && got.nomatch === '0/2' && got.upper === 'CDC76E5C9914FB9281A1C7E284D73E67F1809A48A497200E046D39CCC7112CD0' && got.copyOne === 'CDC76E5C9914FB9281A1C7E284D73E67F1809A48A497200E046D39CCC7112CD0' &&
+                 got.copyAll.length === 6 && /^cdc76e5c.*  million-a\.txt  \(SHA-256\)$/.test(got.copyAll[0]) && got.cleared && /하나 이상 고르세요/.test(got.needAlgo) && !f.dataset.errs;
+        log('파일 해시: 시험 벡터 · 백만 a · 조각 MD5 · 대조 · 대문자 · 복사', ok, 'hello md5/sha1/sha256/sha512 ' + got.hello.join(' ') + ' · fox md5 ' + got.fox + ' sha1 ' + got.foxSha1 + ' · 빈 글 "' + got.emptyDash + '" · a×1e6 [' + got.million.map(function (s) { return s.slice(0, 12); }).join(', ') + '] · 5,000,001 바이트 파일(조각) = 글(한 번에): sha256 ' + (got.bigFile[0] === got.bigText[0]) + ' md5 ' + (got.bigFile[1] === got.bigText[1]) + ' ' + got.bigFile[1] + ' · 대조 일치/불일치 ' + got.match + ' → ' + got.nomatch + ' · 대문자 ' + got.upper.slice(0, 12) + ' 복사 ' + got.copyOne.slice(0, 12) + ' · 전부 복사 ' + got.copyAll.length + '줄 "' + got.copyAll[0].slice(0, 20) + '…" · 비우기 ' + got.cleared + ' · 미선택 "' + got.needAlgo + '"');
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('파일 해시: 시험 벡터 · 백만 a · 조각 MD5 · 대조 · 대문자 · 복사', false, '오류: ' + e.message); });
+
+  // ===== 3. SVG→PNG: 코드 추가 · 크기 모드 3종 · 투명/흰색/JPG · 픽셀 되읽기 · 파일 2개 ZIP · 거부 · 빼기 · 상한 =====
+  chain = chain.then(function () {
+    return loadFrame('../svg-to-png.html').then(function (f) {
+      var d = f.contentDocument, cap = capture(f), got = {};
+      function pngs() { return cap.blobs.filter(function (b) { return b.type !== 'image/svg+xml'; }); }
+      var svgA = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 5"><rect x="0" y="0" width="5" height="5" fill="#ff0000"/></svg>';   // 왼쪽 절반 빨강, 오른쪽 투명
+      setVal(d, 'code', 'hello', 'input'); click(d, 'btn-code'); got.badCode = txt(d, 'msg');
+      setVal(d, 'code', svgA, 'input'); click(d, 'btn-code');
+      return waitFor(function () { return d.querySelectorAll('#list li').length === 1; }, 5000).then(function () {
+        got.meta = d.querySelector('#list .fmeta').textContent; got.name = d.querySelector('#list .fname').textContent;
+        setVal(d, 'mode', 'width'); setVal(d, 'px', '100', 'input'); return sleep(200);
+      }).then(function () {
+        got.w = txt(d, 't-out');
+        setVal(d, 'mode', 'height'); setVal(d, 'px', '40', 'input'); return sleep(200);
+      }).then(function () {
+        got.h = txt(d, 't-out'); got.pxShown = !d.getElementById('px-field').hidden && d.getElementById('scale-field').hidden;
+        setVal(d, 'mode', 'scale'); setVal(d, 'scale', '3'); return sleep(200);
+      }).then(function () {
+        got.s = txt(d, 't-out'); got.scaleShown = d.getElementById('px-field').hidden && !d.getElementById('scale-field').hidden;
+        setVal(d, 'mode', 'width'); setVal(d, 'px', '100', 'input'); setVal(d, 'fmt', 'image/png'); setVal(d, 'bg', 'transparent'); return sleep(200);
+      }).then(function () {
+        click(d, 'btn-all');
+        return waitFor(function () { return pngs().length >= 1; }, 8000);
+      }).then(function () { return blobToCanvas(pngs()[0]); }).then(function (c) {
+        got.png = c.width + '×' + c.height + ' 왼 ' + px(c, 20, 25).join(',') + ' 오른 ' + px(c, 80, 25).join(',');
+        got.pngOk = c.width === 100 && c.height === 50 && px(c, 20, 25)[0] === 255 && px(c, 20, 25)[3] === 255 && px(c, 80, 25)[3] === 0 && pngs()[0].type === 'image/png' && cap.names[0] === '붙여넣은-svg-1.png';
+        got.msg1 = txt(d, 'msg');
+        setVal(d, 'bg', 'white'); click(d, 'btn-all');
+        return waitFor(function () { return pngs().length >= 2; }, 8000);
+      }).then(function () { return blobToCanvas(pngs()[1]); }).then(function (c) {
+        got.whiteRight = px(c, 80, 25).join(',');
+        setVal(d, 'bg', 'custom'); setVal(d, 'bgc', '#00ff00', 'input'); got.bgcShown = !d.getElementById('bgc-field').hidden;
+        return sleep(200);
+      }).then(function () {
+        click(d, 'btn-all');
+        return waitFor(function () { return pngs().length >= 3; }, 8000);
+      }).then(function () { return blobToCanvas(pngs()[2]); }).then(function (c) {
+        got.customRight = px(c, 80, 25).slice(0, 3).join(',');
+        cap.blobs.splice(cap.blobs.indexOf(pngs()[2]), 1);   // 아래 JPG 검사가 세 번째 결과물을 보도록 자리를 비운다
+        setVal(d, 'bg', 'transparent'); setVal(d, 'fmt', 'image/jpeg'); got.jpgNote = !d.getElementById('jpg-note').hidden;
+        click(d, 'btn-all');
+        return waitFor(function () { return pngs().length >= 3; }, 8000);
+      }).then(function () { return blobToCanvas(pngs()[2]); }).then(function (c) {
+        var r = px(c, 80, 25); got.jpgRight = r.join(','); got.jpgOk = pngs()[2].type === 'image/jpeg' && r[0] > 240 && r[1] > 240 && r[2] > 240 && cap.names[3] === '붙여넣은-svg-1.jpg';
+        // 파일 2개 추가 (하나는 width/height 속성 있음) → 셋 → ZIP
+        setVal(d, 'fmt', 'image/png');
+        var svgB = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"><rect width="20" height="10" fill="#0000ff"/></svg>';
+        setFiles(d.getElementById('file'), [new File([svgB], 'blue.svg', { type: 'image/svg+xml' }), new File(['nope'], 'x.png', { type: 'image/png' })]);
+        return waitFor(function () { return d.querySelectorAll('#list li').length === 2; }, 5000);
+      }).then(function () {
+        got.reject = txt(d, 'msg'); got.count = txt(d, 't-count');
+        setVal(d, 'mode', 'scale'); setVal(d, 'scale', '2'); setChk(d, 'as-zip', true);
+        return sleep(200);
+      }).then(function () {
+        got.metaB = d.querySelectorAll('#list .fmeta')[1].textContent;
+        click(d, 'btn-all');
+        return waitFor(function () { return pngs().length >= 4 && pngs()[pngs().length - 1].type === 'application/zip'; }, 10000);
+      }).then(function () { return pngs()[pngs().length - 1].arrayBuffer(); }).then(function (buf) {
+        var entries = readZip(buf); got.zip = entries.map(function (e) { return e.name; }).join(',');
+        got.zipName = cap.names[cap.names.length - 1]; got.zipMsg = txt(d, 'msg');
+        return blobToCanvas(new Blob([entries[1].bytes], { type: 'image/png' }));
+      }).then(function (c) {
+        got.blue = c.width + '×' + c.height + ' ' + px(c, 10, 5).slice(0, 3).join(',');
+        d.querySelector('#list button[data-remove="0"]').click();
+        got.afterRemove = txt(d, 't-count') + ' ' + d.querySelector('#list .fname').textContent;
+        setVal(d, 'mode', 'width'); setVal(d, 'px', '20000', 'input'); return sleep(200);
+      }).then(function () {
+        got.capped = txt(d, 't-out') + ' ' + txt(d, 'msg').slice(0, 10);
+        click(d, 'btn-reset'); got.reset = d.getElementById('area').hidden && txt(d, 't-count') === '0';
+        var ok = /SVG 코드가 아닙니다/.test(got.badCode) && got.meta === '10×5 → 512×256' && got.name === '붙여넣은-svg-1.png' && got.w === '100×50' && got.h === '80×40' && got.pxShown && got.s === '30×15' && got.scaleShown &&
+                 got.pngOk && /1개를 저장했습니다/.test(got.msg1) && got.whiteRight === '255,255,255,255' && got.bgcShown && got.customRight === '0,255,0' && got.jpgNote && got.jpgOk &&
+                 /SVG 파일만/.test(got.reject) && got.metaB === '20×10 → 40×20' && got.count === '2' && got.zip === '붙여넣은-svg-1.png,blue.png' && got.zipName === 'svg-변환.zip' && /2개를 ZIP 하나로/.test(got.zipMsg) &&
+                 got.blue === '40×20 0,0,255' && got.afterRemove === '1 blue.png' && got.capped === '8192×4096 한 변이 8192p' && got.reset && !f.dataset.errs;
+        log('SVG→PNG: 코드 · 크기 3모드 · 투명/흰/JPG · ZIP · 거부 · 빼기 · 상한', ok, '잘못된 코드 "' + got.badCode.slice(0, 14) + '" · ' + got.name + ' ' + got.meta + ' · 가로100 ' + got.w + ' 세로40 ' + got.h + ' (칸 ' + got.pxShown + ') 3배 ' + got.s + ' (칸 ' + got.scaleShown + ') · PNG ' + got.png + ' "' + got.msg1.slice(0, 12) + '" · 흰 배경 오른 ' + got.whiteRight + ' · 지정색 칸 ' + got.bgcShown + ' 오른 ' + got.customRight + ' · JPG 안내 ' + got.jpgNote + ' 오른 ' + got.jpgRight + ' · 거부 "' + got.reject.slice(0, 16) + '" · 둘째 ' + got.metaB + ' 개수 ' + got.count + ' · ZIP [' + got.zip + '] ' + got.zipName + ' "' + got.zipMsg.slice(0, 14) + '" · 파랑 ' + got.blue + ' · 빼기 → ' + got.afterRemove + ' · 20000 → ' + got.capped + ' · 초기화 ' + got.reset);
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('SVG→PNG: 코드 · 크기 3모드 · 투명/흰/JPG · ZIP · 거부 · 빼기 · 상한', false, '오류: ' + e.message); });
+
+  // ===== 4. Base64: 한글 왕복 · URL-safe · 76자 줄바꿈 · 오류 2종 · UTF-8 아님 · 바꾸기 · 파일→data URI 4형식 · 복원 저장 =====
+  chain = chain.then(function () {
+    return solidPng(2, 2, function (x) { x.fillStyle = '#00ff00'; x.fillRect(0, 0, 2, 2); }).then(function (png) {
+      return loadFrame('../base64.html').then(function (f) {
+        var d = f.contentDocument, w = f.contentWindow, cap = capture(f), cb = clip(f), got = {}, pngBytes;
+        setVal(d, 'plain', '안녕하세요 Hello', 'input'); got.enc = val(d, 'enc'); got.info = txt(d, 't-info');
+        setVal(d, 'enc', 'SGVsbG8=', 'input'); got.dec = val(d, 'plain');
+        setVal(d, 'plain', 'subjects?', 'input'); got.plus = val(d, 'enc'); setChk(d, 'urlsafe', true); got.safe = val(d, 'enc'); setChk(d, 'urlsafe', false);
+        setVal(d, 'enc', 'c3ViamVjdHM_', 'input'); got.safeDec = val(d, 'plain');
+        setVal(d, 'plain', new Array(101).join('a'), 'input'); setChk(d, 'wrap', true); got.wrap = val(d, 'enc').split('\n').map(function (l) { return l.length; }).join(','); setChk(d, 'wrap', false);
+        setVal(d, 'enc', 'ab$c', 'input'); got.badChar = txt(d, 'msg');
+        setVal(d, 'enc', 'abcde', 'input'); got.badLen = txt(d, 'msg');
+        setVal(d, 'enc', '/w==', 'input'); got.notUtf8 = txt(d, 'msg').slice(0, 12) + ' ' + (val(d, 'plain') === '\ufffd');
+        setVal(d, 'enc', 'SGVsbG8=', 'input'); click(d, 'btn-swap'); got.swap = val(d, 'plain') + ' → ' + val(d, 'enc');
+        click(d, 'btn-copy-enc');
+        return waitFor(function () { return cb.text !== null; }, 3000).then(function () {
+          got.copy = cb.text; cb.text = null;
+          click(d, 'btn-copy-plain');
+          return waitFor(function () { return cb.text !== null; }, 3000);
+        }).then(function () {
+          got.copyPlain = cb.text; cb.text = null;
+          click(d, 'btn-clear'); got.clear = val(d, 'plain') === '' && val(d, 'enc') === '';
+          return png.arrayBuffer();
+        }).then(function (buf) {
+          pngBytes = new Uint8Array(buf);
+          setFiles(d.getElementById('file'), [new File([png], 'dot.png', { type: 'image/png' })]);
+          return waitFor(function () { return !d.getElementById('farea').hidden && val(d, 'fout'); }, 5000);
+        }).then(function () {
+          got.ftype = txt(d, 't-ftype'); got.uri = val(d, 'fout').slice(0, 22); got.prev = !d.getElementById('fprev').hidden;
+          var b64 = val(d, 'fout').split(',')[1];
+          setVal(d, 'fkind', 'raw'); got.raw = val(d, 'fout') === b64;
+          setVal(d, 'fkind', 'img'); got.img = val(d, 'fout').slice(0, 15);
+          setVal(d, 'fkind', 'css'); got.css = val(d, 'fout').slice(0, 28);
+          setVal(d, 'fkind', 'datauri');
+          click(d, 'btn-copy-file');
+          return waitFor(function () { return cb.text !== null; }, 3000).then(function () {
+            got.copyFile = cb.text === val(d, 'fout') && /복사했습니다/.test(txt(d, 'fcopy-msg'));
+            click(d, 'btn-save-txt');
+            return waitFor(function () { return cap.blobs.length >= 1; }, 3000);
+          }).then(function () {
+            got.txtName = cap.names[0];
+            // 복원: data URI 통째로 → 바이트가 원본과 같은가 · 이름 자동
+            setVal(d, 'dec', val(d, 'fout'), 'input');
+            return waitFor(function () { return /image\/png/.test(txt(d, 'dinfo')); }, 3000);
+          }).then(function () {
+            got.dinfo = txt(d, 'dinfo'); got.dprev = !d.getElementById('dprev').hidden;
+            click(d, 'btn-save-file');
+            return waitFor(function () { return cap.blobs.length >= 2; }, 3000);
+          }).then(function () { return cap.blobs[1].arrayBuffer(); }).then(function (buf2) {
+            var u = new Uint8Array(buf2), same = u.length === pngBytes.length;
+            for (var i = 0; same && i < u.length; i++) if (u[i] !== pngBytes[i]) same = false;
+            got.restored = same + ' ' + cap.blobs[1].type + ' ' + cap.names[1] + ' "' + txt(d, 'dmsg') + '"';
+            // Base64 만 (머리말로 형식 추측) + 이름 지정
+            setVal(d, 'dec', b64only(val(d, 'fout')), 'input'); setVal(d, 'dname', 'logo', 'input');
+            return waitFor(function () { return /image\/png/.test(txt(d, 'dinfo')); }, 3000);
+          }).then(function () {
+            click(d, 'btn-save-file');
+            return waitFor(function () { return cap.names.length >= 3; }, 3000);
+          }).then(function () {
+            got.named = cap.names[2];
+            setVal(d, 'dec', '***', 'input'); return sleep(300);
+          }).then(function () {
+            got.badDec = txt(d, 'dinfo');
+            click(d, 'btn-freset'); got.freset = d.getElementById('farea').hidden && val(d, 'fout') === '';
+            var ok = got.enc === '7JWI64WV7ZWY7IS47JqUIEhlbGxv' && /원문 11자 · 21바이트 → Base64 28자/.test(got.info) && got.dec === 'Hello' && got.plus === 'c3ViamVjdHM/' && got.safe === 'c3ViamVjdHM_' && got.safeDec === 'subjects?' &&
+                     got.wrap === '76,60' && /"\$"가 3번째 자리/.test(got.badChar) && /길이가 맞지 않습니다/.test(got.badLen) && got.notUtf8 === '바이트가 UTF-8 글 true' && got.swap === 'SGVsbG8= → U0dWc2JHOD0=' &&
+                     got.copy === 'U0dWc2JHOD0=' && got.copyPlain === 'SGVsbG8=' && got.copyFile && got.clear && got.ftype === 'image/png' && got.uri === 'data:image/png;base64,' && got.prev && got.raw && got.img === '<img src="data:' && got.css === 'background-image: url("data:' &&
+                     got.txtName === 'dot.base64.txt' && /바이트 · 형식 image\/png/.test(got.dinfo) && got.dprev && /^true image\/png decoded\.png "decoded\.png 저장했습니다"$/.test(got.restored) && got.named === 'logo.png' && /쓸 수 없는 글자/.test(got.badDec) && got.freset && !f.dataset.errs;
+            log('Base64: 한글 왕복 · URL-safe · 줄바꿈 · 오류 · 바꾸기 · 파일 ↔ data URI · 복원', ok, '한글 → ' + got.enc + ' "' + got.info + '" · SGVsbG8= → ' + got.dec + ' · ' + got.plus + ' / safe ' + got.safe + ' → ' + got.safeDec + ' · 76자 줄 [' + got.wrap + '] · "' + got.badChar.slice(0, 30) + '" · "' + got.badLen.slice(0, 16) + '" · ' + got.notUtf8 + ' · 바꾸기 ' + got.swap + ' · 복사 ' + got.copy + ' 원문 복사 ' + got.copyPlain + ' 파일 결과 복사 ' + got.copyFile + ' 지우기 ' + got.clear + ' · 파일 ' + got.ftype + ' ' + got.uri + ' 미리보기 ' + got.prev + ' raw ' + got.raw + ' ' + got.img + ' ' + got.css + ' · ' + got.txtName + ' · 복원 "' + got.dinfo + '" ' + got.dprev + ' ' + got.restored + ' · 이름 지정 ' + got.named + ' · 잘못된 입력 "' + got.badDec.slice(0, 20) + '" · 초기화 ' + got.freset);
+            f.remove();
+          });
+        });
+      });
+    });
+  }).catch(function (e) { log('Base64: 한글 왕복 · URL-safe · 줄바꿈 · 오류 · 바꾸기 · 파일 ↔ data URI · 복원', false, '오류: ' + e.message); });
+  function b64only(uri) { return uri.split(',')[1]; }
+
+  chain.then(render);
+}
+
+function render() {
+  var pass = results.filter(function (r) { return r.ok; }).length;
+  document.getElementById('summary').innerHTML =
+    pass + ' / ' + results.length + ' 통과' +
+    (pass === results.length ? ' <span class="pass">— 전부 정상</span>' : ' <span class="fail">— 문제 있음</span>');
+  document.getElementById('rows').innerHTML = results.map(function (r) {
+    return '<tr><td>' + r.name + '</td><td class="' + (r.ok ? 'pass">PASS' : 'fail">FAIL') +
+           '</td><td>' + r.detail + '</td></tr>';
+  }).join('');
+  document.title = 'TOOLS8 ' + pass + '/' + results.length + ' :: ' +
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+}
+
+window.addEventListener('load', function () { setTimeout(run, 300); });
+</script>
+</body>
+</html>

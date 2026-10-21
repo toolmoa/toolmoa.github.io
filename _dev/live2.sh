@@ -23,7 +23,7 @@ missing=0
 TOOLS="image-compress image-crop image-convert image-join img-to-pdf char-count text-clean
        pdf-merge pdf-split pdf-edit pdf-to-image file-convert qr-generate password-gen
        random-pick unit-convert date-calc age-calc image-mosaic text-diff image-exif
-       image-watermark image-split pdf-watermark qr-scan romanize time-calc color-convert barcode image-resize image-transparent"
+       image-watermark image-split pdf-watermark qr-scan romanize time-calc color-convert barcode image-resize image-transparent pdf-page-number pdf-to-text favicon image-palette json-format file-hash svg-to-png base64"
 for t in $TOOLS; do
   echo "$home" | grep -q "$t.html" || { echo "  홈에 링크 없음: $t"; missing=$((missing+1)); }
 done
@@ -32,7 +32,7 @@ done
 echo
 echo "=== 10. hreflang 이 서로를 가리키는가 ==="
 bad=0
-PAIRS="index image-compress image-crop img-to-pdf pdf-merge pdf-split file-convert qr-generate image-convert image-join pdf-to-image random-pick image-mosaic image-exif image-watermark image-split pdf-watermark qr-scan romanize image-resize image-transparent color-convert barcode text-clean pdf-edit password-gen time-calc text-diff"
+PAIRS="index image-compress image-crop img-to-pdf pdf-merge pdf-split file-convert qr-generate image-convert image-join pdf-to-image random-pick image-mosaic image-exif image-watermark image-split pdf-watermark qr-scan romanize image-resize image-transparent color-convert barcode text-clean pdf-edit password-gen time-calc text-diff pdf-page-number pdf-to-text favicon image-palette json-format file-hash svg-to-png base64"
 for p in $PAIRS; do
   # index 는 canonical 과 맞춰 디렉터리 형태(/ · /en/)를 쓴다
   ko="$BASE/$p.html"; en="$BASE/en/$p.html"

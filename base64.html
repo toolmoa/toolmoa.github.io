@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base64 인코딩·디코딩 - 글자·파일·이미지 data URI 변환 무료 | 툴모아</title>
+<meta name="description" content="글자를 Base64로 바꾸거나 되돌리고(UTF-8·한글 지원), 파일·이미지를 Base64 data URI로 만들거나 Base64를 파일로 복원합니다. URL-safe 형식 지원. 입력은 서버로 전송되지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/base64.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/base64.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/base64.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/base64.html">
+<meta property="og:title" content="Base64 인코딩·디코딩 · 파일 ↔ data URI">
+<meta property="og:description" content="글자·파일·이미지의 Base64 변환과 복원. 브라우저 안에서만 처리됩니다.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔣</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Base64 인코딩·디코딩","applicationCategory":"DeveloperApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .b64 textarea { font-family:ui-monospace, Consolas, "Malgun Gothic", monospace; }
+  .b64-prev { max-width:100%; max-height:220px; display:block; margin-top:8px; border:1px solid var(--border); border-radius:var(--radius-sm); background:#fff; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/base64.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/base64.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Base64 인코딩 · 디코딩 · 파일 ↔ data URI — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Base64 인코딩·디코딩 · 파일 ↔ data URI">
+<meta name="twitter:description" content="글자·파일·이미지의 Base64 변환과 복원. 브라우저 안에서만 처리됩니다.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/base64.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"입력한 내용이 서버로 전송되나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 변환은 브라우저 안에서만 이뤄지고 어디로도 전송되지 않습니다. 인터넷을 끊어도 동작합니다. 토큰이나 내부 파일을 넣어도 어디에도 남지 않습니다."}},{"@type":"Question","name":"한글을 풀었는데 깨져요","acceptedAnswer":{"@type":"Answer","text":"그 Base64가 UTF-8이 아닌 다른 인코딩(EUC-KR 등)의 바이트를 적은 것일 수 있습니다. 이 페이지는 UTF-8로 풀며, 바이트가 UTF-8이 아니면 깨진 글자가 섞였다고 알려 줍니다. 그런 값은 \"Base64 → 파일 복원\"으로 파일로 저장한 뒤 다른 인코딩으로 열어 보세요."}},{"@type":"Question","name":"data URI를 HTML에 어떻게 넣나요?","acceptedAnswer":{"@type":"Answer","text":"이미지는 <img src=\"data:image/png;base64,…\">, CSS는 background-image: url(\"data:…\")로 넣습니다. 결과 종류에서 그 형태를 고르면 그대로 복사됩니다. 수 KB짜리 아이콘에는 좋지만, 큰 그림은 파일로 두고 링크하는 편이 낫습니다."}},{"@type":"Question","name":"Base64를 파일로 돌릴 때 형식을 어떻게 아나요?","acceptedAnswer":{"@type":"Answer","text":"data URI라면 앞의 MIME 형식을 읽습니다. Base64만 있으면 바이트 머리말(PNG·JPG·GIF·PDF·ZIP·WebP)로 추측해 확장자를 붙입니다. 모르면 .bin으로 저장하니 이름을 직접 적으세요."}},{"@type":"Question","name":"큰 파일도 되나요?","acceptedAnswer":{"@type":"Answer","text":"수십 MB까지는 되지만 글자 상자가 느려집니다. Base64는 글자로 담기 위한 형식이라 애초에 큰 파일에 맞지 않습니다. 5MB 이하를 권합니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"Base64 인코딩 · 디코딩 · 파일 ↔ data URI","item":"https://toolmoa.github.io/base64.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="b64.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 쪽 번호</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF→텍스트</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="image-palette.html" data-i18n="nav.pl">색상 추출</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG→PNG</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리</a>
+      <a href="base64.html" aria-current="page" data-i18n="nav.b64">Base64</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="b64.h1">Base64 인코딩 · 디코딩 · 파일 ↔ data URI</h1>
+  <p class="lead" data-i18n="b64.lead">글자를 Base64로 바꾸거나 되돌리고, 파일·이미지를 Base64(data URI)로 만들거나 Base64 문자열을 다시 파일로 복원합니다. 한글은 UTF-8로 처리하고, URL-safe 형식도 됩니다.</p>
+  <span class="privacy-badge" data-i18n="badge.text">🔒 입력한 내용은 어디로도 전송되지 않습니다</span>
+
+  <h2 style="margin-top:8px" data-i18n="b64.s1">글자 ↔ Base64</h2>
+  <div class="card b64">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+      <div class="field" style="margin:0">
+        <label for="plain" data-i18n="b64.plain">원문</label>
+        <textarea id="plain" style="min-height:140px" spellcheck="false" placeholder="안녕하세요 Hello" data-i18n-ph="b64.plainPh"></textarea>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="enc" data-i18n="b64.enc">Base64</label>
+        <textarea id="enc" style="min-height:140px" spellcheck="false" placeholder="7JWI64WV7ZWY7IS47JqUIEhlbGxv" data-i18n-ph="b64.encPh"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;align-items:center">
+      <label class="inline-check" style="margin:0"><input type="checkbox" id="urlsafe"> <span data-i18n="b64.urlsafe">URL-safe (+/ 대신 -_ , = 없음)</span></label>
+      <label class="inline-check" style="margin:0"><input type="checkbox" id="wrap"> <span data-i18n="b64.wrap">76자마다 줄바꿈 (MIME)</span></label>
+      <span class="hint" id="t-info" style="margin:0"></span>
+    </div>
+    <div id="msg" role="status" aria-live="polite"></div>
+    <div class="btn-row" style="margin-bottom:0">
+      <button class="btn" id="btn-copy-enc" data-i18n="b64.copyEnc">Base64 복사</button>
+      <button class="btn secondary" id="btn-copy-plain" data-i18n="b64.copyPlain">원문 복사</button>
+      <button class="btn secondary" id="btn-swap" data-i18n="b64.swap">↔ 바꾸기</button>
+      <button class="btn secondary" id="btn-clear" data-i18n="b64.clear">지우기</button>
+      <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+    </div>
+    <div class="hint" data-i18n="b64.autoHint">어느 쪽에 적어도 반대쪽이 바로 채워집니다. Base64를 붙여 넣으면 원문으로 풀고, 원문을 적으면 Base64로 만듭니다.</div>
+  </div>
+
+  <h2 data-i18n="b64.s2">파일 → Base64 (data URI)</h2>
+  <div class="card b64">
+    <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택" style="margin:0 0 12px">
+      <span class="dz-icon">🔣</span>
+      <span class="dz-main" data-i18n="b64.drop">파일을 끌어다 놓거나 클릭해서 선택하세요</span>
+      <span class="dz-sub" data-i18n="b64.drop2">이미지·글꼴·아무 파일 · 5MB 이하 권장 (Base64는 원본보다 33% 커집니다)</span>
+      <input type="file" id="file">
+    </div>
+    <div id="fmsg" role="status" aria-live="polite"></div>
+    <div id="farea" hidden>
+      <div class="stats" style="margin-top:0">
+        <div class="stat"><span class="num" id="t-fname" style="font-size:16px">-</span><span class="lbl" data-i18n="b64.fname">파일</span></div>
+        <div class="stat"><span class="num" id="t-fsize" style="font-size:18px">-</span><span class="lbl" data-i18n="b64.fsize">원본 → Base64</span></div>
+        <div class="stat"><span class="num" id="t-ftype" style="font-size:16px">-</span><span class="lbl" data-i18n="b64.ftype">MIME 형식</span></div>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="fout" data-i18n="b64.fout">결과</label>
+        <select id="fkind" style="margin-bottom:8px">
+          <option value="datauri" selected data-i18n="b64.kDataUri">data URI (HTML·CSS에 바로 넣기)</option>
+          <option value="raw" data-i18n="b64.kRaw">Base64만</option>
+          <option value="img" data-i18n="b64.kImg">&lt;img src="data:…"&gt; 태그</option>
+          <option value="css" data-i18n="b64.kCss">CSS background-image</option>
+        </select>
+        <textarea id="fout" style="min-height:120px" readonly spellcheck="false"></textarea>
+      </div>
+      <img id="fprev" class="b64-prev" alt="" hidden>
+      <div class="btn-row" style="margin-bottom:0">
+        <button class="btn" id="btn-copy-file" data-i18n="b64.copyFile">결과 복사</button>
+        <button class="btn secondary" id="btn-save-txt" data-i18n="b64.saveTxt">txt로 저장</button>
+        <button class="btn secondary" id="btn-freset" data-i18n="btn.reset">초기화</button>
+        <span class="hint" id="fcopy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+      </div>
+    </div>
+  </div>
+
+  <h2 data-i18n="b64.s3">Base64 → 파일 복원</h2>
+  <div class="card b64">
+    <div class="field" style="margin:0">
+      <label for="dec" data-i18n="b64.dec">Base64 또는 data URI 붙여 넣기</label>
+      <textarea id="dec" style="min-height:100px" spellcheck="false" placeholder="data:image/png;base64,iVBORw0KGgo… 또는 iVBORw0KGgo…" data-i18n-ph="b64.decPh"></textarea>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:12px">
+      <div class="field" style="margin:0">
+        <label for="dname" data-i18n="b64.dname">저장할 파일 이름</label>
+        <input type="text" id="dname" placeholder="자동 (형식을 알아내 붙임)" data-i18n-ph="b64.dnamePh">
+      </div>
+      <div class="field" style="margin:0;align-self:end">
+        <div class="hint" id="dinfo" style="margin:0"></div>
+      </div>
+    </div>
+    <img id="dprev" class="b64-prev" alt="" hidden>
+    <div class="btn-row" style="margin-bottom:0">
+      <button class="btn" id="btn-save-file" data-i18n="b64.saveFile">파일로 저장</button>
+      <span class="hint" id="dmsg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="b64.cross">이미지를 Base64로 넣기 전에 <a href="image-compress.html">이미지 용량 줄이기</a>로 작게 만들면 HTML도 가벼워집니다. 파일이 바뀌지 않았는지 확인하려면 <a href="file-hash.html">파일 해시 확인</a>, JSON 안에 든 값을 정리하려면 <a href="json-format.html">JSON 정리</a>입니다.</p>
+
+  <div class="ad-slot"><!-- AD:BASE64 --></div>
+
+  <h2 data-ko-only>Base64는 암호가 아닙니다</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Base64는 바이트를 글자 64개(A–Z, a–z, 0–9, +, /)로 적는 <strong style="color:var(--text)">표기법</strong>입니다. 누구나 되돌릴 수 있으므로 비밀을 숨기는 데는 쓸 수 없습니다.
+      쓰는 곳은 글자만 다룰 수 있는 곳에 파일을 끼워 넣을 때입니다 — HTML·CSS 안의 작은 이미지(data URI), 이메일 첨부(MIME), JSON에 든 파일, API 토큰의 일부.
+      원본보다 약 33% 커지므로 큰 파일에는 맞지 않습니다. 한글은 먼저 UTF-8 바이트로 바꾼 뒤 Base64로 적습니다. 그래서 다른 도구와 같은 값이 나오고, 거꾸로 풀 때도 한글이 깨지지 않습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>URL-safe 형식과 줄바꿈</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      표준 Base64의 <code>+</code>와 <code>/</code>는 주소(URL)에서 다른 뜻이 있어 깨집니다. <strong style="color:var(--text)">URL-safe</strong>는 그 둘을 <code>-</code>와 <code>_</code>로 바꾸고 끝의 <code>=</code>를 뗀 형식으로, JWT 토큰이나 주소에 넣는 값이 이것입니다.
+      이메일(MIME)은 한 줄을 76자로 끊습니다. 풀 때는 어느 형식이든, 줄바꿈과 공백이 섞여 있어도 알아서 처리합니다.
+      입력이 Base64가 아니면(허용되지 않는 글자, 길이가 맞지 않음) 어느 자리가 문제인지 알려 줍니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>입력한 내용이 서버로 전송되나요?</summary>
+      <p>아니요. 변환은 브라우저 안에서만 이뤄지고 어디로도 전송되지 않습니다. 인터넷을 끊어도 동작합니다. 토큰이나 내부 파일을 넣어도 어디에도 남지 않습니다.</p>
+    </details>
+    <details>
+      <summary>한글을 풀었는데 깨져요</summary>
+      <p>그 Base64가 UTF-8이 아닌 다른 인코딩(EUC-KR 등)의 바이트를 적은 것일 수 있습니다. 이 페이지는 UTF-8로 풀며, 바이트가 UTF-8이 아니면 깨진 글자가 섞였다고 알려 줍니다. 그런 값은 "Base64 → 파일 복원"으로 파일로 저장한 뒤 다른 인코딩으로 열어 보세요.</p>
+    </details>
+    <details>
+      <summary>data URI를 HTML에 어떻게 넣나요?</summary>
+      <p>이미지는 <code>&lt;img src="data:image/png;base64,…"&gt;</code>, CSS는 <code>background-image: url("data:…")</code>로 넣습니다. 결과 종류에서 그 형태를 고르면 그대로 복사됩니다. 수 KB짜리 아이콘에는 좋지만, 큰 그림은 파일로 두고 링크하는 편이 낫습니다.</p>
+    </details>
+    <details>
+      <summary>Base64를 파일로 돌릴 때 형식을 어떻게 아나요?</summary>
+      <p>data URI라면 앞의 MIME 형식을 읽습니다. Base64만 있으면 바이트 머리말(PNG·JPG·GIF·PDF·ZIP·WebP)로 추측해 확장자를 붙입니다. 모르면 .bin으로 저장하니 이름을 직접 적으세요.</p>
+    </details>
+    <details>
+      <summary>큰 파일도 되나요?</summary>
+      <p>수십 MB까지는 되지만 글자 상자가 느려집니다. Base64는 글자로 담기 위한 형식이라 애초에 큰 파일에 맞지 않습니다. 5MB 이하를 권합니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">이미지 크기 조절·리사이즈</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">흰 배경 투명하게 만들기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 페이지 번호 넣기</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF 텍스트 추출</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="image-palette.html" data-i18n="nav.pl">사진 색상 추출·색상 코드 뽑기</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘 만들기 (PNG→ICO)</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG PNG 변환</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리·검증·압축</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시·체크섬 확인</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var plain = el('plain'), enc = el('enc'), urlsafeCb = el('urlsafe'), wrapCb = el('wrap'), msg = el('msg');
+  var lock = false, timer = null;
+
+  function setMsg(box, text, cls) { box.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+
+  // 핵심: 바이트 ↔ Base64. btoa 는 1바이트 글자만 받으므로 UTF-8 바이트를 먼저 만든다.
+  function bytesToB64(u8) {
+    var s = '', CH = 0x8000;
+    for (var i = 0; i < u8.length; i += CH) s += String.fromCharCode.apply(null, u8.subarray(i, i + CH));
+    return btoa(s);
+  }
+  function b64ToBytes(str) {
+    var s = str.replace(/[\s\r\n]/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    var bad = /[^A-Za-z0-9+\/=]/.exec(s);
+    if (bad) throw { pos: bad.index, ch: bad[0] };
+    s = s.replace(/=+$/, '');
+    if (s.indexOf('=') >= 0) throw { pos: s.indexOf('='), ch: '=' };
+    if (s.length % 4 === 1) throw { len: true };
+    while (s.length % 4) s += '=';
+    var bin = atob(s), u8 = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  }
+  function format(b64) {
+    if (urlsafeCb.checked) b64 = b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    if (wrapCb.checked) b64 = b64.replace(/(.{76})/g, '$1\n').replace(/\n$/, '');
+    return b64;
+  }
+  function decodeErr(e) {
+    if (e && e.len) return t('b64.badLen', 'Base64 길이가 맞지 않습니다 (4의 배수여야 하며 1자가 남으면 안 됩니다).');
+    if (e && e.ch !== undefined) return t('b64.badChar', 'Base64에 쓸 수 없는 글자 "{c}"가 {p}번째 자리에 있습니다.').replace('{c}', esc(e.ch)).replace('{p}', e.pos + 1);
+    return t('b64.badGeneric', 'Base64를 풀 수 없습니다.');
+  }
+
+  function encodeSide() {
+    var text = plain.value, u8 = new TextEncoder().encode(text);
+    enc.value = text ? format(bytesToB64(u8)) : '';
+    setMsg(msg, '');
+    el('t-info').textContent = text ? t('b64.info', '원문 {a}자 · {b}바이트 → Base64 {c}자').replace('{a}', text.length).replace('{b}', u8.length).replace('{c}', enc.value.replace(/\n/g, '').length) : '';
+  }
+  function decodeSide() {
+    var text = enc.value;
+    if (!text.trim()) { plain.value = ''; setMsg(msg, ''); el('t-info').textContent = ''; return; }
+    try {
+      var u8 = b64ToBytes(text), dec = new TextDecoder('utf-8', { fatal: false }).decode(u8);
+      plain.value = dec;
+      var broken = dec.indexOf('�') >= 0;
+      setMsg(msg, broken ? t('b64.notUtf8', '바이트가 UTF-8 글자가 아니어서 깨진 글자(�)가 섞였습니다. 파일이라면 아래 "Base64 → 파일 복원"을 쓰세요.') : '', 'err');
+      el('t-info').textContent = t('b64.infoDec', 'Base64 {c}자 → {b}바이트 · 원문 {a}자').replace('{c}', text.replace(/\s/g, '').length).replace('{b}', u8.length).replace('{a}', dec.length);
+    } catch (e) { plain.value = ''; setMsg(msg, decodeErr(e), 'err'); el('t-info').textContent = ''; }
+  }
+  plain.addEventListener('input', function () { if (lock) return; lock = true; encodeSide(); lock = false; });
+  enc.addEventListener('input', function () { if (lock) return; lock = true; decodeSide(); lock = false; });
+  [urlsafeCb, wrapCb].forEach(function (x) { x.addEventListener('change', function () { lock = true; encodeSide(); lock = false; }); });
+  document.addEventListener('langchange', function () { lock = true; if (plain.value) encodeSide(); lock = false; });
+
+  function copy(text, m) {
+    if (!text) { m.textContent = t('b64.nothing', '복사할 내용이 없습니다'); return; }
+    navigator.clipboard.writeText(text).then(function () {
+      m.textContent = t('b64.copied', '복사했습니다');
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = t('b64.copyFail', '복사하지 못했습니다'); });
+  }
+  el('btn-copy-enc').addEventListener('click', function () { copy(enc.value, el('copy-msg')); });
+  el('btn-copy-plain').addEventListener('click', function () { copy(plain.value, el('copy-msg')); });
+  el('btn-swap').addEventListener('click', function () {
+    // Base64 결과를 원문 자리로 옮겨 다시 인코딩한다 (이중 인코딩 확인용)
+    var v = enc.value; plain.value = v; lock = true; encodeSide(); lock = false;
+  });
+  el('btn-clear').addEventListener('click', function () { plain.value = ''; enc.value = ''; setMsg(msg, ''); el('t-info').textContent = ''; el('copy-msg').textContent = ''; });
+
+  // ===== 파일 → Base64 =====
+  var dz = el('dz'), fileInput = el('file'), fout = el('fout'), fkind = el('fkind'), fprev = el('fprev');
+  var fileB64 = '', fileMime = '', fileName = 'file';
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) loadFile(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) loadFile(fileInput.files[0]); });
+
+  function loadFile(f) {
+    if (f.size > 50 * 1024 * 1024) { setMsg(el('fmsg'), t('b64.tooBig', '50MB를 넘는 파일은 글자 상자에 담을 수 없습니다.'), 'err'); return; }
+    f.arrayBuffer().then(function (buf) {
+      var u8 = new Uint8Array(buf);
+      fileB64 = bytesToB64(u8); fileMime = f.type || sniff(u8) || 'application/octet-stream'; fileName = f.name;
+      el('t-fname').textContent = f.name; el('t-ftype').textContent = fileMime;
+      el('t-fsize').textContent = humanSize(f.size) + ' → ' + humanSize(fileB64.length);
+      el('farea').hidden = false;
+      setMsg(el('fmsg'), f.size > 5 * 1024 * 1024 ? t('b64.bigWarn', '5MB가 넘습니다. HTML에 넣기에는 너무 커서 파일로 두고 링크하는 편이 낫습니다.') : '', 'err');
+      renderFile();
+    }).catch(function () { setMsg(el('fmsg'), t('b64.readFail', '파일을 읽지 못했습니다.'), 'err'); });
+  }
+  function dataUri() { return 'data:' + fileMime + ';base64,' + fileB64; }
+  function renderFile() {
+    if (!fileB64) return;
+    var k = fkind.value;
+    fout.value = k === 'raw' ? fileB64 : k === 'img' ? '<img src="' + dataUri() + '" alt="">' : k === 'css' ? 'background-image: url("' + dataUri() + '");' : dataUri();
+    var isImg = /^image\//.test(fileMime) && fileMime !== 'image/svg+xml' || fileMime === 'image/svg+xml';
+    fprev.hidden = !isImg; if (isImg) fprev.src = dataUri();
+  }
+  fkind.addEventListener('change', renderFile);
+  el('btn-copy-file').addEventListener('click', function () { copy(fout.value, el('fcopy-msg')); });
+  el('btn-save-txt').addEventListener('click', function () {
+    if (!fout.value) return;
+    download(new Blob([fout.value], { type: 'text/plain;charset=utf-8' }), fileName.replace(/\.[^.]+$/, '') + '.base64.txt');
+    el('fcopy-msg').textContent = t('b64.savedTxt', 'txt로 저장했습니다');
+  });
+  el('btn-freset').addEventListener('click', function () {
+    fileB64 = ''; fileMime = ''; fileInput.value = ''; fout.value = ''; fprev.hidden = true; fprev.removeAttribute('src');
+    el('t-fname').textContent = '-'; el('t-fsize').textContent = '-'; el('t-ftype').textContent = '-'; el('fcopy-msg').textContent = '';
+    el('farea').hidden = true; setMsg(el('fmsg'), '');
+  });
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+  // 바이트 머리말로 형식 추측
+  var SIGS = [[[0x89, 0x50, 0x4E, 0x47], 'image/png', 'png'], [[0xFF, 0xD8, 0xFF], 'image/jpeg', 'jpg'], [[0x47, 0x49, 0x46, 0x38], 'image/gif', 'gif'],
+              [[0x25, 0x50, 0x44, 0x46], 'application/pdf', 'pdf'], [[0x50, 0x4B, 0x03, 0x04], 'application/zip', 'zip'], [[0x52, 0x49, 0x46, 0x46], 'image/webp', 'webp'],
+              [[0x3C, 0x73, 0x76, 0x67], 'image/svg+xml', 'svg'], [[0x3C, 0x3F, 0x78, 0x6D], 'image/svg+xml', 'svg']];
+  var EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'application/pdf': 'pdf', 'application/zip': 'zip', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'text/plain': 'txt', 'application/json': 'json', 'text/html': 'html', 'text/css': 'css', 'font/woff2': 'woff2', 'font/woff': 'woff', 'audio/mpeg': 'mp3', 'video/mp4': 'mp4' };
+  function sniff(u8) {
+    for (var i = 0; i < SIGS.length; i++) {
+      var sig = SIGS[i][0], ok = true;
+      for (var j = 0; j < sig.length; j++) if (u8[j] !== sig[j]) { ok = false; break; }
+      if (ok) { if (SIGS[i][1] === 'image/webp' && !(u8[8] === 0x57 && u8[9] === 0x45)) continue; return SIGS[i][1]; }
+    }
+    return '';
+  }
+
+  // ===== Base64 → 파일 =====
+  var dec = el('dec'), dname = el('dname'), dprev = el('dprev'), decoded = null, decMime = '';
+  function parseDec() {
+    var text = dec.value.trim(); decoded = null; decMime = '';
+    dprev.hidden = true;
+    if (!text) { el('dinfo').textContent = ''; return; }
+    var m = /^data:([^;,]+)?(;[^,]*)?,([\s\S]*)$/.exec(text), body = text;
+    if (m) { decMime = m[1] || ''; body = m[3]; if (!/;base64/.test(m[2] || '')) { el('dinfo').textContent = t('b64.notB64Uri', 'Base64가 아닌 data URI입니다 (글자가 그대로 들어 있음).'); decoded = new TextEncoder().encode(decodeURIComponent(body)); return finish(); } }
+    try { decoded = b64ToBytes(body); } catch (e) { el('dinfo').textContent = decodeErr(e); return; }
+    if (!decMime) decMime = sniff(decoded) || '';
+    finish();
+  }
+  function finish() {
+    el('dinfo').textContent = t('b64.decInfo', '{b}바이트 · 형식 {m}').replace('{b}', decoded.length.toLocaleString()).replace('{m}', decMime || t('b64.unknown', '알 수 없음'));
+    if (/^image\//.test(decMime)) { dprev.src = URL.createObjectURL(new Blob([decoded], { type: decMime })); dprev.hidden = false; }
+  }
+  dec.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(parseDec, 150); });
+  el('btn-save-file').addEventListener('click', function () {
+    if (!decoded) { el('dmsg').textContent = t('b64.nothingDec', '먼저 Base64를 붙여 넣으세요'); return; }
+    var name = dname.value.trim();
+    if (!name) name = 'decoded.' + (EXT[decMime] || 'bin');
+    else if (!/\.[A-Za-z0-9]{1,8}$/.test(name) && EXT[decMime]) name += '.' + EXT[decMime];
+    download(new Blob([decoded], { type: decMime || 'application/octet-stream' }), name);
+    el('dmsg').textContent = t('b64.savedFile', '{n} 저장했습니다').replace('{n}', name);
+  });
+})();
+</script>
+</body>
+</html>

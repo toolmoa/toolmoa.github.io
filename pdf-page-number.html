@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF 페이지 번호 넣기 - 쪽수 매기기 무료 온라인 | 툴모아</title>
+<meta name="description" content="PDF에 페이지 번호를 넣습니다. 위치·형식(1, 1 / 12, - 1 -)·시작 번호·적용 범위·글자 크기를 정하고, 표지는 건너뛸 수 있습니다. 파일이 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/pdf-page-number.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-page-number.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-page-number.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-page-number.html">
+<meta property="og:title" content="PDF 페이지 번호 넣기 · 쪽수 매기기">
+<meta property="og:description" content="위치·형식·시작 번호·범위를 정해 PDF에 쪽 번호를. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<!-- pdf-lib 은 여기서 미리 받지 않는다. 아래 loadLib() 이 파일을 고른 뒤에 받는다. -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"PDF 페이지 번호 넣기","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .pn-stage { display:flex; justify-content:center; padding:14px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); }
+  .pn-stage canvas { max-width:100%; height:auto; box-shadow:0 2px 10px rgba(0,0,0,.18); }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/pdf-page-number.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/pdf-page-number.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="PDF 페이지 번호 넣기 · 쪽수 매기기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PDF 페이지 번호 넣기 · 쪽수 매기기">
+<meta name="twitter:description" content="위치·형식·시작 번호·범위를 정해 PDF에 쪽 번호를. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/pdf-page-number.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"파일이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. PDF를 읽고 번호를 넣고 저장하는 일이 전부 브라우저 안에서 이뤄집니다. 인터넷을 끊어도 동작합니다. 계약서·성적표처럼 남에게 보이면 안 되는 문서에 쓰라고 만든 도구입니다."}},{"@type":"Question","name":"표지에는 번호를 안 넣고 본문만 1부터 시작하고 싶어요","acceptedAnswer":{"@type":"Answer","text":"\"적용할 쪽\"에 2-를 적고 시작 번호를 1로 두세요. 2쪽부터 끝까지 1, 2, 3…이 들어갑니다. 표지가 두 장이면 3-입니다."}},{"@type":"Question","name":"\"1 / 12\"의 12는 무엇인가요?","acceptedAnswer":{"@type":"Answer","text":"번호를 넣는 마지막 쪽의 번호입니다. 전체가 12쪽인데 표지를 빼고 2쪽부터 1로 시작하면 \"1 / 11\"처럼 11까지 나옵니다."}},{"@type":"Question","name":"\"1쪽\"처럼 한글 형식은 없나요?","acceptedAnswer":{"@type":"Answer","text":"한글을 PDF에 글자로 넣으려면 한글 글꼴 파일(수 MB)을 문서에 통째로 심어야 해서 파일이 크게 늘어납니다. 숫자와 영문은 PDF 기본 글꼴로 넣을 수 있어 용량이 거의 늘지 않습니다. 그래서 숫자·영문 형식만 두었습니다."}},{"@type":"Question","name":"원래 글자가 글자로 남나요? 화질이 떨어지나요?","acceptedAnswer":{"@type":"Answer","text":"네, 그대로입니다. 쪽을 그림으로 바꾸지 않고 번호 글자만 얹기 때문에 본문 글자는 여전히 검색·복사가 되고 화질도 변하지 않습니다. 파일 용량도 몇 KB만 늘어납니다."}},{"@type":"Question","name":"암호가 걸린 PDF는요?","acceptedAnswer":{"@type":"Answer","text":"열기 암호가 걸린 파일은 읽을 수 없어 안내가 뜹니다. PDF 뷰어에서 암호를 풀어 다시 저장한 뒤 올리세요."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"PDF 페이지 번호 넣기 · 쪽수 매기기","item":"https://toolmoa.github.io/pdf-page-number.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="pn.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="pdf-page-number.html" aria-current="page" data-i18n="nav.pn">PDF 쪽 번호</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF→텍스트</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="image-palette.html" data-i18n="nav.pl">색상 추출</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG→PNG</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="pn.h1">PDF 페이지 번호 넣기 · 쪽수 매기기</h1>
+  <p class="lead" data-i18n="pn.lead">PDF의 모든 쪽(또는 고른 범위)에 페이지 번호를 넣습니다. 위치·형식·시작 번호·글자 크기를 정하고, 표지처럼 번호를 안 넣을 쪽은 건너뛸 수 있습니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 파일이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🔢</span>
+    <span class="dz-main" data-i18n="pn.drop">PDF를 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="pn.drop2">한 번에 한 파일 · 암호가 걸린 PDF는 먼저 풀어야 합니다</span>
+    <input type="file" id="file" accept="application/pdf,.pdf">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-pages">0</span><span class="lbl" data-i18n="pn.pages">전체 쪽</span></div>
+      <div class="stat"><span class="num" id="t-num">0</span><span class="lbl" data-i18n="pn.numbered">번호 넣는 쪽</span></div>
+      <div class="stat"><span class="num" id="t-size" style="font-size:18px">-</span><span class="lbl" data-i18n="pn.pageSize">쪽 크기 (mm)</span></div>
+    </div>
+
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="pos" data-i18n="pn.pos">위치</label>
+          <select id="pos">
+            <option value="bc" selected data-i18n="pn.pBC">아래 가운데</option>
+            <option value="br" data-i18n="pn.pBR">아래 오른쪽</option>
+            <option value="bl" data-i18n="pn.pBL">아래 왼쪽</option>
+            <option value="bo" data-i18n="pn.pBO">아래 바깥쪽 (홀수 오른쪽·짝수 왼쪽)</option>
+            <option value="tc" data-i18n="pn.pTC">위 가운데</option>
+            <option value="tr" data-i18n="pn.pTR">위 오른쪽</option>
+            <option value="tl" data-i18n="pn.pTL">위 왼쪽</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="fmt" data-i18n="pn.fmt">형식</label>
+          <select id="fmt">
+            <option value="n" selected>1</option>
+            <option value="n-of">1 / 12</option>
+            <option value="dash">- 1 -</option>
+            <option value="page">Page 1</option>
+            <option value="page-of">Page 1 of 12</option>
+            <option value="p">p. 1</option>
+          </select>
+          <div class="hint" data-i18n="pn.fmtHint">12는 마지막 번호로 바뀝니다. 글꼴을 파일에 넣지 않으려고 영문·숫자 형식만 둡니다.</div>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="start" data-i18n="pn.start">시작 번호</label>
+          <input type="number" id="start" min="0" max="99999" value="1" inputmode="numeric">
+          <div class="hint" data-i18n="pn.startHint">번호를 넣는 첫 쪽에 이 번호가 들어갑니다.</div>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="range" data-i18n="pn.range">적용할 쪽</label>
+          <input type="text" id="range" placeholder="비우면 전부 · 예: 2-  또는 3-10, 12" data-i18n-ph="pn.rangePh">
+          <div class="hint" data-i18n="pn.rangeHint">표지를 건너뛰려면 "2-"처럼 적으세요. 쉼표로 여러 범위를 적을 수 있습니다.</div>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="size"><span data-i18n="pn.size">글자 크기</span> <span id="size-val" style="color:var(--accent)">11pt</span></label>
+          <input type="range" id="size" min="7" max="24" value="11" step="1">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="margin"><span data-i18n="pn.margin">가장자리 여백</span> <span id="margin-val" style="color:var(--accent)">12mm</span></label>
+          <input type="range" id="margin" min="4" max="40" value="12" step="1">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="color" data-i18n="pn.color">글자색</label>
+          <select id="color">
+            <option value="black" selected data-i18n="pn.cBlack">검정</option>
+            <option value="gray" data-i18n="pn.cGray">회색</option>
+            <option value="white" data-i18n="pn.cWhite">흰색 (어두운 배경용)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px" id="preview-note"></p>
+    <div class="pn-stage">
+      <canvas id="preview" width="300" height="400" aria-label="페이지 번호 위치 미리보기"></canvas>
+    </div>
+
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn" id="btn-save" data-i18n="pn.save">번호 넣어 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="pn.cross">여러 PDF를 먼저 하나로 묶으려면 <a href="pdf-merge.html">PDF 합치기</a>를, 쪽을 돌리거나 지우려면 <a href="pdf-edit.html">PDF 회전·삭제</a>를, 전체에 "대외비" 같은 글자를 깔려면 <a href="pdf-watermark.html">PDF 워터마크</a>를 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:PDFPAGENUMBER --></div>
+
+  <h2 data-ko-only>어디에 쓰나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">여러 문서를 합친 뒤</strong> — 각자 번호가 있던 파일을 합치면 번호가 뒤섞입니다. 합친 파일에 새로 매기면 1부터 끝까지 이어집니다.<br>
+      <strong style="color:var(--text)">스캔한 문서</strong> — 종이에 번호가 없던 자료를 제출·보관할 때.<br>
+      <strong style="color:var(--text)">표지 건너뛰기</strong> — "2-"로 범위를 잡고 시작 번호를 1로 두면 표지 다음 쪽이 1쪽이 됩니다.<br>
+      <strong style="color:var(--text)">양면 인쇄</strong> — "아래 바깥쪽"을 고르면 홀수 쪽은 오른쪽, 짝수 쪽은 왼쪽에 들어가 책처럼 제본해도 번호가 바깥에 옵니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>번호가 원래 번호와 겹칠 때</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      이 도구는 기존 내용을 지우지 않고 그 위에 글자를 얹습니다. 문서에 이미 쪽 번호가 있으면 두 개가 보일 수 있습니다.
+      그럴 때는 위치를 반대쪽(위↔아래, 왼쪽↔오른쪽)으로 옮기거나 여백을 조절해 겹치지 않게 하세요.
+      미리보기에서 번호가 들어갈 자리를 먼저 확인할 수 있습니다. 가로로 누운 쪽(가로 방향 PDF)도 보이는 방향 기준으로 같은 자리에 들어갑니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>파일이 서버로 올라가나요?</summary>
+      <p>아니요. PDF를 읽고 번호를 넣고 저장하는 일이 전부 브라우저 안에서 이뤄집니다. 인터넷을 끊어도 동작합니다. 계약서·성적표처럼 남에게 보이면 안 되는 문서에 쓰라고 만든 도구입니다.</p>
+    </details>
+    <details>
+      <summary>표지에는 번호를 안 넣고 본문만 1부터 시작하고 싶어요</summary>
+      <p>"적용할 쪽"에 <code>2-</code>를 적고 시작 번호를 1로 두세요. 2쪽부터 끝까지 1, 2, 3…이 들어갑니다. 표지가 두 장이면 <code>3-</code>입니다.</p>
+    </details>
+    <details>
+      <summary>"1 / 12"의 12는 무엇인가요?</summary>
+      <p>번호를 넣는 마지막 쪽의 번호입니다. 전체가 12쪽인데 표지를 빼고 2쪽부터 1로 시작하면 "1 / 11"처럼 11까지 나옵니다.</p>
+    </details>
+    <details>
+      <summary>"1쪽"처럼 한글 형식은 없나요?</summary>
+      <p>한글을 PDF에 글자로 넣으려면 한글 글꼴 파일(수 MB)을 문서에 통째로 심어야 해서 파일이 크게 늘어납니다. 숫자와 영문은 PDF 기본 글꼴로 넣을 수 있어 용량이 거의 늘지 않습니다. 그래서 숫자·영문 형식만 두었습니다.</p>
+    </details>
+    <details>
+      <summary>원래 글자가 글자로 남나요? 화질이 떨어지나요?</summary>
+      <p>네, 그대로입니다. 쪽을 그림으로 바꾸지 않고 번호 글자만 얹기 때문에 본문 글자는 여전히 검색·복사가 되고 화질도 변하지 않습니다. 파일 용량도 몇 KB만 늘어납니다.</p>
+    </details>
+    <details>
+      <summary>암호가 걸린 PDF는요?</summary>
+      <p>열기 암호가 걸린 파일은 읽을 수 없어 안내가 뜹니다. PDF 뷰어에서 암호를 풀어 다시 저장한 뒤 올리세요.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">이미지 크기 조절·리사이즈</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">흰 배경 투명하게 만들기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF 텍스트 추출</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="image-palette.html" data-i18n="nav.pl">사진 색상 추출·색상 코드 뽑기</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘 만들기 (PNG→ICO)</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG PNG 변환</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리·검증·압축</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64 인코딩·디코딩</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시·체크섬 확인</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), preview = el('preview');
+  var posSel = el('pos'), fmtSel = el('fmt'), startIn = el('start'), rangeIn = el('range'), sizeIn = el('size'), marginIn = el('margin'), colorSel = el('color');
+
+  var bytes = null, baseName = 'document', pageCount = 0, sizes = [];   // sizes[i] = { w, h } 보이는 방향 기준 (pt)
+  var libPromise = null, timer = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  // 무거운 라이브러리는 파일을 고른 뒤에 받는다
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+  function loadLib() {
+    if (!libPromise) {
+      libPromise = needScript('PDFLib', 'assets/vendor/pdf-lib.min.js')
+        .catch(function (e) { libPromise = null; throw e; });   // 실패하면 다음에 다시 받을 수 있게
+    }
+    return libPromise;
+  }
+  function whenReady(fn) {
+    if (typeof PDFLib !== 'undefined') { fn(); return; }
+    setMsg(t('pn.preparing', 'PDF 엔진을 준비하는 중…'));
+    loadLib().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg(t('pn.notReady', 'PDF 엔진을 불러오지 못했습니다. 새로 고침해 주세요.'), 'err');
+    });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 키보드만 쓰는 사람도 열 수 있어야 한다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+
+  function load(file) {
+    var isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if (!isPdf) { setMsg(t('pn.notPdf', 'PDF 파일을 선택해 주세요.'), 'err'); return; }
+    whenReady(function () {
+      setMsg(t('pn.reading', '파일을 읽는 중…'));
+      file.arrayBuffer().then(function (buf) {
+        bytes = new Uint8Array(buf);
+        return PDFLib.PDFDocument.load(bytes, { parseSpeed: PDFLib.ParseSpeeds.Fastest, ignoreEncryption: false });
+      }).then(function (pdf) {
+        var pages = pdf.getPages();
+        pageCount = pages.length;
+        sizes = pages.map(function (p) {
+          var w = p.getWidth(), h = p.getHeight(), rot = ((p.getRotation().angle % 360) + 360) % 360;
+          return (rot === 90 || rot === 270) ? { w: h, h: w } : { w: w, h: h };
+        });
+        baseName = file.name.replace(/\.[^.]+$/, '');
+        el('t-pages').textContent = pageCount;
+        el('t-size').textContent = Math.round(sizes[0].w / 72 * 25.4) + '×' + Math.round(sizes[0].h / 72 * 25.4);
+        area.hidden = false;
+        setMsg('');
+        render();
+      }).catch(function (e) {
+        bytes = null; area.hidden = true;
+        var enc = /encrypt/i.test(String(e && e.message));
+        setMsg(enc ? t('pn.encrypted', '암호가 걸린 PDF입니다. 암호를 풀어 저장한 뒤 다시 올려 주세요.')
+                   : t('pn.cantOpen', '이 파일을 열 수 없습니다. 손상된 PDF일 수 있습니다.'), 'err');
+      });
+    });
+  }
+
+  // "2-" "3-10, 12" 같은 범위 → 0부터 시작하는 쪽 번호 배열. 비우면 전부.
+  function parseRange(str) {
+    var out = [], seen = {};
+    if (!str.trim()) { for (var i = 0; i < pageCount; i++) out.push(i); return out; }
+    str.split(',').forEach(function (part) {
+      part = part.trim();
+      if (!part) return;
+      var m = part.match(/^(\d+)\s*[-~]\s*(\d*)$/);
+      if (m) {
+        var a = parseInt(m[1], 10), b = m[2] ? parseInt(m[2], 10) : pageCount;
+        if (a > b) { var sw = a; a = b; b = sw; }
+        for (var k = a; k <= b; k++) if (k >= 1 && k <= pageCount && !seen[k]) { seen[k] = 1; out.push(k - 1); }
+      } else if (/^\d+$/.test(part)) {
+        var n = parseInt(part, 10);
+        if (n >= 1 && n <= pageCount && !seen[n]) { seen[n] = 1; out.push(n - 1); }
+      }
+    });
+    out.sort(function (x, y) { return x - y; });
+    return out;
+  }
+  function label(fmt, n, last) {
+    switch (fmt) {
+      case 'n-of': return n + ' / ' + last;
+      case 'dash': return '- ' + n + ' -';
+      case 'page': return 'Page ' + n;
+      case 'page-of': return 'Page ' + n + ' of ' + last;
+      case 'p': return 'p. ' + n;
+      default: return String(n);
+    }
+  }
+  function settings() {
+    var targets = parseRange(rangeIn.value), start = parseInt(startIn.value, 10);
+    if (isNaN(start) || start < 0) start = 1;
+    return { targets: targets, start: start, last: start + targets.length - 1, fmt: fmtSel.value, pos: posSel.value,
+             size: parseInt(sizeIn.value, 10), margin: parseInt(marginIn.value, 10) * 72 / 25.4, color: colorSel.value };
+  }
+  // 보이는 방향 기준 좌표 (왼쪽 아래 원점, pt). textW 는 글자 폭.
+  function place(s, pageIndex, pw, ph, textW) {
+    var pos = s.pos, x, y;
+    if (pos === 'bo') pos = ((pageIndex + 1) % 2 === 1) ? 'br' : 'bl';   // 홀수 쪽 오른쪽, 짝수 쪽 왼쪽
+    var h = pos.charAt(0), v = pos.charAt(1);
+    y = h === 'b' ? s.margin : ph - s.margin - s.size * 0.72;
+    x = v === 'c' ? (pw - textW) / 2 : v === 'r' ? pw - s.margin - textW : s.margin;
+    return { x: x, y: y };
+  }
+  function rgb() {
+    var c = colorSel.value;
+    return c === 'gray' ? [0.4, 0.4, 0.4] : c === 'white' ? [1, 1, 1] : [0, 0, 0];
+  }
+
+  // 미리보기: 번호를 넣는 첫 쪽을 축소해 그린다 (글꼴 폭은 Helvetica 와 비슷한 sans-serif 로 어림)
+  function render() {
+    if (!bytes) return;
+    var s = settings();
+    el('t-num').textContent = s.targets.length;
+    el('size-val').textContent = s.size + 'pt';
+    el('margin-val').textContent = marginIn.value + 'mm';
+    var ctx = preview.getContext('2d');
+    var pi = s.targets.length ? s.targets[0] : 0, pg = sizes[pi];
+    var k = Math.min(300 / pg.w, 400 / pg.h);
+    preview.width = Math.round(pg.w * k); preview.height = Math.round(pg.h * k);
+    ctx.fillStyle = s.color === 'white' ? '#444' : '#fff';
+    ctx.fillRect(0, 0, preview.width, preview.height);
+    // 본문 자리 표시
+    ctx.fillStyle = s.color === 'white' ? '#666' : '#e4e7ec';
+    for (var i = 0; i < 14; i++) ctx.fillRect(preview.width * 0.14, preview.height * 0.12 + i * preview.height * 0.045, preview.width * (i % 5 === 4 ? 0.45 : 0.72), preview.height * 0.018);
+    if (!s.targets.length) {
+      el('preview-note').textContent = t('pn.noPages', '적용할 쪽이 없습니다. 범위를 확인하세요.');
+      return;
+    }
+    var text = label(s.fmt, s.start, s.last);
+    ctx.font = (s.size * k) + 'px Helvetica, Arial, sans-serif';
+    var tw = ctx.measureText(text).width / k;
+    var p = place(s, pi, pg.w, pg.h, tw);
+    var c = rgb();
+    ctx.fillStyle = 'rgb(' + Math.round(c[0] * 255) + ',' + Math.round(c[1] * 255) + ',' + Math.round(c[2] * 255) + ')';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(text, p.x * k, preview.height - p.y * k);
+    el('preview-note').textContent = t('pn.previewOf', '{n}쪽 미리보기 — 번호 "{t}"').replace('{n}', pi + 1).replace('{t}', text);
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(render, 60); }
+  [posSel, fmtSel, colorSel].forEach(function (x) { x.addEventListener('change', render); });
+  [startIn, rangeIn, sizeIn, marginIn].forEach(function (x) { x.addEventListener('input', schedule); });
+  document.addEventListener('langchange', render);
+
+  el('btn-save').addEventListener('click', function () {
+    if (!bytes) return;
+    var s = settings();
+    if (!s.targets.length) { setMsg(t('pn.noPages', '적용할 쪽이 없습니다. 범위를 확인하세요.'), 'err'); return; }
+    var btn = this; btn.disabled = true;
+    setMsg(t('pn.working', '번호를 넣는 중…'));
+    // 설정을 바꿔 다시 저장할 수 있게 매번 원본 바이트에서 새로 연다
+    PDFLib.PDFDocument.load(bytes, { parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (pdf) {
+      return pdf.embedFont(PDFLib.StandardFonts.Helvetica).then(function (font) {
+        var pages = pdf.getPages(), c = rgb(), color = PDFLib.rgb(c[0], c[1], c[2]);
+        s.targets.forEach(function (pi, k) {
+          var page = pages[pi], text = label(s.fmt, s.start + k, s.last);
+          var W = page.getWidth(), H = page.getHeight(), rot = ((page.getRotation().angle % 360) + 360) % 360;
+          var vis = sizes[pi];   // 보이는 방향 크기
+          var tw = font.widthOfTextAtSize(text, s.size);
+          var p = place(s, pi, vis.w, vis.h, tw), ux, uy;
+          // 보이는 방향 좌표 → 쪽의 원래 좌표. 회전된 쪽은 글자도 같은 각도로 돌려야 바로 보인다.
+          if (rot === 90) { ux = W - p.y; uy = p.x; }
+          else if (rot === 180) { ux = W - p.x; uy = H - p.y; }
+          else if (rot === 270) { ux = p.y; uy = H - p.x; }
+          else { ux = p.x; uy = p.y; }
+          page.drawText(text, { x: ux, y: uy, size: s.size, font: font, color: color, rotate: PDFLib.degrees(rot) });
+        });
+        return pdf.save();
+      });
+    }).then(function (out) {
+      var blob = new Blob([out], { type: 'application/pdf' });
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = baseName + '_' + t('pn.suffix', '쪽번호') + '.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      setMsg(t('pn.done', '{n}쪽에 번호를 넣어 저장했습니다. ').replace('{n}', s.targets.length) + humanSize(blob.size), 'ok');
+    }).catch(function (e) {
+      setMsg(t('pn.fail', '저장하지 못했습니다: ') + (e && e.message ? e.message : ''), 'err');
+    }).then(function () { btn.disabled = false; });
+  });
+
+  el('btn-reset').addEventListener('click', function () {
+    bytes = null; pageCount = 0; sizes = []; fileInput.value = '';
+    el('t-pages').textContent = '0'; el('t-num').textContent = '0'; el('t-size').textContent = '-';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

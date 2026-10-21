@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extract colors from an image — HEX codes and palette, free</title>
+<meta name="description" content="Dominant colors of a photo or logo as HEX and RGB with their share. Click to pick any pixel's exact color. Save as PNG or CSS variables. Nothing is uploaded.">
+<link rel="canonical" href="https://toolmoa.github.io/en/image-palette.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-palette.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-palette.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-palette.html">
+<meta property="og:title" content="Extract colors from a photo without uploading it">
+<meta property="og:description" content="Dominant colors as HEX and RGB with their share. Click to pick a pixel. Save as PNG or CSS variables.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Image color palette","applicationCategory":"DesignApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<style>
+  .pl-stage { text-align:center; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; }
+  .pl-stage canvas { max-width:100%; max-height:360px; height:auto; cursor:crosshair; border-radius:4px; }
+  .pl-list { list-style:none; margin:14px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+  .pl-list li { border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; background:var(--surface); }
+  .pl-list .sw { height:64px; display:flex; align-items:flex-end; justify-content:flex-end; padding:4px 6px; font-size:12px; font-weight:700; }
+  .pl-list button { width:100%; border:0; background:transparent; color:var(--text); text-align:left; padding:8px 10px; cursor:pointer; font:inherit; font-size:13px; line-height:1.5; }
+  .pl-list button:hover { background:var(--surface-2); }
+  .pl-list .hex { font-family:ui-monospace, Consolas, monospace; font-weight:700; }
+  .pl-list .rgb { color:var(--muted); font-size:12px; display:block; }
+  .pl-pick { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:14px; }
+  .pl-pick .dot { width:34px; height:34px; border-radius:50%; border:1px solid var(--border); flex:none; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/image-palette.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-image-palette.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Extract colors from an image · HEX codes from a photo — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Extract colors from a photo without uploading it">
+<meta name="twitter:description" content="Dominant colors as HEX and RGB with their share. Click to pick a pixel. Save as PNG or CSS variables.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-image-palette.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my photo uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. The colors are counted inside your browser and the picture goes nowhere. It works with the internet switched off."}},{"@type":"Question","name":"The logo color is slightly off","acceptedAnswer":{"@type":"Answer","text":"A palette color is an average of similar pixels, so JPEG noise and anti-aliased edges can shift it a few steps. For the exact value, click a flat area of the logo — that shows the pixel as it is. A PNG or SVG original is more accurate than a JPEG."}},{"@type":"Question","name":"White background comes first","acceptedAnswer":{"@type":"Answer","text":"If the background is most of the picture, it naturally has the largest share. Turn on \"Ignore white/black background\" to leave out nearly white and nearly black pixels so only the object's colors remain."}},{"@type":"Question","name":"What does the percentage mean?","acceptedAnswer":{"@type":"Answer","text":"The share of all pixels assigned to that color. With the background ignored, it is the share of the remaining pixels."}},{"@type":"Question","name":"Does it work with large photos?","acceptedAnswer":{"@type":"Answer","text":"Yes. Counting is done on a reduced copy, so even photos of tens of millions of pixels finish instantly. The color picked by clicking still comes from the full-resolution image."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Extract colors from an image · HEX codes from a photo","item":"https://toolmoa.github.io/en/image-palette.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html">Clean up text</a>
+      <a href="text-diff.html">Compare text</a>
+      <a href="pdf-edit.html">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html">Time calc</a>
+      <a href="pdf-page-number.html">Page numbers</a>
+      <a href="pdf-to-text.html">PDF to text</a>
+      <a href="favicon.html">Favicon</a>
+      <a href="image-palette.html" aria-current="page">Color palette</a>
+      <a href="svg-to-png.html">SVG to PNG</a>
+      <a href="json-format.html">JSON</a>
+      <a href="base64.html">Base64</a>
+      <a href="file-hash.html">File hash</a>
+    </nav>
+    <a class="lang-link" href="../image-palette.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Extract colors from an image · HEX codes from a photo</h1>
+  <p class="lead">Finds the colors used most in a photo or logo and shows them as HEX and RGB codes with their share. Click the picture to pick the color at that spot, and save the palette as a PNG or CSS variables.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🎯</span>
+    <span class="dz-main">Drop a photo here, or click to choose</span>
+    <span class="dz-sub">JPG · PNG · WebP · one at a time</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="count"><span>Number of colors</span> <span id="count-val" style="color:var(--accent)">6</span></label>
+          <input type="range" id="count" min="2" max="12" value="6" step="1">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="sort">Sort</label>
+          <select id="sort">
+            <option value="share" selected>Most used first</option>
+            <option value="light">Lightest first</option>
+            <option value="hue">By hue</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0;align-self:end">
+          <label class="inline-check" style="margin:0">
+            <input type="checkbox" id="skipbw">
+            <span>Ignore white/black background</span>
+          </label>
+          <div class="hint">Turn on for product shots on a nearly white (or black) background so only the object's colors remain.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pl-stage">
+      <canvas id="view" aria-label="Photo — click to pick the color at that spot"></canvas>
+    </div>
+    <div class="pl-pick" id="pick" hidden>
+      <span class="dot" id="pick-dot"></span>
+      <span><span>Picked color</span> <strong class="hex" id="pick-hex"></strong> <span id="pick-rgb" style="color:var(--muted)"></span></span>
+      <button class="btn secondary small" id="btn-pick-copy" type="button">Copy</button>
+    </div>
+    <p class="hint" style="margin:8px 0 0">Click the picture to pick the color at that spot. Click a swatch below to copy its HEX code.</p>
+
+    <ul class="pl-list" id="list"></ul>
+
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn" id="btn-copyall">Copy all codes</button>
+      <button class="btn secondary" id="btn-css">Copy as CSS variables</button>
+      <button class="btn secondary" id="btn-png">Save palette PNG</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+      <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">Paste a code into the <a href="color-convert.html">color code converter</a> to get HSL and CMYK and check its contrast against text. To use only part of the photo, crop it first with <a href="image-crop.html">crop image</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_IMAGEPALETTE --></div>
+
+  <h2>What it is for</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Recovering brand colors</strong> — you have the logo file but not the color codes. Pick them here and hand a designer the exact HEX.<br>
+      <strong style="color:var(--text)">Backgrounds and text that fit a photo</strong> — a thumbnail or social card built on a color taken from the photo itself never clashes with it.<br>
+      <strong style="color:var(--text)">Interior and fashion references</strong> — keep the color combination of a picture you like as codes and reproduce the mood later.<br>
+      <strong style="color:var(--text)">Web and app themes</strong> — "Copy as CSS variables" gives you <code>--color-1: #…;</code> lines ready to paste into a stylesheet.
+    </p>
+  </div>
+
+  <h2>How the colors are chosen</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      All the pixels are treated as one box in color space, and the box is split in half along its widest axis until there are as many boxes as colors
+      you asked for (median cut). The average of each box is a palette color and the number of pixels in it is the share. Small accent colors therefore only
+      appear when you raise the count, and a gradient photo can produce several similar colors. When you need the exact value at one spot, click the picture:
+      that reads the original pixel directly.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — the photo is reduced and counted on your device. Nothing is uploaded, which is what you want for
+      unreleased product shots or a logo that is not public yet, and the page works offline.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my photo uploaded?</summary>
+      <p>No. The colors are counted inside your browser and the picture goes nowhere. It works with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>The logo color is slightly off</summary>
+      <p>A palette color is an average of similar pixels, so JPEG noise and anti-aliased edges can shift it a few steps. For the exact value, click a flat area of the logo — that shows the pixel as it is. A PNG or SVG original is more accurate than a JPEG.</p>
+    </details>
+    <details>
+      <summary>White background comes first</summary>
+      <p>If the background is most of the picture, it naturally has the largest share. Turn on "Ignore white/black background" to leave out nearly white and nearly black pixels so only the object's colors remain.</p>
+    </details>
+    <details>
+      <summary>What does the percentage mean?</summary>
+      <p>The share of all pixels assigned to that color. With the background ignored, it is the share of the remaining pixels.</p>
+    </details>
+    <details>
+      <summary>Does it work with large photos?</summary>
+      <p>Yes. Counting is done on a reduced copy, so even photos of tens of millions of pixels finish instantly. The color picked by clicking still comes from the full-resolution image.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-clean.html">Remove duplicate lines · clean up text</a>
+      <a href="text-diff.html">Compare two texts</a>
+      <a href="pdf-edit.html">Rotate, delete and reorder PDF pages</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="time-calc.html">Time calculator · work hours</a>
+      <a href="pdf-page-number.html">Add page numbers to a PDF</a>
+      <a href="pdf-to-text.html">Extract text from a PDF</a>
+      <a href="favicon.html">Favicon generator</a>
+      <a href="svg-to-png.html">Convert SVG to PNG</a>
+      <a href="json-format.html">JSON formatter · validator</a>
+      <a href="base64.html">Base64 encode · decode</a>
+      <a href="file-hash.html">File hash · SHA-256 · MD5 checksum</a>
+      <a href="../image-palette.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), view = el('view'), list = el('list');
+  var countIn = el('count'), sortSel = el('sort'), skipCb = el('skipbw');
+
+  var MAX_PIXELS = 16e6, SAMPLE = 160;   // 색 세기는 160px 안으로 줄인 그림으로
+  var src = null, sample = null, palette = [], baseName = 'image', timer = null, picked = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function hex2(n) { var s = n.toString(16); return s.length < 2 ? '0' + s : s; }
+  function toHex(c) { return '#' + hex2(c[0]) + hex2(c[1]) + hex2(c[2]); }
+  function toRgb(c) { return 'rgb(' + c[0] + ', ' + c[1] + ', ' + c[2] + ')'; }
+  function lum(c) { return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+  function hue(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    if (!d) return -1;   // 무채색은 맨 뒤
+    var h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return ((h * 60) + 360) % 360;
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      e.preventDefault();
+      load(new File([f], 'pasted-image-' + stamp + '.' + ext, { type: f.type }));
+      return;
+    }
+  });
+
+  function load(file) {
+    if (file.type.indexOf('image/') !== 0) { setMsg('Please choose an image file.', 'err'); return; }
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.naturalWidth, h = img.naturalHeight, k = 1;
+      if (w * h > MAX_PIXELS) k = Math.sqrt(MAX_PIXELS / (w * h));
+      w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+      src = document.createElement('canvas'); src.width = w; src.height = h;
+      src.getContext('2d', { willReadFrequently: true }).drawImage(img, 0, 0, w, h);
+      view.width = w; view.height = h; view.getContext('2d').drawImage(src, 0, 0);
+      // 색 세기용 축소본
+      var sk = Math.min(1, SAMPLE / Math.max(w, h)), sw = Math.max(1, Math.round(w * sk)), sh = Math.max(1, Math.round(h * sk));
+      var sc = document.createElement('canvas'); sc.width = sw; sc.height = sh;
+      sc.getContext('2d').drawImage(img, 0, 0, sw, sh);
+      sample = sc.getContext('2d').getImageData(0, 0, sw, sh).data;
+      baseName = file.name.replace(/\.[^.]+$/, '');
+      picked = null; el('pick').hidden = true;
+      area.hidden = false; setMsg('');
+      analyze();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg('This picture cannot be opened.', 'err'); };
+    img.src = url;
+  }
+
+  // 핵심: 미디언 컷. 픽셀 묶음을 가장 넓게 퍼진 채널의 중간값에서 둘로 나누기를 반복한다.
+  function medianCut(pixels, n) {
+    var boxes = [pixels];
+    function range(box) {
+      var mn = [255, 255, 255], mx = [0, 0, 0];
+      for (var i = 0; i < box.length; i++) for (var c = 0; c < 3; c++) { var v = box[i][c]; if (v < mn[c]) mn[c] = v; if (v > mx[c]) mx[c] = v; }
+      var best = 0, span = -1;
+      for (c = 0; c < 3; c++) if (mx[c] - mn[c] > span) { span = mx[c] - mn[c]; best = c; }
+      return { ch: best, span: span };
+    }
+    while (boxes.length < n) {
+      var bi = -1, bestScore = -1;
+      for (var i = 0; i < boxes.length; i++) {
+        if (boxes[i].length < 2) continue;
+        var r = range(boxes[i]);
+        if (r.span === 0) continue;   // 한 가지 색만 든 상자는 나눠도 같은 색이 둘 나올 뿐이다
+        var score = r.span * Math.sqrt(boxes[i].length);   // 넓고 많은 상자를 먼저 나눈다
+        if (score > bestScore) { bestScore = score; bi = i; }
+      }
+      if (bi < 0) break;
+      var box = boxes[bi], ch = range(box).ch;
+      box.sort(function (a, b) { return a[ch] - b[ch]; });
+      // 가운데에서 자르되, 같은 값은 한쪽에 몰아 둔다 — 똑같은 색이 두 상자에 갈려 평균이 탁해지는 일을 막는다
+      var mid = box.length >> 1, v = box[mid][ch], lo = mid, hi = mid;
+      while (lo > 0 && box[lo - 1][ch] === v) lo--;
+      while (hi < box.length && box[hi][ch] === v) hi++;
+      var cut = (lo > 0 && (hi >= box.length || mid - lo <= hi - mid)) ? lo : hi;
+      boxes.splice(bi, 1, box.slice(0, cut), box.slice(cut));
+    }
+    return boxes.map(function (box) {
+      var s = [0, 0, 0];
+      for (var i = 0; i < box.length; i++) { s[0] += box[i][0]; s[1] += box[i][1]; s[2] += box[i][2]; }
+      return { color: [Math.round(s[0] / box.length), Math.round(s[1] / box.length), Math.round(s[2] / box.length)], count: box.length };
+    });
+  }
+
+  function analyze() {
+    if (!sample) return;
+    var n = parseInt(countIn.value, 10), skip = skipCb.checked, px = [];
+    for (var i = 0; i < sample.length; i += 4) {
+      if (sample[i + 3] < 128) continue;
+      var r = sample[i], g = sample[i + 1], b = sample[i + 2];
+      if (skip) { var l = lum([r, g, b]); if (l > 242 || l < 14) continue; }
+      px.push([r, g, b]);
+    }
+    el('count-val').textContent = n;
+    if (!px.length) { palette = []; list.innerHTML = ''; setMsg('Nothing is left after removing the background. Turn off "Ignore white/black background".', 'err'); return; }
+    setMsg('');
+    var total = px.length;
+    palette = [];
+    medianCut(px, n).forEach(function (p) {
+      // 거의 같은 색(채널 차이 합 12 이하)은 하나로 합친다 — 그라데이션 없는 그림에서 중복이 나오지 않게
+      for (var i = 0; i < palette.length; i++) {
+        var q = palette[i].color, dd = Math.abs(q[0] - p.color[0]) + Math.abs(q[1] - p.color[1]) + Math.abs(q[2] - p.color[2]);
+        if (dd <= 12) { palette[i].share += p.count / total; return; }
+      }
+      palette.push({ color: p.color, share: p.count / total });
+    });
+    var mode = sortSel.value;
+    palette.sort(function (a, b) {
+      if (mode === 'light') return lum(b.color) - lum(a.color);
+      if (mode === 'hue') { var ha = hue(a.color), hb = hue(b.color); if (ha < 0 && hb < 0) return lum(b.color) - lum(a.color); if (ha < 0) return 1; if (hb < 0) return -1; return ha - hb; }
+      return b.share - a.share;
+    });
+    renderList();
+  }
+  function renderList() {
+    list.innerHTML = '';
+    palette.forEach(function (p, i) {
+      var li = document.createElement('li'), hx = toHex(p.color), dark = lum(p.color) < 140;
+      li.innerHTML = '<div class="sw" style="background:' + hx + ';color:' + (dark ? '#fff' : '#111') + '">' + Math.round(p.share * 100) + '%</div>' +
+                     '<button type="button" data-hex="' + hx + '" title="' + 'Click to copy' + '"><span class="hex">' + hx + '</span><span class="rgb">' + toRgb(p.color) + '</span></button>';
+      list.appendChild(li);
+    });
+  }
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    copy(b.getAttribute('data-hex'), '{h} copied'.replace('{h}', b.getAttribute('data-hex')));
+  });
+  function copy(text, okMsg) {
+    var m = el('copy-msg');
+    navigator.clipboard.writeText(text).then(function () {
+      m.textContent = okMsg;
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = 'Could not copy'; });
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(analyze, 80); }
+  countIn.addEventListener('input', schedule);
+  sortSel.addEventListener('change', analyze);
+  skipCb.addEventListener('change', analyze);
+
+  // 그림을 클릭하면 그 자리 원본 픽셀을 집는다
+  view.addEventListener('click', function (e) {
+    if (!src) return;
+    var r = view.getBoundingClientRect();
+    var x = Math.floor((e.clientX - r.left) * view.width / r.width), y = Math.floor((e.clientY - r.top) * view.height / r.height);
+    x = Math.max(0, Math.min(view.width - 1, x)); y = Math.max(0, Math.min(view.height - 1, y));
+    var d = src.getContext('2d').getImageData(x, y, 1, 1).data;
+    picked = [d[0], d[1], d[2]];
+    showPick();
+  });
+  function showPick() {
+    el('pick').hidden = false;
+    el('pick-dot').style.background = toHex(picked);
+    el('pick-hex').textContent = toHex(picked);
+    el('pick-rgb').textContent = toRgb(picked);
+  }
+  el('btn-pick-copy').addEventListener('click', function () { if (picked) copy(toHex(picked), '{h} copied'.replace('{h}', toHex(picked))); });
+
+  el('btn-copyall').addEventListener('click', function () {
+    if (!palette.length) return;
+    copy(palette.map(function (p) { return toHex(p.color) + '  ' + toRgb(p.color) + '  ' + Math.round(p.share * 100) + '%'; }).join('\n'), 'Copied {n} colors'.replace('{n}', palette.length));
+  });
+  el('btn-css').addEventListener('click', function () {
+    if (!palette.length) return;
+    copy(':root {\n' + palette.map(function (p, i) { return '  --color-' + (i + 1) + ': ' + toHex(p.color) + ';'; }).join('\n') + '\n}', 'CSS variables copied');
+  });
+  el('btn-png').addEventListener('click', function () {
+    if (!palette.length) return;
+    var w = 160, c = document.createElement('canvas'); c.width = w * palette.length; c.height = 200;
+    var x = c.getContext('2d');
+    palette.forEach(function (p, i) {
+      x.fillStyle = toHex(p.color); x.fillRect(i * w, 0, w, 150);
+      x.fillStyle = '#fff'; x.fillRect(i * w, 150, w, 50);
+      x.fillStyle = '#111'; x.font = 'bold 18px Helvetica, Arial, sans-serif'; x.textAlign = 'center';
+      x.fillText(toHex(p.color), i * w + w / 2, 174);
+      x.fillStyle = '#666'; x.font = '12px Helvetica, Arial, sans-serif';
+      x.fillText(toRgb(p.color), i * w + w / 2, 192);
+    });
+    c.toBlob(function (blob) {
+      if (!blob) return;
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = baseName + '_' + 'palette' + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      el('copy-msg').textContent = 'Palette PNG saved';
+    }, 'image/png');
+  });
+  el('btn-reset').addEventListener('click', function () {
+    src = null; sample = null; palette = []; picked = null; fileInput.value = '';
+    view.width = view.height = 1; list.innerHTML = ''; el('pick').hidden = true; el('copy-msg').textContent = '';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

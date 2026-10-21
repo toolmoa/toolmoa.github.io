@@ -31,6 +31,14 @@ my %PAIR = (
   'password-gen.html' => 'password-gen.html',
   'time-calc.html' => 'time-calc.html',
   'text-diff.html' => 'text-diff.html',
+  'pdf-page-number.html' => 'pdf-page-number.html',
+  'pdf-to-text.html' => 'pdf-to-text.html',
+  'favicon.html' => 'favicon.html',
+  'image-palette.html' => 'image-palette.html',
+  'json-format.html' => 'json-format.html',
+  'file-hash.html' => 'file-hash.html',
+  'svg-to-png.html' => 'svg-to-png.html',
+  'base64.html' => 'base64.html',
 );
 
 my $BASE = 'https://toolmoa.github.io/';

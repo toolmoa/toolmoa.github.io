@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파비콘 만들기 - PNG를 ICO·모든 크기로 변환 무료 | 툴모아</title>
+<meta name="description" content="로고 한 장으로 favicon.ico(16·32·48)와 PNG 아이콘(16·32·180·192·512), site.webmanifest, HTML 코드까지 한 번에 만듭니다. 여백·배경·둥근 모서리 조절. 그림은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/favicon.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/favicon.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/favicon.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/favicon.html">
+<meta property="og:title" content="파비콘 만들기 · PNG → ICO · 모든 크기 한 번에">
+<meta property="og:description" content="로고 한 장으로 favicon.ico와 PNG 아이콘 전 크기, manifest, HTML 코드까지. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔖</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script src="assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"파비콘 만들기","applicationCategory":"DesignApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .fv-grid { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; }
+  .fv-item { text-align:center; font-size:12px; color:var(--muted); }
+  .fv-item canvas { display:block; margin:0 auto 4px; image-rendering:auto; }
+  .fv-tabs { display:flex; gap:10px; }
+  .fv-tab { flex:1; border-radius:var(--radius-sm); padding:12px; border:1px solid var(--border); }
+  .fv-tab.light { background:#fff; color:#555; }
+  .fv-tab.dark { background:#1f2328; color:#bbb; }
+  .fv-tab .fv-grid { justify-content:center; }
+  .fv-code { font-family:ui-monospace, Consolas, monospace; min-height:120px; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/favicon.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/favicon.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="파비콘 만들기 · PNG를 ICO와 모든 크기로 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="파비콘 만들기 · PNG → ICO · 모든 크기 한 번에">
+<meta name="twitter:description" content="로고 한 장으로 favicon.ico와 PNG 아이콘 전 크기, manifest, HTML 코드까지. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/favicon.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"그림이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 크기를 줄이고 ICO·PNG·ZIP으로 묶는 일이 전부 브라우저 안에서 이뤄집니다. 인터넷을 끊어도 동작합니다. 공개 전인 로고를 올려도 어디에도 남지 않습니다."}},{"@type":"Question","name":"어떤 그림을 올려야 하나요?","acceptedAnswer":{"@type":"Answer","text":"정사각형에 가깝고 512px 이상이면 모든 크기가 선명합니다. SVG를 올리면 어떤 크기도 또렷합니다. 배경이 투명한 PNG가 가장 좋지만, 흰 배경이면 \"배경\"을 그대로 두고 쓰거나 흰 배경 투명하게에서 먼저 지우세요."}},{"@type":"Question","name":"ICO 파일 하나로 끝낼 수 없나요?","acceptedAnswer":{"@type":"Answer","text":"탭 아이콘만 필요하면 \"favicon.ico만 저장\"으로 충분합니다. 다만 아이폰 홈 화면·안드로이드·설치형 웹앱은 ICO를 읽지 않고 PNG를 요구하므로, 휴대폰까지 생각하면 ZIP 전체를 쓰는 편이 좋습니다."}},{"@type":"Question","name":"여백은 왜 넣나요?","acceptedAnswer":{"@type":"Answer","text":"안드로이드는 아이콘을 둥근 모양 등으로 잘라 보여 주는데(마스크), 그림이 가장자리까지 꽉 차 있으면 잘려 나갑니다. 여백 10~15%를 두면 어떤 모양으로 잘려도 안전합니다. 탭 아이콘은 반대로 꽉 채워야 커 보입니다."}},{"@type":"Question","name":"투명 배경을 넣었는데 검게 나와요","acceptedAnswer":{"@type":"Answer","text":"ICO 안의 그림은 32비트(투명 포함)로 담으므로 정상이라면 투명합니다. 일부 오래된 윈도우 프로그램은 ICO의 투명을 검정으로 보여 줍니다. 브라우저에서는 문제없습니다. 걱정되면 \"배경\"을 흰색으로 지정하세요."}},{"@type":"Question","name":"site.webmanifest에 사이트 이름이 왜 들어가나요?","acceptedAnswer":{"@type":"Answer","text":"안드로이드에서 홈 화면에 추가할 때 아이콘 아래에 보이는 이름입니다. 비워 두면 브라우저가 페이지 제목을 씁니다. 나중에 파일을 메모장으로 열어 바꿀 수 있습니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"파비콘 만들기 · PNG를 ICO와 모든 크기로","item":"https://toolmoa.github.io/favicon.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="fv.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 쪽 번호</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF→텍스트</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="image-palette.html" data-i18n="nav.pl">색상 추출</a>
+      <a href="favicon.html" aria-current="page" data-i18n="nav.fv">파비콘</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG→PNG</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="fv.h1">파비콘 만들기 · PNG를 ICO와 모든 크기로</h1>
+  <p class="lead" data-i18n="fv.lead">로고나 그림 한 장을 올리면 브라우저 탭용 favicon.ico(16·32·48), 아이폰·안드로이드 홈 화면용 PNG(180·192·512), site.webmanifest와 붙여 넣을 HTML 코드를 한 번에 만듭니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🔖</span>
+    <span class="dz-main" data-i18n="fv.drop">로고 그림을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="fv.drop2">PNG · SVG · JPG · WebP · 정사각형이 가장 좋고, 512px 이상이면 선명합니다</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*,.svg">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="fit" data-i18n="fv.fit">정사각형이 아닐 때</label>
+          <select id="fit">
+            <option value="contain" selected data-i18n="fv.fContain">여백을 넣어 전부 보이기</option>
+            <option value="cover" data-i18n="fv.fCover">가운데를 잘라 채우기</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="bg" data-i18n="fv.bg">배경</label>
+          <select id="bg">
+            <option value="keep" selected data-i18n="fv.bKeep">그대로 (투명 유지)</option>
+            <option value="white" data-i18n="fv.bWhite">흰색</option>
+            <option value="custom" data-i18n="fv.bCustom">색 지정</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="bgc-field" hidden>
+          <label for="bgc" data-i18n="fv.bgc">배경색</label>
+          <input type="color" id="bgc" value="#2f6df6" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="pad"><span data-i18n="fv.pad">여백</span> <span id="pad-val" style="color:var(--accent)">0%</span></label>
+          <input type="range" id="pad" min="0" max="30" value="0" step="1">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="round"><span data-i18n="fv.round">둥근 모서리</span> <span id="round-val" style="color:var(--accent)">0%</span></label>
+          <input type="range" id="round" min="0" max="50" value="0" step="1">
+          <div class="hint" data-i18n="fv.roundHint">아이폰은 홈 화면 아이콘을 알아서 둥글게 깎습니다. 탭 아이콘에만 쓰세요.</div>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="sitename" data-i18n="fv.siteName">사이트 이름 (manifest용)</label>
+          <input type="text" id="sitename" placeholder="예: 툴모아" maxlength="60" data-i18n-ph="fv.siteNamePh">
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-src" style="font-size:18px">-</span><span class="lbl" data-i18n="fv.srcSize">원본 크기</span></div>
+      <div class="stat"><span class="num" id="t-files">0</span><span class="lbl" data-i18n="fv.files">만드는 파일</span></div>
+      <div class="stat"><span class="num" id="t-warn" style="font-size:18px">-</span><span class="lbl" data-i18n="fv.quality">선명도</span></div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px" data-i18n="fv.previewNote">실제 크기 미리보기 — 밝은 탭과 어두운 탭에서 어떻게 보이는지 확인하세요. 16px에서 알아볼 수 없으면 단순한 모양으로 바꾸는 것이 좋습니다.</p>
+    <div class="fv-tabs">
+      <div class="fv-tab light"><div class="fv-grid" id="pv-light"></div></div>
+      <div class="fv-tab dark"><div class="fv-grid" id="pv-dark"></div></div>
+    </div>
+
+    <div class="field" style="margin-top:16px">
+      <label for="code" data-i18n="fv.code">&lt;head&gt;에 붙여 넣을 코드</label>
+      <textarea id="code" class="fv-code" readonly spellcheck="false"></textarea>
+      <div class="btn-row">
+        <button class="btn" id="btn-zip" data-i18n="fv.zip">전부 ZIP으로 저장</button>
+        <button class="btn secondary" id="btn-ico" data-i18n="fv.ico">favicon.ico만 저장</button>
+        <button class="btn secondary" id="btn-copy" data-i18n="fv.copy">코드 복사</button>
+        <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+        <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+      </div>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="fv.cross">로고의 흰 배경을 먼저 지우려면 <a href="image-transparent.html">흰 배경 투명하게</a>를, 필요한 부분만 남기려면 <a href="image-crop.html">이미지 자르기</a>를, 브랜드 색 코드를 맞추려면 <a href="color-convert.html">색상 코드 변환</a>을 쓰세요.</p>
+
+  <div class="ad-slot"><!-- AD:FAVICON --></div>
+
+  <h2 data-ko-only>왜 크기가 이렇게 많이 필요한가</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">favicon.ico</strong> — 브라우저 탭·북마크·주소창. 한 파일 안에 16·32·48px 세 장을 담아 두면 화면 배율에 따라 알맞은 것을 골라 씁니다. 가장 오래된 형식이라 어디서나 읽힙니다.<br>
+      <strong style="color:var(--text)">favicon-16x16 · 32x32.png</strong> — ICO 대신 PNG를 요구하는 최신 브라우저용.<br>
+      <strong style="color:var(--text)">apple-touch-icon.png (180)</strong> — 아이폰·아이패드에서 "홈 화면에 추가"할 때 나오는 아이콘. 모서리는 iOS가 알아서 둥글게 깎습니다.<br>
+      <strong style="color:var(--text)">android-chrome-192 · 512.png + site.webmanifest</strong> — 안드로이드 홈 화면과 설치형 웹앱(PWA). 512는 설치 화면과 스플래시에 쓰입니다.<br>
+      크기가 작을수록 세부가 사라지므로, 글자가 들어간 로고는 16px에서 알아볼 수 없습니다. 탭용은 심벌이나 머리글자 하나가 좋습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>붙여 넣는 방법</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      ZIP을 풀어 파일들을 사이트 <strong style="color:var(--text)">뿌리 폴더</strong>(index.html이 있는 곳)에 넣고, 위의 코드를 모든 페이지의 <code>&lt;head&gt;</code> 안에 붙입니다.
+      뿌리가 아닌 하위 폴더에 두려면 코드의 <code>/</code> 경로를 그 폴더로 바꾸세요. 브라우저는 파비콘을 오래 기억하므로 바꾼 뒤 바로 안 보이면
+      새 탭에서 <code>/favicon.ico</code>를 직접 열어 보거나 캐시를 지우세요. 워드프레스는 "외모 → 사용자 정의 → 사이트 아이콘"에 512 PNG를 올리면 됩니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>그림이 서버로 올라가나요?</summary>
+      <p>아니요. 크기를 줄이고 ICO·PNG·ZIP으로 묶는 일이 전부 브라우저 안에서 이뤄집니다. 인터넷을 끊어도 동작합니다. 공개 전인 로고를 올려도 어디에도 남지 않습니다.</p>
+    </details>
+    <details>
+      <summary>어떤 그림을 올려야 하나요?</summary>
+      <p>정사각형에 가깝고 512px 이상이면 모든 크기가 선명합니다. SVG를 올리면 어떤 크기도 또렷합니다. 배경이 투명한 PNG가 가장 좋지만, 흰 배경이면 "배경"을 그대로 두고 쓰거나 <a href="image-transparent.html">흰 배경 투명하게</a>에서 먼저 지우세요.</p>
+    </details>
+    <details>
+      <summary>ICO 파일 하나로 끝낼 수 없나요?</summary>
+      <p>탭 아이콘만 필요하면 "favicon.ico만 저장"으로 충분합니다. 다만 아이폰 홈 화면·안드로이드·설치형 웹앱은 ICO를 읽지 않고 PNG를 요구하므로, 휴대폰까지 생각하면 ZIP 전체를 쓰는 편이 좋습니다.</p>
+    </details>
+    <details>
+      <summary>여백은 왜 넣나요?</summary>
+      <p>안드로이드는 아이콘을 둥근 모양 등으로 잘라 보여 주는데(마스크), 그림이 가장자리까지 꽉 차 있으면 잘려 나갑니다. 여백 10~15%를 두면 어떤 모양으로 잘려도 안전합니다. 탭 아이콘은 반대로 꽉 채워야 커 보입니다.</p>
+    </details>
+    <details>
+      <summary>투명 배경을 넣었는데 검게 나와요</summary>
+      <p>ICO 안의 그림은 32비트(투명 포함)로 담으므로 정상이라면 투명합니다. 일부 오래된 윈도우 프로그램은 ICO의 투명을 검정으로 보여 줍니다. 브라우저에서는 문제없습니다. 걱정되면 "배경"을 흰색으로 지정하세요.</p>
+    </details>
+    <details>
+      <summary>site.webmanifest에 사이트 이름이 왜 들어가나요?</summary>
+      <p>안드로이드에서 홈 화면에 추가할 때 아이콘 아래에 보이는 이름입니다. 비워 두면 브라우저가 페이지 제목을 씁니다. 나중에 파일을 메모장으로 열어 바꿀 수 있습니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">이미지 크기 조절·리사이즈</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">흰 배경 투명하게 만들기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 페이지 번호 넣기</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF 텍스트 추출</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="image-palette.html" data-i18n="nav.pl">사진 색상 추출·색상 코드 뽑기</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG PNG 변환</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리·검증·압축</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64 인코딩·디코딩</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시·체크섬 확인</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg');
+  var fitSel = el('fit'), bgSel = el('bg'), bgcIn = el('bgc'), padIn = el('pad'), roundIn = el('round'), nameIn = el('sitename');
+
+  var SIZES = [16, 32, 48, 180, 192, 512];
+  var PNG_FILES = [[16, 'favicon-16x16.png'], [32, 'favicon-32x32.png'], [180, 'apple-touch-icon.png'], [192, 'android-chrome-192x192.png'], [512, 'android-chrome-512x512.png']];
+  var src = null, srcW = 0, srcH = 0, isSvg = false, baseName = 'favicon', timer = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      e.preventDefault();
+      load(new File([f], '붙여넣은-그림-' + stamp + '.' + ext, { type: f.type }));
+      return;
+    }
+  });
+
+  function load(file) {
+    isSvg = file.type === 'image/svg+xml' || /\.svg$/i.test(file.name);
+    if (!isSvg && file.type.indexOf('image/') !== 0) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    baseName = file.name.replace(/\.[^.]+$/, '');
+    if (isSvg) {
+      // 크기 정보가 없는 SVG 는 <img> 로 읽으면 0×0 이 된다. width/height 를 넣어 1024 로 그린다.
+      file.text().then(function (svg) {
+        var fixed = svg;
+        if (!/<svg[^>]*\swidth=/.test(svg) || !/<svg[^>]*\sheight=/.test(svg)) {
+          fixed = svg.replace(/<svg\b/, '<svg width="1024" height="1024"');
+        }
+        openBlob(new Blob([fixed], { type: 'image/svg+xml' }));
+      });
+    } else openBlob(file);
+  }
+  function openBlob(blob) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      srcW = img.naturalWidth; srcH = img.naturalHeight;
+      if (!srcW || !srcH) { setMsg(t('fv.cantOpen', '이 그림을 열 수 없습니다.'), 'err'); return; }
+      src = img;
+      el('t-src').textContent = isSvg ? 'SVG' : srcW + '×' + srcH;
+      area.hidden = false;
+      setMsg(!isSvg && Math.min(srcW, srcH) < 180 ? t('fv.small', '원본이 작아 큰 아이콘(180·192·512)은 흐릿해집니다. 512px 이상 그림을 권합니다.') : '', 'err');
+      render();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg(t('fv.cantOpen', '이 그림을 열 수 없습니다.'), 'err'); };
+    img.src = url;
+  }
+
+  // 핵심: 한 크기의 아이콘을 그린다. 큰 그림을 작은 칸에 한 번에 넣으면 흐려지므로 절반씩 줄여 간다.
+  function iconCanvas(size) {
+    var pad = parseInt(padIn.value, 10) / 100, inner = size * (1 - 2 * pad);
+    var fit = fitSel.value, sw = srcW, sh = srcH, k = fit === 'cover' ? Math.max(inner / sw, inner / sh) : Math.min(inner / sw, inner / sh);
+    var dw = sw * k, dh = sh * k;
+    // 먼저 큰 중간 캔버스(원본 크기 또는 목표의 2배 이상)에 배치한 뒤 단계적으로 줄인다
+    var big = Math.max(size, Math.min(2048, Math.pow(2, Math.ceil(Math.log(Math.max(size, Math.min(sw, sh))) / Math.LN2))));
+    var scale = big / size;
+    var c = document.createElement('canvas'); c.width = big; c.height = big;
+    var x = c.getContext('2d');
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    var r = parseInt(roundIn.value, 10) / 100 * big;
+    if (r > 0) { x.beginPath(); roundRect(x, 0, 0, big, big, r); x.clip(); }
+    if (bgSel.value !== 'keep') { x.fillStyle = bgSel.value === 'white' ? '#ffffff' : bgcIn.value; x.fillRect(0, 0, big, big); }
+    x.drawImage(src, (size - dw) / 2 * scale, (size - dh) / 2 * scale, dw * scale, dh * scale);
+    while (c.width / 2 >= size) {
+      var n = document.createElement('canvas'); n.width = c.width / 2; n.height = c.height / 2;
+      var nx = n.getContext('2d'); nx.imageSmoothingEnabled = true; nx.imageSmoothingQuality = 'high';
+      nx.drawImage(c, 0, 0, n.width, n.height);
+      c = n;
+    }
+    if (c.width !== size) {
+      var f = document.createElement('canvas'); f.width = size; f.height = size;
+      var fx = f.getContext('2d'); fx.imageSmoothingEnabled = true; fx.imageSmoothingQuality = 'high';
+      fx.drawImage(c, 0, 0, size, size);
+      c = f;
+    }
+    return c;
+  }
+  function roundRect(x, X, Y, W, H, r) {
+    x.moveTo(X + r, Y); x.lineTo(X + W - r, Y); x.quadraticCurveTo(X + W, Y, X + W, Y + r);
+    x.lineTo(X + W, Y + H - r); x.quadraticCurveTo(X + W, Y + H, X + W - r, Y + H);
+    x.lineTo(X + r, Y + H); x.quadraticCurveTo(X, Y + H, X, Y + H - r);
+    x.lineTo(X, Y + r); x.quadraticCurveTo(X, Y, X + r, Y); x.closePath();
+  }
+
+  // ICO: 16·32·48 을 32비트 BMP 로 담는다 (PNG 담기보다 오래된 프로그램 호환이 넓다)
+  function buildIco(canvases) {
+    var n = canvases.length, headers = 6 + 16 * n, images = [], total = headers;
+    canvases.forEach(function (c) {
+      var s = c.width, px = c.getContext('2d').getImageData(0, 0, s, s).data;
+      var rowMask = ((s + 31) >> 5) * 4, body = 40 + s * s * 4 + rowMask * s;
+      var buf = new Uint8Array(body), v = new DataView(buf.buffer);
+      v.setUint32(0, 40, true); v.setInt32(4, s, true); v.setInt32(8, s * 2, true);   // 높이는 XOR+AND 두 배
+      v.setUint16(12, 1, true); v.setUint16(14, 32, true); v.setUint32(16, 0, true); v.setUint32(20, s * s * 4 + rowMask * s, true);
+      var o = 40;
+      for (var y = s - 1; y >= 0; y--) {          // 아래에서 위로
+        for (var xx = 0; xx < s; xx++) {
+          var i = (y * s + xx) * 4;
+          buf[o++] = px[i + 2]; buf[o++] = px[i + 1]; buf[o++] = px[i]; buf[o++] = px[i + 3];   // BGRA
+        }
+      }
+      // AND 마스크는 전부 0 (알파 채널을 쓴다)
+      images.push(buf); total += body;
+    });
+    var out = new Uint8Array(total), dv = new DataView(out.buffer);
+    dv.setUint16(0, 0, true); dv.setUint16(2, 1, true); dv.setUint16(4, n, true);
+    var off = headers;
+    canvases.forEach(function (c, i) {
+      var e = 6 + i * 16, s = c.width;
+      out[e] = s >= 256 ? 0 : s; out[e + 1] = s >= 256 ? 0 : s; out[e + 2] = 0; out[e + 3] = 0;
+      dv.setUint16(e + 4, 1, true); dv.setUint16(e + 6, 32, true);
+      dv.setUint32(e + 8, images[i].length, true); dv.setUint32(e + 12, off, true);
+      out.set(images[i], off); off += images[i].length;
+    });
+    return out;
+  }
+  function manifest() {
+    var name = nameIn.value.trim();
+    var bg = bgSel.value === 'keep' ? '#ffffff' : bgSel.value === 'white' ? '#ffffff' : bgcIn.value;
+    return JSON.stringify({
+      name: name, short_name: name.length > 12 ? name.slice(0, 12) : name,
+      icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+              { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' }],
+      theme_color: bg, background_color: bg, display: 'standalone'
+    }, null, 2);
+  }
+  function htmlCode() {
+    // 주소는 따로 이어 붙인다 — 정적 점검이 이 페이지의 링크로 오해하지 않게
+    var at = function (p) { return 'href="' + p + '"'; };
+    return '<link rel="icon" ' + at('/favicon.ico') + ' sizes="any">\n' +
+           '<link rel="icon" type="image/png" sizes="32x32" ' + at('/favicon-32x32.png') + '>\n' +
+           '<link rel="icon" type="image/png" sizes="16x16" ' + at('/favicon-16x16.png') + '>\n' +
+           '<link rel="apple-touch-icon" sizes="180x180" ' + at('/apple-touch-icon.png') + '>\n' +
+           '<link rel="manifest" ' + at('/site.webmanifest') + '>';
+  }
+
+  function render() {
+    if (!src) return;
+    el('pad-val').textContent = padIn.value + '%';
+    el('round-val').textContent = roundIn.value + '%';
+    el('bgc-field').hidden = bgSel.value !== 'custom';
+    ['pv-light', 'pv-dark'].forEach(function (id) {
+      var box = el(id); box.innerHTML = '';
+      [16, 32, 48, 180].forEach(function (s) {
+        var c = iconCanvas(s), item = document.createElement('div'); item.className = 'fv-item';
+        c.style.width = c.style.height = (s === 180 ? 90 : s) + 'px';   // 180 은 자리를 아끼려 반으로 보인다
+        item.appendChild(c);
+        var lbl = document.createElement('span'); lbl.textContent = s + 'px'; item.appendChild(lbl);
+        box.appendChild(item);
+      });
+    });
+    el('t-files').textContent = 1 + PNG_FILES.length + 2;   // ico + png 5 + manifest + html 조각
+    var q = isSvg ? t('fv.qVector', '선명 (SVG)') : Math.min(srcW, srcH) >= 512 ? t('fv.qGood', '선명') : Math.min(srcW, srcH) >= 180 ? t('fv.qOk', '보통') : t('fv.qLow', '흐림');
+    el('t-warn').textContent = q;
+    el('code').value = htmlCode();
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(render, 80); }
+  [fitSel, bgSel].forEach(function (x) { x.addEventListener('change', render); });
+  [bgcIn, padIn, roundIn].forEach(function (x) { x.addEventListener('input', schedule); });
+  document.addEventListener('langchange', render);
+
+  function toPng(c) { return new Promise(function (r) { c.toBlob(r, 'image/png'); }); }
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  el('btn-ico').addEventListener('click', function () {
+    if (!src) return;
+    var ico = buildIco([16, 32, 48].map(iconCanvas));
+    var blob = new Blob([ico], { type: 'image/x-icon' });
+    download(blob, 'favicon.ico');
+    setMsg(t('fv.doneIco', 'favicon.ico를 저장했습니다 (16·32·48). ') + humanSize(blob.size), 'ok');
+  });
+  el('btn-zip').addEventListener('click', function () {
+    if (!src) return;
+    if (typeof makeZip !== 'function') { setMsg(t('fv.noZip', 'ZIP 기능을 불러오지 못했습니다. 새로 고침해 주세요.'), 'err'); return; }
+    var btn = this; btn.disabled = true;
+    var entries = [{ name: 'favicon.ico', bytes: buildIco([16, 32, 48].map(iconCanvas)) }];
+    Promise.all(PNG_FILES.map(function (p) { return toPng(iconCanvas(p[0])).then(function (b) { return b.arrayBuffer(); }).then(function (buf) { return { name: p[1], bytes: new Uint8Array(buf) }; }); }))
+      .then(function (pngs) {
+        entries = entries.concat(pngs);
+        entries.push({ name: 'site.webmanifest', bytes: new TextEncoder().encode(manifest()) });
+        entries.push({ name: 'favicon-head.html', bytes: new TextEncoder().encode(htmlCode() + '\n') });
+        var zip = makeZip(entries), blob = new Blob([zip], { type: 'application/zip' });
+        download(blob, 'favicon-' + baseName + '.zip');
+        setMsg(t('fv.doneZip', '{n}개 파일을 ZIP 하나로 저장했습니다. ').replace('{n}', entries.length) + humanSize(blob.size), 'ok');
+      }).catch(function () { setMsg(t('fv.fail', '파일을 만들지 못했습니다.'), 'err'); })
+      .then(function () { btn.disabled = false; });
+  });
+  el('btn-copy').addEventListener('click', function () {
+    var m = el('copy-msg');
+    navigator.clipboard.writeText(el('code').value).then(function () {
+      m.textContent = t('fv.copied', '복사했습니다');
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = t('fv.copyFail', '복사하지 못했습니다'); });
+  });
+  el('btn-reset').addEventListener('click', function () {
+    src = null; fileInput.value = ''; el('pv-light').innerHTML = ''; el('pv-dark').innerHTML = '';
+    el('t-src').textContent = '-'; el('t-files').textContent = '0'; el('t-warn').textContent = '-'; el('code').value = '';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

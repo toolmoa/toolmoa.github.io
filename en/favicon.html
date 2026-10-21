@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Favicon generator — PNG to ICO and every size, free, no upload</title>
+<meta name="description" content="One logo becomes favicon.ico (16·32·48), PNG icons for iPhone and Android (180·192·512), a site.webmanifest and the HTML to paste. Nothing is uploaded.">
+<link rel="canonical" href="https://toolmoa.github.io/en/favicon.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/favicon.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/favicon.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/favicon.html">
+<meta property="og:title" content="Favicon generator — one logo, every size, in your browser">
+<meta property="og:description" content="favicon.ico, PNG icons from 16 to 512, site.webmanifest and the HTML snippet, all in one ZIP.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔖</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/zip.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Favicon generator","applicationCategory":"DesignApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<style>
+  .fv-grid { display:flex; flex-wrap:wrap; gap:14px; align-items:flex-end; }
+  .fv-item { text-align:center; font-size:12px; color:var(--muted); }
+  .fv-item canvas { display:block; margin:0 auto 4px; image-rendering:auto; }
+  .fv-tabs { display:flex; gap:10px; }
+  .fv-tab { flex:1; border-radius:var(--radius-sm); padding:12px; border:1px solid var(--border); }
+  .fv-tab.light { background:#fff; color:#555; }
+  .fv-tab.dark { background:#1f2328; color:#bbb; }
+  .fv-tab .fv-grid { justify-content:center; }
+  .fv-code { font-family:ui-monospace, Consolas, monospace; min-height:120px; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/favicon.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-favicon.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Favicon generator · PNG to ICO and every size — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Favicon generator — one logo, every size, in your browser">
+<meta name="twitter:description" content="favicon.ico, PNG icons from 16 to 512, site.webmanifest and the HTML snippet, all in one ZIP.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-favicon.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is my logo uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. Resizing, packing the ICO and PNGs and building the ZIP all happen inside your browser. It works with the internet switched off, and nothing of an unreleased logo is left anywhere."}},{"@type":"Question","name":"What picture should I start from?","acceptedAnswer":{"@type":"Answer","text":"Something close to square and at least 512 px keeps every size sharp; an SVG stays sharp at any size. A PNG with a transparent background is ideal. If the background is white, either keep it or remove it first with make a white background transparent."}},{"@type":"Question","name":"Can I get away with just the ICO?","acceptedAnswer":{"@type":"Answer","text":"For the tab icon alone, \"Save favicon.ico only\" is enough. iPhone home screens, Android and installable web apps ignore ICO and need PNG, so for phones use the full ZIP."}},{"@type":"Question","name":"Why add padding?","acceptedAnswer":{"@type":"Answer","text":"Android masks icons into circles and other shapes, and artwork that reaches the edge gets clipped. 10–15% padding is safe for any mask. Tab icons, on the other hand, look bigger when they fill the square."}},{"@type":"Question","name":"The transparent background looks black somewhere","acceptedAnswer":{"@type":"Answer","text":"The ICO stores 32-bit pixels with alpha, so transparency is preserved. A few old Windows programs render ICO transparency as black; browsers do not. If it worries you, set the background to white."}},{"@type":"Question","name":"What is the site name in site.webmanifest for?","acceptedAnswer":{"@type":"Answer","text":"It is the label shown under the icon when the site is added to an Android home screen. Leave it empty and the browser uses the page title. You can edit the file later in any text editor."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Favicon generator · PNG to ICO and every size","item":"https://toolmoa.github.io/en/favicon.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html">Clean up text</a>
+      <a href="text-diff.html">Compare text</a>
+      <a href="pdf-edit.html">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html">Time calc</a>
+      <a href="pdf-page-number.html">Page numbers</a>
+      <a href="pdf-to-text.html">PDF to text</a>
+      <a href="favicon.html" aria-current="page">Favicon</a>
+      <a href="image-palette.html">Color palette</a>
+      <a href="svg-to-png.html">SVG to PNG</a>
+      <a href="json-format.html">JSON</a>
+      <a href="base64.html">Base64</a>
+      <a href="file-hash.html">File hash</a>
+    </nav>
+    <a class="lang-link" href="../favicon.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Favicon generator · PNG to ICO and every size</h1>
+  <p class="lead">Upload one logo or picture and get favicon.ico for browser tabs (16·32·48), PNG icons for iPhone and Android home screens (180·192·512), a site.webmanifest and the HTML code to paste, all at once.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🔖</span>
+    <span class="dz-main">Drop a logo here, or click to choose</span>
+    <span class="dz-sub">PNG · SVG · JPG · WebP · square works best, 512px or larger stays sharp</span>
+    <span class="dz-paste">You can paste a screenshot straight in with Ctrl+V</span>
+    <input type="file" id="file" accept="image/*,.svg">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="fit">If it is not square</label>
+          <select id="fit">
+            <option value="contain" selected>Add padding and show all of it</option>
+            <option value="cover">Crop the centre to fill</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="bg">Background</label>
+          <select id="bg">
+            <option value="keep" selected>Keep as is (transparent stays transparent)</option>
+            <option value="white">White</option>
+            <option value="custom">Custom colour</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0" id="bgc-field" hidden>
+          <label for="bgc">Background colour</label>
+          <input type="color" id="bgc" value="#2f6df6" style="width:64px;height:38px;padding:2px">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="pad"><span>Padding</span> <span id="pad-val" style="color:var(--accent)">0%</span></label>
+          <input type="range" id="pad" min="0" max="30" value="0" step="1">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="round"><span>Rounded corners</span> <span id="round-val" style="color:var(--accent)">0%</span></label>
+          <input type="range" id="round" min="0" max="50" value="0" step="1">
+          <div class="hint">iPhone rounds home-screen icons by itself. Use this for tab icons only.</div>
+        </div>
+        <div class="field" style="margin:0">
+          <label for="sitename">Site name (for the manifest)</label>
+          <input type="text" id="sitename" placeholder="e.g. Toolmoa" maxlength="60">
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-src" style="font-size:18px">-</span><span class="lbl">Source size</span></div>
+      <div class="stat"><span class="num" id="t-files">0</span><span class="lbl">Files produced</span></div>
+      <div class="stat"><span class="num" id="t-warn" style="font-size:18px">-</span><span class="lbl">Sharpness</span></div>
+    </div>
+
+    <p class="hint" style="margin:0 0 6px">Actual-size preview — see how it looks on a light tab and a dark tab. If it is unreadable at 16px, use a simpler shape.</p>
+    <div class="fv-tabs">
+      <div class="fv-tab light"><div class="fv-grid" id="pv-light"></div></div>
+      <div class="fv-tab dark"><div class="fv-grid" id="pv-dark"></div></div>
+    </div>
+
+    <div class="field" style="margin-top:16px">
+      <label for="code">Code to paste into &lt;head&gt;</label>
+      <textarea id="code" class="fv-code" readonly spellcheck="false"></textarea>
+      <div class="btn-row">
+        <button class="btn" id="btn-zip">Save everything as ZIP</button>
+        <button class="btn secondary" id="btn-ico">Save favicon.ico only</button>
+        <button class="btn secondary" id="btn-copy">Copy code</button>
+        <button class="btn secondary" id="btn-reset">Reset</button>
+        <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+      </div>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To remove a white background from the logo first use <a href="image-transparent.html">make a white background transparent</a>; to keep only part of it use <a href="image-crop.html">crop image</a>; to match brand colour codes use the <a href="color-convert.html">color code converter</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_FAVICON --></div>
+
+  <h2>Why so many sizes</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">favicon.ico</strong> — browser tabs, bookmarks, the address bar. One file holding 16, 32 and 48 px versions so the browser picks the right one for the screen scale. The oldest format, understood everywhere.<br>
+      <strong style="color:var(--text)">favicon-16x16 · 32x32.png</strong> — for modern browsers that ask for PNG rather than ICO.<br>
+      <strong style="color:var(--text)">apple-touch-icon.png (180)</strong> — the icon iPhone and iPad show for "Add to Home Screen". iOS rounds the corners itself.<br>
+      <strong style="color:var(--text)">android-chrome-192 · 512.png + site.webmanifest</strong> — Android home screens and installable web apps (PWA); 512 is used on the install screen and splash.<br>
+      Detail disappears as icons shrink, so a logo with words in it is unreadable at 16 px. For the tab icon, a symbol or a single initial works best.
+    </p>
+  </div>
+
+  <h2>How to install them</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Unzip the files into the <strong style="color:var(--text)">root folder</strong> of your site (where index.html lives) and paste the code into the <code>&lt;head&gt;</code> of every page.
+      If the files live in a subfolder, change the leading <code>/</code> in the code to that folder. Browsers cache favicons aggressively: if the new one does not show,
+      open <code>/favicon.ico</code> directly in a new tab or clear the cache. WordPress users can simply upload the 512 PNG under Appearance → Customize → Site Icon.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Why it runs in the browser</strong> — a logo you are preparing a favicon for is often not public yet. The resizing, the ICO and the ZIP are
+      all produced on your device; the picture is never uploaded, and the page works offline.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is my logo uploaded?</summary>
+      <p>No. Resizing, packing the ICO and PNGs and building the ZIP all happen inside your browser. It works with the internet switched off, and nothing of an unreleased logo is left anywhere.</p>
+    </details>
+    <details>
+      <summary>What picture should I start from?</summary>
+      <p>Something close to square and at least 512 px keeps every size sharp; an SVG stays sharp at any size. A PNG with a transparent background is ideal. If the background is white, either keep it or remove it first with <a href="image-transparent.html">make a white background transparent</a>.</p>
+    </details>
+    <details>
+      <summary>Can I get away with just the ICO?</summary>
+      <p>For the tab icon alone, "Save favicon.ico only" is enough. iPhone home screens, Android and installable web apps ignore ICO and need PNG, so for phones use the full ZIP.</p>
+    </details>
+    <details>
+      <summary>Why add padding?</summary>
+      <p>Android masks icons into circles and other shapes, and artwork that reaches the edge gets clipped. 10–15% padding is safe for any mask. Tab icons, on the other hand, look bigger when they fill the square.</p>
+    </details>
+    <details>
+      <summary>The transparent background looks black somewhere</summary>
+      <p>The ICO stores 32-bit pixels with alpha, so transparency is preserved. A few old Windows programs render ICO transparency as black; browsers do not. If it worries you, set the background to white.</p>
+    </details>
+    <details>
+      <summary>What is the site name in site.webmanifest for?</summary>
+      <p>It is the label shown under the icon when the site is added to an Android home screen. Leave it empty and the browser uses the page title. You can edit the file later in any text editor.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-clean.html">Remove duplicate lines · clean up text</a>
+      <a href="text-diff.html">Compare two texts</a>
+      <a href="pdf-edit.html">Rotate, delete and reorder PDF pages</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="time-calc.html">Time calculator · work hours</a>
+      <a href="pdf-page-number.html">Add page numbers to a PDF</a>
+      <a href="pdf-to-text.html">Extract text from a PDF</a>
+      <a href="image-palette.html">Extract colors from an image</a>
+      <a href="svg-to-png.html">Convert SVG to PNG</a>
+      <a href="json-format.html">JSON formatter · validator</a>
+      <a href="base64.html">Base64 encode · decode</a>
+      <a href="file-hash.html">File hash · SHA-256 · MD5 checksum</a>
+      <a href="../favicon.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg');
+  var fitSel = el('fit'), bgSel = el('bg'), bgcIn = el('bgc'), padIn = el('pad'), roundIn = el('round'), nameIn = el('sitename');
+
+  var SIZES = [16, 32, 48, 180, 192, 512];
+  var PNG_FILES = [[16, 'favicon-16x16.png'], [32, 'favicon-32x32.png'], [180, 'apple-touch-icon.png'], [192, 'android-chrome-192x192.png'], [512, 'android-chrome-512x512.png']];
+  var src = null, srcW = 0, srcH = 0, isSvg = false, baseName = 'favicon', timer = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function humanSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB'; }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg').replace('svg+xml', 'svg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      e.preventDefault();
+      load(new File([f], 'pasted-image-' + stamp + '.' + ext, { type: f.type }));
+      return;
+    }
+  });
+
+  function load(file) {
+    isSvg = file.type === 'image/svg+xml' || /\.svg$/i.test(file.name);
+    if (!isSvg && file.type.indexOf('image/') !== 0) { setMsg('Please choose an image file.', 'err'); return; }
+    baseName = file.name.replace(/\.[^.]+$/, '');
+    if (isSvg) {
+      // 크기 정보가 없는 SVG 는 <img> 로 읽으면 0×0 이 된다. width/height 를 넣어 1024 로 그린다.
+      file.text().then(function (svg) {
+        var fixed = svg;
+        if (!/<svg[^>]*\swidth=/.test(svg) || !/<svg[^>]*\sheight=/.test(svg)) {
+          fixed = svg.replace(/<svg\b/, '<svg width="1024" height="1024"');
+        }
+        openBlob(new Blob([fixed], { type: 'image/svg+xml' }));
+      });
+    } else openBlob(file);
+  }
+  function openBlob(blob) {
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      srcW = img.naturalWidth; srcH = img.naturalHeight;
+      if (!srcW || !srcH) { setMsg('This picture cannot be opened.', 'err'); return; }
+      src = img;
+      el('t-src').textContent = isSvg ? 'SVG' : srcW + '×' + srcH;
+      area.hidden = false;
+      setMsg(!isSvg && Math.min(srcW, srcH) < 180 ? 'The source is small, so the large icons (180·192·512) will be blurry. A picture of 512px or more is recommended.' : '', 'err');
+      render();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg('This picture cannot be opened.', 'err'); };
+    img.src = url;
+  }
+
+  // 핵심: 한 크기의 아이콘을 그린다. 큰 그림을 작은 칸에 한 번에 넣으면 흐려지므로 절반씩 줄여 간다.
+  function iconCanvas(size) {
+    var pad = parseInt(padIn.value, 10) / 100, inner = size * (1 - 2 * pad);
+    var fit = fitSel.value, sw = srcW, sh = srcH, k = fit === 'cover' ? Math.max(inner / sw, inner / sh) : Math.min(inner / sw, inner / sh);
+    var dw = sw * k, dh = sh * k;
+    // 먼저 큰 중간 캔버스(원본 크기 또는 목표의 2배 이상)에 배치한 뒤 단계적으로 줄인다
+    var big = Math.max(size, Math.min(2048, Math.pow(2, Math.ceil(Math.log(Math.max(size, Math.min(sw, sh))) / Math.LN2))));
+    var scale = big / size;
+    var c = document.createElement('canvas'); c.width = big; c.height = big;
+    var x = c.getContext('2d');
+    x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+    var r = parseInt(roundIn.value, 10) / 100 * big;
+    if (r > 0) { x.beginPath(); roundRect(x, 0, 0, big, big, r); x.clip(); }
+    if (bgSel.value !== 'keep') { x.fillStyle = bgSel.value === 'white' ? '#ffffff' : bgcIn.value; x.fillRect(0, 0, big, big); }
+    x.drawImage(src, (size - dw) / 2 * scale, (size - dh) / 2 * scale, dw * scale, dh * scale);
+    while (c.width / 2 >= size) {
+      var n = document.createElement('canvas'); n.width = c.width / 2; n.height = c.height / 2;
+      var nx = n.getContext('2d'); nx.imageSmoothingEnabled = true; nx.imageSmoothingQuality = 'high';
+      nx.drawImage(c, 0, 0, n.width, n.height);
+      c = n;
+    }
+    if (c.width !== size) {
+      var f = document.createElement('canvas'); f.width = size; f.height = size;
+      var fx = f.getContext('2d'); fx.imageSmoothingEnabled = true; fx.imageSmoothingQuality = 'high';
+      fx.drawImage(c, 0, 0, size, size);
+      c = f;
+    }
+    return c;
+  }
+  function roundRect(x, X, Y, W, H, r) {
+    x.moveTo(X + r, Y); x.lineTo(X + W - r, Y); x.quadraticCurveTo(X + W, Y, X + W, Y + r);
+    x.lineTo(X + W, Y + H - r); x.quadraticCurveTo(X + W, Y + H, X + W - r, Y + H);
+    x.lineTo(X + r, Y + H); x.quadraticCurveTo(X, Y + H, X, Y + H - r);
+    x.lineTo(X, Y + r); x.quadraticCurveTo(X, Y, X + r, Y); x.closePath();
+  }
+
+  // ICO: 16·32·48 을 32비트 BMP 로 담는다 (PNG 담기보다 오래된 프로그램 호환이 넓다)
+  function buildIco(canvases) {
+    var n = canvases.length, headers = 6 + 16 * n, images = [], total = headers;
+    canvases.forEach(function (c) {
+      var s = c.width, px = c.getContext('2d').getImageData(0, 0, s, s).data;
+      var rowMask = ((s + 31) >> 5) * 4, body = 40 + s * s * 4 + rowMask * s;
+      var buf = new Uint8Array(body), v = new DataView(buf.buffer);
+      v.setUint32(0, 40, true); v.setInt32(4, s, true); v.setInt32(8, s * 2, true);   // 높이는 XOR+AND 두 배
+      v.setUint16(12, 1, true); v.setUint16(14, 32, true); v.setUint32(16, 0, true); v.setUint32(20, s * s * 4 + rowMask * s, true);
+      var o = 40;
+      for (var y = s - 1; y >= 0; y--) {          // 아래에서 위로
+        for (var xx = 0; xx < s; xx++) {
+          var i = (y * s + xx) * 4;
+          buf[o++] = px[i + 2]; buf[o++] = px[i + 1]; buf[o++] = px[i]; buf[o++] = px[i + 3];   // BGRA
+        }
+      }
+      // AND 마스크는 전부 0 (알파 채널을 쓴다)
+      images.push(buf); total += body;
+    });
+    var out = new Uint8Array(total), dv = new DataView(out.buffer);
+    dv.setUint16(0, 0, true); dv.setUint16(2, 1, true); dv.setUint16(4, n, true);
+    var off = headers;
+    canvases.forEach(function (c, i) {
+      var e = 6 + i * 16, s = c.width;
+      out[e] = s >= 256 ? 0 : s; out[e + 1] = s >= 256 ? 0 : s; out[e + 2] = 0; out[e + 3] = 0;
+      dv.setUint16(e + 4, 1, true); dv.setUint16(e + 6, 32, true);
+      dv.setUint32(e + 8, images[i].length, true); dv.setUint32(e + 12, off, true);
+      out.set(images[i], off); off += images[i].length;
+    });
+    return out;
+  }
+  function manifest() {
+    var name = nameIn.value.trim();
+    var bg = bgSel.value === 'keep' ? '#ffffff' : bgSel.value === 'white' ? '#ffffff' : bgcIn.value;
+    return JSON.stringify({
+      name: name, short_name: name.length > 12 ? name.slice(0, 12) : name,
+      icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+              { src: '/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' }],
+      theme_color: bg, background_color: bg, display: 'standalone'
+    }, null, 2);
+  }
+  function htmlCode() {
+    // 주소는 따로 이어 붙인다 — 정적 점검이 이 페이지의 링크로 오해하지 않게
+    var at = function (p) { return 'href="' + p + '"'; };
+    return '<link rel="icon" ' + at('/favicon.ico') + ' sizes="any">\n' +
+           '<link rel="icon" type="image/png" sizes="32x32" ' + at('/favicon-32x32.png') + '>\n' +
+           '<link rel="icon" type="image/png" sizes="16x16" ' + at('/favicon-16x16.png') + '>\n' +
+           '<link rel="apple-touch-icon" sizes="180x180" ' + at('/apple-touch-icon.png') + '>\n' +
+           '<link rel="manifest" ' + at('/site.webmanifest') + '>';
+  }
+
+  function render() {
+    if (!src) return;
+    el('pad-val').textContent = padIn.value + '%';
+    el('round-val').textContent = roundIn.value + '%';
+    el('bgc-field').hidden = bgSel.value !== 'custom';
+    ['pv-light', 'pv-dark'].forEach(function (id) {
+      var box = el(id); box.innerHTML = '';
+      [16, 32, 48, 180].forEach(function (s) {
+        var c = iconCanvas(s), item = document.createElement('div'); item.className = 'fv-item';
+        c.style.width = c.style.height = (s === 180 ? 90 : s) + 'px';   // 180 은 자리를 아끼려 반으로 보인다
+        item.appendChild(c);
+        var lbl = document.createElement('span'); lbl.textContent = s + 'px'; item.appendChild(lbl);
+        box.appendChild(item);
+      });
+    });
+    el('t-files').textContent = 1 + PNG_FILES.length + 2;   // ico + png 5 + manifest + html 조각
+    var q = isSvg ? 'Sharp (SVG)' : Math.min(srcW, srcH) >= 512 ? 'Sharp' : Math.min(srcW, srcH) >= 180 ? 'Fair' : 'Blurry';
+    el('t-warn').textContent = q;
+    el('code').value = htmlCode();
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(render, 80); }
+  [fitSel, bgSel].forEach(function (x) { x.addEventListener('change', render); });
+  [bgcIn, padIn, roundIn].forEach(function (x) { x.addEventListener('input', schedule); });
+
+  function toPng(c) { return new Promise(function (r) { c.toBlob(r, 'image/png'); }); }
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  el('btn-ico').addEventListener('click', function () {
+    if (!src) return;
+    var ico = buildIco([16, 32, 48].map(iconCanvas));
+    var blob = new Blob([ico], { type: 'image/x-icon' });
+    download(blob, 'favicon.ico');
+    setMsg('Saved favicon.ico (16·32·48). ' + humanSize(blob.size), 'ok');
+  });
+  el('btn-zip').addEventListener('click', function () {
+    if (!src) return;
+    if (typeof makeZip !== 'function') { setMsg('The ZIP feature could not be loaded. Please refresh.', 'err'); return; }
+    var btn = this; btn.disabled = true;
+    var entries = [{ name: 'favicon.ico', bytes: buildIco([16, 32, 48].map(iconCanvas)) }];
+    Promise.all(PNG_FILES.map(function (p) { return toPng(iconCanvas(p[0])).then(function (b) { return b.arrayBuffer(); }).then(function (buf) { return { name: p[1], bytes: new Uint8Array(buf) }; }); }))
+      .then(function (pngs) {
+        entries = entries.concat(pngs);
+        entries.push({ name: 'site.webmanifest', bytes: new TextEncoder().encode(manifest()) });
+        entries.push({ name: 'favicon-head.html', bytes: new TextEncoder().encode(htmlCode() + '\n') });
+        var zip = makeZip(entries), blob = new Blob([zip], { type: 'application/zip' });
+        download(blob, 'favicon-' + baseName + '.zip');
+        setMsg('Saved {n} files in one ZIP. '.replace('{n}', entries.length) + humanSize(blob.size), 'ok');
+      }).catch(function () { setMsg('Could not create the files.', 'err'); })
+      .then(function () { btn.disabled = false; });
+  });
+  el('btn-copy').addEventListener('click', function () {
+    var m = el('copy-msg');
+    navigator.clipboard.writeText(el('code').value).then(function () {
+      m.textContent = 'Copied';
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = 'Could not copy'; });
+  });
+  el('btn-reset').addEventListener('click', function () {
+    src = null; fileInput.value = ''; el('pv-light').innerHTML = ''; el('pv-dark').innerHTML = '';
+    el('t-src').textContent = '-'; el('t-files').textContent = '0'; el('t-warn').textContent = '-'; el('code').value = '';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

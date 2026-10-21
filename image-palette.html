@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 색상 추출 - 이미지 색상 코드·팔레트 뽑기 무료 | 툴모아</title>
+<meta name="description" content="사진·로고에서 많이 쓰인 색을 뽑아 HEX·RGB 코드로 보여 줍니다. 색 개수 조절, 그림을 클릭해 그 자리 색 집기, 팔레트 PNG·CSS 변수로 저장. 사진은 서버로 올라가지 않습니다.">
+<link rel="canonical" href="https://toolmoa.github.io/image-palette.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/image-palette.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/image-palette.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/image-palette.html">
+<meta property="og:title" content="사진 색상 추출 · 색상 코드 뽑기">
+<meta property="og:description" content="사진에서 대표색을 HEX·RGB로 뽑고 클릭해 색을 집습니다. 업로드 없이 브라우저 안에서.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link rel="stylesheet" href="assets/style.css">
+<script src="assets/i18n.js" defer></script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"사진 색상 추출","applicationCategory":"DesignApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"},"inLanguage":"ko-KR"}
+</script>
+<style>
+  .pl-stage { text-align:center; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; }
+  .pl-stage canvas { max-width:100%; max-height:360px; height:auto; cursor:crosshair; border-radius:4px; }
+  .pl-list { list-style:none; margin:14px 0 0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+  .pl-list li { border:1px solid var(--border); border-radius:var(--radius-sm); overflow:hidden; background:var(--surface); }
+  .pl-list .sw { height:64px; display:flex; align-items:flex-end; justify-content:flex-end; padding:4px 6px; font-size:12px; font-weight:700; }
+  .pl-list button { width:100%; border:0; background:transparent; color:var(--text); text-align:left; padding:8px 10px; cursor:pointer; font:inherit; font-size:13px; line-height:1.5; }
+  .pl-list button:hover { background:var(--surface-2); }
+  .pl-list .hex { font-family:ui-monospace, Consolas, monospace; font-weight:700; }
+  .pl-list .rgb { color:var(--muted); font-size:12px; display:block; }
+  .pl-pick { display:flex; align-items:center; gap:10px; margin-top:10px; font-size:14px; }
+  .pl-pick .dot { width:34px; height:34px; border-radius:50%; border:1px solid var(--border); flex:none; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/image-palette.html">
+<meta property="og:site_name" content="툴모아">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/image-palette.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="사진 색상 추출 · 이미지에서 색상 코드 뽑기 — 툴모아">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="사진 색상 추출 · 색상 코드 뽑기">
+<meta name="twitter:description" content="사진에서 대표색을 HEX·RGB로 뽑고 클릭해 색을 집습니다. 업로드 없이 브라우저 안에서.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/image-palette.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"사진이 서버로 올라가나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 색을 세는 일은 브라우저 안에서만 이뤄지고 사진은 어디로도 가지 않습니다. 인터넷을 끊어도 동작합니다."}},{"@type":"Question","name":"로고의 정확한 색이 조금 다르게 나와요","acceptedAnswer":{"@type":"Answer","text":"대표색은 비슷한 색의 평균이라 JPG 압축 노이즈나 가장자리의 번짐이 섞여 몇 단계 어긋날 수 있습니다. 정확한 값은 로고의 평평한 부분을 클릭해 집으세요. 그 자리 픽셀 값을 그대로 보여 줍니다. PNG·SVG 원본이 있으면 그쪽이 더 정확합니다."}},{"@type":"Question","name":"흰 배경이 1등으로 나와요","acceptedAnswer":{"@type":"Answer","text":"배경이 사진의 대부분이면 당연히 비율이 가장 큽니다. \"흰·검 배경 빼기\"를 켜면 거의 흰색·거의 검정인 픽셀을 세지 않아 물건 색만 남습니다."}},{"@type":"Question","name":"비율 숫자는 무엇인가요?","acceptedAnswer":{"@type":"Answer","text":"그 색으로 분류된 픽셀이 전체에서 차지하는 비율입니다. 배경 빼기를 켰다면 남은 픽셀 기준입니다."}},{"@type":"Question","name":"큰 사진도 되나요?","acceptedAnswer":{"@type":"Answer","text":"됩니다. 색을 셀 때는 사진을 작게 줄여서 세므로 수천만 픽셀 사진도 금방 끝납니다. 클릭으로 집는 색은 원본 해상도 기준입니다."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"홈","item":"https://toolmoa.github.io/"},{"@type":"ListItem","position":2,"name":"사진 색상 추출 · 이미지에서 색상 코드 뽑기","item":"https://toolmoa.github.io/image-palette.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body data-i18n-title="pl.title">
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html" data-i18n="brand">툴<span>모아</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 압축</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">크기 조절</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">형식 변환</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">모자이크</a>
+      <a href="image-exif.html" data-i18n="nav.exif">위치정보 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">워터마크</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">배경 투명</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지→PDF</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF→이미지</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 쪽 번호</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF→텍스트</a>
+      <a href="file-convert.html" data-i18n="nav.conv">파일 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR 읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드</a>
+      <a href="image-palette.html" aria-current="page" data-i18n="nav.pl">색상 추출</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG→PNG</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 data-i18n="pl.h1">사진 색상 추출 · 이미지에서 색상 코드 뽑기</h1>
+  <p class="lead" data-i18n="pl.lead">사진이나 로고에서 가장 많이 쓰인 색을 골라 HEX·RGB 코드와 비율로 보여 줍니다. 그림을 클릭하면 그 자리의 색을 집고, 팔레트를 PNG나 CSS 변수로 저장할 수 있습니다.</p>
+  <span class="privacy-badge" data-i18n="badge.file">🔒 사진이 서버로 업로드되지 않습니다</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="파일 선택">
+    <span class="dz-icon">🎯</span>
+    <span class="dz-main" data-i18n="pl.drop">사진을 끌어다 놓거나 클릭해서 선택하세요</span>
+    <span class="dz-sub" data-i18n="pl.drop2">JPG · PNG · WebP · 한 번에 한 장</span>
+    <span class="dz-paste" data-i18n="paste.hint">캡처한 화면은 Ctrl+V로 바로 붙여넣을 수 있습니다</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px">
+        <div class="field" style="margin:0">
+          <label for="count"><span data-i18n="pl.count">색 개수</span> <span id="count-val" style="color:var(--accent)">6</span></label>
+          <input type="range" id="count" min="2" max="12" value="6" step="1">
+        </div>
+        <div class="field" style="margin:0">
+          <label for="sort" data-i18n="pl.sort">정렬</label>
+          <select id="sort">
+            <option value="share" selected data-i18n="pl.sShare">많이 쓰인 순</option>
+            <option value="light" data-i18n="pl.sLight">밝은 색부터</option>
+            <option value="hue" data-i18n="pl.sHue">색상환 순</option>
+          </select>
+        </div>
+        <div class="field" style="margin:0;align-self:end">
+          <label class="inline-check" style="margin:0">
+            <input type="checkbox" id="skipbw">
+            <span data-i18n="pl.skipBw">흰·검 배경 빼기</span>
+          </label>
+          <div class="hint" data-i18n="pl.skipHint">제품 사진처럼 배경이 거의 흰색(또는 검정)일 때 켜면 물건 색만 남습니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pl-stage">
+      <canvas id="view" aria-label="사진 — 클릭하면 그 자리 색을 집습니다"></canvas>
+    </div>
+    <div class="pl-pick" id="pick" hidden>
+      <span class="dot" id="pick-dot"></span>
+      <span><span data-i18n="pl.picked">집은 색</span> <strong class="hex" id="pick-hex"></strong> <span id="pick-rgb" style="color:var(--muted)"></span></span>
+      <button class="btn secondary small" id="btn-pick-copy" type="button" data-i18n="pl.copyOne">복사</button>
+    </div>
+    <p class="hint" style="margin:8px 0 0" data-i18n="pl.clickHint">사진을 클릭하면 그 자리 색을 집습니다. 아래 색 칸을 누르면 HEX 코드가 복사됩니다.</p>
+
+    <ul class="pl-list" id="list"></ul>
+
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn" id="btn-copyall" data-i18n="pl.copyAll">코드 전부 복사</button>
+      <button class="btn secondary" id="btn-css" data-i18n="pl.copyCss">CSS 변수로 복사</button>
+      <button class="btn secondary" id="btn-png" data-i18n="pl.savePng">팔레트 PNG 저장</button>
+      <button class="btn secondary" id="btn-reset" data-i18n="btn.reset">초기화</button>
+      <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0" data-i18n="pl.cross">뽑은 코드를 <a href="color-convert.html">색상 코드 변환</a>에 넣으면 HSL·CMYK로 바꾸고 글자색과의 명도 대비를 검사할 수 있습니다. 사진의 일부만 쓰려면 먼저 <a href="image-crop.html">이미지 자르기</a>로 잘라 올리세요.</p>
+
+  <div class="ad-slot"><!-- AD:IMAGEPALETTE --></div>
+
+  <h2 data-ko-only>어디에 쓰나</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">브랜드 색 알아내기</strong> — 로고 파일만 있고 색상 코드를 모를 때. 디자이너에게 "이 색으로"라고 정확히 전달할 수 있습니다.<br>
+      <strong style="color:var(--text)">사진에 맞는 배경·글자색</strong> — 썸네일이나 카드뉴스에 사진을 넣을 때 사진에서 뽑은 색을 배경으로 쓰면 어색하지 않습니다.<br>
+      <strong style="color:var(--text)">인테리어·패션 참고</strong> — 마음에 드는 사진의 색 조합을 코드로 받아 두면 비슷한 분위기를 다시 만들 수 있습니다.<br>
+      <strong style="color:var(--text)">웹·앱 테마</strong> — "CSS 변수로 복사"는 <code>--color-1: #…;</code> 형태로 바로 붙여 넣을 수 있습니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>색을 고르는 방식</h2>
+  <div class="card" data-ko-only>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      사진의 모든 픽셀을 색 공간에서 상자 하나로 보고, 가장 넓게 퍼진 축의 가운데에서 둘로 나누는 일을 원하는 개수가 될 때까지 반복합니다(미디언 컷).
+      각 상자의 평균이 대표색이 되고, 상자에 든 픽셀 수가 비율입니다. 그래서 면적이 작은 강조색은 개수를 늘려야 나타나고,
+      그라데이션 사진은 비슷한 색이 여럿 나올 수 있습니다. 특정한 한 점의 정확한 색이 필요하면 그림을 직접 클릭하세요 — 그 자리 원본 픽셀의 값을 그대로 보여 줍니다.
+    </p>
+  </div>
+
+  <h2 data-ko-only>자주 묻는 질문</h2>
+  <div class="faq" data-ko-only>
+    <details>
+      <summary>사진이 서버로 올라가나요?</summary>
+      <p>아니요. 색을 세는 일은 브라우저 안에서만 이뤄지고 사진은 어디로도 가지 않습니다. 인터넷을 끊어도 동작합니다.</p>
+    </details>
+    <details>
+      <summary>로고의 정확한 색이 조금 다르게 나와요</summary>
+      <p>대표색은 비슷한 색의 평균이라 JPG 압축 노이즈나 가장자리의 번짐이 섞여 몇 단계 어긋날 수 있습니다. 정확한 값은 로고의 평평한 부분을 클릭해 집으세요. 그 자리 픽셀 값을 그대로 보여 줍니다. PNG·SVG 원본이 있으면 그쪽이 더 정확합니다.</p>
+    </details>
+    <details>
+      <summary>흰 배경이 1등으로 나와요</summary>
+      <p>배경이 사진의 대부분이면 당연히 비율이 가장 큽니다. "흰·검 배경 빼기"를 켜면 거의 흰색·거의 검정인 픽셀을 세지 않아 물건 색만 남습니다.</p>
+    </details>
+    <details>
+      <summary>비율 숫자는 무엇인가요?</summary>
+      <p>그 색으로 분류된 픽셀이 전체에서 차지하는 비율입니다. 배경 빼기를 켰다면 남은 픽셀 기준입니다.</p>
+    </details>
+    <details>
+      <summary>큰 사진도 되나요?</summary>
+      <p>됩니다. 색을 셀 때는 사진을 작게 줄여서 세므로 수천만 픽셀 사진도 금방 끝납니다. 클릭으로 집는 색은 원본 해상도 기준입니다.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html" data-i18n="nav.home">홈</a>
+      <a href="image-compress.html" data-i18n="nav.imgc">이미지 용량 줄이기</a>
+      <a href="image-resize.html" data-i18n="nav.rsz">이미지 크기 조절·리사이즈</a>
+      <a href="image-crop.html" data-i18n="nav.crop">이미지 자르기</a>
+      <a href="image-convert.html" data-i18n="nav.icv">이미지 형식 변환 (PNG·JPG·WebP)</a>
+      <a href="image-join.html" data-i18n="nav.ijn">사진 이어붙이기</a>
+      <a href="image-mosaic.html" data-i18n="nav.mos">사진 모자이크·가리기</a>
+      <a href="image-exif.html" data-i18n="nav.exif">사진 위치정보·EXIF 삭제</a>
+      <a href="image-watermark.html" data-i18n="nav.wm">사진 워터마크 넣기</a>
+      <a href="image-split.html" data-i18n="nav.spl">사진 분할·그리드 나누기</a>
+      <a href="image-transparent.html" data-i18n="nav.trp">흰 배경 투명하게 만들기</a>
+      <a href="img-to-pdf.html" data-i18n="nav.i2p">이미지 PDF 변환</a>
+      <a href="char-count.html" data-i18n="nav.char">글자수 세기</a>
+      <a href="text-clean.html" data-i18n="nav.txt">텍스트 정리·중복 제거</a>
+      <a href="text-diff.html" data-i18n="nav.diff">텍스트 비교·차이 찾기</a>
+      <a href="romanize.html" data-i18n="nav.rom">이름 영문 변환·로마자 표기</a>
+      <a href="pdf-merge.html" data-i18n="nav.merge">PDF 합치기</a>
+      <a href="pdf-split.html" data-i18n="nav.split">PDF 나누기</a>
+      <a href="pdf-edit.html" data-i18n="nav.edit">PDF 페이지 회전·삭제</a>
+      <a href="pdf-to-image.html" data-i18n="nav.p2i">PDF 이미지 변환</a>
+      <a href="pdf-watermark.html" data-i18n="nav.pwm">PDF 워터마크 넣기</a>
+      <a href="pdf-page-number.html" data-i18n="nav.pn">PDF 페이지 번호 넣기</a>
+      <a href="pdf-to-text.html" data-i18n="nav.p2t">PDF 텍스트 추출</a>
+      <a href="file-convert.html" data-i18n="nav.conv">CSV·JSON·엑셀 변환</a>
+      <a href="qr-generate.html" data-i18n="nav.qr">QR코드 만들기</a>
+      <a href="qr-scan.html" data-i18n="nav.qrs">QR코드 스캔·읽기</a>
+      <a href="barcode.html" data-i18n="nav.bc">바코드 생성기</a>
+      <a href="password-gen.html" data-i18n="nav.pw">비밀번호 생성기</a>
+      <a href="color-convert.html" data-i18n="nav.cc">색상 코드 변환·명도 대비</a>
+      <a href="favicon.html" data-i18n="nav.fv">파비콘 만들기 (PNG→ICO)</a>
+      <a href="svg-to-png.html" data-i18n="nav.svg">SVG PNG 변환</a>
+      <a href="json-format.html" data-i18n="nav.js">JSON 정리·검증·압축</a>
+      <a href="base64.html" data-i18n="nav.b64">Base64 인코딩·디코딩</a>
+      <a href="file-hash.html" data-i18n="nav.hs">파일 해시·체크섬 확인</a>
+      <a href="random-pick.html" data-i18n="nav.rnd">랜덤 뽑기·추첨</a>
+      <a href="unit-convert.html" data-i18n="nav.unit">단위 변환기</a>
+      <a href="date-calc.html" data-i18n="nav.date">날짜 계산기</a>
+      <a href="time-calc.html" data-i18n="nav.tc">시간 계산기·근무시간 합계</a>
+      <a href="age-calc.html" data-i18n="nav.age">만 나이 계산기</a>
+    </nav>
+    <nav>
+      <a href="privacy.html" data-i18n="foot.privacy">개인정보처리방침</a>
+      <a href="terms.html" data-i18n="foot.terms">이용약관</a>
+      <a href="licenses.html" data-i18n="foot.licenses">오픈소스 고지</a>
+    </nav>
+    <div data-i18n="foot.note">© 툴모아 · 모든 처리는 브라우저 안에서 이뤄집니다</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  var dz = el('dz'), fileInput = el('file'), area = el('area'), msg = el('msg'), view = el('view'), list = el('list');
+  var countIn = el('count'), sortSel = el('sort'), skipCb = el('skipbw');
+
+  var MAX_PIXELS = 16e6, SAMPLE = 160;   // 색 세기는 160px 안으로 줄인 그림으로
+  var src = null, sample = null, palette = [], baseName = 'image', timer = null, picked = null;
+
+  function setMsg(text, cls) { msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : ''; }
+  function hex2(n) { var s = n.toString(16); return s.length < 2 ? '0' + s : s; }
+  function toHex(c) { return '#' + hex2(c[0]) + hex2(c[1]) + hex2(c[2]); }
+  function toRgb(c) { return 'rgb(' + c[0] + ', ' + c[1] + ', ' + c[2] + ')'; }
+  function lum(c) { return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+  function hue(c) {
+    var r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+    if (!d) return -1;   // 무채색은 맨 뒤
+    var h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return ((h * 60) + 360) % 360;
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) { e.preventDefault(); dz.classList.remove('over'); if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', function () { if (fileInput.files.length) load(fileInput.files[0]); });
+  document.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind !== 'file' || items[i].type.indexOf('image/') !== 0) continue;
+      var f = items[i].getAsFile(); if (!f) continue;
+      var ext = (f.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+      var stamp = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+      e.preventDefault();
+      load(new File([f], '붙여넣은-사진-' + stamp + '.' + ext, { type: f.type }));
+      return;
+    }
+  });
+
+  function load(file) {
+    if (file.type.indexOf('image/') !== 0) { setMsg(t('msg.pickImage', '이미지 파일을 선택해 주세요.'), 'err'); return; }
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.naturalWidth, h = img.naturalHeight, k = 1;
+      if (w * h > MAX_PIXELS) k = Math.sqrt(MAX_PIXELS / (w * h));
+      w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+      src = document.createElement('canvas'); src.width = w; src.height = h;
+      src.getContext('2d', { willReadFrequently: true }).drawImage(img, 0, 0, w, h);
+      view.width = w; view.height = h; view.getContext('2d').drawImage(src, 0, 0);
+      // 색 세기용 축소본
+      var sk = Math.min(1, SAMPLE / Math.max(w, h)), sw = Math.max(1, Math.round(w * sk)), sh = Math.max(1, Math.round(h * sk));
+      var sc = document.createElement('canvas'); sc.width = sw; sc.height = sh;
+      sc.getContext('2d').drawImage(img, 0, 0, sw, sh);
+      sample = sc.getContext('2d').getImageData(0, 0, sw, sh).data;
+      baseName = file.name.replace(/\.[^.]+$/, '');
+      picked = null; el('pick').hidden = true;
+      area.hidden = false; setMsg('');
+      analyze();
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); setMsg(t('pl.cantOpen', '이 사진을 열 수 없습니다.'), 'err'); };
+    img.src = url;
+  }
+
+  // 핵심: 미디언 컷. 픽셀 묶음을 가장 넓게 퍼진 채널의 중간값에서 둘로 나누기를 반복한다.
+  function medianCut(pixels, n) {
+    var boxes = [pixels];
+    function range(box) {
+      var mn = [255, 255, 255], mx = [0, 0, 0];
+      for (var i = 0; i < box.length; i++) for (var c = 0; c < 3; c++) { var v = box[i][c]; if (v < mn[c]) mn[c] = v; if (v > mx[c]) mx[c] = v; }
+      var best = 0, span = -1;
+      for (c = 0; c < 3; c++) if (mx[c] - mn[c] > span) { span = mx[c] - mn[c]; best = c; }
+      return { ch: best, span: span };
+    }
+    while (boxes.length < n) {
+      var bi = -1, bestScore = -1;
+      for (var i = 0; i < boxes.length; i++) {
+        if (boxes[i].length < 2) continue;
+        var r = range(boxes[i]);
+        if (r.span === 0) continue;   // 한 가지 색만 든 상자는 나눠도 같은 색이 둘 나올 뿐이다
+        var score = r.span * Math.sqrt(boxes[i].length);   // 넓고 많은 상자를 먼저 나눈다
+        if (score > bestScore) { bestScore = score; bi = i; }
+      }
+      if (bi < 0) break;
+      var box = boxes[bi], ch = range(box).ch;
+      box.sort(function (a, b) { return a[ch] - b[ch]; });
+      // 가운데에서 자르되, 같은 값은 한쪽에 몰아 둔다 — 똑같은 색이 두 상자에 갈려 평균이 탁해지는 일을 막는다
+      var mid = box.length >> 1, v = box[mid][ch], lo = mid, hi = mid;
+      while (lo > 0 && box[lo - 1][ch] === v) lo--;
+      while (hi < box.length && box[hi][ch] === v) hi++;
+      var cut = (lo > 0 && (hi >= box.length || mid - lo <= hi - mid)) ? lo : hi;
+      boxes.splice(bi, 1, box.slice(0, cut), box.slice(cut));
+    }
+    return boxes.map(function (box) {
+      var s = [0, 0, 0];
+      for (var i = 0; i < box.length; i++) { s[0] += box[i][0]; s[1] += box[i][1]; s[2] += box[i][2]; }
+      return { color: [Math.round(s[0] / box.length), Math.round(s[1] / box.length), Math.round(s[2] / box.length)], count: box.length };
+    });
+  }
+
+  function analyze() {
+    if (!sample) return;
+    var n = parseInt(countIn.value, 10), skip = skipCb.checked, px = [];
+    for (var i = 0; i < sample.length; i += 4) {
+      if (sample[i + 3] < 128) continue;
+      var r = sample[i], g = sample[i + 1], b = sample[i + 2];
+      if (skip) { var l = lum([r, g, b]); if (l > 242 || l < 14) continue; }
+      px.push([r, g, b]);
+    }
+    el('count-val').textContent = n;
+    if (!px.length) { palette = []; list.innerHTML = ''; setMsg(t('pl.allBg', '배경을 빼니 남는 색이 없습니다. "흰·검 배경 빼기"를 끄세요.'), 'err'); return; }
+    setMsg('');
+    var total = px.length;
+    palette = [];
+    medianCut(px, n).forEach(function (p) {
+      // 거의 같은 색(채널 차이 합 12 이하)은 하나로 합친다 — 그라데이션 없는 그림에서 중복이 나오지 않게
+      for (var i = 0; i < palette.length; i++) {
+        var q = palette[i].color, dd = Math.abs(q[0] - p.color[0]) + Math.abs(q[1] - p.color[1]) + Math.abs(q[2] - p.color[2]);
+        if (dd <= 12) { palette[i].share += p.count / total; return; }
+      }
+      palette.push({ color: p.color, share: p.count / total });
+    });
+    var mode = sortSel.value;
+    palette.sort(function (a, b) {
+      if (mode === 'light') return lum(b.color) - lum(a.color);
+      if (mode === 'hue') { var ha = hue(a.color), hb = hue(b.color); if (ha < 0 && hb < 0) return lum(b.color) - lum(a.color); if (ha < 0) return 1; if (hb < 0) return -1; return ha - hb; }
+      return b.share - a.share;
+    });
+    renderList();
+  }
+  function renderList() {
+    list.innerHTML = '';
+    palette.forEach(function (p, i) {
+      var li = document.createElement('li'), hx = toHex(p.color), dark = lum(p.color) < 140;
+      li.innerHTML = '<div class="sw" style="background:' + hx + ';color:' + (dark ? '#fff' : '#111') + '">' + Math.round(p.share * 100) + '%</div>' +
+                     '<button type="button" data-hex="' + hx + '" title="' + t('pl.clickCopy', '누르면 복사') + '"><span class="hex">' + hx + '</span><span class="rgb">' + toRgb(p.color) + '</span></button>';
+      list.appendChild(li);
+    });
+  }
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    copy(b.getAttribute('data-hex'), t('pl.copiedOne', '{h} 복사했습니다').replace('{h}', b.getAttribute('data-hex')));
+  });
+  function copy(text, okMsg) {
+    var m = el('copy-msg');
+    navigator.clipboard.writeText(text).then(function () {
+      m.textContent = okMsg;
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = t('pl.copyFail', '복사하지 못했습니다'); });
+  }
+  function schedule() { clearTimeout(timer); timer = setTimeout(analyze, 80); }
+  countIn.addEventListener('input', schedule);
+  sortSel.addEventListener('change', analyze);
+  skipCb.addEventListener('change', analyze);
+  document.addEventListener('langchange', function () { renderList(); if (picked) showPick(); });
+
+  // 그림을 클릭하면 그 자리 원본 픽셀을 집는다
+  view.addEventListener('click', function (e) {
+    if (!src) return;
+    var r = view.getBoundingClientRect();
+    var x = Math.floor((e.clientX - r.left) * view.width / r.width), y = Math.floor((e.clientY - r.top) * view.height / r.height);
+    x = Math.max(0, Math.min(view.width - 1, x)); y = Math.max(0, Math.min(view.height - 1, y));
+    var d = src.getContext('2d').getImageData(x, y, 1, 1).data;
+    picked = [d[0], d[1], d[2]];
+    showPick();
+  });
+  function showPick() {
+    el('pick').hidden = false;
+    el('pick-dot').style.background = toHex(picked);
+    el('pick-hex').textContent = toHex(picked);
+    el('pick-rgb').textContent = toRgb(picked);
+  }
+  el('btn-pick-copy').addEventListener('click', function () { if (picked) copy(toHex(picked), t('pl.copiedOne', '{h} 복사했습니다').replace('{h}', toHex(picked))); });
+
+  el('btn-copyall').addEventListener('click', function () {
+    if (!palette.length) return;
+    copy(palette.map(function (p) { return toHex(p.color) + '  ' + toRgb(p.color) + '  ' + Math.round(p.share * 100) + '%'; }).join('\n'), t('pl.copiedAll', '색 {n}개를 복사했습니다').replace('{n}', palette.length));
+  });
+  el('btn-css').addEventListener('click', function () {
+    if (!palette.length) return;
+    copy(':root {\n' + palette.map(function (p, i) { return '  --color-' + (i + 1) + ': ' + toHex(p.color) + ';'; }).join('\n') + '\n}', t('pl.copiedCss', 'CSS 변수를 복사했습니다'));
+  });
+  el('btn-png').addEventListener('click', function () {
+    if (!palette.length) return;
+    var w = 160, c = document.createElement('canvas'); c.width = w * palette.length; c.height = 200;
+    var x = c.getContext('2d');
+    palette.forEach(function (p, i) {
+      x.fillStyle = toHex(p.color); x.fillRect(i * w, 0, w, 150);
+      x.fillStyle = '#fff'; x.fillRect(i * w, 150, w, 50);
+      x.fillStyle = '#111'; x.font = 'bold 18px Helvetica, Arial, sans-serif'; x.textAlign = 'center';
+      x.fillText(toHex(p.color), i * w + w / 2, 174);
+      x.fillStyle = '#666'; x.font = '12px Helvetica, Arial, sans-serif';
+      x.fillText(toRgb(p.color), i * w + w / 2, 192);
+    });
+    c.toBlob(function (blob) {
+      if (!blob) return;
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = baseName + '_' + t('pl.suffix', '팔레트') + '.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+      el('copy-msg').textContent = t('pl.savedPng', '팔레트 PNG를 저장했습니다');
+    }, 'image/png');
+  });
+  el('btn-reset').addEventListener('click', function () {
+    src = null; sample = null; palette = []; picked = null; fileInput.value = '';
+    view.width = view.height = 1; list.innerHTML = ''; el('pick').hidden = true; el('copy-msg').textContent = '';
+    area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>
