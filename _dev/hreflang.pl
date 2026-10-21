@@ -26,6 +26,11 @@ my %PAIR = (
   'image-transparent.html' => 'image-transparent.html',
   'color-convert.html'  => 'color-convert.html',
   'barcode.html'        => 'barcode.html',
+  'text-clean.html' => 'text-clean.html',
+  'pdf-edit.html' => 'pdf-edit.html',
+  'password-gen.html' => 'password-gen.html',
+  'time-calc.html' => 'time-calc.html',
+  'text-diff.html' => 'text-diff.html',
 );
 
 my $BASE = 'https://toolmoa.github.io/';

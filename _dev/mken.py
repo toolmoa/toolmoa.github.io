@@ -441,6 +441,279 @@ PAGES = {
     </details>
   </div>
 '''),
+ 'pdf-edit': dict(
+   title='Rotate, delete and reorder PDF pages — free, nothing uploaded',
+   desc='Rotate PDF pages, remove the ones you do not need and drag them into a new order, with thumbnails, inside your browser. The file never leaves your device.',
+   og_t='Rotate, delete and reorder PDF pages without uploading',
+   og_d='Fix sideways scans, drop blank pages and change the page order, all in your browser.',
+   name='PDF page editor', cat='UtilitiesApplication',
+   aria={'파일 선택': 'Choose a file'},
+   attrs=[],
+   body='''  <h2>Why a scanned PDF keeps coming out sideways</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Every PDF page carries its own <strong style="color:var(--text)">rotation value</strong>. Scanners and copiers often leave that value
+      untouched, so a document that looks fine on your screen opens sideways on someone else's computer or comes out of the printer lying down.
+      Rotating in a viewer only turns the picture for that moment; nothing is written to the file. The rotation you apply here changes the
+      value stored in the file itself, so the page stands upright wherever it is opened.
+    </p>
+  </div>
+
+  <h2>Why not upload it</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      The PDFs people fix are contracts, invoices, medical forms and ID scans — exactly the files that should not sit on a stranger's server.
+      Most "edit PDF online" sites upload the whole document before showing you the first thumbnail. This page renders the previews, rotates,
+      deletes and reorders with your own browser. It keeps working with the internet switched off, there is no file size cap beyond your
+      device's memory, and nothing is kept once you close the tab.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Typical jobs</strong> — a few pages fed upside down by the document feeder; blank backs left over from
+      duplex scanning; pages that arrived shuffled; a sensitive page removed before sharing. If you want to <strong style="color:var(--text)">extract</strong>
+      pages into separate files use <a href="pdf-split.html">split PDF</a>; to <strong style="color:var(--text)">join</strong> several files use <a href="pdf-merge.html">merge PDF</a>.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is the rotation really saved into the file?</summary>
+      <p>Yes. Instead of just turning the view, the page's rotation entry inside the PDF is rewritten, so it opens upright in any reader and prints upright too.</p>
+    </details>
+    <details>
+      <summary>Is my PDF uploaded?</summary>
+      <p>No. From the thumbnails to the saved file, everything happens inside your browser. You can disconnect from the internet after the page has loaded and it still works.</p>
+    </details>
+    <details>
+      <summary>How do I change the page order?</summary>
+      <p>Drag a thumbnail to a new place, or use the ← → buttons on each card. The numbers on the cards show the new order; the saved file follows it.</p>
+    </details>
+    <details>
+      <summary>Does it keep the quality of the pages?</summary>
+      <p>Yes. Pages are copied as they are — text stays text, images keep their original resolution. Nothing is re-rendered or compressed.</p>
+    </details>
+    <details>
+      <summary>Is it slow with long documents?</summary>
+      <p>Making the thumbnails takes a moment. Documents over 100 pages appear from the front as the previews are drawn; rotating and saving are quick.</p>
+    </details>
+    <details>
+      <summary>Is my original changed?</summary>
+      <p>No. A new file is always saved; the original on your disk stays exactly as it was.</p>
+    </details>
+  </div>
+'''),
+ 'text-diff': dict(
+   title='Compare two texts and highlight the differences — free, private',
+   desc='Paste the original and the revised text to see changed, added and removed lines and the exact characters that changed. Compared in your browser, never sent anywhere.',
+   og_t='Compare two texts without uploading them',
+   og_d='Changed lines and characters highlighted side by side or inline. Runs in your browser.',
+   name='Text compare', cat='UtilitiesApplication',
+   aria={},
+   attrs=[],
+   body='''  <h2>Why the texts you compare should not be uploaded</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Two versions of a text usually get compared because the text matters: a contract that came back from the other side, a report draft,
+      a proposal, a cover letter, a configuration file. You want to know what changed since last time, or what went missing in your edit.
+      Most online diff tools post both texts to a server to do that. This page compares them inside your browser only. It keeps working with
+      the internet disconnected, nothing is stored on your device, and a refresh clears both boxes.
+    </p>
+  </div>
+
+  <h2>How to read the result</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Red line</strong> — present only in the original (removed).<br>
+      <strong style="color:var(--text)">Green line</strong> — present only in the revision (added).<br>
+      <strong style="color:var(--text)">Colour on both sides</strong> — the same line was edited; the darker highlight marks the characters that actually changed.<br>
+      <strong style="color:var(--text)">"… n lines unchanged …"</strong> — unchanged text folded away. Switch off "Show only changed areas" to expand everything.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is the text sent to a server?</summary>
+      <p>No. The comparison runs entirely in your browser and the text is never transmitted. Proof: load the page, go offline, and it still works. Nothing is saved either, so reloading clears it.</p>
+    </details>
+    <details>
+      <summary>Can I compare Word, Google Docs or PDF files directly?</summary>
+      <p>Not as files — those formats mix text with formatting. Open the document, select all, copy and paste it here. Plain-text files such as .txt, .csv, .md, .json, .srt subtitles or source code can be opened with "Load a file" or dropped onto a box.</p>
+    </details>
+    <details>
+      <summary>Everything shows as changed when only the line breaks differ</summary>
+      <p>Lines are matched one to one. If one version wraps a paragraph onto several lines and the other keeps it on one, they look like different lines. Paste both in the same shape. Differences between Windows and Mac line endings (CRLF/LF) and a trailing newline are ignored automatically.</p>
+    </details>
+    <details>
+      <summary>Can I ignore whitespace-only edits?</summary>
+      <p>Turn on "Ignore whitespace". Leading and trailing spaces are dropped and runs of spaces count as one. A space that appears or disappears inside a word still counts as a change, because it may change the meaning.</p>
+    </details>
+    <details>
+      <summary>How long can the texts be?</summary>
+      <p>Tens of thousands of lines. Identical text at the start and end is stripped first and only the differing middle is computed. If the two texts are almost entirely different — thousands of differing lines — the comparison stops and tells you, since at that point they are simply different documents.</p>
+    </details>
+    <details>
+      <summary>How do I put the result in an email or report?</summary>
+      <p>"Copy result" copies the changed lines with two lines of context, marked <code>-</code> for removed and <code>+</code> for added, as plain text you can paste anywhere.</p>
+    </details>
+  </div>
+'''),
+ 'password-gen': dict(
+   title='Random password generator — made in your browser, never sent',
+   desc='Strong random passwords with your choice of length and character sets, without look-alike letters, several at a time. Made on your device, never transmitted.',
+   og_t='Random password generator that never sends your password',
+   og_d='Pick length and character sets, drop look-alike letters, make 1 to 20 at once. Generated locally.',
+   name='Password generator', cat='SecurityApplication',
+   aria={},
+   attrs=[('>16자<', '>16 characters<'), ('<option value="1">1개<', '<option value="1">1<'), ('<option value="5" selected>5개<', '<option value="5" selected>5<'),
+          ('<option value="10">10개<', '<option value="10">10<'), ('<option value="20">20개<', '<option value="20">20<'), ("tt('pw.countUnit', '개')", "''")],
+   body='''  <h2>What makes a password strong</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Length</strong> matters far more than forcing in symbols. Anything under 12 characters falls quickly to
+      modern hardware; at 16 or more it is out of reach in practice. And however good a password is, <strong style="color:var(--text)">reusing it</strong>
+      means one leaked site exposes all the others. Use a different one everywhere, do not try to memorise them, and keep them in a password manager.
+    </p>
+  </div>
+
+  <h2>Four more characters beat all the symbols</h2>
+  <div class="card">
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      The arithmetic is clear. Take a <strong style="color:var(--text)">12-character</strong> password from letters and digits (62 symbols) and add the full set
+      of punctuation (94 symbols): the number of possibilities grows about <strong style="color:var(--text)">150 times</strong>. Keep the same 62 symbols but
+      go to <strong style="color:var(--text)">16 characters</strong>: it grows about <strong style="color:var(--text)">15 million times</strong>.
+      Four extra characters do roughly a hundred thousand times more work than every symbol on the keyboard.
+    </p>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      That is not an argument against symbols. It is a warning about the most common mistake: making a password short and "fixing" it with punctuation
+      when the site would have allowed a longer one. Make it long, let a manager remember it.
+    </p>
+  </div>
+
+  <h2>Why it is safe to generate it here</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      With a password generator the only question is <strong style="color:var(--text)">where the value goes</strong>. This page does not ask a server
+      to make one. It uses the cryptographic random number generator built into your browser (<code>crypto.getRandomValues</code>), the value is
+      created on your device and never leaves the screen, and nothing is logged — close the tab and it is gone. When random bytes are turned into
+      characters, <strong style="color:var(--text)">modulo bias</strong> is removed so no character comes up more often than the others.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is it safe to use a password generated here?</summary>
+      <p>Yes. It comes from the browser's cryptographic random number generator (<code>crypto.getRandomValues</code>). The value exists only on your screen; it is not transmitted and not stored.</p>
+    </details>
+    <details>
+      <summary>Why exclude look-alike characters?</summary>
+      <p>Lower-case l, the digit 1 and capital I, and capital O and the digit 0, are hard to tell apart on screen and on paper. If you will ever type the password by hand, leaving them out avoids mistakes.</p>
+    </details>
+    <details>
+      <summary>How long should it be?</summary>
+      <p>16 characters or more for anything important. If a site limits the length, use the longest it allows.</p>
+    </details>
+    <details>
+      <summary>Could the same password come up twice?</summary>
+      <p>Not in practice. With 16 characters from all four sets the number of possibilities is astronomical, and the chance of a repeat is negligible.</p>
+    </details>
+  </div>
+'''),
+ 'text-clean': dict(
+   title='Remove duplicate lines, sort and clean up text — free, private',
+   desc='Delete duplicate and blank lines, trim spaces, sort A–Z or by length, change case, number or join lines. Lists stay in your browser and are never uploaded.',
+   og_t='Remove duplicate lines and clean up a list without uploading',
+   og_d='Dedupe, sort, trim, change case, number or join lines. Runs in your browser.',
+   name='Text cleaner', cat='UtilitiesApplication',
+   aria={},
+   attrs=[],
+   body='''  <h2>When to use it</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      A mailing list assembled from several places with <strong style="color:var(--text)">the same address several times</strong>; a comma-separated list
+      that should be <strong style="color:var(--text)">one item per line</strong>; values copied out of a spreadsheet with
+      <strong style="color:var(--text)">stray spaces</strong> around them. Because everything happens in your browser, it is fine to use on customer lists
+      and other data you would not paste into a random website.
+    </p>
+  </div>
+
+  <h2>Invisible spaces ruin lists</h2>
+  <div class="card">
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      Text copied from web pages and PDFs often carries characters that <strong style="color:var(--text)">look like a space but are not one</strong>.
+      They look identical on screen, yet a spreadsheet search cannot find them, duplicates survive deduplication, and sorting comes out in a strange order.
+      <strong style="color:var(--text)">Trim spaces</strong> removes those special spaces as well as ordinary ones.
+    </p>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      That is why a pasted list is best cleaned in this order: <strong style="color:var(--text)">trim → remove blank lines → remove duplicates → sort</strong>.
+      Only after trimming do two equal values compare as equal. The defaults are set up in that order.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is deduplication case-sensitive?</summary>
+      <p>Yes. <code>Apple</code> and <code>apple</code> are different lines. To treat them as the same, choose "All lower case" first and then remove duplicates.</p>
+    </details>
+    <details>
+      <summary>Is the original order kept?</summary>
+      <p>With sorting set to "Leave as is", the first occurrence of each line stays where it was and only the later repeats are removed.</p>
+    </details>
+    <details>
+      <summary>Is my text stored anywhere?</summary>
+      <p>No. It is processed in your browser only and disappears when you close the tab. Nothing is sent to a server.</p>
+    </details>
+    <details>
+      <summary>How large a list can it handle?</summary>
+      <p>Tens of thousands of lines without trouble. Much larger lists may make the browser pause for a moment.</p>
+    </details>
+  </div>
+'''),
+ 'time-calc': dict(
+   title='Time calculator — add hours, time between, total work hours',
+   desc='Add or subtract hours and minutes from a time, find the hours between two times, total work hours across many days, and convert 7:45 to 7.75. All in your browser.',
+   og_t='Time calculator · add hours, time between, work hour totals',
+   og_d='Add and subtract times, duration between two times, sum many days, h:mm ↔ decimal hours.',
+   name='Time calculator', cat='UtilitiesApplication',
+   aria={},
+   attrs=[],
+   body='''  <h2>Why adding work hours by hand goes wrong</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Time is base 60: 8:30 plus 7:45 is 16:15, not 15:75. One or two days are easy, but somewhere in a month of entries a carry gets dropped.
+      In a spreadsheet the cell format has to be <strong style="color:var(--text)">[h]:mm</strong> before a total over 24 hours displays correctly,
+      and if you do not know that the total simply looks too small. This page converts every line to minutes first — whether it is written as
+      "8:30", "8h 30m", "90m" or "09:00-18:00" — so that mistake cannot happen, and shows the total both as h:mm and as decimal hours so it can go
+      straight into whichever timesheet system you use.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is what I type sent anywhere?</summary>
+      <p>No. The arithmetic runs in your browser and nothing is transmitted. It works with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>How are overnight shifts handled?</summary>
+      <p>If the end time is earlier than the start, it is taken to be the next day: 22:00 to 06:00 is 8 hours. A line such as "22:00-06:00" in the totals box is read the same way.</p>
+    </details>
+    <details>
+      <summary>How do I take off breaks?</summary>
+      <p>"Time between two times" has its own break field. In the totals box, "Break to subtract per line" is taken off every line written as a start–end range, but not off lines that already give a net duration like "8:30". You can also write "-60m" at the end of a single line to subtract from that line only.</p>
+    </details>
+    <details>
+      <summary>What are decimal hours?</summary>
+      <p>Minutes divided by 60 and added to the hours. 7 h 45 min is 7.75, 7 h 30 min is 7.5, 7 h 20 min is 7.33. Many payroll and timesheet systems use this form, hence the converter.</p>
+    </details>
+    <details>
+      <summary>Which formats does the totals box accept?</summary>
+      <p>One entry per line: "8:30", "8h 30m", "8 hours 15 minutes", "90m", "2.5" (decimal hours) or a range like "09:00-18:00". A day name or date in front of the entry is ignored, so you can paste a week straight from your notes.</p>
+    </details>
+  </div>
+'''),
 }
 
 def convert(slug):
@@ -489,8 +762,10 @@ def convert(slug):
         key = m.group(2)
         if key not in EN: missing.append(key); return m.group(0)
         return m.group(1).replace(m.group(0), '')
-    h = re.sub(r'placeholder="[^"]*"([^>]*?) data-i18n-ph="([^"]+)"', lambda m: 'placeholder="' + EN.get(m.group(2), '?') + '"' + m.group(1), h)
-    h = re.sub(r' data-i18n-ph="([^"]+)"( [^>]*?)placeholder="[^"]*"', lambda m: m.group(2) + 'placeholder="' + EN.get(m.group(1), '?') + '"', h)
+    # 사전의 '\n' 은 JS 이스케이프다. 속성값에서는 줄바꿈 문자 참조로 바꿔야 자리글이 여러 줄로 보인다.
+    def ph(key): return EN.get(key, '?').replace('\\n', '&#10;')
+    h = re.sub(r'placeholder="[^"]*"([^>]*?) data-i18n-ph="([^"]+)"', lambda m: 'placeholder="' + ph(m.group(2)) + '"' + m.group(1), h)
+    h = re.sub(r' data-i18n-ph="([^"]+)"(\s[^>]*?)placeholder="[^"]*"', lambda m: m.group(2) + 'placeholder="' + ph(m.group(1)) + '"', h)
     assert 'data-i18n' not in h, ('data-i18n 잔존', re.findall(r'data-i18n[^ >]*', h)[:5])
 
     # ---- 한국어 전용 본문 → 영어 본문 ----
@@ -526,6 +801,8 @@ def convert(slug):
     h = re.sub(r"\bt\('([^']+)',\s*'(?:[^'\\]|\\.)*'\)", sub_t, h)
     h = h.replace("'붙여넣은-사진-'", "'pasted-image-'")
     h = h.replace("'붙여넣은-그림-'", "'pasted-image-'")
+    # 여러 줄짜리 langchange 리스너는 블록째 지운다 (첫 줄만 지우면 남은 본문이 문법 오류가 된다)
+    h = re.sub(r"\n[ \t]*document\.addEventListener\('langchange',\s*function \(\) \{\n(?:(?!\n[ \t]*\}\);).)*\n[ \t]*\}\);", '', h, flags=re.S)
     h = re.sub(r"\n[^\n]*addEventListener\('langchange'[^\n]*", '', h)
     # 로컬 링크는 같은 폴더의 영어판을 가리킨다 (전부 영어판이 있는 툴만 cross 에 적었다)
     left_t = re.findall(r"(?<![\w.])t\('[^']*'", h)   # getContext('2d') 처럼 't(' 로 끝나는 이름은 제외

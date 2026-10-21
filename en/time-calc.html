@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Time calculator — add hours, time between, total work hours</title>
+<meta name="description" content="Add or subtract hours and minutes from a time, find the hours between two times, total work hours across many days, and convert 7:45 to 7.75. All in your browser.">
+<link rel="canonical" href="https://toolmoa.github.io/en/time-calc.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/time-calc.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/time-calc.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/time-calc.html">
+<meta property="og:title" content="Time calculator · add hours, time between, work hour totals">
+<meta property="og:description" content="Add and subtract times, duration between two times, sum many days, h:mm ↔ decimal hours.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Time calculator","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<style>
+  .tc-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; align-items:end; }
+  .tc-result { font-size:22px; font-weight:700; letter-spacing:-.02em; margin:12px 0 4px; font-variant-numeric:tabular-nums; }
+  .tc-sub { color:var(--muted); font-size:14px; }
+</style>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/time-calc.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-time-calc.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Time calculator · add, subtract, sum work hours — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Time calculator · add hours, time between, work hour totals">
+<meta name="twitter:description" content="Add and subtract times, duration between two times, sum many days, h:mm ↔ decimal hours.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-time-calc.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is what I type sent anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. The arithmetic runs in your browser and nothing is transmitted. It works with the internet switched off."}},{"@type":"Question","name":"How are overnight shifts handled?","acceptedAnswer":{"@type":"Answer","text":"If the end time is earlier than the start, it is taken to be the next day: 22:00 to 06:00 is 8 hours. A line such as \"22:00-06:00\" in the totals box is read the same way."}},{"@type":"Question","name":"How do I take off breaks?","acceptedAnswer":{"@type":"Answer","text":"\"Time between two times\" has its own break field. In the totals box, \"Break to subtract per line\" is taken off every line written as a start–end range, but not off lines that already give a net duration like \"8:30\". You can also write \"-60m\" at the end of a single line to subtract from that line only."}},{"@type":"Question","name":"What are decimal hours?","acceptedAnswer":{"@type":"Answer","text":"Minutes divided by 60 and added to the hours. 7 h 45 min is 7.75, 7 h 30 min is 7.5, 7 h 20 min is 7.33. Many payroll and timesheet systems use this form, hence the converter."}},{"@type":"Question","name":"Which formats does the totals box accept?","acceptedAnswer":{"@type":"Answer","text":"One entry per line: \"8:30\", \"8h 30m\", \"8 hours 15 minutes\", \"90m\", \"2.5\" (decimal hours) or a range like \"09:00-18:00\". A day name or date in front of the entry is ignored, so you can paste a week straight from your notes."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Time calculator · add, subtract, sum work hours","item":"https://toolmoa.github.io/en/time-calc.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html">Clean up text</a>
+      <a href="text-diff.html">Compare text</a>
+      <a href="pdf-edit.html">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html" aria-current="page">Time calc</a>
+    </nav>
+    <a class="lang-link" href="../time-calc.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Time calculator · add, subtract, sum work hours</h1>
+  <p class="lead">Add or subtract hours from a time, find how long it is between two times, and total many shifts at once. Also converts 8:30-style times to decimal hours like 8.5 and back.</p>
+  <span class="privacy-badge">🔒 What you type is never sent anywhere</span>
+
+  <h2 style="margin-top:8px">Add to or subtract from a time</h2>
+  <div class="card">
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="base">Starting time</label>
+        <input type="time" id="base" value="09:00">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="op">Operation</label>
+        <select id="op">
+          <option value="add" selected>Add (+)</option>
+          <option value="sub">Subtract (−)</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="dh">Hours</label>
+        <input type="number" id="dh" min="0" max="9999" value="8" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="dm">Minutes</label>
+        <input type="number" id="dm" min="0" max="59" value="30" inputmode="numeric">
+      </div>
+    </div>
+    <div class="tc-result" id="r1">-</div>
+    <div class="tc-sub" id="r1-sub"></div>
+  </div>
+
+  <h2>Between two times</h2>
+  <div class="card">
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="from">Start</label>
+        <input type="time" id="from" value="09:00">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="to">End</label>
+        <input type="time" id="to" value="18:30">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="brk">Break to subtract (min)</label>
+        <input type="number" id="brk" min="0" max="1440" value="60" inputmode="numeric">
+      </div>
+    </div>
+    <div class="tc-result" id="r2">-</div>
+    <div class="tc-sub" id="r2-sub"></div>
+  </div>
+
+  <h2>Sum of durations (work hours)</h2>
+  <div class="card">
+    <div class="field">
+      <label for="list">One per line — 8:30 · 8h 30m · 90m · 2.5 · 09:00-18:00 can be mixed</label>
+      <textarea id="list" style="min-height:140px" placeholder="Mon 09:00-18:00&#10;Tue 8:30&#10;Wed 8h 15m&#10;Thu 90m&#10;Fri 7.5"></textarea>
+      <div class="hint">A line written as start-end ("09:00-18:00") counts the time between them. A weekday or date in front is fine. Subtract a break with "-60m" at the end of a line, or enter a daily break below.</div>
+    </div>
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="list-brk">Break to subtract per line (min)</label>
+        <input type="number" id="list-brk" min="0" max="1440" value="0" inputmode="numeric">
+      </div>
+      <div class="field" style="margin:0">
+        <label for="target">Compare with (e.g. 40 per week)</label>
+        <input type="number" id="target" min="0" max="9999" step="0.5" placeholder="40" inputmode="decimal">
+      </div>
+    </div>
+    <div class="tc-result" id="r3">-</div>
+    <div class="tc-sub" id="r3-sub"></div>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn secondary small" id="btn-copy">Copy total</button>
+      <button class="btn secondary small" id="btn-clear">Clear</button>
+    </div>
+    <div class="hint" id="copy-msg" role="status" aria-live="polite"></div>
+  </div>
+
+  <h2>H:MM ↔ decimal hours</h2>
+  <div class="card">
+    <div class="tc-row">
+      <div class="field" style="margin:0">
+        <label for="hm">H:MM → decimal</label>
+        <input type="text" id="hm" value="7:45" placeholder="7:45" inputmode="numeric">
+        <div class="hint" id="hm-out" style="font-weight:600;color:var(--text)"></div>
+      </div>
+      <div class="field" style="margin:0">
+        <label for="dec">Decimal → H:MM</label>
+        <input type="number" id="dec" value="7.75" step="0.01" min="0" inputmode="decimal">
+        <div class="hint" id="dec-out" style="font-weight:600;color:var(--text)"></div>
+      </div>
+    </div>
+    <p class="hint">Timesheets that use decimal hours (7.75) divide the minutes by 60: 7 h 45 min = 7.75 h, 7 h 30 min = 7.5 h.</p>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">Day-based calculations (working days, countdowns) are in the <a href="../date-calc.html">date calculator</a>; length and weight conversions in the <a href="../unit-convert.html">unit converter</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_TIMECALC --></div>
+
+  <h2>Why adding work hours by hand goes wrong</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Time is base 60: 8:30 plus 7:45 is 16:15, not 15:75. One or two days are easy, but somewhere in a month of entries a carry gets dropped.
+      In a spreadsheet the cell format has to be <strong style="color:var(--text)">[h]:mm</strong> before a total over 24 hours displays correctly,
+      and if you do not know that the total simply looks too small. This page converts every line to minutes first — whether it is written as
+      "8:30", "8h 30m", "90m" or "09:00-18:00" — so that mistake cannot happen, and shows the total both as h:mm and as decimal hours so it can go
+      straight into whichever timesheet system you use.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is what I type sent anywhere?</summary>
+      <p>No. The arithmetic runs in your browser and nothing is transmitted. It works with the internet switched off.</p>
+    </details>
+    <details>
+      <summary>How are overnight shifts handled?</summary>
+      <p>If the end time is earlier than the start, it is taken to be the next day: 22:00 to 06:00 is 8 hours. A line such as "22:00-06:00" in the totals box is read the same way.</p>
+    </details>
+    <details>
+      <summary>How do I take off breaks?</summary>
+      <p>"Time between two times" has its own break field. In the totals box, "Break to subtract per line" is taken off every line written as a start–end range, but not off lines that already give a net duration like "8:30". You can also write "-60m" at the end of a single line to subtract from that line only.</p>
+    </details>
+    <details>
+      <summary>What are decimal hours?</summary>
+      <p>Minutes divided by 60 and added to the hours. 7 h 45 min is 7.75, 7 h 30 min is 7.5, 7 h 20 min is 7.33. Many payroll and timesheet systems use this form, hence the converter.</p>
+    </details>
+    <details>
+      <summary>Which formats does the totals box accept?</summary>
+      <p>One entry per line: "8:30", "8h 30m", "8 hours 15 minutes", "90m", "2.5" (decimal hours) or a range like "09:00-18:00". A day name or date in front of the entry is ignored, so you can paste a week straight from your notes.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-clean.html">Remove duplicate lines · clean up text</a>
+      <a href="text-diff.html">Compare two texts</a>
+      <a href="pdf-edit.html">Rotate, delete and reorder PDF pages</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="../time-calc.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function el(id) { return document.getElementById(id); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function parseTime(v) {               // "HH:MM" → 분. 비어 있으면 null
+    var m = /^(\d{1,2}):(\d{2})$/.exec(v || '');
+    if (!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+  function hm(mins) {                    // 분 → "H시간 M분"
+    var neg = mins < 0; mins = Math.abs(Math.round(mins));
+    var h = Math.floor(mins / 60), m = mins % 60;
+    var s = h + ' h' + (m ? ' ' + m + ' min' : '');
+    return (neg ? '−' : '') + s;
+  }
+  function clock(mins) {                 // 분 → "HH:MM" (하루 안으로)
+    mins = ((Math.round(mins) % 1440) + 1440) % 1440;
+    return pad(Math.floor(mins / 60)) + ':' + pad(mins % 60);
+  }
+  function dec(mins) { return (Math.round(mins / 60 * 100) / 100).toFixed(2).replace(/\.?0+$/, ''); }
+  function colon(mins) {                 // 분 → "H:MM" (24시간 넘어도 그대로)
+    var neg = mins < 0; mins = Math.abs(Math.round(mins));
+    return (neg ? '−' : '') + Math.floor(mins / 60) + ':' + pad(mins % 60);
+  }
+
+  /* 1. 시각에 더하기·빼기 */
+  function calc1() {
+    var base = parseTime(el('base').value);
+    var d = (parseInt(el('dh').value, 10) || 0) * 60 + (parseInt(el('dm').value, 10) || 0);
+    if (base === null) { el('r1').textContent = '-'; el('r1-sub').textContent = ''; return; }
+    var total = el('op').value === 'add' ? base + d : base - d;
+    var days = Math.floor(total / 1440);
+    el('r1').textContent = clock(total);
+    el('r1-sub').textContent = days === 0 ? 'same day'
+      : days > 0 ? days + ' day(s) later' : (-days) + ' day(s) earlier';
+  }
+
+  /* 2. 두 시각 사이 */
+  function calc2() {
+    var a = parseTime(el('from').value), b = parseTime(el('to').value), brk = parseInt(el('brk').value, 10) || 0;
+    if (a === null || b === null) { el('r2').textContent = '-'; el('r2-sub').textContent = ''; return; }
+    var span = b - a; if (span < 0) span += 1440;        // 밤을 넘기면 다음 날
+    var net = span - brk;
+    if (net < 0) { el('r2').textContent = '-'; el('r2-sub').textContent = 'The break is longer than the time worked.'; return; }
+    el('r2').textContent = hm(net);
+    el('r2-sub').textContent = colon(net) + ' · ' + dec(net) + ' h' + ' · ' + net + ' min' +
+      (b < a ? ' · ' + 'into the next day' : '') + (brk ? ' · ' + 'break of {n} min subtracted'.replace('{n}', brk) : '');
+  }
+
+  /* 3. 합계: 줄마다 형식이 달라도 전부 분으로 바꾼다 */
+  function parseLine(line, lineBreak) {
+    var s = line.replace(/\s+/g, ' ').trim();
+    if (!s) return null;
+    // 끝에 "-60분" / "-1:00" 처럼 뺄 것이 붙어 있으면 따로 뗀다
+    var minus = 0, mm;
+    while ((mm = /\s-\s*(\d+)\s*분\s*$/.exec(s) || /\s-\s*(\d{1,2}):(\d{2})\s*$/.exec(s))) {
+      minus += mm[2] !== undefined ? parseInt(mm[1], 10) * 60 + parseInt(mm[2], 10) : parseInt(mm[1], 10);
+      s = s.slice(0, mm.index);
+    }
+    var m;
+    // 시작-끝 (09:00-18:00, 9:00~18:00, 22:00 - 06:00)
+    if ((m = /(\d{1,2}):(\d{2})\s*[-~–]\s*(\d{1,2}):(\d{2})/.exec(s))) {
+      var a = parseInt(m[1], 10) * 60 + parseInt(m[2], 10), b = parseInt(m[3], 10) * 60 + parseInt(m[4], 10);
+      var span = b - a; if (span < 0) span += 1440;
+      return { mins: span - lineBreak - minus, range: true };
+    }
+    // 8시간 30분 / 8h 30m / 8 hours 30 min
+    if ((m = /(\d+(?:\.\d+)?)\s*(?:시간|h|hr|hrs|hours?)(?:\s*(\d+)\s*(?:분|m|min|mins|minutes?))?/i.exec(s))) {
+      return { mins: Math.round(parseFloat(m[1]) * 60) + (m[2] ? parseInt(m[2], 10) : 0) - minus, range: false };
+    }
+    // 90분 / 90m
+    // \b 는 영숫자 경계라 '분' 뒤에서는 성립하지 않는다 (실제로 "90분" 이 90시간으로 읽혔다). 뒤에 영문자가 없으면 된다.
+    if ((m = /(\d+)\s*(?:분|m|min|mins|minutes?)(?![a-z])/i.exec(s))) return { mins: parseInt(m[1], 10) - minus, range: false };
+    // 8:30
+    if ((m = /(\d{1,3}):(\d{2})/.exec(s))) return { mins: parseInt(m[1], 10) * 60 + parseInt(m[2], 10) - minus, range: false };
+    // 7.5 / 8 (시간)
+    if ((m = /(\d+(?:\.\d+)?)/.exec(s))) return { mins: Math.round(parseFloat(m[1]) * 60) - minus, range: false };
+    return { mins: null };
+  }
+  function calc3() {
+    var lines = el('list').value.split('\n'), lineBreak = parseInt(el('list-brk').value, 10) || 0;
+    var total = 0, n = 0, bad = [], ranges = 0;
+    lines.forEach(function (l) {
+      var r = parseLine(l, lineBreak);
+      if (!r) return;
+      if (r.mins === null) { bad.push(l.trim()); return; }
+      total += r.mins; n++; if (r.range) ranges++;
+    });
+    if (!n && !bad.length) { el('r3').textContent = '-'; el('r3-sub').textContent = ''; return; }
+    el('r3').textContent = hm(total);
+    var sub = colon(total) + ' · ' + dec(total) + ' h' + ' · ' + total + ' min' + ' · ' + n + ' lines';
+    if (n) sub += ' · ' + 'average' + ' ' + hm(total / n);
+    if (ranges && lineBreak) sub += ' · ' + '{m} min break subtracted from {n} start-end line(s)'.replace('{n}', ranges).replace('{m}', lineBreak);
+    var target = parseFloat(el('target').value);
+    if (target > 0) {
+      var diff = total - target * 60;
+      sub += ' · ' + 'vs target {t} h'.replace('{t}', target) + ' ' + (diff >= 0 ? '+' : '−') + hm(Math.abs(diff));
+    }
+    if (bad.length) sub += ' · ' + 'could not read: ' + bad.slice(0, 3).join(', ');
+    el('r3-sub').textContent = sub;
+  }
+
+  /* 4. 시:분 ↔ 소수 */
+  function calc4() {
+    var m = /^(\d{1,4}):(\d{1,2})$/.exec(el('hm').value.trim());
+    el('hm-out').textContent = m ? '= ' + dec(parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) + ' h' : ((el('hm').value.trim()) ? 'Write it as 7:45.' : '');
+    var d = parseFloat(el('dec').value);
+    el('dec-out').textContent = isNaN(d) ? '' : '= ' + colon(Math.round(d * 60)) + ' (' + hm(Math.round(d * 60)) + ')';
+  }
+
+  function all() { calc1(); calc2(); calc3(); calc4(); }
+  ['base', 'op', 'dh', 'dm', 'from', 'to', 'brk', 'list', 'list-brk', 'target', 'hm', 'dec'].forEach(function (id) {
+    el(id).addEventListener('input', all);
+    el(id).addEventListener('change', all);
+  });
+  // 언어를 바꾸면 스크립트가 쓴 결과 문구도 다시 만들어야 한다
+
+  el('btn-copy').addEventListener('click', function () {
+    var text = el('r3').textContent;
+    if (!text || text === '-') return;
+    var note = el('copy-msg');
+    var done = function () { note.textContent = 'Copied.'; };
+    var full = text + ' (' + el('r3-sub').textContent + ')';
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(full).then(done, done);
+    else done();
+  });
+  el('btn-clear').addEventListener('click', function () { el('list').value = ''; el('copy-msg').textContent = ''; calc3(); el('list').focus(); });
+
+  all();
+})();
+</script>
+</body>
+</html>

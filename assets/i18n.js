@@ -2898,7 +2898,8 @@
                   'pdf-merge.html', 'pdf-split.html', 'file-convert.html', 'qr-generate.html',
                   'image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
                   'image-mosaic.html', 'image-exif.html',
-                  'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'image-resize.html', 'image-transparent.html', 'color-convert.html', 'barcode.html'];
+                  'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html', 'image-resize.html', 'image-transparent.html', 'color-convert.html', 'barcode.html',
+                  'text-clean.html', 'pdf-edit.html', 'password-gen.html', 'time-calc.html', 'text-diff.html'];
 
   function currentFile() {
     return location.pathname.split('/').pop() || 'index.html';

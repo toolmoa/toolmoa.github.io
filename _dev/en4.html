@@ -190,7 +190,8 @@ function decodeCode128(m) {
 
 var NEW = ['image-convert.html', 'image-join.html', 'pdf-to-image.html', 'random-pick.html',
            'image-mosaic.html', 'image-exif.html', 'image-watermark.html', 'image-split.html', 'pdf-watermark.html', 'qr-scan.html', 'romanize.html',
-           'image-resize.html', 'image-transparent.html', 'color-convert.html', 'barcode.html'];
+           'image-resize.html', 'image-transparent.html', 'color-convert.html', 'barcode.html',
+           'text-clean.html', 'pdf-edit.html', 'password-gen.html', 'time-calc.html', 'text-diff.html'];
 var ALL_EN = ['index.html', 'image-compress.html', 'image-crop.html', 'img-to-pdf.html', 'pdf-merge.html',
               'pdf-split.html', 'file-convert.html', 'qr-generate.html'].concat(NEW);
 var MENU_N = ALL_EN.length - 1;   // 홈을 뺀 툴 수 = 머리 메뉴 개수 = 영어 홈 카드 수
@@ -777,6 +778,176 @@ function run() {
     });
   }).catch(function (e) { log('바코드 (영어)', false, '오류: ' + e.message); });
 
+  // ===== 18. 텍스트 정리 (영어): 중복·빈 줄·공백 → 정렬 → 대문자 → 복사 → txt 저장 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/text-clean.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, cap = capture(f), got = {}, copied = null;
+      Object.defineProperty(w.navigator, 'clipboard', { configurable: true, value: { writeText: function (s) { copied = s; return Promise.resolve(); } } });
+      set(d, 'src', 'apple\n  banana  \napple\n\ncherry\n', 'input');
+      got.out = d.getElementById('out').value.split('\n'); got.n = txt(d, 't-out'); got.cut = txt(d, 't-cut');
+      set(d, 'sort', 'asc'); got.sorted = d.getElementById('out').value.split('\n')[0];
+      set(d, 'case', 'upper'); got.upper = d.getElementById('out').value.split('\n')[0];
+      set(d, 'sort', 'none'); set(d, 'case', 'none');
+      click(d, 'btn-copy');
+      return sleep(150).then(function () {
+        got.copyMsg = txt(d, 'copy-msg');
+        click(d, 'btn-down');
+        return waitFor(function () { return cap.blobs.length >= 1; }, 4000);
+      }).then(function () {
+        got.optUpper = d.querySelector('#case option[value="upper"]').textContent;
+        var han = hangulLeft(d);
+        var ok = got.out.length === 3 && got.out.indexOf('banana') >= 0 && got.n === '3' && got.cut === '3' && got.sorted === 'apple' && got.upper === 'APPLE' &&
+                 copied === 'apple\nbanana\ncherry' && /Copied/.test(got.copyMsg) && /^cleaned\.txt$/.test(cap.names[0] || '') && got.optUpper === 'UPPERCASE' && !han && !f.dataset.errs;
+        log('텍스트 정리 (영어)', ok, '6줄 → ' + got.out.length + '줄 [' + got.out.join(', ') + '] 줄어든 ' + got.cut + ' · A→Z 첫 줄 ' + got.sorted + ' · 대문자 ' + got.upper + ' · 복사 ' + JSON.stringify(copied) + ' "' + got.copyMsg + '" · 저장 ' + cap.names[0] + ' · 선택지 "' + got.optUpper + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('텍스트 정리 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 19. 비밀번호 (영어): 길이 표시 · 개수 선택지 단위 없음 · 10개 · 종류 미선택 안내 · 강도 영어 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/password-gen.html').then(function (f) {
+      var d = f.contentDocument, got = {};
+      got.len0 = txt(d, 'len-val');
+      set(d, 'len', '24', 'input'); got.len = txt(d, 'len-val');
+      set(d, 'count', '10');
+      var codes = Array.prototype.map.call(d.querySelectorAll('#list code'), function (c) { return c.textContent; });
+      got.n = codes.length; got.allLen = codes.every(function (p) { return p.length === 24; });
+      got.noAmb = codes.every(function (p) { return !/[l1IO0o]/.test(p); });
+      got.hasAll = codes.every(function (p) { return /[a-z]/.test(p) && /[A-Z]/.test(p) && /[0-9]/.test(p) && /[^a-zA-Z0-9]/.test(p); });
+      got.opts = Array.prototype.map.call(d.querySelectorAll('#count option'), function (o) { return o.textContent; }).join(',');
+      got.strength = txt(d, 'strength'); got.entropy = txt(d, 'entropy');
+      ['lower', 'upper', 'digit', 'symbol'].forEach(function (id) { d.getElementById(id).checked = false; d.getElementById(id).dispatchEvent(new Event('change', { bubbles: true })); });
+      got.none = txt(d, 'msg');
+      d.getElementById('lower').checked = true; d.getElementById('lower').dispatchEvent(new Event('change', { bubbles: true }));
+      var han = hangulLeft(d);
+      var ok = got.len0 === '16 characters' && got.len === '24 characters' && got.n === 10 && got.allLen && got.noAmb && got.hasAll && got.opts === '1,5,10,20' &&
+               /^(Weak|Fair|Strong|Very strong)$/.test(got.strength) && /^Entropy \d+ bits · alphabet of \d+ characters$/.test(got.entropy) &&
+               /at least one character type/.test(got.none) && !han && !f.dataset.errs;
+      log('비밀번호 (영어)', ok, '길이 "' + got.len0 + '" → "' + got.len + '" · ' + got.n + '개 길이 24 ' + got.allLen + ' 헷갈림 제외 ' + got.noAmb + ' 4종 ' + got.hasAll + ' · 개수 선택지 [' + got.opts + '] · 강도 "' + got.strength + '" "' + got.entropy + '" · 종류 없음 "' + got.none + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+      f.remove();
+    });
+  }).catch(function (e) { log('비밀번호 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 20. 텍스트 비교 (영어): 고침·지움·더함 · 접힘 문구 · 같음 안내 · 복사 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/text-diff.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, got = {}, copied = null;
+      Object.defineProperty(w.navigator, 'clipboard', { configurable: true, value: { writeText: function (s) { copied = s; return Promise.resolve(); } } });
+      function setAB(a, b) { d.getElementById('a').value = a; d.getElementById('b').value = b; d.getElementById('ignore-ws').dispatchEvent(new Event('change', { bubbles: true })); }
+      var A = [], B; for (var i = 1; i <= 20; i++) A.push('line ' + i);
+      B = A.slice(); B[4] = 'line 5 changed'; B.splice(9, 1); B.splice(14, 0, 'brand new');
+      setAB(A.join('\n'), B.join('\n'));
+      got.stat = [txt(d, 't-chg'), txt(d, 't-del'), txt(d, 't-add'), txt(d, 't-same')].join('/');
+      got.ins = Array.prototype.map.call(d.querySelectorAll('#diff-table ins'), function (e) { return e.textContent; }).join('|');
+      got.skip = Array.prototype.map.call(d.querySelectorAll('#diff-table tr.skip'), function (e) { return e.textContent.trim(); })[0] || '';
+      setAB('x\r\ny\r\n', 'x\ny'); got.same = txt(d, 'msg');
+      setAB('a  b\nKeep', ' a b \nKeep'); got.wsOff = txt(d, 't-chg');
+      d.getElementById('ignore-ws').checked = true; d.getElementById('ignore-ws').dispatchEvent(new Event('change', { bubbles: true }));
+      got.wsOn = txt(d, 't-chg'); got.wsMsg = txt(d, 'msg');
+      d.getElementById('ignore-ws').checked = false;
+      var R = []; for (i = 1; i <= 12; i++) R.push('row ' + i);
+      var R2 = R.slice(); R2[7] = 'row eight';
+      setAB(R.join('\n'), R2.join('\n'));
+      click(d, 'btn-copy');
+      return sleep(150).then(function () {
+        got.copyMsg = txt(d, 'msg');
+        click(d, 'btn-clear');
+        got.cleared = d.getElementById('a').value === '' && d.getElementById('out').innerHTML === '';
+        got.emptyMsg = txt(d, 'msg');
+        var han = hangulLeft(d);
+        var ok = got.stat === '1/1/1/18' && got.ins === ' changed' && /2 unchanged lines/.test(got.skip) && got.same === 'The two texts are identical.' &&
+                 got.wsOff === '1' && got.wsOn === '0' && /identical/.test(got.wsMsg) && /spacing or case/.test(got.wsMsg) &&
+                 /^… 5 unchanged lines …\n  row 6\n  row 7\n- row 8\n\+ row eight\n  row 9\n  row 10\n… 2 unchanged lines …$/.test(copied || '') && /copied as text/.test(got.copyMsg) &&
+                 got.cleared && !han && !f.dataset.errs;
+        log('텍스트 비교 (영어)', ok, '고침/지움/더함/같음 ' + got.stat + ' (1/1/1/18) · 글자 [' + got.ins + '] · 접힘 "' + got.skip + '" · CRLF "' + got.same + '" · 공백 ' + got.wsOff + '→' + got.wsOn + ' "' + got.wsMsg.slice(0, 60) + '" · 복사 ' + JSON.stringify(copied) + ' "' + got.copyMsg + '" · 비우기 ' + got.cleared + ' · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('텍스트 비교 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 21. 시간 계산 (영어): 더하기 · 사이 · 합계(영어 형식) · 소수 변환 =====
+  chain = chain.then(function () {
+    return loadFrame('../en/time-calc.html').then(function (f) {
+      var d = f.contentDocument, w = f.contentWindow, got = {}, copied = null;
+      Object.defineProperty(w.navigator, 'clipboard', { configurable: true, value: { writeText: function (s) { copied = s; return Promise.resolve(); } } });
+      set(d, 'base', '09:00', 'input'); set(d, 'op', 'add'); set(d, 'dh', '8', 'input'); set(d, 'dm', '30', 'input');
+      got.add = txt(d, 'r1') + ' ' + txt(d, 'r1-sub');
+      set(d, 'base', '22:00', 'input'); set(d, 'dh', '5', 'input'); set(d, 'dm', '0', 'input');
+      got.over = txt(d, 'r1') + ' ' + txt(d, 'r1-sub');
+      set(d, 'from', '09:00', 'input'); set(d, 'to', '18:30', 'input'); set(d, 'brk', '60', 'input');
+      got.between = txt(d, 'r2') + ' [' + txt(d, 'r2-sub') + ']';
+      set(d, 'from', '22:00', 'input'); set(d, 'to', '06:00', 'input'); set(d, 'brk', '0', 'input');
+      got.night = txt(d, 'r2') + ' [' + txt(d, 'r2-sub') + ']';
+      set(d, 'list', 'Mon 09:00-18:00\nTue 8:30\nWed 8h 15m\nThu 90m\nFri 7.5\n???', 'input');
+      set(d, 'list-brk', '0', 'input'); set(d, 'target', '40', 'input');
+      // 9:00 + 8:30 + 8:15 + 1:30 + 7:30 = 34:45 → 기준 40 대비 -5:15
+      got.sum = txt(d, 'r3') + ' [' + txt(d, 'r3-sub') + ']';
+      click(d, 'btn-copy');
+      set(d, 'hm', '7:45', 'input'); got.hm = txt(d, 'hm-out');
+      set(d, 'hm', 'abc', 'input'); got.hmBad = txt(d, 'hm-out');
+      set(d, 'dec', '7.75', 'input'); got.dec = txt(d, 'dec-out');
+      return waitFor(function () { return copied !== null; }, 3000).then(function () {
+        got.ph = d.getElementById('list').getAttribute('placeholder').split('\n')[0];
+        var han = hangulLeft(d);
+        var ok = /^17:30 same day$/.test(got.add) && /^03:00 1 day\(s\) later$/.test(got.over) &&
+                 /^8 h 30 min \[8:30 · 8\.5 h · 510 min · break of 60 min subtracted\]$/.test(got.between) && /^8 h \[8:00 · 8 h · 480 min · into the next day\]$/.test(got.night) &&
+                 /^34 h 45 min \[34:45 · 34\.75 h · 2085 min · 5 lines · average 6 h 57 min · vs target 40 h −5 h 15 min · could not read: \?\?\?\]$/.test(got.sum) &&
+                 /^34 h 45 min/.test(copied || '') && /7\.75/.test(got.hm) && got.hmBad === 'Write it as 7:45.' && /7:45/.test(got.dec) && got.ph === 'Mon 09:00-18:00' && !han && !f.dataset.errs;
+        log('시간 계산 (영어)', ok, '더하기 "' + got.add + '" · 넘김 "' + got.over + '" · 사이 "' + got.between + '" · 밤샘 "' + got.night + '" · 합계 "' + got.sum + '" · 복사 "' + (copied || '').slice(0, 24) + '" · 7:45 → "' + got.hm + '" · abc "' + got.hmBad + '" · 7.75 → "' + got.dec + '" · 자리글 "' + got.ph + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+        f.remove();
+      });
+    });
+  }).catch(function (e) { log('시간 계산 (영어)', false, '오류: ' + e.message); });
+
+  // ===== 22. PDF 회전·삭제 (영어): 미리보기 3장 · 순서 · 전체 회전 · 삭제 표시 → 저장 PDF 되읽기 =====
+  chain = chain.then(function () {
+    return PDFLib.PDFDocument.create().then(function (doc) {
+      for (var i = 0; i < 3; i++) {
+        var pg = doc.addPage([200, 300]);
+        pg.drawRectangle({ x: 0, y: 0, width: 100 + i * 40, height: 300, color: PDFLib.rgb(0.1 * i, 0, 0.7) });
+      }
+      return doc.save();
+    }).then(function (bytes) {
+      return loadFrame('../en/pdf-edit.html').then(function (f) {
+        var d = f.contentDocument, cap = capture(f), got = {};
+        setFiles(d.getElementById('file'), [new File([bytes], 'scan.pdf', { type: 'application/pdf' })]);
+        return waitFor(function () { return txt(d, 't-total') === '3' && d.querySelectorAll('.pcard canvas').length === 3; }, 30000).then(function () {
+          return waitFor(function () { return Array.prototype.every.call(d.querySelectorAll('.pcard canvas'), function (c) { return c.width > 0; }); }, 15000);
+        }).then(function () {
+          got.first = d.querySelector('.pcard .pno').textContent.trim();
+          var ops = Array.prototype.slice.call(d.querySelectorAll('.pcard')[0].querySelectorAll('.ops button'));
+          var right = ops.filter(function (b) { return b.textContent.trim() === '→'; })[0];
+          got.tips = ops.map(function (b) { return b.title || b.getAttribute('aria-label') || ''; }).join('|');
+          right.click();
+          got.afterFirst = d.querySelector('.pcard .pno').textContent.trim();
+          click(d, 'all-r'); got.rot = txt(d, 't-rot');
+          var del = Array.prototype.slice.call(d.querySelectorAll('.pcard')[2].querySelectorAll('.ops button')).filter(function (b) { return b.textContent.trim() === '✕'; })[0];
+          del.click(); got.keep1 = txt(d, 't-keep');
+          click(d, 'undo-del'); got.keep2 = txt(d, 't-keep');
+          del.click(); got.keep3 = txt(d, 't-keep');
+          got.hint = d.querySelector('main .hint').textContent.trim();
+          click(d, 'btn-save');
+          return waitFor(function () { return cap.blobs.length >= 1 && /Saved/.test(txt(d, 'msg')); }, 30000);
+        }).then(function () {
+          got.msg = txt(d, 'msg');
+          return cap.blobs[0].arrayBuffer();
+        }).then(function (buf) {
+          return PDFLib.PDFDocument.load(new Uint8Array(buf), { parseSpeed: PDFLib.ParseSpeeds.Fastest });
+        }).then(function (pdf) {
+          got.pages = pdf.getPageCount();
+          got.rots = pdf.getPages().map(function (p) { return p.getRotation().angle; }).join(',');
+          got.widths = pdf.getPages().map(function (p) { return Math.round(p.getWidth()); }).join(',');
+          var han = hangulLeft(d);
+          var ok = got.first !== got.afterFirst && got.rot === '3' && got.keep1 === '2' && got.keep2 === '3' && got.keep3 === '2' && /Use ↺ ↻ to turn a page/.test(got.hint) &&
+                   /Move earlier|Move later/.test(got.tips) && got.pages === 2 && got.rots === '90,90' && /_edited\.pdf$/.test(cap.names[0] || '') && /^Saved\./.test(got.msg) && !han && !f.dataset.errs;
+          log('PDF 회전·삭제 (영어)', ok, '첫 카드 "' + got.first + '" → "' + got.afterFirst + '" · 전체 회전 ' + got.rot + '/3 · 삭제 표시 ' + got.keep1 + ' → 해제 ' + got.keep2 + ' → 다시 ' + got.keep3 + ' · 안내 "' + got.hint.slice(0, 30) + '" · 버튼 설명 [' + got.tips + '] · 저장 ' + got.pages + '쪽 회전 [' + got.rots + '] 너비 [' + got.widths + '] ' + cap.names[0] + ' "' + got.msg + '" · 한글 ' + (han || '0') + ' · JS오류 ' + (f.dataset.errs || '없음'));
+          f.remove();
+        });
+      });
+    });
+  }).catch(function (e) { log('PDF 회전·삭제 (영어)', false, '오류: ' + e.message); });
+
   chain.then(render);
 }
 
@@ -790,7 +961,8 @@ function render() {
            '</td><td>' + r.detail + '</td></tr>';
   }).join('');
   document.title = 'EN4 ' + pass + '/' + results.length + ' :: ' +
-    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + r.detail; }).join(' ;; ');
+    // 창 제목이 너무 길면 뒤쪽 항목이 잘려 보이지 않는다. 통과한 항목은 설명을 줄이고 실패한 항목만 전부 적는다.
+    results.map(function (r) { return r.name + ' [' + (r.ok ? 'PASS' : 'FAIL') + '] ' + (r.ok && r.detail.length > 160 ? r.detail.slice(0, 160) + '…' : r.detail); }).join(' ;; ');
 }
 
 window.addEventListener('load', function () { setTimeout(run, 300); });

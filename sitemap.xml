@@ -159,6 +159,22 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/"/>
   </url>
   <url>
+    <loc>https://toolmoa.github.io/en/password-gen.html</loc>
+    <lastmod>2026-10-21</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/password-gen.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/password-gen.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/password-gen.html"/>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/en/pdf-edit.html</loc>
+    <lastmod>2026-10-21</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-edit.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-edit.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-edit.html"/>
+  </url>
+  <url>
     <loc>https://toolmoa.github.io/en/pdf-merge.html</loc>
     <lastmod>2026-10-21</lastmod>
     <priority>0.7</priority>
@@ -221,6 +237,30 @@
     <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/romanize.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/romanize.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/romanize.html"/>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/en/text-clean.html</loc>
+    <lastmod>2026-10-21</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/text-clean.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/text-clean.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/text-clean.html"/>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/en/text-diff.html</loc>
+    <lastmod>2026-10-21</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/text-diff.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/text-diff.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/text-diff.html"/>
+  </url>
+  <url>
+    <loc>https://toolmoa.github.io/en/time-calc.html</loc>
+    <lastmod>2026-10-21</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/time-calc.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/time-calc.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/time-calc.html"/>
   </url>
 
   <!-- 한국어 -->
@@ -337,11 +377,17 @@
     <loc>https://toolmoa.github.io/password-gen.html</loc>
     <lastmod>2026-10-21</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/password-gen.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/password-gen.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/password-gen.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/pdf-edit.html</loc>
     <lastmod>2026-10-21</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-edit.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-edit.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-edit.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/pdf-merge.html</loc>
@@ -421,16 +467,25 @@
     <loc>https://toolmoa.github.io/text-clean.html</loc>
     <lastmod>2026-10-21</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/text-clean.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/text-clean.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/text-clean.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/text-diff.html</loc>
     <lastmod>2026-10-21</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/text-diff.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/text-diff.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/text-diff.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/time-calc.html</loc>
     <lastmod>2026-10-21</lastmod>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/time-calc.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/time-calc.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/time-calc.html"/>
   </url>
   <url>
     <loc>https://toolmoa.github.io/unit-convert.html</loc>

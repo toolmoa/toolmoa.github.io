@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remove duplicate lines, sort and clean up text — free, private</title>
+<meta name="description" content="Delete duplicate and blank lines, trim spaces, sort A–Z or by length, change case, number or join lines. Lists stay in your browser and are never uploaded.">
+<link rel="canonical" href="https://toolmoa.github.io/en/text-clean.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/text-clean.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/text-clean.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/text-clean.html">
+<meta property="og:title" content="Remove duplicate lines and clean up a list without uploading">
+<meta property="og:description" content="Dedupe, sort, trim, change case, number or join lines. Runs in your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧹</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Text cleaner","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/text-clean.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-text-clean.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Clean up text — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Remove duplicate lines and clean up a list without uploading">
+<meta name="twitter:description" content="Dedupe, sort, trim, change case, number or join lines. Runs in your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-text-clean.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is deduplication case-sensitive?","acceptedAnswer":{"@type":"Answer","text":"Yes. Apple and apple are different lines. To treat them as the same, choose \"All lower case\" first and then remove duplicates."}},{"@type":"Question","name":"Is the original order kept?","acceptedAnswer":{"@type":"Answer","text":"With sorting set to \"Leave as is\", the first occurrence of each line stays where it was and only the later repeats are removed."}},{"@type":"Question","name":"Is my text stored anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. It is processed in your browser only and disappears when you close the tab. Nothing is sent to a server."}},{"@type":"Question","name":"How large a list can it handle?","acceptedAnswer":{"@type":"Answer","text":"Tens of thousands of lines without trouble. Much larger lists may make the browser pause for a moment."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Clean up text","item":"https://toolmoa.github.io/en/text-clean.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html" aria-current="page">Clean up text</a>
+      <a href="text-diff.html">Compare text</a>
+      <a href="pdf-edit.html">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html">Time calc</a>
+    </nav>
+    <a class="lang-link" href="../text-clean.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Clean up text</h1>
+  <p class="lead">Remove duplicate lines, sort them, and strip messy whitespace.</p>
+  <span class="privacy-badge">🔒 What you type is never sent anywhere</span>
+
+  <div class="card">
+    <div class="field">
+      <label for="src">Your text</label>
+      <textarea id="src" style="min-height:170px"
+        placeholder="Paste here. Works best with one item per line." spellcheck="false"></textarea>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px">
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="dedup" style="width:auto;margin:0" checked>
+        <span>Remove duplicate lines</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="noblank" style="width:auto;margin:0" checked>
+        <span>Remove blank lines</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="trim" style="width:auto;margin:0" checked>
+        <span>Trim spaces at both ends</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="squeeze" style="width:auto;margin:0">
+        <span>Collapse repeated spaces</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="number" style="width:auto;margin:0">
+        <span>Number each line</span>
+      </label>
+      <label style="font-weight:400;display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="joinone" style="width:auto;margin:0">
+        <span>Join into one line</span>
+      </label>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-top:16px">
+      <div class="field" style="margin-bottom:0">
+        <label for="sort">Sort</label>
+        <select id="sort">
+          <option value="none">Keep original order</option>
+          <option value="asc">A → Z</option>
+          <option value="desc">Z → A</option>
+          <option value="len">Shortest first</option>
+          <option value="shuffle">Shuffle randomly</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="case">Letter case</label>
+        <select id="case">
+          <option value="none">Leave as is</option>
+          <option value="upper">UPPERCASE</option>
+          <option value="lower">lowercase</option>
+          <option value="title">Capitalise Each Word</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="sep">Split by</label>
+        <select id="sep">
+          <option value="line">Line</option>
+          <option value="comma">Comma</option>
+          <option value="space">Whitespace</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="t-in">0</span><span class="lbl">Lines in</span></div>
+    <div class="stat"><span class="num" id="t-out">0</span><span class="lbl">Lines out</span></div>
+    <div class="stat"><span class="num" id="t-cut" style="color:var(--ok)">0</span><span class="lbl">Lines removed</span></div>
+  </div>
+
+  <div class="field">
+    <label for="out">Result</label>
+    <textarea id="out" style="min-height:170px" readonly spellcheck="false"></textarea>
+    <div class="btn-row">
+      <button class="btn" id="btn-copy">Copy result</button>
+      <button class="btn secondary" id="btn-down">Save as .txt</button>
+      <button class="btn secondary" id="btn-clear">Clear</button>
+      <span class="hint" id="copy-msg" role="status" aria-live="polite" style="align-self:center;margin:0"></span>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To check the character count of the cleaned text, use <a href="../char-count.html">Character count</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_TEXT --></div>
+
+  <h2>When to use it</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      A mailing list assembled from several places with <strong style="color:var(--text)">the same address several times</strong>; a comma-separated list
+      that should be <strong style="color:var(--text)">one item per line</strong>; values copied out of a spreadsheet with
+      <strong style="color:var(--text)">stray spaces</strong> around them. Because everything happens in your browser, it is fine to use on customer lists
+      and other data you would not paste into a random website.
+    </p>
+  </div>
+
+  <h2>Invisible spaces ruin lists</h2>
+  <div class="card">
+    <p style="margin:0 0 14px;color:var(--muted);font-size:14px">
+      Text copied from web pages and PDFs often carries characters that <strong style="color:var(--text)">look like a space but are not one</strong>.
+      They look identical on screen, yet a spreadsheet search cannot find them, duplicates survive deduplication, and sorting comes out in a strange order.
+      <strong style="color:var(--text)">Trim spaces</strong> removes those special spaces as well as ordinary ones.
+    </p>
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      That is why a pasted list is best cleaned in this order: <strong style="color:var(--text)">trim → remove blank lines → remove duplicates → sort</strong>.
+      Only after trimming do two equal values compare as equal. The defaults are set up in that order.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is deduplication case-sensitive?</summary>
+      <p>Yes. <code>Apple</code> and <code>apple</code> are different lines. To treat them as the same, choose "All lower case" first and then remove duplicates.</p>
+    </details>
+    <details>
+      <summary>Is the original order kept?</summary>
+      <p>With sorting set to "Leave as is", the first occurrence of each line stays where it was and only the later repeats are removed.</p>
+    </details>
+    <details>
+      <summary>Is my text stored anywhere?</summary>
+      <p>No. It is processed in your browser only and disappears when you close the tab. Nothing is sent to a server.</p>
+    </details>
+    <details>
+      <summary>How large a list can it handle?</summary>
+      <p>Tens of thousands of lines without trouble. Much larger lists may make the browser pause for a moment.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-diff.html">Compare two texts</a>
+      <a href="pdf-edit.html">Rotate, delete and reorder PDF pages</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="time-calc.html">Time calculator · work hours</a>
+      <a href="../text-clean.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var src = document.getElementById('src');
+  var out = document.getElementById('out');
+  var ids = ['dedup', 'noblank', 'trim', 'squeeze', 'number', 'joinone', 'sort', 'case', 'sep'];
+
+  function on(id) { return document.getElementById(id).checked; }
+  function val(id) { return document.getElementById(id).value; }
+
+  function titleCase(s) {
+    return s.replace(/\b[a-z]/g, function (m) { return m.toUpperCase(); });
+  }
+
+  function process() {
+    var text = src.value;
+
+    // 어떤 기준으로 나눌지 먼저 정한다
+    var parts;
+    if (val('sep') === 'comma') parts = text.split(',');
+    else if (val('sep') === 'space') parts = text.split(/\s+/);
+    else parts = text.split(/\r?\n/);
+
+    var inCount = text ? parts.length : 0;
+
+    if (on('trim')) parts = parts.map(function (s) { return s.trim(); });
+    if (on('squeeze')) parts = parts.map(function (s) { return s.replace(/[ \t]+/g, ' '); });
+    if (on('noblank')) parts = parts.filter(function (s) { return s.trim() !== ''; });
+
+    var c = val('case');
+    if (c === 'upper') parts = parts.map(function (s) { return s.toUpperCase(); });
+    else if (c === 'lower') parts = parts.map(function (s) { return s.toLowerCase(); });
+    else if (c === 'title') parts = parts.map(function (s) { return titleCase(s.toLowerCase()); });
+
+    if (on('dedup')) {
+      var seen = Object.create(null), uniq = [];
+      parts.forEach(function (s) { if (!seen[s]) { seen[s] = 1; uniq.push(s); } });
+      parts = uniq;
+    }
+
+    var s = val('sort');
+    if (s === 'asc') parts = parts.slice().sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+    else if (s === 'desc') parts = parts.slice().sort(function (a, b) { return b.localeCompare(a, 'ko'); });
+    else if (s === 'len') parts = parts.slice().sort(function (a, b) { return a.length - b.length; });
+    else if (s === 'shuffle') {
+      parts = parts.slice();
+      for (var i = parts.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = parts[i]; parts[i] = parts[j]; parts[j] = tmp;
+      }
+    }
+
+    if (on('number')) parts = parts.map(function (x, i) { return (i + 1) + '. ' + x; });
+
+    var result = on('joinone') ? parts.join(' ') : parts.join('\n');
+    out.value = result;
+
+    var outCount = on('joinone') ? (result ? 1 : 0) : (result ? parts.length : 0);
+    document.getElementById('t-in').textContent = inCount.toLocaleString('ko-KR');
+    document.getElementById('t-out').textContent = outCount.toLocaleString('ko-KR');
+    var cut = Math.max(0, inCount - (on('joinone') ? inCount : outCount));
+    document.getElementById('t-cut').textContent = cut.toLocaleString('ko-KR');
+  }
+
+  src.addEventListener('input', process);
+  ids.forEach(function (id) { document.getElementById(id).addEventListener('change', process); });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var m = document.getElementById('copy-msg');
+    if (!out.value) { m.textContent = 'There is nothing to copy'; return; }
+    navigator.clipboard.writeText(out.value).then(function () {
+      m.textContent = 'Copied';
+      setTimeout(function () { m.textContent = ''; }, 2000);
+    }).catch(function () { m.textContent = 'Could not copy'; });
+  });
+
+  document.getElementById('btn-down').addEventListener('click', function () {
+    if (!out.value) return;
+    // 메모장에서 한글이 깨지지 않도록 BOM을 붙인다
+    var blob = new Blob(['﻿' + out.value], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'cleaned' + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    src.value = ''; process(); src.focus();
+  });
+
+  process();
+})();
+</script>
+</body>
+</html>

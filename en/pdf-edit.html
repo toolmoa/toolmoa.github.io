@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rotate, delete and reorder PDF pages — free, nothing uploaded</title>
+<meta name="description" content="Rotate PDF pages, remove the ones you do not need and drag them into a new order, with thumbnails, inside your browser. The file never leaves your device.">
+<link rel="canonical" href="https://toolmoa.github.io/en/pdf-edit.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/pdf-edit.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/pdf-edit.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/pdf-edit.html">
+<meta property="og:title" content="Rotate, delete and reorder PDF pages without uploading">
+<meta property="og:description" content="Fix sideways scans, drop blank pages and change the page order, all in your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔃</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"PDF page editor","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/pdf-edit.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-pdf-edit.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rotate &amp; delete PDF pages — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Rotate, delete and reorder PDF pages without uploading">
+<meta name="twitter:description" content="Fix sideways scans, drop blank pages and change the page order, all in your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-pdf-edit.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is the rotation really saved into the file?","acceptedAnswer":{"@type":"Answer","text":"Yes. Instead of just turning the view, the page's rotation entry inside the PDF is rewritten, so it opens upright in any reader and prints upright too."}},{"@type":"Question","name":"Is my PDF uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. From the thumbnails to the saved file, everything happens inside your browser. You can disconnect from the internet after the page has loaded and it still works."}},{"@type":"Question","name":"How do I change the page order?","acceptedAnswer":{"@type":"Answer","text":"Drag a thumbnail to a new place, or use the ← → buttons on each card. The numbers on the cards show the new order; the saved file follows it."}},{"@type":"Question","name":"Does it keep the quality of the pages?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pages are copied as they are — text stays text, images keep their original resolution. Nothing is re-rendered or compressed."}},{"@type":"Question","name":"Is it slow with long documents?","acceptedAnswer":{"@type":"Answer","text":"Making the thumbnails takes a moment. Documents over 100 pages appear from the front as the previews are drawn; rotating and saving are quick."}},{"@type":"Question","name":"Is my original changed?","acceptedAnswer":{"@type":"Answer","text":"No. A new file is always saved; the original on your disk stays exactly as it was."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Rotate & delete PDF pages","item":"https://toolmoa.github.io/en/pdf-edit.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html">Clean up text</a>
+      <a href="text-diff.html">Compare text</a>
+      <a href="pdf-edit.html" aria-current="page">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html">Time calc</a>
+    </nav>
+    <a class="lang-link" href="../pdf-edit.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Rotate & delete PDF pages</h1>
+  <p class="lead">See every page, turn it, drop it, or move it — then save.</p>
+  <span class="privacy-badge">🔒 Your files are never uploaded</span>
+
+  <div class="dropzone" id="dz" role="button" tabindex="0" aria-label="Choose a file">
+    <span class="dz-icon">🔃</span>
+    <span class="dz-main">Drop a PDF here, or click to choose</span>
+    <span class="dz-sub">Page previews will appear</span>
+    <input type="file" id="file" accept="application/pdf,.pdf">
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+
+  <div id="area" hidden>
+    <div class="stats">
+      <div class="stat"><span class="num" id="t-total">0</span><span class="lbl">Total pages</span></div>
+      <div class="stat"><span class="num" id="t-keep">0</span><span class="lbl">Pages kept</span></div>
+      <div class="stat"><span class="num" id="t-rot">0</span><span class="lbl">Rotated</span></div>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:6px">
+      <button class="btn secondary small" id="all-l">↺ Turn all left</button>
+      <button class="btn secondary small" id="all-r">↻ Turn all right</button>
+      <button class="btn secondary small" id="undo-del">Clear all delete marks</button>
+    </div>
+    <p class="hint" style="margin:0 0 8px">Use ↺ ↻ to turn a page and ✕ to mark it for deletion. Reorder with the ← → buttons or by dragging a card.</p>
+
+    <div class="pgrid" id="grid"></div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-save">Save as shown</button>
+      <button class="btn secondary" id="btn-reset">Reset</button>
+    </div>
+  </div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To join several PDFs use <a href="pdf-merge.html">Merge PDF</a>; to pull out pages use <a href="pdf-split.html">Split PDF</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_PDFEDIT --></div>
+
+  <h2>Why a scanned PDF keeps coming out sideways</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Every PDF page carries its own <strong style="color:var(--text)">rotation value</strong>. Scanners and copiers often leave that value
+      untouched, so a document that looks fine on your screen opens sideways on someone else's computer or comes out of the printer lying down.
+      Rotating in a viewer only turns the picture for that moment; nothing is written to the file. The rotation you apply here changes the
+      value stored in the file itself, so the page stands upright wherever it is opened.
+    </p>
+  </div>
+
+  <h2>Why not upload it</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      The PDFs people fix are contracts, invoices, medical forms and ID scans — exactly the files that should not sit on a stranger's server.
+      Most "edit PDF online" sites upload the whole document before showing you the first thumbnail. This page renders the previews, rotates,
+      deletes and reorders with your own browser. It keeps working with the internet switched off, there is no file size cap beyond your
+      device's memory, and nothing is kept once you close the tab.
+    </p>
+    <p style="margin:14px 0 0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Typical jobs</strong> — a few pages fed upside down by the document feeder; blank backs left over from
+      duplex scanning; pages that arrived shuffled; a sensitive page removed before sharing. If you want to <strong style="color:var(--text)">extract</strong>
+      pages into separate files use <a href="pdf-split.html">split PDF</a>; to <strong style="color:var(--text)">join</strong> several files use <a href="pdf-merge.html">merge PDF</a>.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is the rotation really saved into the file?</summary>
+      <p>Yes. Instead of just turning the view, the page's rotation entry inside the PDF is rewritten, so it opens upright in any reader and prints upright too.</p>
+    </details>
+    <details>
+      <summary>Is my PDF uploaded?</summary>
+      <p>No. From the thumbnails to the saved file, everything happens inside your browser. You can disconnect from the internet after the page has loaded and it still works.</p>
+    </details>
+    <details>
+      <summary>How do I change the page order?</summary>
+      <p>Drag a thumbnail to a new place, or use the ← → buttons on each card. The numbers on the cards show the new order; the saved file follows it.</p>
+    </details>
+    <details>
+      <summary>Does it keep the quality of the pages?</summary>
+      <p>Yes. Pages are copied as they are — text stays text, images keep their original resolution. Nothing is re-rendered or compressed.</p>
+    </details>
+    <details>
+      <summary>Is it slow with long documents?</summary>
+      <p>Making the thumbnails takes a moment. Documents over 100 pages appear from the front as the previews are drawn; rotating and saving are quick.</p>
+    </details>
+    <details>
+      <summary>Is my original changed?</summary>
+      <p>No. A new file is always saved; the original on your disk stays exactly as it was.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-clean.html">Remove duplicate lines · clean up text</a>
+      <a href="text-diff.html">Compare two texts</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="time-calc.html">Time calculator · work hours</a>
+      <a href="../pdf-edit.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<!-- pdf-lib · pdf.js 는 여기서 미리 받지 않는다. 아래 loadLibs() 가 파일을 고른 뒤에 받는다. -->
+<script>
+(function () {
+  var dz = document.getElementById('dz');
+  var fileInput = document.getElementById('file');
+  var area = document.getElementById('area');
+  var msg = document.getElementById('msg');
+  var grid = document.getElementById('grid');
+
+  var srcBytes = null, baseName = 'document';
+  var pages = [];        // {index, rot, del}
+  var dragIdx = null;
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  // 스크립트를 필요할 때 받는다. 이미 있으면 그대로 쓴다.
+  function needScript(globalName, src) {
+    return new Promise(function (res, rej) {
+      if (typeof window[globalName] !== 'undefined') { res(); return; }
+      var sc = document.createElement('script');
+      sc.src = src;
+      sc.onload = function () { res(); };
+      sc.onerror = function () { rej(new Error(src)); };
+      document.head.appendChild(sc);
+    });
+  }
+
+  // pdf-lib 과 pdf.js 는 둘이 합쳐 압축 전송 기준 약 300KB 다.
+  // 파일을 고른 뒤에 받는다. 검색으로 들어와 둘러보기만 하고 떠나는 사람이 훨씬 많다.
+  var libPromise = null;
+  function loadLibs() {
+    if (!libPromise) {
+      libPromise = Promise.all([
+        needScript('PDFLib', '../assets/vendor/pdf-lib.min.js'),
+        needScript('pdfjsLib', '../assets/vendor/pdf.min.js')
+      ]).then(function () {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
+      }).catch(function (e) { libPromise = null; throw e; });
+    }
+    return libPromise;
+  }
+  function ready(fn) {
+    if (typeof PDFLib !== 'undefined' && typeof pdfjsLib !== 'undefined') { fn(); return; }
+    setMsg('Preparing the PDF engine…');
+    loadLibs().then(function () { setMsg(''); fn(); }).catch(function () {
+      setMsg('The PDF engine could not be loaded. Please refresh.', 'err');
+    });
+  }
+
+  dz.addEventListener('click', function () { fileInput.click(); });
+  // 파일 입력은 숨겨져 있어 탭 순서에 없다. 이게 없으면 키보드만 쓰는 사람은
+  // 파일을 고를 방법이 아예 없다.
+  dz.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    e.preventDefault();
+    fileInput.click();
+  });
+  dz.addEventListener('dragover', function (e) { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', function () { dz.classList.remove('over'); });
+  dz.addEventListener('drop', function (e) {
+    e.preventDefault(); dz.classList.remove('over');
+    if (e.dataTransfer.files.length) load(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files.length) load(fileInput.files[0]);
+  });
+
+  function load(file) {
+    if (!(file.type === 'application/pdf' || /\.pdf$/i.test(file.name))) {
+      setMsg('Please choose a PDF file.', 'err'); return;
+    }
+    ready(function () {
+      baseName = file.name.replace(/\.[^.]+$/, '');
+      setMsg('Building page previews…');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = '../assets/vendor/pdf.worker.min.js';
+
+      file.arrayBuffer().then(function (buf) {
+        srcBytes = new Uint8Array(buf);
+        // pdf.js가 원본 버퍼를 가져가 버리므로 복사본을 넘긴다
+        return pdfjsLib.getDocument({ data: srcBytes.slice() }).promise;
+      }).then(function (doc) {
+        pages = [];
+        for (var i = 0; i < doc.numPages; i++) pages.push({ index: i, rot: 0, del: false });
+        area.hidden = false;
+        render();
+        setMsg('');
+        return renderThumbs(doc);
+      }).catch(function (e) {
+        setMsg('This file could not be opened. It may be password protected or damaged.' +
+               ' — ' + ((e && e.message) || e), 'err');
+      });
+    });
+  }
+
+  // 미리보기는 한 장씩 순서대로 그린다. 많은 페이지에서도 화면이 멈추지 않는다.
+  function renderThumbs(doc) {
+    var n = 1;
+    function next() {
+      if (n > doc.numPages) return Promise.resolve();
+      return doc.getPage(n).then(function (page) {
+        var vp = page.getViewport({ scale: 1 });
+        var scale = 150 / vp.width;
+        var v = page.getViewport({ scale: scale });
+        var c = document.createElement('canvas');
+        c.width = Math.ceil(v.width); c.height = Math.ceil(v.height);
+        return page.render({ canvasContext: c.getContext('2d'), viewport: v }).promise
+          .then(function () {
+            var holder = grid.querySelector('[data-page="' + (n - 1) + '"] .thumb');
+            if (holder) { holder.innerHTML = ''; holder.appendChild(c); }
+            n++;
+            return next();
+          });
+      });
+    }
+    return next();
+  }
+
+  function render() {
+    grid.innerHTML = '';
+    pages.forEach(function (p, i) {
+      var d = document.createElement('div');
+      d.className = 'pcard' + (p.del ? ' del' : '');
+      d.draggable = true;
+      d.dataset.page = p.index;
+      d.innerHTML =
+        '<span class="grab" title="' + 'Drag to reorder' + '">⠿</span>' +
+        '<div class="thumb" style="min-height:90px"></div>' +
+        '<span class="pno">' + (i + 1) +
+        (p.index !== i ? ' <span style="opacity:.6">(' + 'was' + ' ' + (p.index + 1) + ')</span>' : '') +
+        (p.rot ? ' · ' + p.rot + '°' : '') + '</span>';
+
+      var ops = document.createElement('div');
+      ops.className = 'ops';
+
+      // 드래그만 되면 휴대폰에서 순서를 바꾸기 어렵다. 버튼도 함께 둔다.
+      var left = document.createElement('button');
+      left.textContent = '←';
+      left.title = 'Move earlier';
+      left.disabled = i === 0;
+      left.onclick = function () { move(i, i - 1); };
+      ops.appendChild(left);
+
+      [['↺', -90], ['↻', 90]].forEach(function (b) {
+        var btn = document.createElement('button');
+        btn.textContent = b[0];
+        btn.onclick = function () { rotate(i, b[1]); };
+        ops.appendChild(btn);
+      });
+
+      var right = document.createElement('button');
+      right.textContent = '→';
+      right.title = 'Move later';
+      right.disabled = i === pages.length - 1;
+      right.onclick = function () { move(i, i + 1); };
+      ops.appendChild(right);
+      var del = document.createElement('button');
+      del.textContent = '✕';
+      del.className = p.del ? 'on' : '';
+      del.title = 'Mark for deletion';
+      del.onclick = function () { p.del = !p.del; render(); };
+      ops.appendChild(del);
+      d.appendChild(ops);
+
+      d.addEventListener('dragstart', function () { dragIdx = i; d.classList.add('dragging'); });
+      d.addEventListener('dragend', function () { d.classList.remove('dragging'); });
+      d.addEventListener('dragover', function (e) { e.preventDefault(); });
+      d.addEventListener('drop', function (e) {
+        e.preventDefault();
+        if (dragIdx !== null && dragIdx !== i) { move(dragIdx, i); dragIdx = null; }
+      });
+      grid.appendChild(d);
+    });
+
+    // 회전값을 미리보기에 반영한다
+    pages.forEach(function (p, i) {
+      var cv = grid.children[i].querySelector('canvas');
+      if (cv) cv.style.transform = 'rotate(' + p.rot + 'deg)';
+    });
+
+    document.getElementById('t-total').textContent = pages.length;
+    document.getElementById('t-keep').textContent =
+      pages.filter(function (p) { return !p.del; }).length;
+    document.getElementById('t-rot').textContent =
+      pages.filter(function (p) { return p.rot % 360 !== 0; }).length;
+  }
+
+  // 순서를 바꾸면 미리보기 캔버스를 잃지 않도록 옮겨 담는다
+  function redraw() {
+    var cache = {};
+    Array.prototype.forEach.call(grid.children, function (el) {
+      var cv = el.querySelector('canvas');
+      if (cv) cache[el.dataset.page] = cv;
+    });
+    render();
+    pages.forEach(function (p, i) {
+      var holder = grid.children[i].querySelector('.thumb');
+      if (cache[p.index] && holder) {
+        holder.innerHTML = '';
+        holder.appendChild(cache[p.index]);
+        cache[p.index].style.transform = 'rotate(' + p.rot + 'deg)';
+      }
+    });
+  }
+
+  // 페이지 순서를 한 칸 옮긴다 (버튼·드래그 공통)
+  function move(from, to) {
+    if (to < 0 || to >= pages.length) return;
+    var it = pages.splice(from, 1)[0];
+    pages.splice(to, 0, it);
+    redraw();
+  }
+
+  function rotate(i, deg) {
+    pages[i].rot = ((pages[i].rot + deg) % 360 + 360) % 360;
+    redraw();
+  }
+
+  document.getElementById('all-l').addEventListener('click', function () {
+    pages.forEach(function (p) { p.rot = ((p.rot - 90) % 360 + 360) % 360; });
+    redraw();
+  });
+  document.getElementById('all-r').addEventListener('click', function () {
+    pages.forEach(function (p) { p.rot = (p.rot + 90) % 360; });
+    redraw();
+  });
+  document.getElementById('undo-del').addEventListener('click', function () {
+    pages.forEach(function (p) { p.del = false; });
+    redraw();
+  });
+
+  document.getElementById('btn-save').addEventListener('click', function () {
+    if (!srcBytes) return;
+    var keep = pages.filter(function (p) { return !p.del; });
+    if (!keep.length) {
+      setMsg('There are no pages left to keep.', 'err'); return;
+    }
+    var btn = this;
+    btn.disabled = true;
+    setMsg('Building the file…');
+
+    // 큰 문서는 시간이 걸리므로 어디까지 진행됐는지 알려준다
+    PDFLib.PDFDocument.load(srcBytes, { ignoreEncryption: true, parseSpeed: PDFLib.ParseSpeeds.Fastest }).then(function (src) {
+      setMsg('Copying pages…');
+      return PDFLib.PDFDocument.create().then(function (out) {
+        return out.copyPages(src, keep.map(function (p) { return p.index; }))
+          .then(function (copied) {
+            setMsg('Writing the file…');
+            copied.forEach(function (pg, i) {
+              // 보기만 돌리는 것이 아니라 PDF의 회전값 자체를 바꾼다
+              var base = pg.getRotation().angle || 0;
+              pg.setRotation(PDFLib.degrees((base + keep[i].rot) % 360));
+              out.addPage(pg);
+            });
+            return out.save();
+          });
+      });
+    }).then(function (bytes) {
+      var blob = new Blob([bytes], { type: 'application/pdf' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = baseName + '_' + 'edited' + '.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      setMsg('Saved.' + ' ' + keep.length + ' pages', 'ok');
+      btn.disabled = false;
+    }).catch(function (e) {
+      setMsg('Something went wrong while saving: ' + ((e && e.message) || e), 'err');
+      btn.disabled = false;
+    });
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', function () {
+    srcBytes = null; pages = []; fileInput.value = '';
+    grid.innerHTML = ''; area.hidden = true; setMsg('');
+  });
+})();
+</script>
+</body>
+</html>

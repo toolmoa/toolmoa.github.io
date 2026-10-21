@@ -135,6 +135,11 @@ my @PAIRS = (
   ['image-transparent.html', ['function keyColor', 'function render', 'function cornerHex', 'MAX_PIXELS', "addEventListener('paste'", 'id="region"']],
   ['color-convert.html',  ['function parse', 'function hslToRgb', 'function rgbToCmyk', 'function contrast', 'function renderPalettes', 'id="btn-swap"']],
   ['barcode.html',        ['function eanCheck', 'function code128Values', 'var PARITY', 'START_B = 104', 'function draw', 'id="showtext"']],
+  ['text-clean.html',     ['function process', 'function titleCase', 'id="dedup"', 'id="squeeze"', 'id="joinone"', 'id="btn-down"']],
+  ['text-diff.html',      ['function myers', 'function backtrack', 'function charMarks', 'function visibleMask', 'function decodeText', 'id="ignore-ws"', 'id="btn-swap"']],
+  ['pdf-edit.html',       ['function renderThumbs', 'function rotate', 'function move', 'function loadLibs', 'id="all-l"', 'id="undo-del"']],
+  ['password-gen.html',   ['function entropyBits', 'function makeOne', 'function pools', 'crypto.getRandomValues', 'id="noamb"', 'id="each"']],
+  ['time-calc.html',      ['function parseLine', 'function parseTime', 'function calc3', 'function calc4', 'id="list-brk"', 'id="target"']],
 );
 
 my $gap = 0;

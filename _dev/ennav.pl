@@ -27,6 +27,11 @@ my @TOOLS = (   # 파일, 머리 메뉴 이름, 바닥 이름
   ['image-transparent.html', 'Transparent bg', 'Make a white background transparent'],
   ['color-convert.html',  'Color codes',    'Color code converter'],
   ['barcode.html',        'Barcode',        'Barcode generator'],
+  ['text-clean.html',     'Clean up text',  'Remove duplicate lines · clean up text'],
+  ['text-diff.html',      'Compare text',   'Compare two texts'],
+  ['pdf-edit.html',       'Rotate PDF',     'Rotate, delete and reorder PDF pages'],
+  ['password-gen.html',   'Password',       'Password generator'],
+  ['time-calc.html',      'Time calc',      'Time calculator · work hours'],
 );
 
 for my $path (glob('en/*.html')) {

@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compare two texts and highlight the differences — free, private</title>
+<meta name="description" content="Paste the original and the revised text to see changed, added and removed lines and the exact characters that changed. Compared in your browser, never sent anywhere.">
+<link rel="canonical" href="https://toolmoa.github.io/en/text-diff.html">
+<link rel="alternate" hreflang="ko" href="https://toolmoa.github.io/text-diff.html">
+<link rel="alternate" hreflang="en" href="https://toolmoa.github.io/en/text-diff.html">
+<link rel="alternate" hreflang="x-default" href="https://toolmoa.github.io/text-diff.html">
+<meta property="og:title" content="Compare two texts without uploading them">
+<meta property="og:description" content="Changed lines and characters highlighted side by side or inline. Runs in your browser.">
+<meta property="og:locale" content="en_US">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Text compare","applicationCategory":"UtilitiesApplication","operatingSystem":"All","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":"en"}
+</script>
+<!-- SEO:AUTO  _dev/seometa.pl 이 만든다. 직접 고치지 말 것 -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolmoa.github.io/en/text-diff.html">
+<meta property="og:site_name" content="Toolmoa">
+<meta property="og:image" content="https://toolmoa.github.io/assets/og/en-text-diff.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Compare text · find the differences — Toolmoa">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Compare two texts without uploading them">
+<meta name="twitter:description" content="Changed lines and characters highlighted side by side or inline. Runs in your browser.">
+<meta name="twitter:image" content="https://toolmoa.github.io/assets/og/en-text-diff.png">
+<meta name="theme-color" content="#2f6df6">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is the text sent to a server?","acceptedAnswer":{"@type":"Answer","text":"No. The comparison runs entirely in your browser and the text is never transmitted. Proof: load the page, go offline, and it still works. Nothing is saved either, so reloading clears it."}},{"@type":"Question","name":"Can I compare Word, Google Docs or PDF files directly?","acceptedAnswer":{"@type":"Answer","text":"Not as files — those formats mix text with formatting. Open the document, select all, copy and paste it here. Plain-text files such as .txt, .csv, .md, .json, .srt subtitles or source code can be opened with \"Load a file\" or dropped onto a box."}},{"@type":"Question","name":"Everything shows as changed when only the line breaks differ","acceptedAnswer":{"@type":"Answer","text":"Lines are matched one to one. If one version wraps a paragraph onto several lines and the other keeps it on one, they look like different lines. Paste both in the same shape. Differences between Windows and Mac line endings (CRLF/LF) and a trailing newline are ignored automatically."}},{"@type":"Question","name":"Can I ignore whitespace-only edits?","acceptedAnswer":{"@type":"Answer","text":"Turn on \"Ignore whitespace\". Leading and trailing spaces are dropped and runs of spaces count as one. A space that appears or disappears inside a word still counts as a change, because it may change the meaning."}},{"@type":"Question","name":"How long can the texts be?","acceptedAnswer":{"@type":"Answer","text":"Tens of thousands of lines. Identical text at the start and end is stripped first and only the differing middle is computed. If the two texts are almost entirely different — thousands of differing lines — the comparison stops and tells you, since at that point they are simply different documents."}},{"@type":"Question","name":"How do I put the result in an email or report?","acceptedAnswer":{"@type":"Answer","text":"\"Copy result\" copies the changed lines with two lines of context, marked - for removed and + for added, as plain text you can paste anywhere."}}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://toolmoa.github.io/en/"},{"@type":"ListItem","position":2,"name":"Compare text · find the differences","item":"https://toolmoa.github.io/en/text-diff.html"}]}
+</script>
+<!-- /SEO:AUTO -->
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="logo" href="index.html">Tool<span>moa</span></a>
+    <nav class="site-nav">
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image → PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF → image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur / redact</a>
+      <a href="image-exif.html">Remove location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Watermark</a>
+      <a href="image-split.html">Split image</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read QR</a>
+      <a href="romanize.html">Romanize name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Transparent bg</a>
+      <a href="color-convert.html">Color codes</a>
+      <a href="barcode.html">Barcode</a>
+      <a href="text-clean.html">Clean up text</a>
+      <a href="text-diff.html" aria-current="page">Compare text</a>
+      <a href="pdf-edit.html">Rotate PDF</a>
+      <a href="password-gen.html">Password</a>
+      <a href="time-calc.html">Time calc</a>
+    </nav>
+    <a class="lang-link" href="../text-diff.html" hreflang="ko">한국어</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Compare text · find the differences</h1>
+  <p class="lead">Paste the text before and after editing. Changed lines are found, and the characters that changed inside them are highlighted.</p>
+  <span class="privacy-badge">🔒 What you type is never sent anywhere</span>
+
+  <div class="card" style="margin-top:18px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px">
+      <div class="field" style="margin-bottom:0">
+        <label for="a">Before (original)</label>
+        <textarea id="a" style="min-height:190px" spellcheck="false"
+          placeholder="Paste the original text, or drop a file here"></textarea>
+        <button class="btn small secondary" id="btn-file-a" type="button" style="margin-top:6px">Open file</button>
+        <input type="file" id="file-a" accept=".txt,.csv,.tsv,.md,.json,.xml,.html,.htm,.css,.js,.log,.srt,text/*" hidden>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label for="b">After</label>
+        <textarea id="b" style="min-height:190px" spellcheck="false"
+          placeholder="Paste the edited text, or drop a file here"></textarea>
+        <button class="btn small secondary" id="btn-file-b" type="button" style="margin-top:6px">Open file</button>
+        <input type="file" id="file-b" accept=".txt,.csv,.tsv,.md,.json,.xml,.html,.htm,.css,.js,.log,.srt,text/*" hidden>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:16px">
+      <label class="inline-check" style="margin:0">
+        <input type="checkbox" id="ignore-ws">
+        <span>Ignore spacing differences</span>
+      </label>
+      <label class="inline-check" style="margin:0">
+        <input type="checkbox" id="ignore-case">
+        <span>Ignore upper/lower case</span>
+      </label>
+      <label class="inline-check" style="margin:0">
+        <input type="checkbox" id="only-chg" checked>
+        <span>Show only around changes</span>
+      </label>
+    </div>
+
+    <div class="field" style="margin:14px 0 0">
+      <label for="view">View</label>
+      <select id="view">
+        <option value="side" selected>Side by side (left before · right after)</option>
+        <option value="unified">Single column (removed − · added +)</option>
+      </select>
+    </div>
+
+    <div class="btn-row" style="margin-bottom:0">
+      <button class="btn secondary" id="btn-swap" type="button">Swap sides</button>
+      <button class="btn secondary" id="btn-copy" type="button">Copy result</button>
+      <button class="btn secondary" id="btn-clear" type="button">Clear</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="num" id="t-chg" style="color:var(--warn)">0</span><span class="lbl">Changed lines</span></div>
+    <div class="stat"><span class="num" id="t-del" style="color:var(--danger)">0</span><span class="lbl">Removed lines</span></div>
+    <div class="stat"><span class="num" id="t-add" style="color:var(--ok)">0</span><span class="lbl">Added lines</span></div>
+    <div class="stat"><span class="num" id="t-same">0</span><span class="lbl">Unchanged lines</span></div>
+  </div>
+
+  <div id="msg" role="status" aria-live="polite"></div>
+  <div id="out"></div>
+
+  <p style="color:var(--muted);font-size:14px;margin:24px 0 0">To <strong style="color:var(--text)">tidy blank or duplicate lines</strong> before comparing, use <a href="text-clean.html">clean up text</a>. To check the length of the edited text, use the <a href="../char-count.html">character counter</a>.</p>
+
+  <div class="ad-slot"><!-- AD:EN_TEXTDIFF --></div>
+
+  <h2>Why the texts you compare should not be uploaded</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      Two versions of a text usually get compared because the text matters: a contract that came back from the other side, a report draft,
+      a proposal, a cover letter, a configuration file. You want to know what changed since last time, or what went missing in your edit.
+      Most online diff tools post both texts to a server to do that. This page compares them inside your browser only. It keeps working with
+      the internet disconnected, nothing is stored on your device, and a refresh clears both boxes.
+    </p>
+  </div>
+
+  <h2>How to read the result</h2>
+  <div class="card">
+    <p style="margin:0;color:var(--muted);font-size:14px">
+      <strong style="color:var(--text)">Red line</strong> — present only in the original (removed).<br>
+      <strong style="color:var(--text)">Green line</strong> — present only in the revision (added).<br>
+      <strong style="color:var(--text)">Colour on both sides</strong> — the same line was edited; the darker highlight marks the characters that actually changed.<br>
+      <strong style="color:var(--text)">"… n lines unchanged …"</strong> — unchanged text folded away. Switch off "Show only changed areas" to expand everything.
+    </p>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details>
+      <summary>Is the text sent to a server?</summary>
+      <p>No. The comparison runs entirely in your browser and the text is never transmitted. Proof: load the page, go offline, and it still works. Nothing is saved either, so reloading clears it.</p>
+    </details>
+    <details>
+      <summary>Can I compare Word, Google Docs or PDF files directly?</summary>
+      <p>Not as files — those formats mix text with formatting. Open the document, select all, copy and paste it here. Plain-text files such as .txt, .csv, .md, .json, .srt subtitles or source code can be opened with "Load a file" or dropped onto a box.</p>
+    </details>
+    <details>
+      <summary>Everything shows as changed when only the line breaks differ</summary>
+      <p>Lines are matched one to one. If one version wraps a paragraph onto several lines and the other keeps it on one, they look like different lines. Paste both in the same shape. Differences between Windows and Mac line endings (CRLF/LF) and a trailing newline are ignored automatically.</p>
+    </details>
+    <details>
+      <summary>Can I ignore whitespace-only edits?</summary>
+      <p>Turn on "Ignore whitespace". Leading and trailing spaces are dropped and runs of spaces count as one. A space that appears or disappears inside a word still counts as a change, because it may change the meaning.</p>
+    </details>
+    <details>
+      <summary>How long can the texts be?</summary>
+      <p>Tens of thousands of lines. Identical text at the start and end is stripped first and only the differing middle is computed. If the two texts are almost entirely different — thousands of differing lines — the comparison stops and tells you, since at that point they are simply different documents.</p>
+    </details>
+    <details>
+      <summary>How do I put the result in an email or report?</summary>
+      <p>"Copy result" copies the changed lines with two lines of context, marked <code>-</code> for removed and <code>+</code> for added, as plain text you can paste anywhere.</p>
+    </details>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="image-compress.html">Compress image</a>
+      <a href="image-crop.html">Crop image</a>
+      <a href="image-convert.html">Convert image format</a>
+      <a href="image-join.html">Join images</a>
+      <a href="img-to-pdf.html">Image to PDF</a>
+      <a href="pdf-merge.html">Merge PDF</a>
+      <a href="pdf-split.html">Split PDF</a>
+      <a href="pdf-to-image.html">PDF to image</a>
+      <a href="file-convert.html">Convert file</a>
+      <a href="image-mosaic.html">Blur or redact a photo</a>
+      <a href="image-exif.html">Remove photo location</a>
+      <a href="qr-generate.html">QR code</a>
+      <a href="random-pick.html">Random picker</a>
+      <a href="image-watermark.html">Photo watermark</a>
+      <a href="image-split.html">Split image into a grid</a>
+      <a href="pdf-watermark.html">PDF watermark</a>
+      <a href="qr-scan.html">Read a QR code from an image</a>
+      <a href="romanize.html">Romanize a Korean name</a>
+      <a href="image-resize.html">Resize image</a>
+      <a href="image-transparent.html">Make a white background transparent</a>
+      <a href="color-convert.html">Color code converter</a>
+      <a href="barcode.html">Barcode generator</a>
+      <a href="text-clean.html">Remove duplicate lines · clean up text</a>
+      <a href="pdf-edit.html">Rotate, delete and reorder PDF pages</a>
+      <a href="password-gen.html">Password generator</a>
+      <a href="time-calc.html">Time calculator · work hours</a>
+      <a href="../text-diff.html" hreflang="ko">한국어</a>
+    </nav>
+    <nav>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../terms.html">Terms</a>
+      <a href="../licenses.html">Open source</a>
+    </nav>
+    <div>© Toolmoa · Everything runs inside your browser</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var aEl = document.getElementById('a');
+  var bEl = document.getElementById('b');
+  var wsChk = document.getElementById('ignore-ws');
+  var caseChk = document.getElementById('ignore-case');
+  var onlyChk = document.getElementById('only-chg');
+  var viewSel = document.getElementById('view');
+  var out = document.getElementById('out');
+  var msg = document.getElementById('msg');
+
+  // 두 글이 거의 전부 다르면 계산량이 제곱으로 늘어난다. 그 전에 멈추고 알린다.
+  var MAX_EDITS = 3000;
+  // 한 줄이 이보다 길면 글자 단위 비교는 건너뛰고 줄 전체만 칠한다.
+  var MAX_CHARS = 3000;
+  // 접어 둘 때 바뀐 곳 앞뒤로 남겨 둘 줄 수
+  var CONTEXT = 2;
+
+  var last = null;       // 마지막 비교 결과 { rows, A, B } — 언어를 바꾸면 다시 그리기만 한다
+
+  function setMsg(text, cls) {
+    msg.innerHTML = text ? '<div class="notice ' + (cls || '') + '">' + text + '</div>' : '';
+  }
+  function esc(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // 줄 나누기. 윈도(CRLF)·옛 맥(CR) 줄바꿈을 맞추고, 마지막 줄 끝의 줄바꿈 하나는 없는 것으로 본다.
+  // 이게 없으면 파일 끝에 엔터가 있느냐 없느냐만으로 "빈 줄이 추가됨"이 나온다.
+  function splitLines(s) {
+    s = s.replace(/\r\n?/g, '\n');
+    if (s === '') return [];
+    if (s.charAt(s.length - 1) === '\n') s = s.slice(0, -1);
+    return s.split('\n');
+  }
+
+  function keyOf(line) {
+    var k = line;
+    if (wsChk.checked) k = k.replace(/\s+/g, ' ').trim();
+    if (caseChk.checked) k = k.toLowerCase();
+    return k;
+  }
+
+  // Myers 차이 알고리즘. 두 배열을 받아 { t:'='|'-'|'+', a, b } 목록을 돌려준다.
+  // 줄 비교가 문자열 비교가 되지 않도록 호출하는 쪽에서 줄을 번호로 바꿔 넘긴다.
+  // 편집 수가 limit 을 넘으면 null 을 돌려준다.
+  function diff(A, B, limit) {
+    var n = A.length, m = B.length, pre = 0, suf = 0;
+    // 앞뒤로 같은 부분은 계산할 필요가 없다. 긴 글에서 고친 곳이 몇 군데뿐일 때 이게 대부분을 걸러 낸다.
+    while (pre < n && pre < m && A[pre] === B[pre]) pre++;
+    while (suf < n - pre && suf < m - pre && A[n - 1 - suf] === B[m - 1 - suf]) suf++;
+    var core = myers(A.slice(pre, n - suf), B.slice(pre, m - suf), limit);
+    if (core === null) return null;
+    var ops = [], i;
+    for (i = 0; i < pre; i++) ops.push({ t: '=', a: i, b: i });
+    core.forEach(function (o) {
+      ops.push({ t: o.t, a: o.a === undefined ? undefined : o.a + pre, b: o.b === undefined ? undefined : o.b + pre });
+    });
+    for (i = 0; i < suf; i++) ops.push({ t: '=', a: n - suf + i, b: m - suf + i });
+    return ops;
+  }
+
+  function myers(a, b, limit) {
+    var N = a.length, M = b.length, i;
+    if (!N) { var ins = []; for (i = 0; i < M; i++) ins.push({ t: '+', b: i }); return ins; }
+    if (!M) { var dels = []; for (i = 0; i < N; i++) dels.push({ t: '-', a: i }); return dels; }
+    var MAX = N + M, off = MAX + 1;
+    var V = new Int32Array(2 * MAX + 3);
+    var trace = [];
+    for (var d = 0; d <= MAX; d++) {
+      if (d > limit) return null;
+      // 되짚을 때 필요한 것은 -d..d 구간뿐이다. 전체를 복사하면 긴 글에서 메모리가 터진다.
+      trace.push(V.slice(off - d, off + d + 1));
+      for (var k = -d; k <= d; k += 2) {
+        var x = (k === -d || (k !== d && V[off + k - 1] < V[off + k + 1])) ? V[off + k + 1] : V[off + k - 1] + 1;
+        var y = x - k;
+        while (x < N && y < M && a[x] === b[y]) { x++; y++; }
+        V[off + k] = x;
+        if (x >= N && y >= M) return backtrack(trace, N, M, d);
+      }
+    }
+    return null;
+  }
+
+  function backtrack(trace, N, M, D) {
+    var ops = [], x = N, y = M;
+    for (var d = D; d > 0; d--) {
+      var v = trace[d], k = x - y;
+      var get = function (kk) { return v[kk + d]; };
+      var prevK = (k === -d || (k !== d && get(k - 1) < get(k + 1))) ? k + 1 : k - 1;
+      var prevX = get(prevK), prevY = prevX - prevK;
+      while (x > prevX && y > prevY) { x--; y--; ops.push({ t: '=', a: x, b: y }); }
+      if (x === prevX) { y--; ops.push({ t: '+', b: y }); }
+      else { x--; ops.push({ t: '-', a: x }); }
+    }
+    while (x > 0 && y > 0) { x--; y--; ops.push({ t: '=', a: x, b: y }); }
+    return ops.reverse();
+  }
+
+  // 줄 → 번호. 같은 내용(비교 기준으로)의 줄은 같은 번호가 된다.
+  // 일반 객체를 쓰면 "__proto__" 같은 줄이 사전을 망가뜨린다. Map 을 쓴다.
+  function toIds(lines, dict) {
+    return lines.map(function (l) {
+      var k = keyOf(l);
+      if (!dict.has(k)) dict.set(k, dict.size);
+      return dict.get(k);
+    });
+  }
+
+  // 연속된 지움·더함 묶음에서 앞에서부터 짝을 지어 "고친 줄"로 본다.
+  // 짝이 남는 쪽은 순수하게 지운 줄 또는 더한 줄이다.
+  function toRows(ops) {
+    var rows = [], dels = [], adds = [];
+    function flush() {
+      var n = Math.min(dels.length, adds.length), i;
+      for (i = 0; i < n; i++) rows.push({ t: 'chg', a: dels[i], b: adds[i] });
+      for (i = n; i < dels.length; i++) rows.push({ t: 'del', a: dels[i] });
+      for (i = n; i < adds.length; i++) rows.push({ t: 'add', b: adds[i] });
+      dels = []; adds = [];
+    }
+    ops.forEach(function (o) {
+      if (o.t === '=') { flush(); rows.push({ t: 'same', a: o.a, b: o.b }); }
+      else if (o.t === '-') dels.push(o.a);
+      else adds.push(o.b);
+    });
+    flush();
+    return rows;
+  }
+
+  // 고친 줄 안에서 바뀐 글자만 표시한다. 한글 조합이나 이모지가 반쪽으로 잘리지 않게 코드포인트 단위로 나눈다.
+  function charMarks(sa, sb) {
+    var ca = Array.from(sa), cb = Array.from(sb);
+    if (ca.length > MAX_CHARS || cb.length > MAX_CHARS) {
+      return { a: '<del>' + esc(sa) + '</del>', b: '<ins>' + esc(sb) + '</ins>' };
+    }
+    var ops = diff(ca, cb, 2000);
+    if (!ops) return { a: '<del>' + esc(sa) + '</del>', b: '<ins>' + esc(sb) + '</ins>' };
+    var ha = '', hb = '', runA = '', runB = '';
+    function endA() { if (runA) { ha += '<del>' + esc(runA) + '</del>'; runA = ''; } }
+    function endB() { if (runB) { hb += '<ins>' + esc(runB) + '</ins>'; runB = ''; } }
+    ops.forEach(function (o) {
+      if (o.t === '=') { endA(); endB(); ha += esc(ca[o.a]); hb += esc(cb[o.b]); }
+      else if (o.t === '-') runA += ca[o.a];
+      else runB += cb[o.b];
+    });
+    endA(); endB();
+    return { a: ha, b: hb };
+  }
+
+  // 바뀐 곳에서 CONTEXT 줄 넘게 떨어진 같은 줄 묶음은 접는다
+  function visibleMask(rows, collapse) {
+    var keep = rows.map(function () { return !collapse; });
+    if (!collapse) return keep;
+    rows.forEach(function (r, i) {
+      if (r.t === 'same') return;
+      for (var j = Math.max(0, i - CONTEXT); j <= Math.min(rows.length - 1, i + CONTEXT); j++) keep[j] = true;
+    });
+    // 한 줄만 접으면 "1줄 같음" 표시가 그 줄보다 자리를 더 차지한다. 그런 곳은 펼쳐 둔다.
+    for (var i = 0; i < rows.length; i++) {
+      if (!keep[i] && (i === 0 || keep[i - 1]) && (i === rows.length - 1 || keep[i + 1])) keep[i] = true;
+    }
+    return keep;
+  }
+
+  function skipRow(n, cols) {
+    return '<tr class="skip"><td colspan="' + cols + '">… ' +
+           '{n} unchanged lines'.replace('{n}', n) + ' …</td></tr>';
+  }
+
+  function render() {
+    if (!last) { out.innerHTML = ''; return; }
+    var rows = last.rows, A = last.A, B = last.B;
+    var keep = visibleMask(rows, onlyChk.checked);
+    var side = viewSel.value === 'side';
+    var cols = 4;
+    var html = [], skipped = 0;
+
+    rows.forEach(function (r, i) {
+      if (!keep[i]) { skipped++; return; }
+      if (skipped) { html.push(skipRow(skipped, cols)); skipped = 0; }
+      var la = r.a === undefined ? '' : r.a + 1;
+      var lb = r.b === undefined ? '' : r.b + 1;
+      if (r.t === 'same') {
+        if (side) {
+          html.push('<tr><td class="ln">' + la + '</td><td class="side-a">' + esc(A[r.a]) + '</td>' +
+                    '<td class="ln">' + lb + '</td><td>' + esc(B[r.b]) + '</td></tr>');
+        } else {
+          html.push('<tr><td class="ln">' + la + '</td><td class="ln">' + lb + '</td><td class="sg"></td><td>' + esc(A[r.a]) + '</td></tr>');
+        }
+        return;
+      }
+      if (r.t === 'chg') {
+        var mk = charMarks(A[r.a], B[r.b]);
+        if (side) {
+          html.push('<tr><td class="ln del">' + la + '</td><td class="del side-a">' + mk.a + '</td>' +
+                    '<td class="ln add">' + lb + '</td><td class="add">' + mk.b + '</td></tr>');
+        } else {
+          html.push('<tr><td class="ln del">' + la + '</td><td class="ln del"></td><td class="sg del">−</td><td class="del">' + mk.a + '</td></tr>');
+          html.push('<tr><td class="ln add"></td><td class="ln add">' + lb + '</td><td class="sg add">+</td><td class="add">' + mk.b + '</td></tr>');
+        }
+        return;
+      }
+      if (r.t === 'del') {
+        html.push(side
+          ? '<tr><td class="ln del">' + la + '</td><td class="del side-a">' + esc(A[r.a]) + '</td><td class="ln nil"></td><td class="nil"></td></tr>'
+          : '<tr><td class="ln del">' + la + '</td><td class="ln del"></td><td class="sg del">−</td><td class="del">' + esc(A[r.a]) + '</td></tr>');
+        return;
+      }
+      html.push(side
+        ? '<tr><td class="ln nil"></td><td class="nil side-a"></td><td class="ln add">' + lb + '</td><td class="add">' + esc(B[r.b]) + '</td></tr>'
+        : '<tr><td class="ln add"></td><td class="ln add">' + lb + '</td><td class="sg add">+</td><td class="add">' + esc(B[r.b]) + '</td></tr>');
+    });
+    if (skipped) html.push(skipRow(skipped, cols));
+
+    var colgroup = side
+      ? '<colgroup><col style="width:46px"><col><col style="width:46px"><col></colgroup>'
+      : '<colgroup><col style="width:46px"><col style="width:46px"><col style="width:18px"><col></colgroup>';
+    out.innerHTML = '<div class="diff-wrap"><table class="diff" id="diff-table">' + colgroup +
+                    '<tbody>' + html.join('') + '</tbody></table></div>';
+  }
+
+  function stats(rows) {
+    var s = { chg: 0, del: 0, add: 0, same: 0 };
+    rows.forEach(function (r) { s[r.t]++; });
+    document.getElementById('t-chg').textContent = s.chg;
+    document.getElementById('t-del').textContent = s.del;
+    document.getElementById('t-add').textContent = s.add;
+    document.getElementById('t-same').textContent = s.same;
+    return s;
+  }
+
+  function compare() {
+    var A = splitLines(aEl.value), B = splitLines(bEl.value);
+    if (!A.length && !B.length) {
+      last = null; out.innerHTML = ''; stats([]);
+      setMsg('Paste text into both boxes. They are compared as soon as you paste.');
+      return;
+    }
+    var dict = new Map();
+    var ops = diff(toIds(A, dict), toIds(B, dict), MAX_EDITS);
+    if (!ops) {
+      last = null; out.innerHTML = ''; stats([]);
+      setMsg('The two texts are almost entirely different, so the comparison was stopped. Please check that you pasted the right texts.', 'err');
+      return;
+    }
+    var rows = toRows(ops);
+    last = { rows: rows, A: A, B: B };
+    var s = stats(rows);
+    if (!s.chg && !s.del && !s.add) {
+      setMsg('The two texts are identical.' +
+             ((wsChk.checked || caseChk.checked) && aEl.value !== bEl.value
+               ? ' ' + '(the only differences are the spacing or case you chose to ignore)' : ''), 'ok');
+    } else {
+      setMsg('');
+    }
+    render();
+  }
+
+  var timer = null;
+  function later() { clearTimeout(timer); timer = setTimeout(compare, 200); }
+  aEl.addEventListener('input', later);
+  bEl.addEventListener('input', later);
+  wsChk.addEventListener('change', compare);
+  caseChk.addEventListener('change', compare);
+  onlyChk.addEventListener('change', render);
+  viewSel.addEventListener('change', render);
+  // 언어를 바꾸면 스크립트가 쓴 안내문("n줄 같음" 등)도 다시 만들어야 한다
+
+  // 결과를 글로 복사한다. 화면과 같은 기준(바뀐 곳 앞뒤 CONTEXT 줄)으로 접는다.
+  function asText() {
+    if (!last) return '';
+    var rows = last.rows, A = last.A, B = last.B;
+    var keep = visibleMask(rows, true);
+    var lines = [], skipped = 0;
+    rows.forEach(function (r, i) {
+      if (!keep[i]) { skipped++; return; }
+      if (skipped) { lines.push('… ' + '{n} unchanged lines'.replace('{n}', skipped) + ' …'); skipped = 0; }
+      if (r.t === 'same') lines.push('  ' + A[r.a]);
+      else if (r.t === 'chg') { lines.push('- ' + A[r.a]); lines.push('+ ' + B[r.b]); }
+      else if (r.t === 'del') lines.push('- ' + A[r.a]);
+      else lines.push('+ ' + B[r.b]);
+    });
+    if (skipped) lines.push('… ' + '{n} unchanged lines'.replace('{n}', skipped) + ' …');
+    return lines.join('\n');
+  }
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    var text = asText();
+    if (!text) { setMsg('There are no differences to copy.', 'err'); return; }
+    var done = function () { setMsg('The changes were copied as text.', 'ok'); };
+    var fail = function () { setMsg('Could not copy. Please select the result and copy it yourself.', 'err'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fail);
+      return;
+    }
+    // 예전 브라우저나 보안 맥락이 아닐 때를 위한 대체 경로
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      ta.remove();
+      ok ? done() : fail();
+    } catch (e) { fail(); }
+  });
+
+  document.getElementById('btn-swap').addEventListener('click', function () {
+    var tmp = aEl.value; aEl.value = bEl.value; bEl.value = tmp;
+    compare();
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function () {
+    aEl.value = ''; bEl.value = '';
+    compare();
+  });
+
+  // 메모장에서 저장한 옛 한글 파일은 EUC-KR 인 경우가 많다. UTF-8 로 읽어 보고 깨지면 EUC-KR 로 읽는다.
+  function decodeText(u8) {
+    if (u8[0] === 0xEF && u8[1] === 0xBB && u8[2] === 0xBF) return new TextDecoder('utf-8').decode(u8.subarray(3));
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); }
+    catch (e) { return new TextDecoder('euc-kr').decode(u8); }
+  }
+
+  function loadInto(file, target) {
+    if (!file) return;
+    // 한글·워드·PDF 는 글자 파일이 아니다. 열어 봐야 깨진 글자만 나오니 미리 막는다.
+    if (/\.(hwp|hwpx|docx?|pdf|xlsx?|pptx?|zip)$/i.test(file.name)) {
+      setMsg('This is not a plain-text file. Open the document, select all, copy, and paste it here instead.', 'err');
+      return;
+    }
+    file.arrayBuffer().then(function (buf) {
+      target.value = decodeText(new Uint8Array(buf));
+      compare();
+    }).catch(function () {
+      setMsg('Could not read the file.', 'err');
+    });
+  }
+
+  [['a', aEl], ['b', bEl]].forEach(function (p) {
+    var input = document.getElementById('file-' + p[0]);
+    document.getElementById('btn-file-' + p[0]).addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', function () { loadInto(input.files[0], p[1]); input.value = ''; });
+    // 글상자에 파일을 끌어다 놓으면 그 파일의 내용을 넣는다
+    p[1].addEventListener('dragover', function (e) {
+      if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) e.preventDefault();
+    });
+    p[1].addEventListener('drop', function (e) {
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      e.preventDefault();
+      loadInto(e.dataTransfer.files[0], p[1]);
+    });
+  });
+
+  compare();
+})();
+</script>
+</body>
+</html>
